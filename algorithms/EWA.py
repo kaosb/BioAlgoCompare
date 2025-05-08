@@ -1,100 +1,177 @@
-import random as rnd
-import copy
+import numpy as np
+import random
 import time
+from .base import Individual, MetaheuristicAlgorithm
 
-class EWA:
-    def __init__(self):
-        self.nWorms = 10  # Número de gusanos de tierra
-        self.T = 100  # Número de iteraciones
+class Earthworm(Individual):
+    """Clase para representar un individuo en el algoritmo EWA (Earthworm Algorithm)."""
+    
+    def __init__(self, problem):
+        """
+        Inicializa un gusano de tierra con una posición aleatoria.
+        
+        Args:
+            problem: Instancia del problema a resolver
+        """
+        self.problem = problem
+        self.dimension = problem.get_dimension()
+        self.position = np.random.uniform(0, 1, self.dimension)
+        self._fitness = None
+    
+    def fitness(self):
+        """Calcula el fitness del individuo."""
+        if self._fitness is None:
+            self._fitness = self.problem.evaluate(self.position)
+        return self._fitness
+    
+    def is_better_than(self, other):
+        """Compara si este individuo es mejor que otro."""
+        return self.fitness() < other.fitness()
+    
+    def is_feasible(self):
+        """Verifica si el individuo representa una solución factible."""
+        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
+    
+    def move(self, best_worm, alpha=0.8, beta=0.2, generation=0, gamma=0.99):
+        """
+        Movimiento y reproducción según el algoritmo EWA original.
 
-        self.flock = None  # Enjambre de gusanos
-        self.g = None  # Mejor solución global
-        self.sTime = 0
-        self.eTime = 0
-        # Parámetros para Q-learning
-        self.num_states = 10
-        self.actions = [
-            (0.75, 1.25),
-            (0.85, 1.15),
-            (0.65, 1.35),
-            # ... otras combinaciones pueden ser agregadas
-        ]
-        self.num_actions = len(self.actions)
-        self.q_learner = QLearner(self.num_states, self.num_actions)
+        Args:
+            best_worm: Mejor gusano (líder)
+            alpha: Similarity factor
+            beta: Proportional factor para la suma ponderada
+            generation: número de iteración actual
+            gamma: factor de enfriamiento para β
+        """
+        LB = np.zeros_like(self.position)
+        UB = np.ones_like(self.position)
 
-    def execute(self):
-        self.start_time()
-        self.init()
-        self.run()
-        self.end_time()
-        self.log()
+        # Reproducción 1 (auto-replicación con modificación)
+        u1 = UB + LB - alpha * self.position
 
-    def start_time(self):
-        self.sTime = time.time()
+        # Reproducción 2 (crossover uniforme con mejor gusano)
+        u12 = np.copy(self.position)
+        u22 = np.copy(best_worm.position)
+        for k in range(self.dimension):
+            if random.random() > 0.5:
+                u12[k] = self.position[k]
+                u22[k] = best_worm.position[k]
+            else:
+                u12[k] = best_worm.position[k]
+                u22[k] = self.position[k]
+        u2 = u12 if random.random() < 0.5 else u22
 
-    def init(self):
-        self.flock = []
-        self.g = Earthworm()  # Instancia de la mejor solución
-        w = None
-        for _ in range(1, self.nWorms + 1):
-            while True:
-                w = Earthworm()
-                if w.is_feasible():
-                    break
-            self.flock.append(w)
+        # Suma ponderada
+        beta_t = beta * (gamma ** generation)
+        u_prime = beta_t * u1 + (1 - beta_t) * u2
 
+        # Mutación Cauchy
+        W = np.mean([self.position[k] for k in range(self.dimension)])
+        C_d = np.random.standard_cauchy(size=self.dimension)
+        u_final = u_prime + W * C_d
+
+        # Clip
+        self.position = np.clip(u_final, LB, UB)
+        self._fitness = None
+    
+    def copy(self, other):
+        """
+        Copia los valores de otro individuo a este.
+        
+        Args:
+            other: Otro individuo (Earthworm)
+        """
+        self.position = np.copy(other.position)
+        self._fitness = other._fitness
+
+
+class EWA(MetaheuristicAlgorithm):
+    """Implementación del algoritmo de optimización de gusanos de tierra (Earthworm Algorithm)."""
+    
+    def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
+        """
+        Inicializa el algoritmo EWA.
+        
+        Args:
+            problem: Instancia del problema
+            population_size: Tamaño de la población
+            max_iterations: Número máximo de iteraciones
+            seed: Semilla para reproducibilidad
+        """
+        super().__init__(problem, population_size, max_iterations, seed)
+        self.alpha = 0.8  # Parámetro de intensificación
+        self.beta = 0.2   # Parámetro de exploración
+        self.reproduction_rate = 0.3  # Tasa de reproducción
+        self.mutation_rate = 0.1      # Tasa de mutación
+        self.convergence_curve = []
+    
+    def initialize_population(self):
+        """Inicializa la población de gusanos de tierra."""
+        self.population = []
+        for _ in range(self.population_size):
+            worm = Earthworm(self.problem)
+            self.population.append(worm)
+        
         # Encontrar el mejor gusano inicial
-        self.g.copy(self.flock[0])
-        for i in range(1, self.nWorms):
-            if self.flock[i].is_better_than(self.g):
-                self.g.copy(self.flock[i])
-
-    def run(self):
-        t = 1
-        w = Earthworm()
-        while t <= self.T:
-            # Guardar una copia profunda del mejor gusano actual
-            previous_g = copy.deepcopy(self.g)
-
-            # Calcular la diversidad del enjambre actual
-            previous_diversity = Utils.compute_diversity(self.flock)
-
-            # Obtener el estado actual basado en la diversidad
-            current_state = Utils.get_diversity_state(previous_diversity, self.num_states)
-
-            # Elegir una acción usando Q-learning
-            action_idx = self.q_learner.choose_action(current_state)
-
-            # Actualizar los parámetros de EWA basados en la acción elegida
-            self.fmin, self.fmax = self.actions[action_idx]
-
-            for i in range(self.nWorms):
-                while True:
-                    w.copy(self.flock[i])
-                    w.move(self.g)
-
-                    if w.is_feasible():
-                        break
-
-                if w.is_better_than(self.flock[i]):
-                    self.flock[i].copy(w)
-
-                if w.is_better_than(self.g):
-                    self.g.copy(w)
-
-            # Calcular la recompensa basada en la mejora de la función objetivo y la diversidad
-            current_g = self.g
-            current_diversity = Utils.compute_diversity(self.flock)
-            reward = Utils.compute_reward(previous_g, current_g, previous_diversity, current_diversity)
-
-            # Actualizar la tabla Q con la recompensa obtenida
-            next_state = Utils.get_diversity_state(current_diversity, self.num_states)
-            self.q_learner.update_q_table(current_state, action_idx, reward, next_state)
-
-            t += 1
-
-    def end_time(self):
-        self.eTime = time.time()
-
-    def log(self):
-        print(f"{self.g}\t t={self.eTime - self.sTime}")
+        self.best_solution = self.population[0]
+        for i in range(1, self.population_size):
+            if self.population[i].is_better_than(self.best_solution):
+                self.best_solution = self.population[i]
+    
+    def update_population(self):
+        """Actualiza la población en cada iteración."""
+        current_iter = len(self.convergence_curve)
+        # 1. Fase de movimiento: mover todos los gusanos
+        for i in range(self.population_size):
+            # No mover el mejor gusano
+            if self.population[i] is not self.best_solution:
+                self.population[i].move(self.best_solution, self.alpha, self.beta, current_iter)
+                
+                # Actualizar mejor solución si es necesario
+                if self.population[i].is_better_than(self.best_solution):
+                    worm_copy = Earthworm(self.problem)
+                    worm_copy.copy(self.population[i])
+                    self.best_solution = worm_copy
+        
+        # 2. Fase de reproducción: generar nuevos gusanos
+        num_offspring = int(self.population_size * self.reproduction_rate)
+        if num_offspring > 0:
+            # Seleccionar padres basados en torneo
+            parents = []
+            for _ in range(num_offspring):
+                # Selección por torneo
+                idx1 = random.randint(0, self.population_size - 1)
+                idx2 = random.randint(0, self.population_size - 1)
+                if self.population[idx1].is_better_than(self.population[idx2]):
+                    parents.append(self.population[idx1])
+                else:
+                    parents.append(self.population[idx2])
+            
+            # Generar descendencia
+            offspring = []
+            for parent in parents:
+                child = Earthworm(self.problem)
+                # Copiar posición del padre
+                child.copy(parent)
+                
+                # Aplicar mutación
+                for j in range(child.dimension):
+                    if random.random() < self.mutation_rate:
+                        child.position[j] = random.random()  # Mutación aleatoria
+                
+                # Resetear fitness
+                child._fitness = None
+                offspring.append(child)
+            
+            # Reemplazar los peores individuos con la descendencia
+            self.population.sort(key=lambda x: x.fitness(), reverse=True)  # Ordenar de peor a mejor
+            for i in range(min(num_offspring, len(offspring))):
+                self.population[i] = offspring[i]
+            
+            # Actualizar la mejor solución si es necesario
+            for worm in offspring:
+                if worm.is_better_than(self.best_solution):
+                    worm_copy = Earthworm(self.problem)
+                    worm_copy.copy(worm)
+                    self.best_solution = worm_copy
+        self.convergence_curve.append(self.best_solution.fitness())
