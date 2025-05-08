@@ -1,6 +1,6 @@
-# 🧬 Optimización Metaheurística Bioinspirada para VRP
+# 🧬 BioAlgoCompare
 
-Este proyecto forma parte de una investigación académica para la **Jornada Chilena de Computación 2025**, cuyo objetivo es **evaluar y comparar algoritmos bioinspirados recientes (2024–2025)** aplicados al **Vehicle Routing Problem (VRP)**.
+Plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -28,7 +28,7 @@ Comparar el rendimiento de algoritmos metaheurísticos bioinspirados recientes s
 ## 🧱 Estructura del Proyecto
 
 ```
-bio-vrp-paper/
+BioAlgoCompare/
 ├── algorithms/                # Implementaciones de algoritmos
 │   ├── base.py                # Clase base para algoritmos
 │   ├── hoa.py                 # Hyena Optimization Algorithm
@@ -41,10 +41,20 @@ bio-vrp-paper/
 ├── problems/
 │   └── vrp.py                 # Implementación del problema VRP
 ├── utils/
+│   ├── benchmarking.py        # Sistema base de benchmarking
+│   ├── statistical_analysis.py # Análisis estadístico
+│   ├── vrp_operators.py       # Operadores específicos para VRP
 │   ├── operators.py           # Operadores genéticos y utilidades
-│   └── visualization.py       # Visualización de soluciones
+│   ├── visualization.py       # Visualización básica
+│   ├── improved/              # Componentes avanzados
+│   │   ├── enhanced_benchmarking.py # Benchmarking con checkpoints
+│   │   ├── advanced_visualization.py # Visualizaciones avanzadas 
+│   │   └── enhanced_statistics.py # Estadísticas rigurosas
 ├── results/                   # Resultados de experimentos
-├── run.py                     # Script principal de ejecución
+├── run.py                     # Ejecución de algoritmos individuales
+├── run_massive.py             # Ejecución de benchmarks masivos
+├── analyze_results.py         # Análisis de resultados
+├── analyze_1000runs.py        # Análisis estadístico para 1000 ejecuciones
 ├── requirements.txt           # Dependencias del proyecto
 └── README.md                  # Este archivo
 ```
@@ -71,8 +81,8 @@ El proyecto incluye las siguientes instancias VRP estándar:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/usuario/bio-vrp-paper.git
-cd bio-vrp-paper
+git clone https://github.com/kaosb/BioAlgoCompare.git
+cd BioAlgoCompare
 
 # Crear entorno virtual
 python -m venv venv
@@ -92,7 +102,7 @@ Para ejecutar un algoritmo específico en una instancia VRP:
 python run.py --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
 ```
 
-### Opciones Disponibles
+### Opciones de Ejecución Normal
 
 | Opción | Descripción | Valor Predeterminado |
 |--------|-------------|----------------------|
@@ -104,13 +114,25 @@ python run.py --algorithm hoa --instance A-n32-k5 --iterations 100 --population 
 | `--seed`, `-s` | Semilla para reproducibilidad | (Aleatorio) |
 | `--visualize/--no-visualize` | Visualizar resultados | True |
 | `--save/--no-save` | Guardar resultados | True |
+| `--parallel/--no-parallel` | Ejecución paralela | False |
+
+### Opciones de Benchmarking Masivo (1000 ejecuciones)
+
+| Opción | Descripción | Valor Predeterminado |
+|--------|-------------|----------------------|
+| `--runs`, `-r` | Número de ejecuciones por algoritmo | 1000 |
+| `--algorithm`, `-a` | Algoritmos a ejecutar | all |
+| `--instances`, `-i` | Instancias a evaluar | E-n22-k4 |
+| `--parallel/--no-parallel` | Ejecución paralela | True |
+| `--resume/--no-resume` | Reanudar benchmark interrumpido | True |
+| `--output-dir`, `-o` | Directorio de salida | auto |
 
 ### Ejemplos de Uso
 
 #### Ejecutar todos los algoritmos en una instancia:
 
 ```bash
-python run.py --algorithm all --instance A-n32-k5 --runs 5
+python run.py --algorithm all --instance A-n32-k5 --runs 5 --parallel
 ```
 
 #### Ejecutar un algoritmo específico con parámetros personalizados:
@@ -119,33 +141,50 @@ python run.py --algorithm all --instance A-n32-k5 --runs 5
 python run.py --algorithm foa --instance P-n16-k8 --iterations 200 --population 50 --seed 42
 ```
 
-#### Prueba de rendimiento con instancia grande:
+#### Ejecutar un benchmark masivo con 1000 ejecuciones por algoritmo:
 
 ```bash
-python run.py --algorithm egto --instance E-n51-k5 --iterations 300 --population 50
+python run_massive.py --runs 1000 --algorithm hoa --algorithm egto --instances E-n22-k4 --parallel
+```
+
+#### Analizar resultados de un benchmark masivo:
+
+```bash
+python analyze_1000runs.py
 ```
 
 ## 📊 Resultados y Análisis
 
 Los resultados se almacenan en el directorio `results/` con la siguiente estructura:
 
+### Ejecuciones Normales
 - `{instancia}_{timestamp}.csv`: Resultados detallados de cada ejecución
 - `{instancia}_{timestamp}_summary.csv`: Resumen estadístico por algoritmo
 - `{algoritmo}_{instancia}_solution.png`: Visualización de la mejor solución encontrada
 - `{algoritmo}_{instancia}_convergence.png`: Curva de convergencia del algoritmo
 
+### Benchmarks Masivos (1000 ejecuciones)
+- `massive_{timestamp}/benchmark_state.json.gz`: Estado completo del benchmark con checkpoints
+- `massive_{timestamp}/massive_benchmark_summary.csv`: Resumen estadístico del benchmark
+- `massive_{timestamp}/massive_benchmark_report.html`: Informe HTML interactivo
+- `statistical_analysis_{timestamp}/`: Análisis estadístico avanzado con visualizaciones
+
 ## 🧠 Metodología
 
 - **Codificación**: Adaptación de algoritmos continuos mediante codificación ordinal → se ordenan los valores reales para generar una permutación de visitas.
 - **Evaluación**: Decodificación de soluciones respetando restricciones de capacidad vehicular.
-- **Análisis**: Comparación estadística mediante pruebas de Friedman, Wilcoxon post-hoc, boxplots y curvas de convergencia.
+- **Benchmark Masivo**: Ejecución de 1000 repeticiones por algoritmo con checkpoint y recuperación.
+- **Análisis Estadístico**: Tests no paramétricos (Kruskal-Wallis, Mann-Whitney), corrección de Bonferroni, intervalos de confianza del 95%.
+- **Visualización Científica**: Boxplots, distribuciones, curvas de convergencia con intervalos de confianza.
 
 ## 🔍 Características Técnicas
 
-- **Interfaz Común**: Todos los algoritmos implementan una interfaz común para facilitar la comparación.
+- **Arquitectura Modular**: Sistema de benchmarking avanzado para muestras grandes.
+- **Paralelización**: Ejecución paralela eficiente con gestión de procesos.
 - **Reproducibilidad**: Control de semillas aleatorias para garantizar resultados reproducibles.
-- **Visualización**: Herramientas para visualizar soluciones y analizar convergencia.
-- **CLI Profesional**: Interfaz de línea de comandos con opciones configurables mediante `click`.
+- **Checkpoint y Recuperación**: Capacidad de interrumpir y reanudar benchmarks masivos.
+- **Visualización Avanzada**: Herramientas científicas para visualizar distribuciones e intervalos de confianza.
+- **CLI Profesional**: Interfaces de línea de comandos robustas para todos los componentes.
 
 ## 👥 Contribuir
 
