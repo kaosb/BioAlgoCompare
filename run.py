@@ -6,6 +6,10 @@ import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import multiprocessing as mp
+from multiprocessing import Pool
+from functools import partial
+from tqdm import tqdm
 
 # Importar algoritmos
 from algorithms.hoa import HOA
@@ -20,18 +24,66 @@ from problems.vrp import VRPProblem
 # Importar utilidades
 from utils.visualization import plot_vrp_solution, plot_convergence, compare_algorithms
 
+# Función para ejecutar un algoritmo en paralelo
+def run_algorithm(algo_name, problem, population, iterations, run_seed, run_id):
+    try:
+        # Inicializar algoritmo
+        if algo_name == 'hoa':
+            algo = HOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'apo':
+            algo = APO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'egto':
+            algo = EGTO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'fgo':
+            algo = FGO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'foa':
+            algo = FOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        
+        # Ejecutar algoritmo
+        start_time = time.time()
+        best_solution = algo.execute()
+        execution_time = time.time() - start_time
+        
+        return {
+            'algorithm': algo_name.upper(),
+            'run': run_id,
+            'best_fitness': best_solution.fitness(),
+            'execution_time': execution_time,
+            'convergence': algo.get_convergence_curve(),
+            'best_solution': best_solution
+        }
+    except Exception as e:
+        return {
+            'algorithm': algo_name.upper(),
+            'run': run_id,
+            'error': str(e)
+        }
+
+# Función auxiliar para la ejecución paralela
+def run_algo_wrapper(args):
+    return run_algorithm(*args)
+
 @click.command()
 @click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'all']), 
               required=True, help='Algoritmo a ejecutar')
 @click.option('--instance', '-i', required=True, help='Nombre de la instancia VRP')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones')
-@click.option('--population', '-p', default=30, help='Tamaño de la población')
+@click.option('--population', '-pop', default=30, help='Tamaño de la población')
 @click.option('--runs', '-r', default=1, help='Número de ejecuciones independientes')
 @click.option('--seed', '-s', default=None, type=int, help='Semilla para reproducibilidad')
 @click.option('--visualize/--no-visualize', default=True, help='Visualizar resultados')
 @click.option('--save/--no-save', default=True, help='Guardar resultados')
-def main(algorithm, instance, iterations, population, runs, seed, visualize, save):
-    """Ejecuta algoritmos de optimización para resolver problemas VRP."""
+@click.option('--parallel/--no-parallel', '-p', default=False, help='Ejecutar en paralelo')
+def main(algorithm, instance, iterations, population, runs, seed, visualize, save, parallel):
+    """
+    Ejecuta algoritmos de optimización para resolver problemas VRP con soporte para ejecución paralela.
+    
+    Nota científica: Para análisis estadísticos rigurosos, se recomienda:
+    - Ejecutar al menos 5 ejecuciones independientes (--runs 5 o más)
+    - Incluir varios algoritmos para comparación (--algorithm all)
+    - Usar semillas fijas para reproducibilidad (--seed <número>)
+    - Guardar resultados para análisis posterior (--save)
+    """
     
     # Verificar que la instancia exista
     instance_path = f"data/vrp/{instance}.vrp"
@@ -51,83 +103,122 @@ def main(algorithm, instance, iterations, population, runs, seed, visualize, sav
     else:
         algorithms_to_run = [algorithm]
     
-    # Preparar resultados
+    # Determinar número de procesos para paralelización
+    num_processes = min(mp.cpu_count(), runs * len(algorithms_to_run)) if parallel else 1
+    
+    if parallel:
+        click.echo(f"Modo paralelo activado. Usando {num_processes} procesos.")
+    
+    # Preparar tareas para ejecución paralela o secuencial
+    all_tasks = []
+    for algo_name in algorithms_to_run:
+        for run in range(1, runs + 1):
+            run_seed = seed + run - 1 if seed is not None else None
+            all_tasks.append((algo_name, problem, population, iterations, run_seed, run))
+    
+    # Ejecutar algoritmos
+    all_results = []
+    
+    if parallel and num_processes > 1:
+        # Ejecución paralela
+        try:
+            with Pool(processes=num_processes) as pool:
+                # Ejecutar tareas y mostrar progreso con barra de progreso
+                click.echo(f"Ejecutando {len(all_tasks)} tareas en paralelo...")
+                for result in tqdm(pool.imap_unordered(run_algo_wrapper, all_tasks), total=len(all_tasks)):
+                    if 'error' in result:
+                        click.echo(f"Error en {result['algorithm']}, ejecución {result['run']}: {result['error']}")
+                    all_results.append(result)
+        except Exception as e:
+            click.echo(f"Error en la ejecución paralela: {str(e)}")
+            return
+    else:
+        # Ejecución secuencial
+        for algo_name, problem, population, iterations, run_seed, run in all_tasks:
+            click.echo(f"\nEjecutando {algo_name.upper()}, ejecución {run}/{runs}...")
+            result = run_algorithm(algo_name, problem, population, iterations, run_seed, run)
+            
+            if 'error' in result:
+                click.echo(f"Error: {result['error']}")
+            else:
+                click.echo(f"  Mejor fitness = {result['best_fitness']:.2f}, Tiempo = {result['execution_time']:.2f}s")
+            
+            all_results.append(result)
+    
+    # Filtrar resultados exitosos
+    successful_results = [r for r in all_results if 'error' not in r]
+    
+    if not successful_results:
+        click.echo("No se obtuvieron resultados exitosos.")
+        return
+    
+    # Preparar resultados para análisis
     results = {
         'algorithm': [],
         'run': [],
         'best_fitness': [],
         'execution_time': [],
-        'convergence': []
+        'convergence': [],
+        'best_solution': []
     }
     
-    # Ejecutar algoritmos
-    for algo_name in algorithms_to_run:
-        click.echo(f"\nEjecutando {algo_name.upper()}...")
+    for result in successful_results:
+        results['algorithm'].append(result['algorithm'])
+        results['run'].append(result['run'])
+        results['best_fitness'].append(result['best_fitness'])
+        results['execution_time'].append(result['execution_time'])
+        results['convergence'].append(result['convergence'])
+        results['best_solution'].append(result['best_solution'])
+    
+    # Visualizar soluciones
+    if visualize:
+        # Agrupar resultados por algoritmo
+        algo_results = {}
+        for i, algo in enumerate(results['algorithm']):
+            if algo not in algo_results:
+                algo_results[algo] = []
+            algo_results[algo].append(i)
         
-        for run in range(1, runs + 1):
-            # Establecer semilla para reproducibilidad
-            run_seed = seed + run - 1 if seed is not None else None
-            
-            # Inicializar algoritmo
-            if algo_name == 'hoa':
-                algo = HOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-            elif algo_name == 'apo':
-                algo = APO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-            elif algo_name == 'egto':
-                algo = EGTO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-            elif algo_name == 'fgo':
-                algo = FGO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-            elif algo_name == 'foa':
-                algo = FOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-            
-            # Ejecutar algoritmo
-            start_time = time.time()
-            best_solution = algo.execute()
-            execution_time = time.time() - start_time
-            
-            # Guardar resultados
-            results['algorithm'].append(algo_name.upper())
-            results['run'].append(run)
-            results['best_fitness'].append(best_solution.fitness())
-            results['execution_time'].append(execution_time)
-            results['convergence'].append(algo.get_convergence_curve())
-            
-            click.echo(f"  Ejecución {run}/{runs}: Mejor fitness = {best_solution.fitness():.2f}, Tiempo = {execution_time:.2f}s")
+        # Para cada algoritmo, visualizar la mejor solución
+        for algo, indices in algo_results.items():
+            # Encontrar la mejor solución para este algoritmo
+            best_idx = indices[np.argmin([results['best_fitness'][i] for i in indices])]
+            best_solution = results['best_solution'][best_idx]
             
             # Visualizar solución
-            if visualize and run == runs:  # Solo visualizar la última ejecución
-                routes, total_distance, _ = problem.decode_solution(best_solution.position)
-                plt = plot_vrp_solution(problem, routes, f"{algo_name.upper()} - {instance} - Distancia: {total_distance:.2f}")
-                
-                if save:
-                    # Crear directorio si no existe
-                    os.makedirs("results", exist_ok=True)
-                    plt.savefig(f"results/{algo_name}_{instance}_solution.png")
-                
-                plt.show()
-                
-                # Visualizar convergencia
-                plt = plot_convergence(algo.get_convergence_curve(), f"{algo_name.upper()} - Curva de Convergencia")
-                
-                if save:
-                    plt.savefig(f"results/{algo_name}_{instance}_convergence.png")
-                
-                plt.show()
+            routes, total_distance, _ = problem.decode_solution(best_solution.position)
+            plt = plot_vrp_solution(problem, routes, f"{algo} - {instance} - Distancia: {total_distance:.2f}")
+            
+            if save:
+                # Crear directorio si no existe
+                os.makedirs("results", exist_ok=True)
+                plt.savefig(f"results/{algo.lower()}_{instance}_solution.png")
+            
+            plt.show()
+            
+            # Visualizar convergencia
+            plt = plot_convergence(results['convergence'][best_idx], f"{algo} - Curva de Convergencia")
+            
+            if save:
+                plt.savefig(f"results/{algo.lower()}_{instance}_convergence.png")
+            
+            plt.show()
     
     # Comparar algoritmos si se ejecutaron varios
     if len(algorithms_to_run) > 1 and visualize:
         # Calcular promedio de convergencia para cada algoritmo
         avg_convergence = {}
         for algo_name in algorithms_to_run:
+            algo_upper = algo_name.upper()
             algo_convergence = [results['convergence'][i] for i in range(len(results['algorithm'])) 
-                               if results['algorithm'][i] == algo_name.upper()]
+                               if results['algorithm'][i] == algo_upper]
             
             # Asegurar que todas las curvas tengan la misma longitud
             min_length = min(len(curve) for curve in algo_convergence)
             algo_convergence = [curve[:min_length] for curve in algo_convergence]
             
             # Calcular promedio
-            avg_convergence[algo_name.upper()] = np.mean(algo_convergence, axis=0)
+            avg_convergence[algo_upper] = np.mean(algo_convergence, axis=0)
         
         # Visualizar comparación
         plt = compare_algorithms(avg_convergence, f"Comparación de Algoritmos - {instance}")
@@ -164,6 +255,28 @@ def main(algorithm, instance, iterations, population, runs, seed, visualize, sav
         
         click.echo(f"\nResultados guardados en results/{instance}_{timestamp}.csv")
         click.echo(f"Resumen guardado en results/{instance}_{timestamp}_summary.csv")
+        
+        # Guardar información sobre ejecución paralela
+        if parallel:
+            # Calcular métricas de paralelización
+            total_runtime = sum(results['execution_time'])
+            max_runtime = max(results['execution_time'])
+            theoretical_speedup = total_runtime / max(1, max_runtime)
+            efficiency = theoretical_speedup / num_processes
+            
+            parallel_info = {
+                "num_processes": num_processes,
+                "total_execution_time": total_runtime,
+                "theoretical_sequential_time": total_runtime,
+                "parallel_execution_time": max_runtime,
+                "theoretical_speedup": theoretical_speedup,
+                "parallel_efficiency": efficiency
+            }
+            
+            with open(f"results/{instance}_{timestamp}_parallel_info.json", "w") as f:
+                json.dump(parallel_info, f, indent=2)
+            
+            click.echo(f"Información de paralelización guardada en results/{instance}_{timestamp}_parallel_info.json")
 
 if __name__ == '__main__':
     main()
