@@ -1,179 +1,133 @@
-import random as rnd
-import copy
-import time
+import numpy as np
+import random
+import math
+from .base import Individual, MetaheuristicAlgorithm
 
-class Hawk:
-    def __init__(self):
-        self.nVariables = Problem.subnetworks
-        self.x = [rnd.randint(0, 1) for _ in range(self.nVariables)]  # Posición inicial del halcón
-        self.E0 = rnd.uniform(-1, 1)  # Energía inicial del halcón
-        self.E = self.E0  # Energía actual
-        self.D = [0] * self.nVariables  # Diferencia entre el halcón y la presa
-        self.q = rnd.random()  # Factor aleatorio para exploración/explotación
-        self.r = rnd.random()  # Parámetro aleatorio para el comportamiento de caza
+class Whale(Individual):
+    """Clase para representar un individuo en el algoritmo WOA (Whale Optimization Algorithm)."""
     
-    def is_better_than(self, g):
-        return self.scalering() <= g.scalering()
-
-    def scalering(self):
-        return abs(self.fitness_z1() * (-1) + self.fitness_z2() + self.fitness_z3() * (-1))
-
-    def fitness_z1(self):
-        return sum(x * cost for x, cost in zip(self.x, Problem.costs))
-
-    def fitness_z2(self):
-        return sum(x * direct for x, direct in zip(self.x, Problem.directs))
-
-    def fitness_z3(self):
-        return sum(x * indirect for x, indirect in zip(self.x, Problem.indirects))
-
+    def __init__(self, problem):
+        """
+        Inicializa una ballena con una posición aleatoria.
+        
+        Args:
+            problem: Instancia del problema a resolver
+        """
+        self.problem = problem
+        self.dimension = problem.get_dimension()
+        self.position = np.random.uniform(0, 1, self.dimension)
+        self._fitness = None
+    
+    def fitness(self):
+        """Calcula el fitness del individuo."""
+        if self._fitness is None:
+            self._fitness = self.problem.evaluate(self.position)
+        return self._fitness
+    
+    def is_better_than(self, other):
+        """Compara si este individuo es mejor que otro."""
+        return self.fitness() < other.fitness()
+    
     def is_feasible(self):
-        return self.is_feasible_probability() and self.is_feasible_cover()
-
-    def is_feasible_probability(self):
-        sum_num = sum(prob * (1 - xi) for prob, xi in zip(Problem.probabilities, self.x))
-        sum_den = sum(Problem.probabilities)
-        return sum_num / sum_den <= 1 - Problem.umbral
-
-    def is_feasible_cover(self):
-        return any(self.x)
-
-    def move(self, g):
-        for j in range(self.nVariables):
-            self.E = 2 * self.E0 * rnd.random() - self.E0  # Energía del halcón actualizada
-            if abs(self.E) >= 1:  # Exploración
-                self.q = rnd.random()  # Parámetro aleatorio de exploración
-                if self.q < 0.5:
-                    self.D[j] = abs(self.C[j] * g.x[j] - self.x[j])
-                    self.x[j] = g.x[j] - self.E * self.D[j]
-                else:
-                    self.x[j] = rnd.uniform(0, 1)  # Saltos aleatorios para explorar
-            else:  # Explotación (cuando la energía es baja)
-                if self.r >= 0.5 and abs(self.E) < 0.5:  # Espiral descendente (ataque suave)
-                    self.D[j] = abs(g.x[j] - self.x[j])
-                    self.x[j] = self.D[j] * math.exp(self.E) * math.cos(2 * math.pi * self.E) + g.x[j]
-                elif self.r < 0.5 and abs(self.E) >= 0.5:  # Ataque fuerte (asalto rápido)
-                    self.D[j] = abs(g.x[j] - self.x[j])
-                    self.x[j] = g.x[j] - self.E * abs(g.x[j] - self.x[j])
-
-    def update_energy(self, max_iterations, current_iteration):
-        self.E0 = 2 * (1 - current_iteration / max_iterations)  # La energía decrece con las iteraciones
-
+        """Verifica si el individuo representa una solución factible."""
+        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
+    
+    def move(self, best_whale, a, a2, leader_type=0):
+        """
+        Mueve la ballena según las reglas del algoritmo WOA.
+        
+        Args:
+            best_whale: Mejor ballena (líder)
+            a: Parámetro de control que disminuye linealmente de 2 a 0
+            a2: Parámetro de control para la espiral
+            leader_type: Tipo de líder (0: mejor, 1: aleatorio)
+        """
+        r1 = random.random()  # Número aleatorio en [0, 1]
+        r2 = random.random()  # Número aleatorio en [0, 1]
+        
+        A = 2 * a * r1 - a  # Parámetro de comportamiento
+        C = 2 * r2  # Parámetro de ponderación
+        
+        # Seleccionar estrategia de movimiento
+        p = random.random()  # Probabilidad para seleccionar entre encogimiento o espiral
+        
+        if p < 0.5:  # Encogimiento (estrategia de exploración/explotación)
+            if abs(A) < 1:  # Explotación: acercarse a la presa (mejor solución)
+                for i in range(self.dimension):
+                    D = abs(C * best_whale.position[i] - self.position[i])
+                    self.position[i] = best_whale.position[i] - A * D
+            else:  # Exploración: moverse aleatoriamente
+                X_rand = np.random.uniform(0, 1, self.dimension)
+                for i in range(self.dimension):
+                    D = abs(C * X_rand[i] - self.position[i])
+                    self.position[i] = X_rand[i] - A * D
+        else:  # Estrategia de espiral (movimiento en espiral alrededor de la presa)
+            for i in range(self.dimension):
+                D = abs(best_whale.position[i] - self.position[i])
+                l = random.uniform(-1, 1)  # Parámetro aleatorio para definir la forma de la espiral
+                self.position[i] = D * math.exp(a2 * l) * math.cos(2 * math.pi * l) + best_whale.position[i]
+        
+        # Asegurar que los valores estén dentro del rango [0, 1]
+        LB = np.zeros_like(self.position)
+        UB = np.ones_like(self.position)
+        self.position = np.clip(self.position, LB, UB)
+        
+        # Reset fitness para recalcular
+        self._fitness = None
+    
     def copy(self, other):
-        if isinstance(other, Hawk):
-            self.x = other.x.copy()
+        """
+        Copia los valores de otro individuo a este.
+        
+        Args:
+            other: Otro individuo (Whale)
+        """
+        self.position = np.copy(other.position)
+        self._fitness = other._fitness
 
-    def sum(self):
-        return sum(self.x)
 
-    def __str__(self):
-        return f"{self.x}, {self.scalering()}, {self.sum()}, {self.nVariables}"
-
-
-class HHO:
-    def __init__(self):
-        self.nHawks = 10  # Número de halcones
-        self.T = 100  # Número de iteraciones
-
-        self.flock = None  # Enjambre de halcones
-        self.g = None  # Mejor solución global
-        self.sTime = 0
-        self.eTime = 0
-        # Parámetros para Q-learning
-        self.num_states = 10
-        self.actions = [
-            (0.75, 1.25),
-            (0.85, 1.15),
-            (0.65, 1.35),
-            # ... otras combinaciones pueden ser agregadas
-        ]
-        self.num_actions = len(self.actions)
-        self.q_learner = QLearner(self.num_states, self.num_actions)
-
-    def execute(self):
-        self.start_time()
-        self.init()
-        self.run()
-        self.end_time()
-        self.log()
-
-    def start_time(self):
-        self.sTime = time.time()
-
-    def init(self):
-        self.flock = []
-        self.g = Hawk()  # Instancia de la mejor ballena (solución)
-        w = None
-        for _ in range(1, self.nHawks + 1):
-            while True:
-                w = Hawk()
-                if w.is_feasible():
-                    break
-            self.flock.append(w)
-
+class WOA(MetaheuristicAlgorithm):
+    """Implementación del algoritmo de optimización de ballenas (Whale Optimization Algorithm)."""
+    
+    def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
+        """
+        Inicializa el algoritmo WOA.
+        
+        Args:
+            problem: Instancia del problema
+            population_size: Tamaño de la población
+            max_iterations: Número máximo de iteraciones
+            seed: Semilla para reproducibilidad
+        """
+        super().__init__(problem, population_size, max_iterations, seed)
+        self.a2 = 0.5  # Constante para definir la forma de la espiral logarítmica
+    
+    def initialize_population(self):
+        """Inicializa la población de ballenas."""
+        self.population = []
+        for _ in range(self.population_size):
+            whale = Whale(self.problem)
+            self.population.append(whale)
+        
         # Encontrar la mejor ballena inicial
-        self.g.copy(self.flock[0])
-        for i in range(1, self.nHawks):
-            if self.flock[i].is_better_than(self.g):
-                self.g.copy(self.flock[i])
-
-    def run(self):
-        t = 1
-        w = Hawk()
-        while t <= self.T:
-            # Guardar una copia profunda del mejor halcón actual
-            previous_g = copy.deepcopy(self.g)
-
-            # Calcular la diversidad del enjambre actual
-            previous_diversity = Utils.compute_diversity(self.flock)
-
-            # Obtener el estado actual basado en la diversidad
-            current_state = Utils.get_diversity_state(previous_diversity, self.num_states)
-
-            # Elegir una acción usando Q-learning
-            action_idx = self.q_learner.choose_action(current_state)
-
-            # Actualizar los parámetros de HHO basados en la acción elegida
-            self.fmin, self.fmax = self.actions[action_idx]
-
-            for i in range(self.nHawks):
-                while True:
-                    w.copy(self.flock[i])
-                    w.move(self.g)
-
-                    if w.is_feasible():
-                        break
-
-                if w.is_better_than(self.flock[i]):
-                    self.flock[i].copy(w)
-
-                if w.is_better_than(self.g):
-                    self.g.copy(w)
-
-            # Calcular la recompensa basada en la mejora de la función objetivo y la diversidad
-            current_g = self.g
-            current_diversity = Utils.compute_diversity(self.flock)
-            reward = Utils.compute_reward(previous_g, current_g, previous_diversity, current_diversity)
-
-            # Actualizar la tabla Q con la recompensa obtenida
-            next_state = Utils.get_diversity_state(current_diversity, self.num_states)
-            self.q_learner.update_q_table(current_state, action_idx, reward, next_state)
-
-            t += 1
-          #  print(f"{self.g}")
-
-    def end_time(self):
-        self.eTime = time.time()
-
-    def log(self):
-        print(f"{self.g}\t t={self.eTime - self.sTime}")
-
-    def dist(self):
-        dist = 0
-        for i in range(self.nHawks):
-            dist += abs(self.flock[i].scalering() - self.g.scalering())
-        return dist
-
-    def average(self):
-        data = [w.E for w in self.flock]  # Calcula el promedio de las energías de los halcones
-        return sum(data) / len(data)
+        self.best_solution = self.population[0]
+        for i in range(1, self.population_size):
+            if self.population[i].is_better_than(self.best_solution):
+                self.best_solution = self.population[i]
+    
+    def update_population(self):
+        """Actualiza la población en cada iteración."""
+        # Calcular el valor de 'a' que disminuye linealmente de 2 a 0
+        a = 2 - self.convergence_curve.count(self.best_solution.fitness()) * (2 / self.max_iterations)
+        
+        # Actualizar posición de cada ballena
+        for i in range(self.population_size):
+            # No mover la mejor ballena
+            if self.population[i] is not self.best_solution:
+                self.population[i].move(self.best_solution, a, self.a2)
+                
+                # Actualizar mejor solución si es necesario
+                if self.population[i].is_better_than(self.best_solution):
+                    whale_copy = Whale(self.problem)
+                    whale_copy.copy(self.population[i])
+                    self.best_solution = whale_copy
