@@ -44,6 +44,25 @@ ENV/
 results/*.png
 results/*.csv
 logs/*.log
+*.log
+benchmark.log
+massive_benchmark.log
+analyze_massive.log
 
-# Temporary files
-*.tmp
+# Resultados masivos y temporales
+results/massive_*/checkpoints/
+results/*_parallel_info.json
+results/analysis_*
+results/statistical_analysis_*
+results/benchmark_*
+*.json.gz
+
+# Excluir todos los resultados pero incluir los resumenes importantes
+results/**/*
+!results/massive_1000runs/massive_benchmark_summary.csv
+!results/statistical_analysis_1000runs/algorithm_comparison.csv
+!results/massive_1000runs/massive_benchmark_report.html
+
+# Archivos Claude
+.claude/
+**/.claude/settings.local.json
