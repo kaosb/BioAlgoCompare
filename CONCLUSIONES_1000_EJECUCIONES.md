@@ -9,6 +9,7 @@ El tamaño de muestra considerablemente grande (1000 ejecuciones por algoritmo) 
 ## 1. Metodología y Validez Estadística
 
 La experimentación se realizó con las siguientes características:
+
 - **Muestra**: 1000 ejecuciones independientes por algoritmo
 - **Problema**: Instancia E-n22-k4 del problema VRP
 - **Configuración**: Población de 40 individuos, 100 iteraciones
