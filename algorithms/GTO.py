@@ -35,22 +35,35 @@ class Gorilla(Individual):
         """Verifica si el individuo representa una solución factible."""
         return True  # En VRP todas las soluciones son factibles con nuestro decodificador
     
-    def move(self, best_gorilla, C, L, W, beta, p, iteration, max_iter):
+    def move(self, best_gorilla, C, L, W, beta, p, iteration, max_iter, population=None):
         dim = self.dimension
-        r = random.random()
-
-        if C >= W:
-            # Follow the silverback (Eq. 7)
-            M = np.mean([self.position])  # simula promedio de GX
-            for i in range(dim):
-                self.position[i] = L * (M - self.position[i]) + best_gorilla.position[i]
+        # --- Operadores de exploración (Ecuación 1) ---
+        if random.random() < p:
+            # Exploración: migración a lugar desconocido
+            r1 = np.random.rand(dim)
+            self.position = self.lower_bounds + (self.upper_bounds - self.lower_bounds) * r1
+        elif random.random() >= 0.5 and population is not None:
+            # Exploración: moverse hacia otro gorila
+            Xr = random.choice(population).position
+            self.position = self.position + C * (Xr - self.position)
         else:
-            # Competition for adult females (Eq. 10)
-            Q = 2 * random.random() - 1
-            E = np.random.rand(dim) if random.random() >= 0.5 else np.random.randn(dim)
-            A = beta * E
-            for i in range(dim):
-                self.position[i] = best_gorilla.position[i] - Q * (best_gorilla.position[i] - self.position[i]) * A[i]
+            # Exploración: migración hacia un lugar conocido
+            H = (np.random.uniform(-C, C, dim)) * self.position
+            self.position = (self.upper_bounds - self.lower_bounds) * np.random.rand(dim) + self.lower_bounds
+            self.position = self.position + L * H
+
+        # --- Transición a explotación si corresponde ---
+        if C < W:
+            if random.random() < 0.5 and population is not None:
+                # Seguir al silverback (Eq. 7)
+                M = np.mean([g.position for g in population], axis=0)
+                self.position = L * (M - self.position) + best_gorilla.position
+            else:
+                # Competencia por hembras (Eq. 10)
+                Q = 2 * random.random() - 1
+                E = np.random.rand(dim) if random.random() >= 0.5 else np.random.randn(dim)
+                A = beta * E
+                self.position = best_gorilla.position - Q * (best_gorilla.position - self.position) * A
 
         # Clipping
         self.position = np.clip(self.position, self.lower_bounds, self.upper_bounds)
@@ -116,7 +129,7 @@ class GTO(MetaheuristicAlgorithm):
             # No mover el mejor gorila
             if self.population[i] is not self.best_solution:
                 # Movimiento principal siguiendo al líder
-                self.population[i].move(self.best_solution, C, L, self.W, self.beta, self.p, t, self.max_iterations)
+                self.population[i].move(self.best_solution, C, L, self.W, self.beta, self.p, t, self.max_iterations, self.population)
                 
                 # Comportamiento social: interacción entre gorilas
                 if random.random() < self.social_factor:
