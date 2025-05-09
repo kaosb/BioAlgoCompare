@@ -1,620 +1,311 @@
 #!/usr/bin/env python3
 """
-Script para análisis estadístico avanzado de 1000 ejecuciones por algoritmo.
+Script para analizar y comparar los resultados de los 3 escenarios (10, 100 y 1000 ejecuciones).
+Genera gráficas comparativas y tablas de resumen.
 """
 
 import os
+import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy import stats
-import scikit_posthocs as sp
-from math import sqrt
+from datetime import datetime
 
-# Configuración de visualización
-plt.style.use('seaborn-v0_8-darkgrid')
-sns.set_context("paper", font_scale=1.2)
-colors = sns.color_palette("viridis", 5)
+# Configurar estilo de las gráficas
+plt.style.use('ggplot')
+sns.set_style("whitegrid")
+sns.set_palette("colorblind")
 
-def load_data(file_path):
-    """Carga datos del CSV de resumen de benchmark."""
-    df = pd.read_csv(file_path)
-    print(f"Datos cargados desde {file_path}")
-    print(f"Forma del dataframe: {df.shape}")
-    return df
+# Rutas a los directorios de resultados
+RESULTS_10 = "results/test_10runs"
+RESULTS_100 = "results/test_100runs"
+RESULTS_1000 = "results/test_1000runs"
+OUTPUT_DIR = "results/comparative_analysis"
 
-def generate_confidence_intervals(df):
-    """Genera intervalos de confianza del 95% para el fitness medio."""
-    results = []
+# Asegurar que existe el directorio de salida
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def load_benchmark_results(json_path):
+    """Carga resultados de un archivo JSON de benchmark."""
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+    return data
+
+def extract_summary_statistics(results_data):
+    """Extrae estadísticas resumidas de los resultados del benchmark."""
+    summary = []
     
-    for _, row in df.iterrows():
-        mean = row['Mean']
-        std = row['Std']
-        n = row['Runs']
-        
-        # Error estándar de la media
-        se = std / sqrt(n)
-        
-        # Intervalo de confianza del 95% (distribución t)
-        t_value = stats.t.ppf(0.975, n-1)  # Valor crítico para 95%
-        margin = t_value * se
-        
-        ci_lower = mean - margin
-        ci_upper = mean + margin
-        
-        results.append({
-            'Algorithm': row['Algorithm'],
-            'Mean': mean,
-            'CI_Lower': ci_lower,
-            'CI_Upper': ci_upper,
-            'Sample_Size': n
+    for result in results_data:
+        summary.append({
+            'algorithm': result['algorithm'],
+            'instance': result['instance'],
+            'best_fitness': result['metrics']['best_fitness'],
+            'mean_fitness': result['metrics']['mean_fitness'],
+            'std_fitness': result['metrics']['std_fitness'],
+            'mean_time': result['metrics']['mean_time'],
+            'std_time': result['metrics']['std_time'],
+            'gap_to_optimal': result['metrics']['gap_to_optimal'],
+            'success_rate': result['metrics']['success_rate'],
+            'runs': result['runs']
         })
     
-    return pd.DataFrame(results)
+    return pd.DataFrame(summary)
 
-def plot_confidence_intervals(ci_df, output_dir):
-    """Genera gráfico de intervalos de confianza para fitness medio."""
-    plt.figure(figsize=(12, 6))
+def create_comparison_table():
+    """Crea una tabla comparativa de los tres escenarios."""
+    try:
+        # Cargar resultados
+        results_10 = load_benchmark_results(os.path.join(RESULTS_10, "benchmark_results.json"))
+        results_100 = load_benchmark_results(os.path.join(RESULTS_100, "benchmark_results.json"))
+        results_1000 = load_benchmark_results(os.path.join(RESULTS_1000, "benchmark_results.json"))
+        
+        # Extraer estadísticas
+        summary_10 = extract_summary_statistics(results_10)
+        summary_100 = extract_summary_statistics(results_100)
+        summary_1000 = extract_summary_statistics(results_1000)
+        
+        # Añadir columna para identificar el escenario
+        summary_10['scenario'] = '10 runs'
+        summary_100['scenario'] = '100 runs'
+        summary_1000['scenario'] = '1000 runs'
+        
+        # Combinar todos los resultados
+        all_summary = pd.concat([summary_10, summary_100, summary_1000])
+        
+        # Guardar tabla completa
+        table_path = os.path.join(OUTPUT_DIR, "comparison_table.csv")
+        all_summary.to_csv(table_path, index=False)
+        print(f"Tabla de comparación guardada en {table_path}")
+        
+        return all_summary
+    except Exception as e:
+        print(f"Error al crear la tabla de comparación: {str(e)}")
+        return None
+
+def plot_best_fitness_comparison(summary_df):
+    """Gráfica comparativa del mejor fitness por algoritmo y escenario."""
+    if summary_df is None:
+        return
     
-    # Ordenar por media
-    ci_df = ci_df.sort_values('Mean')
+    plt.figure(figsize=(10, 6))
     
-    # Crear gráfico
-    plt.errorbar(
-        ci_df['Algorithm'], 
-        ci_df['Mean'],
-        yerr=[(ci_df['Mean'] - ci_df['CI_Lower']), (ci_df['CI_Upper'] - ci_df['Mean'])],
-        fmt='o', 
-        capsize=5, 
-        ecolor='black',
-        markersize=8,
-        linewidth=2
-    )
+    # Crear gráfico de barras agrupadas
+    sns.barplot(x='algorithm', y='best_fitness', hue='scenario', data=summary_df)
     
-    plt.title('Fitness Medio con Intervalos de Confianza del 95%\n(1000 ejecuciones por algoritmo)', fontsize=14)
-    plt.ylabel('Fitness (menor es mejor)', fontsize=12)
+    plt.title('Mejor Fitness por Algoritmo y Cantidad de Ejecuciones', fontsize=14)
     plt.xlabel('Algoritmo', fontsize=12)
+    plt.ylabel('Mejor Fitness (Menor es Mejor)', fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(title='Escenario')
     
-    # Añadir valores
-    for i, row in ci_df.iterrows():
-        plt.text(
-            i, 
-            row['Mean'] + 5, 
-            f"{row['Mean']:.2f}\n±{row['CI_Upper'] - row['Mean']:.2f}",
-            ha='center',
-            fontsize=10
-        )
+    # Añadir valor óptimo conocido
+    plt.axhline(y=450, color='red', linestyle='--', label='Óptimo Conocido (450)')
+    plt.legend()
     
+    # Guardar gráfica
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, 'confidence_intervals.png'), dpi=300)
+    output_path = os.path.join(OUTPUT_DIR, "best_fitness_comparison.png")
+    plt.savefig(output_path, dpi=300)
     plt.close()
+    print(f"Gráfica de mejor fitness guardada en {output_path}")
 
-def run_statistical_tests(df):
-    """Ejecuta tests estadísticos para comparar algoritmos."""
-    results = {}
+def plot_mean_fitness_comparison(summary_df):
+    """Gráfica comparativa del fitness promedio por algoritmo y escenario."""
+    if summary_df is None:
+        return
     
-    # 1. ANOVA global para determinar si hay diferencias significativas
-    algorithms = df['Algorithm'].unique()
-    samples = [df[df['Algorithm'] == algo]['Mean'].values[0] for algo in algorithms]
+    plt.figure(figsize=(10, 6))
     
-    # Como solo tenemos un valor por algoritmo (media), usamos la desviación estándar
-    # para simular distribuciones y realizar pruebas más robustas
-    simulated_samples = []
-    for i, algo in enumerate(algorithms):
-        mean = df[df['Algorithm'] == algo]['Mean'].values[0]
-        std = df[df['Algorithm'] == algo]['Std'].values[0]
-        n = df[df['Algorithm'] == algo]['Runs'].values[0]
+    # Preparar datos para mostrar barras de error
+    ax = sns.barplot(x='algorithm', y='mean_fitness', hue='scenario', data=summary_df)
+    
+    # Añadir barras de error
+    for i, row in enumerate(summary_df.itertuples()):
+        x = i % len(summary_df['algorithm'].unique())
+        x_offset = (i // len(summary_df['algorithm'].unique())) * 0.3 - 0.3
         
-        # Generar 100 muestras que seguirían la distribución para cada algoritmo
-        simulated = np.random.normal(mean, std, size=100)
-        simulated_samples.append(simulated)
+        ax.errorbar(x + x_offset, row.mean_fitness, yerr=row.std_fitness, 
+                   fmt='none', capsize=5, ecolor='black', alpha=0.7)
     
-    # Realizar test de Kruskal-Wallis (no paramétrico)
-    statistic, p_value = stats.kruskal(*simulated_samples)
-    results['kruskal'] = {
-        'statistic': statistic,
-        'p_value': p_value,
-        'significant': p_value < 0.05
-    }
-    
-    # Si hay diferencias significativas, realizar pruebas post-hoc
-    if p_value < 0.05:
-        # Realizar comparaciones manuales en lugar de usar la biblioteca externa
-        pairwise_comparisons = {}
-        
-        for i, algo1 in enumerate(algorithms):
-            for j, algo2 in enumerate(algorithms):
-                if i < j:  # Solo la mitad diagonal superior
-                    # Test de Mann-Whitney U (no paramétrico para dos muestras)
-                    u_stat, p_value = stats.mannwhitneyu(
-                        simulated_samples[i], 
-                        simulated_samples[j],
-                        alternative='two-sided'
-                    )
-                    
-                    # Aplicar corrección de Bonferroni
-                    n_comparisons = len(algorithms) * (len(algorithms) - 1) // 2
-                    adjusted_p = min(p_value * n_comparisons, 1.0)
-                    
-                    pairwise_comparisons[f"{algo1} vs {algo2}"] = {
-                        'p_value': adjusted_p,
-                        'significant': adjusted_p < 0.05
-                    }
-        
-        results['pairwise'] = pairwise_comparisons
-    
-    return results
-
-def print_statistical_analysis(df, test_results):
-    """Imprime resultados del análisis estadístico."""
-    print("\n==== ANÁLISIS ESTADÍSTICO AVANZADO ====")
-    print(f"Tamaño de muestra por algoritmo: 1000 ejecuciones")
-    
-    # Ranking de algoritmos por fitness medio
-    print("\nRanking de algoritmos por fitness medio (menor es mejor):")
-    ranking = df.sort_values('Mean')[['Algorithm', 'Mean', 'Best']]
-    for i, (_, row) in enumerate(ranking.iterrows()):
-        print(f"{i+1}. {row['Algorithm']}: {row['Mean']:.2f} (mejor: {row['Best']:.2f})")
-    
-    # Resultado del test global
-    print("\nTest global (Kruskal-Wallis):")
-    kruskal = test_results['kruskal']
-    print(f"Estadístico H: {kruskal['statistic']:.2f}")
-    print(f"Valor p: {kruskal['p_value']:.8f}")
-    print(f"Conclusión: {'Hay diferencias significativas entre los algoritmos' if kruskal['significant'] else 'No hay diferencias significativas'}")
-    
-    # Resultados de comparaciones por pares
-    if 'pairwise' in test_results:
-        print("\nComparaciones por pares (Test de Dunn con corrección de Bonferroni):")
-        pairwise = test_results['pairwise']
-        
-        print("\n  Algoritmo 1  |  Algoritmo 2  |  p-valor  |  Significativo")
-        print("  " + "-" * 58)
-        
-        for pair, result in sorted(pairwise.items(), key=lambda x: x[1]['p_value']):
-            algo1, algo2 = pair.split(' vs ')
-            print(f"  {algo1.ljust(12)}|  {algo2.ljust(12)}|  {result['p_value']:.8f}  |  {'SÍ' if result['significant'] else 'NO'}")
-
-def create_distribution_plot(df, output_dir):
-    """Crea visualización de distribuciones estimadas para cada algoritmo."""
-    plt.figure(figsize=(12, 6))
-    
-    # Para cada algoritmo, dibujar distribución normal con la media y desviación
-    x = np.linspace(380, 580, 1000)
-    
-    for i, (_, row) in enumerate(df.iterrows()):
-        algorithm = row['Algorithm']
-        mean = row['Mean']
-        std = row['Std']
-        
-        # Calcular PDF
-        pdf = stats.norm.pdf(x, mean, std)
-        
-        # Dibujar
-        plt.plot(x, pdf, label=algorithm, color=colors[i], linewidth=2)
-        
-        # Marcar la media
-        plt.axvline(mean, color=colors[i], linestyle='--', alpha=0.5)
-        
-        # Marcar intervalo de confianza del 95%
-        ci_lower = mean - 1.96 * std / np.sqrt(row['Runs'])
-        ci_upper = mean + 1.96 * std / np.sqrt(row['Runs'])
-        plt.axvspan(ci_lower, ci_upper, alpha=0.2, color=colors[i])
-    
-    plt.title('Distribuciones estimadas de fitness\n(1000 ejecuciones por algoritmo)', fontsize=14)
-    plt.xlabel('Fitness (menor es mejor)', fontsize=12)
-    plt.ylabel('Densidad de probabilidad', fontsize=12)
-    plt.legend(title="Algoritmo")
+    plt.title('Fitness Promedio por Algoritmo y Cantidad de Ejecuciones', fontsize=14)
+    plt.xlabel('Algoritmo', fontsize=12)
+    plt.ylabel('Fitness Promedio ± Desv. Est.', fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(title='Escenario')
+    
+    # Añadir valor óptimo conocido
+    plt.axhline(y=450, color='red', linestyle='--', label='Óptimo Conocido (450)')
+    plt.legend()
+    
+    # Guardar gráfica
     plt.tight_layout()
-    
-    plt.savefig(os.path.join(output_dir, 'distributions.png'), dpi=300)
+    output_path = os.path.join(OUTPUT_DIR, "mean_fitness_comparison.png")
+    plt.savefig(output_path, dpi=300)
     plt.close()
+    print(f"Gráfica de fitness promedio guardada en {output_path}")
 
-def create_gap_analysis_plot(df, output_dir):
-    """Crea gráfico de análisis de gap al óptimo."""
-    plt.figure(figsize=(12, 6))
+def plot_execution_time_comparison(summary_df):
+    """Gráfica comparativa del tiempo de ejecución por algoritmo y escenario."""
+    if summary_df is None:
+        return
     
-    # Ordenar por gap
-    df_sorted = df.sort_values('Gap (%)')
+    plt.figure(figsize=(10, 6))
     
-    bars = plt.bar(
-        df_sorted['Algorithm'], 
-        df_sorted['Gap (%)'],
-        color=colors
-    )
+    # Crear gráfico de barras agrupadas
+    sns.barplot(x='algorithm', y='mean_time', hue='scenario', data=summary_df)
     
-    # Añadir etiquetas de valores
-    for bar in bars:
-        height = bar.get_height()
-        plt.text(
-            bar.get_x() + bar.get_width()/2.,
-            height + 0.1,
-            f'{height:.2f}%',
-            ha='center', 
-            va='bottom',
-            fontsize=10
-        )
-    
-    plt.title('Gap al óptimo por algoritmo\n(1000 ejecuciones por algoritmo)', fontsize=14)
-    plt.ylabel('Gap al óptimo (%)', fontsize=12)
+    plt.title('Tiempo de Ejecución por Algoritmo y Cantidad de Ejecuciones', fontsize=14)
     plt.xlabel('Algoritmo', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7, axis='y')
+    plt.ylabel('Tiempo Promedio (segundos)', fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(title='Escenario')
+    
+    # Guardar gráfica
     plt.tight_layout()
-    
-    plt.savefig(os.path.join(output_dir, 'gap_analysis.png'), dpi=300)
+    output_path = os.path.join(OUTPUT_DIR, "execution_time_comparison.png")
+    plt.savefig(output_path, dpi=300)
     plt.close()
+    print(f"Gráfica de tiempo de ejecución guardada en {output_path}")
 
-def create_time_analysis_plot(df, output_dir):
-    """Crea gráfico de análisis de tiempo de ejecución."""
-    plt.figure(figsize=(12, 6))
+def plot_success_rate_comparison(summary_df):
+    """Gráfica comparativa de la tasa de éxito por algoritmo y escenario."""
+    if summary_df is None:
+        return
     
-    # Ordenar por tiempo
-    df_sorted = df.sort_values('Time')
+    plt.figure(figsize=(10, 6))
     
-    bars = plt.bar(
-        df_sorted['Algorithm'], 
-        df_sorted['Time'],
-        color=colors
-    )
+    # Crear gráfico de barras agrupadas
+    sns.barplot(x='algorithm', y='success_rate', hue='scenario', data=summary_df)
     
-    # Añadir etiquetas de valores
-    for bar in bars:
-        height = bar.get_height()
-        plt.text(
-            bar.get_x() + bar.get_width()/2.,
-            height + 0.005,
-            f'{height:.4f}s',
-            ha='center', 
-            va='bottom',
-            fontsize=10
-        )
-    
-    plt.title('Tiempo de ejecución promedio por algoritmo\n(1000 ejecuciones por algoritmo)', fontsize=14)
-    plt.ylabel('Tiempo (segundos)', fontsize=12)
+    plt.title('Tasa de Éxito por Algoritmo y Cantidad de Ejecuciones', fontsize=14)
     plt.xlabel('Algoritmo', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7, axis='y')
+    plt.ylabel('Tasa de Éxito (%)', fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(title='Escenario')
+    
+    # Guardar gráfica
     plt.tight_layout()
-    
-    plt.savefig(os.path.join(output_dir, 'time_analysis.png'), dpi=300)
+    output_path = os.path.join(OUTPUT_DIR, "success_rate_comparison.png")
+    plt.savefig(output_path, dpi=300)
     plt.close()
+    print(f"Gráfica de tasa de éxito guardada en {output_path}")
 
-def generate_comparison_table(df, test_results, output_dir):
-    """Genera una tabla de comparación y la guarda en formato CSV."""
-    comparison_data = []
+def generate_summary_report(summary_df):
+    """Genera un informe resumido en formato Markdown."""
+    if summary_df is None:
+        return
     
-    # Para cada algoritmo
-    for _, row in df.iterrows():
-        algo = row['Algorithm']
-        mean = row['Mean']
-        std = row['Std']
-        best = row['Best']
-        gap = row['Gap (%)']
-        time = row['Time']
-        
-        # Crear entrada para la tabla
-        entry = {
-            'Algorithm': algo,
-            'Best_Fitness': best,
-            'Mean_Fitness': mean,
-            'Std_Dev': std,
-            'Gap_To_Optimal (%)': gap,
-            'Execution_Time (s)': time,
-            'CI_Lower': mean - 1.96 * std / np.sqrt(row['Runs']),
-            'CI_Upper': mean + 1.96 * std / np.sqrt(row['Runs']),
-        }
-        
-        # Añadir resultados estadísticos
-        if 'pairwise' in test_results:
-            # Contar cuántos algoritmos supera significativamente
-            better_than = 0
-            for pair, result in test_results['pairwise'].items():
-                if pair.startswith(algo + ' vs') and result['significant'] and result['p_value'] < 0.05:
-                    better_than += 1
-                    
-            entry['Sig_Better_Than'] = better_than
-        
-        comparison_data.append(entry)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # Crear DataFrame
-    comparison_df = pd.DataFrame(comparison_data)
+    # Crear resumen por algoritmo y escenario
+    algo_summary = summary_df.groupby(['algorithm', 'scenario']).agg({
+        'best_fitness': 'min',
+        'mean_fitness': 'mean',
+        'std_fitness': 'mean',
+        'mean_time': 'mean',
+        'gap_to_optimal': 'min',
+        'success_rate': 'mean'
+    }).reset_index()
     
-    # Guardar como CSV
-    comparison_csv = os.path.join(output_dir, 'algorithm_comparison.csv')
-    comparison_df.to_csv(comparison_csv, index=False)
+    # Formatear como tabla Markdown
+    markdown = f"# Resumen Comparativo de Escenarios (10, 100, 1000 ejecuciones)\n\n"
+    markdown += f"Generado el: {timestamp}\n\n"
+    markdown += f"## Tabla Comparativa de Resultados\n\n"
     
-    print(f"\nTabla comparativa guardada en: {comparison_csv}")
-    return comparison_df
-
-def generate_report(df, test_results, output_dir, comparison_df):
-    """Genera un informe HTML con los resultados del análisis."""
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Análisis Estadístico de 1000 Ejecuciones por Algoritmo</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                margin: 20px;
-                line-height: 1.6;
-            }}
-            h1, h2, h3 {{
-                color: #2c3e50;
-            }}
-            table {{
-                border-collapse: collapse;
-                width: 100%;
-                margin-bottom: 20px;
-            }}
-            th, td {{
-                text-align: left;
-                padding: 8px;
-                border: 1px solid #ddd;
-            }}
-            th {{
-                background-color: #f2f2f2;
-            }}
-            tr:nth-child(even) {{
-                background-color: #f9f9f9;
-            }}
-            .section {{
-                margin-bottom: 30px;
-            }}
-            .figure {{
-                margin: 20px 0;
-                text-align: center;
-            }}
-            .figure img {{
-                max-width: 100%;
-                height: auto;
-            }}
-            .caption {{
-                margin-top: 10px;
-                font-style: italic;
-                color: #666;
-            }}
-            .highlight {{
-                font-weight: bold;
-                color: #e74c3c;
-            }}
-            .success {{
-                color: #27ae60;
-            }}
-            .container {{
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-            }}
-        </style>
-    </head>
-    <body>
-        <h1>Análisis Estadístico de 1000 Ejecuciones por Algoritmo</h1>
-        <p>Fecha: {pd.Timestamp.now().strftime('%Y-%m-%d')}</p>
+    # Crear tabla por algoritmo
+    for algo in algo_summary['algorithm'].unique():
+        algo_data = algo_summary[algo_summary['algorithm'] == algo]
         
-        <div class="section">
-            <h2>Resumen de Datos</h2>
-            <p>Se analizaron los resultados de <strong>1000 ejecuciones</strong> para cada uno de los 5 algoritmos metaheurísticos en la instancia E-n22-k4 del problema VRP.</p>
+        markdown += f"### Algoritmo: {algo}\n\n"
+        markdown += "| Métrica | 10 ejecuciones | 100 ejecuciones | 1000 ejecuciones |\n"
+        markdown += "|---------|----------------|-----------------|------------------|\n"
+        
+        # Extraer datos para cada escenario
+        for metric in ['best_fitness', 'mean_fitness', 'std_fitness', 'mean_time', 'gap_to_optimal', 'success_rate']:
+            metric_name = {
+                'best_fitness': 'Mejor Fitness',
+                'mean_fitness': 'Fitness Promedio',
+                'std_fitness': 'Desviación Estándar',
+                'mean_time': 'Tiempo Promedio (s)',
+                'gap_to_optimal': 'Gap al Óptimo (%)',
+                'success_rate': 'Tasa de Éxito (%)'
+            }[metric]
             
-            <table>
-                <tr>
-                    <th>Algoritmo</th>
-                    <th>Mejor Fitness</th>
-                    <th>Fitness Medio</th>
-                    <th>Desviación Estándar</th>
-                    <th>Gap al Óptimo (%)</th>
-                    <th>Tiempo (s)</th>
-                </tr>
-    """
-    
-    # Añadir filas para cada algoritmo, ordenadas por fitness medio
-    for _, row in df.sort_values('Mean').iterrows():
-        html_content += f"""
-                <tr>
-                    <td>{row['Algorithm']}</td>
-                    <td>{row['Best']:.4f}</td>
-                    <td>{row['Mean']:.4f}</td>
-                    <td>{row['Std']:.4f}</td>
-                    <td>{row['Gap (%)']:.4f}%</td>
-                    <td>{row['Time']:.4f}</td>
-                </tr>
-        """
-    
-    html_content += """
-            </table>
-        </div>
-        
-        <div class="section">
-            <h2>Análisis Estadístico</h2>
-    """
-    
-    # Añadir resultados del test global
-    kruskal = test_results['kruskal']
-    significance = "Hay diferencias estadísticamente significativas" if kruskal['significant'] else "No hay diferencias estadísticamente significativas"
-    
-    html_content += f"""
-            <h3>Test Global (Kruskal-Wallis)</h3>
-            <p>Estadístico H: {kruskal['statistic']:.4f}</p>
-            <p>Valor p: {kruskal['p_value']:.8f}</p>
-            <p>Conclusión: <strong>{significance}</strong> entre los algoritmos analizados.</p>
-    """
-    
-    # Añadir resultados de comparaciones por pares si existen
-    if 'pairwise' in test_results:
-        html_content += """
-            <h3>Comparaciones por Pares (Test de Dunn con corrección de Bonferroni)</h3>
-            <table>
-                <tr>
-                    <th>Algoritmo 1</th>
-                    <th>Algoritmo 2</th>
-                    <th>Valor p</th>
-                    <th>Significativo</th>
-                </tr>
-        """
-        
-        for pair, result in sorted(test_results['pairwise'].items(), key=lambda x: x[1]['p_value']):
-            algo1, algo2 = pair.split(' vs ')
-            significant = "SÍ" if result['significant'] else "NO"
-            html_content += f"""
-                <tr>
-                    <td>{algo1}</td>
-                    <td>{algo2}</td>
-                    <td>{result['p_value']:.8f}</td>
-                    <td>{significant}</td>
-                </tr>
-            """
-        
-        html_content += """
-            </table>
-        """
-    
-    # Añadir visualizaciones
-    html_content += """
-        </div>
-        
-        <div class="section">
-            <h2>Visualizaciones</h2>
-            
-            <div class="container">
-                <div class="figure">
-                    <img src="confidence_intervals.png" alt="Intervalos de confianza">
-                    <p class="caption">Fitness medio con intervalos de confianza del 95% para cada algoritmo.</p>
-                </div>
+            # Formatear valores
+            values = []
+            for scenario in ['10 runs', '100 runs', '1000 runs']:
+                scenario_data = algo_data[algo_data['scenario'] == scenario]
                 
-                <div class="figure">
-                    <img src="distributions.png" alt="Distribuciones estimadas">
-                    <p class="caption">Distribuciones estimadas de fitness para cada algoritmo.</p>
-                </div>
-                
-                <div class="figure">
-                    <img src="gap_analysis.png" alt="Análisis de gap">
-                    <p class="caption">Gap al óptimo (%) para cada algoritmo.</p>
-                </div>
-                
-                <div class="figure">
-                    <img src="time_analysis.png" alt="Análisis de tiempo">
-                    <p class="caption">Tiempo de ejecución promedio para cada algoritmo.</p>
-                </div>
-            </div>
-        </div>
+                if len(scenario_data) > 0:
+                    if metric in ['gap_to_optimal', 'success_rate']:
+                        values.append(f"{scenario_data[metric].values[0]:.2f}%")
+                    elif metric == 'mean_time':
+                        values.append(f"{scenario_data[metric].values[0]:.4f}")
+                    else:
+                        values.append(f"{scenario_data[metric].values[0]:.2f}")
+                else:
+                    values.append("N/A")
+            
+            markdown += f"| {metric_name} | {values[0]} | {values[1]} | {values[2]} |\n"
         
-        <div class="section">
-            <h2>Conclusiones</h2>
-            
-            <h3>Ranking de Algoritmos</h3>
-            <ol>
-    """
+        markdown += "\n"
     
-    # Añadir ranking de algoritmos
-    for i, (_, row) in enumerate(df.sort_values('Mean').iterrows()):
-        html_content += f"""
-                <li><strong>{row['Algorithm']}</strong> - Fitness medio: {row['Mean']:.4f} (±{1.96 * row['Std'] / np.sqrt(row['Runs']):.4f})</li>
-        """
+    # Añadir sección de observaciones
+    markdown += "## Observaciones\n\n"
+    markdown += "- La mejor solución global encontrada fue "
+    best_overall = summary_df['best_fitness'].min()
+    best_algo = summary_df.loc[summary_df['best_fitness'] == best_overall, 'algorithm'].iloc[0]
+    best_scenario = summary_df.loc[summary_df['best_fitness'] == best_overall, 'scenario'].iloc[0]
+    markdown += f"{best_overall:.2f} por el algoritmo {best_algo} en el escenario de {best_scenario}.\n"
     
-    # Añadir conclusiones
-    best_algo = df.loc[df['Mean'].idxmin(), 'Algorithm']
-    worst_algo = df.loc[df['Mean'].idxmax(), 'Algorithm']
-    fastest_algo = df.loc[df['Time'].idxmin(), 'Algorithm']
-    slowest_algo = df.loc[df['Time'].idxmax(), 'Algorithm']
+    # Análisis de rendimiento computacional
+    fastest_algo = summary_df.groupby('algorithm')['mean_time'].mean().idxmin()
+    markdown += f"- El algoritmo más rápido en promedio fue {fastest_algo}.\n"
     
-    html_content += f"""
-            </ol>
-            
-            <h3>Observaciones Principales</h3>
-            <ul>
-                <li>El algoritmo con mejor rendimiento en términos de fitness medio es <strong>{best_algo}</strong>.</li>
-                <li>El algoritmo con peor rendimiento en términos de fitness medio es <strong>{worst_algo}</strong>.</li>
-                <li>El algoritmo más rápido es <strong>{fastest_algo}</strong> con un tiempo medio de {df.loc[df['Time'].idxmin(), 'Time']:.4f} segundos.</li>
-                <li>El algoritmo más lento es <strong>{slowest_algo}</strong> con un tiempo medio de {df.loc[df['Time'].idxmax(), 'Time']:.4f} segundos.</li>
-            </ul>
-            
-            <h3>Significancia Estadística</h3>
-            <p>El análisis estadístico realizado con 1000 ejecuciones por algoritmo muestra que {significance.lower()} entre los algoritmos.</p>
-    """
+    # Tendencia de mejora
+    markdown += "- Incrementar el número de ejecuciones de 10 a 100 resultó en "
+    best_10 = summary_df[summary_df['scenario'] == '10 runs']['best_fitness'].min()
+    best_100 = summary_df[summary_df['scenario'] == '100 runs']['best_fitness'].min()
+    improvement_10_to_100 = (best_10 - best_100) / best_10 * 100
+    markdown += f"una mejora del {improvement_10_to_100:.2f}% en el mejor fitness global encontrado.\n"
     
-    if 'pairwise' in test_results:
-        # Identificar pares con diferencias significativas
-        significant_pairs = [pair for pair, result in test_results['pairwise'].items() if result['significant']]
-        
-        if significant_pairs:
-            html_content += """
-            <p>Las siguientes comparaciones por pares mostraron diferencias estadísticamente significativas:</p>
-            <ul>
-            """
-            
-            for pair in significant_pairs:
-                html_content += f"""
-                <li>{pair}</li>
-                """
-            
-            html_content += """
-            </ul>
-            """
-        else:
-            html_content += """
-            <p>Ninguna de las comparaciones por pares mostró diferencias estadísticamente significativas.</p>
-            """
+    # Tendencia de estabilidad
+    markdown += "- La desviación estándar en los resultados fue "
+    std_10 = summary_df[summary_df['scenario'] == '10 runs']['std_fitness'].mean()
+    std_100 = summary_df[summary_df['scenario'] == '100 runs']['std_fitness'].mean()
+    if std_100 < std_10:
+        markdown += f"menor con 100 ejecuciones ({std_100:.2f}) que con 10 ejecuciones ({std_10:.2f}), "
+        markdown += "lo que indica mayor estabilidad y confiabilidad estadística con más ejecuciones.\n"
+    else:
+        markdown += f"similar o mayor con más ejecuciones, lo que sugiere que algunos algoritmos pueden mostrar comportamiento más variable a largo plazo.\n"
     
-    html_content += """
-        </div>
-        
-        <div class="section">
-            <h2>Implicaciones para la Investigación</h2>
-            <p>Este análisis riguroso con 1000 ejecuciones por algoritmo proporciona una visión estadísticamente robusta del rendimiento relativo de los algoritmos metaheurísticos evaluados en el problema VRP.</p>
-            
-            <h3>Recomendaciones:</h3>
-            <ul>
-                <li>Para aplicaciones donde el tiempo de ejecución es crítico, considerar el uso de algoritmos más rápidos como APO o FGO.</li>
-                <li>Para aplicaciones donde la calidad de la solución es prioritaria, HOA ofrece el mejor balance entre calidad y tiempo.</li>
-                <li>Considerar enfoques híbridos que combinen las fortalezas de HOA (mejor fitness) con la velocidad de FGO o APO.</li>
-            </ul>
-        </div>
-        
-        <div class="section">
-            <p><em>Análisis generado automáticamente a partir de 1000 ejecuciones por algoritmo.</em></p>
-        </div>
-    </body>
-    </html>
-    """
-    
-    # Guardar reporte HTML
-    report_path = os.path.join(output_dir, 'statistical_analysis_report.html')
-    with open(report_path, 'w') as f:
-        f.write(html_content)
-    
-    print(f"\nInforme HTML generado en: {report_path}")
+    # Guardar informe
+    output_path = os.path.join(OUTPUT_DIR, "comparative_summary.md")
+    with open(output_path, 'w') as f:
+        f.write(markdown)
+    print(f"Informe resumido guardado en {output_path}")
 
 def main():
-    # Configurar directorio para resultados
-    output_dir = "results/statistical_analysis_1000runs"
-    os.makedirs(output_dir, exist_ok=True)
+    """Función principal que ejecuta todo el análisis comparativo."""
+    print("Iniciando análisis comparativo de escenarios (10, 100, 1000 ejecuciones)...")
     
-    # Cargar datos
-    csv_path = "results/massive_1000runs/massive_benchmark_summary.csv"
-    df = load_data(csv_path)
+    # Crear tabla comparativa
+    summary_df = create_comparison_table()
     
-    # Generar intervalos de confianza
-    ci_df = generate_confidence_intervals(df)
-    plot_confidence_intervals(ci_df, output_dir)
-    
-    # Ejecutar tests estadísticos
-    test_results = run_statistical_tests(df)
-    print_statistical_analysis(df, test_results)
-    
-    # Generar visualizaciones
-    create_distribution_plot(df, output_dir)
-    create_gap_analysis_plot(df, output_dir)
-    create_time_analysis_plot(df, output_dir)
-    
-    # Generar tabla comparativa
-    comparison_df = generate_comparison_table(df, test_results, output_dir)
-    
-    # Generar informe HTML
-    generate_report(df, test_results, output_dir, comparison_df)
-    
-    print(f"\nAnálisis estadístico completo. Resultados guardados en: {output_dir}")
+    if summary_df is not None:
+        # Generar gráficas comparativas
+        plot_best_fitness_comparison(summary_df)
+        plot_mean_fitness_comparison(summary_df)
+        plot_execution_time_comparison(summary_df)
+        plot_success_rate_comparison(summary_df)
+        
+        # Generar informe resumido
+        generate_summary_report(summary_df)
+        
+        print(f"Análisis comparativo completado. Resultados guardados en {OUTPUT_DIR}")
+    else:
+        print("No se pudo generar el análisis debido a errores en la carga de datos.")
 
 if __name__ == "__main__":
     main()

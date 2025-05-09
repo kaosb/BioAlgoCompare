@@ -34,11 +34,21 @@ print("✅ Reemplazado método de análisis estadístico con versión corregida.
 from problems.vrp import VRPProblem
 
 # Importar algoritmos
-from algorithms.hoa import HOA
-from algorithms.apo import APO
-from algorithms.egto import EGTO
-from algorithms.fgo import FGO
-from algorithms.foa import FOA
+from algorithms.sho import SHO  # Spotted Hyena Optimizer (anteriormente HOA)
+from algorithms.apo import APO  # Artificial Protozoa Optimizer
+from algorithms.egto import EGTO  # Enhanced Gorilla Troops Optimizer
+from algorithms.fsa import FSA  # Flamingo Search Algorithm (anteriormente FGO)
+from algorithms.foa import FOA  # Fossa Optimization Algorithm
+from algorithms.woa import WOA  # Whale Optimization Algorithm
+from algorithms.hho import HHO  # Harris Hawks Optimization
+from algorithms.mrfo import MRFO  # Manta Ray Foraging Optimization
+from algorithms.sma import SMA  # Slime Mould Algorithm
+from algorithms.gto import GTO  # Gorilla Troops Optimizer
+from algorithms.ewa import EWA  # Earthworm Algorithm
+
+# Aliases para mantener la compatibilidad con código antiguo
+HOA = SHO  # Spotted Hyena Optimizer (anteriormente Hyena Optimization Algorithm)
+FGO = FSA  # Flamingo Search Algorithm (anteriormente Flamingo Optimization Algorithm)
 
 @click.command()
 @click.option('--input', '-i', help='Ruta al archivo CSV de resultados')
@@ -80,15 +90,23 @@ def main(input, run_benchmark, instances, algorithms, runs, iterations, populati
             instances = ['P-n16-k8', 'E-n22-k4']  # Por defecto, usar instancias pequeñas
         
         if not algorithms:
-            algorithms = ['hoa', 'apo', 'egto', 'fgo', 'foa']  # Por defecto, usar todos los algoritmos
+            algorithms = ['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa']  # Por defecto, usar todos los algoritmos
         
         # Preparar diccionario de algoritmos
         algo_classes = {
-            'hoa': HOA,
+            'hoa': SHO,
+            'sho': SHO,
             'apo': APO,
             'egto': EGTO,
-            'fgo': FGO,
-            'foa': FOA
+            'fgo': FSA,
+            'fsa': FSA,
+            'foa': FOA,
+            'woa': WOA,
+            'hho': HHO,
+            'mrfo': MRFO,
+            'sma': SMA,
+            'gto': GTO,
+            'ewa': EWA
         }
         
         algo_dict = {algo: algo_classes[algo] for algo in algorithms if algo in algo_classes}

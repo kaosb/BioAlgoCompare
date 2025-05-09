@@ -73,4 +73,5 @@ results/**/*
 # Directorios de backup
 backup/
 */backup/
+**/backup/
 algorithms/backup/

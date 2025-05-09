@@ -12,21 +12,17 @@ from functools import partial
 from tqdm import tqdm
 
 # Importar algoritmos
-from algorithms.sho import SHO  # Spotted Hyena Optimizer (anteriormente HOA)
-from algorithms.apo import APO  # Artificial Protozoa Optimizer
-from algorithms.egto import EGTO  # Enhanced Gorilla Troops Optimizer
-from algorithms.fsa import FSA  # Flamingo Search Algorithm (anteriormente FGO)
-from algorithms.foa import FOA  # Fossa Optimization Algorithm
-from algorithms.woa import WOA  # Whale Optimization Algorithm
-from algorithms.hho import HHO  # Harris Hawks Optimization
-from algorithms.mrfo import MRFO  # Manta Ray Foraging Optimization
-from algorithms.sma import SMA  # Slime Mould Algorithm
-from algorithms.gto import GTO  # Gorilla Troops Optimizer
-from algorithms.ewa import EWA  # Earthworm Algorithm
-
-# Aliases para mantener la compatibilidad con código antiguo
-HOA = SHO  # Spotted Hyena Optimizer (anteriormente Hyena Optimization Algorithm)
-FGO = FSA  # Flamingo Search Algorithm (anteriormente Flamingo Optimization Algorithm)
+from algorithms.sho import SHO  # Previously HOA
+from algorithms.apo import APO
+from algorithms.egto import EGTO
+from algorithms.fsa import FSA  # Previously FGO
+from algorithms.foa import FOA
+from algorithms.woa import WOA
+from algorithms.hho import HHO
+from algorithms.mrfo import MRFO
+from algorithms.sma import SMA
+from algorithms.gto import GTO
+from algorithms.ewa import EWA
 
 # Importar problema
 from problems.vrp import VRPProblem
@@ -84,17 +80,18 @@ def run_algorithm(algo_name, problem, population, iterations, run_seed, run_id):
 # Función auxiliar para la ejecución paralela
 def run_algo_wrapper(args):
     return run_algorithm(*args)
+
 @click.command()
-@click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'all']), 
+@click.option('--algorithm', '-a', type=click.Choice(['hoa', 'sho', 'apo', 'egto', 'fgo', 'fsa', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'all']), 
               required=True, help='Algoritmo a ejecutar')
 @click.option('--instance', '-i', required=True, help='Nombre de la instancia VRP')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones')
-@click.option('--population', '-p', default=30, help='Tamaño de la población')
+@click.option('--population', '-pop', default=30, help='Tamaño de la población')
 @click.option('--runs', '-r', default=1, help='Número de ejecuciones independientes')
 @click.option('--seed', '-s', default=None, type=int, help='Semilla para reproducibilidad')
 @click.option('--visualize/--no-visualize', default=True, help='Visualizar resultados')
 @click.option('--save/--no-save', default=True, help='Guardar resultados')
-@click.option('--parallel/--no-parallel', default=False, help='Ejecutar en paralelo')
+@click.option('--parallel/--no-parallel', '-p', default=False, help='Ejecutar en paralelo')
 def main(algorithm, instance, iterations, population, runs, seed, visualize, save, parallel):
     """
     Ejecuta algoritmos de optimización para resolver problemas VRP con soporte para ejecución paralela.
@@ -120,7 +117,7 @@ def main(algorithm, instance, iterations, population, runs, seed, visualize, sav
     # Determinar qué algoritmos ejecutar
     algorithms_to_run = []
     if algorithm == 'all':
-        algorithms_to_run = ['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa']
+        algorithms_to_run = ['sho', 'apo', 'egto', 'fsa', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa']
     else:
         algorithms_to_run = [algorithm]
     

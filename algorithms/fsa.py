@@ -4,7 +4,7 @@ import math
 from .base import Individual, MetaheuristicAlgorithm
 
 class Flamingo(Individual):
-    """Clase para representar un individuo en el algoritmo FGO."""
+    """Clase para representar un individuo en el algoritmo FSA (Flamingo Search Algorithm)."""
     
     def __init__(self, problem):
         """
@@ -97,12 +97,12 @@ class Flamingo(Individual):
             self.personal_best_position = other.personal_best_position.copy()
             self.personal_best_fitness = other.personal_best_fitness
 
-class FGO(MetaheuristicAlgorithm):
-    """Implementación del algoritmo Flamingo Optimization Algorithm (FGO)."""
+class FSA(MetaheuristicAlgorithm):
+    """Implementación del algoritmo Flamingo Search Algorithm (FSA)."""
     
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         """
-        Inicializa el algoritmo FGO.
+        Inicializa el algoritmo FSA.
         
         Args:
             problem: Instancia del problema a resolver
@@ -162,3 +162,6 @@ class FGO(MetaheuristicAlgorithm):
         
         # Actualizar curva de convergencia
         self.convergence_curve.append(self.best_solution.fitness())
+
+# Alias para mantener compatibilidad con código existente
+FGO = FSA

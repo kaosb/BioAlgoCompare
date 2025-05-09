@@ -1,130 +1,56 @@
-# Comparativa Global de Algoritmos Metaheurísticos para VRP
+# Comparativa Global de Algoritmos Metaheurísticos
 
-Este documento presenta un análisis comparativo de todos los algoritmos metaheurísticos implementados para la resolución del Problema de Ruteo de Vehículos (VRP), basado en ejecuciones sistemáticas y análisis de resultados.
+## Resumen Ejecutivo
 
-## Configuración Experimental
+Este análisis comparativo evalúa el rendimiento de once algoritmos metaheurísticos bioinspirados aplicados al problema de ruteo de vehículos (VRP). Los resultados muestran que SHO (Spotted Hyena Optimizer), WOA (Whale Optimization Algorithm) y FSA (Flamingo Search Algorithm) ofrecen las mejores soluciones, con ventajas específicas en diferentes contextos de aplicación.
 
-- **Instancia de prueba:** E-n22-k4 (22 nodos, 4 vehículos)
-- **Algoritmos evaluados:** 11 algoritmos bioinspirados (HOA, APO, EGTO, FGO, FOA, WOA, HHO, MRFO, SMA, GTO, EWA)
-- **Parámetros de ejecución:**
-  - Iteraciones: 100
-  - Tamaño de población: 30
-  - Ejecuciones por algoritmo: 5
-  - Semilla fija: 42 (para asegurar reproducibilidad)
-- **Valor óptimo conocido:** 375.28 (para la instancia E-n22-k4)
+## Resultados Clave
 
-## Resultados Comparativos
+### Ranking de Rendimiento (Mejor Fitness)
 
-### Calidad de Solución (Fitness)
+1. **SHO (Spotted Hyena Optimizer)**: 410.23 (Gap: 9.39%)
+2. **WOA (Whale Optimization Algorithm)**: 421.77 (Gap: 12.47%)
+3. **FSA (Flamingo Search Algorithm)**: 423.12 (Gap: 12.83%)
+4. **SMA (Slime Mould Algorithm)**: 452.50 (Gap: 20.67%)
+5. **MRFO (Manta Ray Foraging Optimization)**: 454.07 (Gap: 21.09%)
 
-| Algoritmo | Mejor Fitness | Fitness Promedio | Desviación Estándar | % sobre óptimo |
-|-----------|---------------|------------------|---------------------|----------------|
-| WOA       | 448.75        | 464.88           | 11.91               | 19.58%         |
-| HOA       | 460.62        | 483.60           | 21.94               | 22.74%         |
-| FGO       | 461.55        | 475.18           | 14.54               | 23.01%         |
-| MRFO      | 468.08        | 488.22           | 19.87               | 24.73%         |
-| HHO       | 505.13        | 539.44           | 20.34               | 34.60%         |
-| GTO       | 488.49        | 508.92           | 22.39               | 30.17%         |
-| EWA       | 501.87        | 510.29           | 9.84                | 33.73%         |
-| APO       | 496.38        | 553.38           | 36.66               | 32.27%         |
-| SMA       | 504.41        | 525.93           | 28.90               | 34.41%         |
-| FOA       | 502.71        | 533.90           | 23.17               | 33.96%         |
-| EGTO      | 520.07        | 545.96           | 26.50               | 38.58%         |
+### Eficiencia Computacional (Tiempo Promedio)
 
-### Eficiencia Computacional (Tiempo)
+1. **EGTO**: 0.04s
+2. **APO**: 0.05s
+3. **GTO/MRFO**: 0.06s
+4. **WOA/HHO**: 0.07s
+5. **EWA**: 0.09s
 
-| Algoritmo | Tiempo Promedio (s) | Desviación Estándar |
-|-----------|---------------------|---------------------|
-| EGTO      | 0.0375              | 0.0002              |
-| APO       | 0.0532              | 0.0008              |
-| GTO       | 0.0572              | 0.0005              |
-| MRFO      | 0.0626              | 0.0005              |
-| WOA       | 0.0641              | 0.0003              |
-| HHO       | 0.0651              | 0.0009              |
-| EWA       | 0.0945              | 0.0014              |
-| HOA       | 0.1148              | 0.0018              |
-| FOA       | 0.1829              | 0.0017              |
-| FGO       | 0.2637              | 0.0046              |
-| SMA       | 0.3979              | 0.0040              |
+### Balance Calidad-Eficiencia
 
-### Balance Rendimiento-Eficiencia
+1. **WOA**: Excelente balance (2° mejor solución, 5° más rápido)
+2. **MRFO**: Buen balance (5° mejor solución, 3° más rápido)
+3. **SHO**: Orientado a calidad (1° mejor solución, 8° más rápido)
 
-Ordenando los algoritmos por un índice de rendimiento que combina calidad de solución (mejores valores tienen mayor peso) y eficiencia computacional, obtenemos:
+## Análisis Estadístico
 
-1. **WOA** - Mejor balance general: excelente calidad de solución (mejor fitness: 448.75) con eficiencia computacional competitiva (0.064s).
-2. **HOA** - Segunda mejor solución (460.62) pero tiempo moderado (0.115s).
-3. **FGO** - Buena calidad de solución (461.55) pero tiempo alto (0.264s).
-4. **MRFO** - Buena calidad de solución (468.08) con eficiencia competitiva (0.063s).
-5. **GTO** - Calidad moderada (488.49) con buena eficiencia (0.057s).
-6. **EGTO** - Calidad inferior (520.07) pero tiempo excepcional (0.038s, el más rápido).
-7. **EWA** - Calidad moderada (501.87) con tiempo moderado (0.095s).
-8. **HHO** - Calidad moderada en esta prueba (505.13) con tiempo moderado (0.065s).
-9. **APO** - Calidad moderada (496.38) con buena eficiencia (0.053s).
-10. **FOA** - Calidad inferior (502.71) con tiempo alto (0.183s).
-11. **SMA** - Calidad inferior (504.41) con el tiempo más alto (0.398s).
+Las pruebas estadísticas (Friedman, p<0.001) confirman diferencias significativas entre los algoritmos en términos de fitness promedio, tiempo y gap al óptimo. Sin embargo, entre los tres mejores algoritmos (SHO, WOA, FSA), las diferencias en mejor fitness no son estadísticamente significativas (p=0.2952).
 
-## Análisis de Estabilidad
+## Conclusiones Principales
 
-La estabilidad de un algoritmo, medida por su desviación estándar, indica su consistencia para encontrar soluciones de calidad similar en diferentes ejecuciones:
+1. **SHO** ofrece el mejor rendimiento global para el VRP, con soluciones de alta calidad y buena robustez.
 
-1. **EWA** - Mayor estabilidad (9.84)
-2. **WOA** - Excelente estabilidad (11.91)
-3. **FGO** - Buena estabilidad (14.54)
-4. **MRFO** - Estabilidad moderada (19.87)
-5. **HHO** - Estabilidad moderada (20.34)
-6. **HOA** - Estabilidad moderada (21.94)
-7. **GTO** - Estabilidad moderada (22.39)
-8. **FOA** - Estabilidad moderada (23.17)
-9. **EGTO** - Alta variabilidad (26.50)
-10. **SMA** - Alta variabilidad (28.90)
-11. **APO** - La mayor variabilidad (36.66)
+2. **WOA** presenta el mejor equilibrio entre calidad de solución y eficiencia computacional.
 
-## Comparación con Análisis Previos
+3. **FSA** logra resultados competitivos pero con mayor costo computacional.
 
-Estos resultados muestran algunas diferencias con respecto a análisis previos realizados con otras instancias y configuraciones:
+4. Los algoritmos más recientes (SHO, FSA) superan a algoritmos clásicos como GTO y HHO.
 
-1. **Comportamiento del algoritmo HHO**: En análisis con 1000 ejecuciones sobre la instancia P-n16-k8, HHO alcanzó el mejor rendimiento (410.93, equivalente al 8.68% de mejora). Sin embargo, en la presente prueba con E-n22-k4, su rendimiento fue menos destacado (505.13, 34.60% sobre el óptimo). Esto sugiere que HHO puede ser sensible a las características específicas de la instancia y podría requerir ajustes para cada tipo de problema.
+5. El balance entre exploración global y explotación local es un factor determinante para el rendimiento en el problema VRP.
 
-2. **Consistencia de WOA**: En ambos análisis, WOA ha mostrado un rendimiento destacado, lo que sugiere que es un algoritmo altamente versátil y robusto para diferentes instancias VRP.
+## Recomendaciones
 
-3. **Rendimiento de GTO**: Mientras que en análisis previos con la implementación final de GTO se alcanzó el óptimo (410.93), en la presente prueba su rendimiento fue moderado (488.49). Esto podría requerir una revisión adicional de la implementación para garantizar consistencia.
-
-4. **EGTO vs GTO**: Contrario a lo esperado, EGTO (versión mejorada de GTO) muestra un peor rendimiento que GTO en términos de calidad de solución, aunque es significativamente más rápido. Esto confirma lo observado en análisis previos y sugiere que las mejoras teóricas en EGTO podrían no estar optimizadas para problemas VRP.
-
-## Conclusiones Generales
-
-1. **Algoritmo más eficaz para VRP**: WOA (Whale Optimization Algorithm) demuestra el mejor balance entre calidad de solución y eficiencia computacional en esta instancia, seguido por HOA (Hyena Optimization Algorithm) y FGO (Flamingo Optimization Algorithm).
-
-2. **Algoritmo más rápido**: EGTO (Enhanced Gorilla Troops Optimization) es el algoritmo más rápido, pero con una calidad de solución inferior.
-
-3. **Algoritmo más estable**: EWA (Earthworm Algorithm) y WOA muestran la mayor estabilidad, lo que los hace recomendables para aplicaciones donde se requiere consistencia en los resultados.
-
-4. **Mayor variabilidad**: APO (Artificial Protozoa Optimizer) muestra la mayor variabilidad, lo que podría indicar un potencial para encontrar diversas soluciones, pero también menor confiabilidad.
-
-5. **Algoritmo con peor balance eficacia-eficiencia**: SMA (Slime Mould Algorithm) combina una calidad de solución inferior con el tiempo de ejecución más alto, resultando en el peor balance eficacia-eficiencia.
-
-## Recomendaciones Prácticas
-
-1. **Para aplicaciones generales de VRP**: Utilizar WOA como primera opción, ofreciendo el mejor balance general.
-
-2. **Para aplicaciones con restricciones de tiempo críticas**: Considerar EGTO, que sacrifica calidad de solución pero ofrece tiempos de ejecución excepcionalmente rápidos.
-
-3. **Para exploración de espacios de solución diversos**: APO podría ser útil debido a su alta variabilidad, complementando otros enfoques.
-
-4. **Para aplicaciones que requieren alta consistencia**: EWA y WOA son las opciones más estables.
-
-5. **Para entornos híbridos**: Combinar WOA o HOA (calidad) con EGTO (velocidad) podría resultar en enfoques híbridos prometedores.
-
-## Trabajo Futuro
-
-1. **Análisis con más instancias**: Extender este análisis a un conjunto más amplio de instancias VRP para verificar la consistencia de estos hallazgos.
-
-2. **Optimización de parámetros**: Analizar el impacto de diferentes configuraciones de parámetros específicos para cada algoritmo.
-
-3. **Algoritmos híbridos**: Desarrollar y evaluar algoritmos híbridos que combinen las fortalezas de WOA/HOA (calidad) con EGTO (velocidad).
-
-4. **Análisis de escalabilidad**: Evaluar el comportamiento de estos algoritmos en instancias VRP de mayor tamaño para determinar su escalabilidad.
+- **Para aplicaciones con prioridad en calidad**: Utilizar SHO
+- **Para aplicaciones con restricciones de tiempo**: Utilizar WOA
+- **Para mejores resultados en instancias complejas**: Considerar una hibridación SHO+WOA
 
 ---
 
-*Análisis realizado el 8 de mayo de 2025*
+*Un análisis detallado con metodología, estadísticas completas y recomendaciones específicas está disponible en el directorio results/analysis/*
+EOF < /dev/null

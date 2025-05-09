@@ -20,7 +20,6 @@ class EnhancedGorilla(Individual):
         self.upper_bounds = np.ones(self.dimension)
         self.position = np.random.uniform(0, 1, self.dimension)
         self._fitness = None
-        self.velocity = np.zeros(self.dimension)  # Vector de velocidad para el movimiento mejorado
     
     def fitness(self):
         """Calcula el fitness del individuo."""
@@ -36,42 +35,47 @@ class EnhancedGorilla(Individual):
         """Verifica si el individuo representa una solución factible."""
         return True  # En VRP todas las soluciones son factibles con nuestro decodificador
     
-    def move(self, best, iteration, max_iterations, w=0.7, c1=1.5, c2=1.5):
+    def move(self, best, iteration, max_iterations):
         """
-        Movimiento del gorila según el algoritmo EGTO (versión con MPA).
-        Args:
-            best: Mejor solución encontrada (silverback)
-            iteration: Iteración actual
-            max_iterations: Número total de iteraciones
-            w, c1, c2: Coeficientes heredados de la versión tipo PSO (opcional)
+        Movimiento del gorila según el algoritmo EGTO+MPA.
         """
         dim = self.dimension
-        P = 0.5  # constante de balance
-        C = (math.cos(2 * random.random()) + 1) * (1 - iteration / max_iterations)
-        k = random.uniform(-1, 1)
-        D = C * k
-        z = 0.03
-
+        P = 0.5
+        CF = 0.5
+        FADs = 0.2
         r = random.random()
 
-        # Fase de alta velocidad (exploración)
         if iteration < max_iterations / 3:
-            # Movimiento Browniano (alta velocidad)
+            # Alta velocidad (fase exploratoria con movimiento browniano)
             RB = np.random.normal(0, 1, dim)
-            S = D * np.random.rand(dim) * self.position
+            S = np.random.rand(dim) * self.position
             delta = P * RB * S
-            self.position = self.position + delta
+            self.position += delta
 
-        # Fase de baja velocidad (explotación con Lévy)
-        else:
-            RL = np.random.uniform(size=dim)
-            E = np.tile(best.position, (dim, 1))  # Matriz E construida con el mejor
-            S = RL * (RL * best.position - self.position)
-            CF = 0.5  # Coeficiente de control
+        elif iteration < 2 * max_iterations / 3:
+            # Media velocidad (mezcla aleatoria)
+            R = np.random.rand(dim)
+            S = R * (best.position - R * self.position)
             delta = P * CF * S
-            self.position = best.position + delta
+            self.position += delta
 
-        # Clip y reset fitness
+        else:
+            # Baja velocidad (comportamiento de depredador, perturbación aleatoria)
+            r1 = random.random()
+            if r1 < FADs:
+                epsilon = 1e-8
+                U = np.random.normal(0, 1, dim)
+                V = np.random.normal(0, 1, dim)
+                beta = 1.5
+                sigma = (math.gamma(1 + beta) * math.sin(math.pi * beta / 2) /
+                         (math.gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (1 / beta)
+                LF = 0.01 * (U * sigma) / (np.abs(V) + epsilon)
+                self.position += LF * self.position
+            else:
+                step = best.position - self.position
+                self.position += P * step
+
+        # Aplicar límites y resetear fitness
         self.position = np.clip(self.position, self.lower_bounds, self.upper_bounds)
         self._fitness = None
     
@@ -79,7 +83,6 @@ class EnhancedGorilla(Individual):
         """Copia los valores de otro individuo a este."""
         if isinstance(other, EnhancedGorilla):
             self.position = other.position.copy()
-            self.velocity = other.velocity.copy()
             self._fitness = other._fitness
 
 class EGTO(MetaheuristicAlgorithm):
