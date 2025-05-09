@@ -80,7 +80,7 @@ bioalgo run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
 
 ```bash
 # Ejecutar un benchmark con múltiples algoritmos e instancias
-bioalgo benchmark --run-benchmark --instances E-n22-k4 P-n16-k8 --algorithms hoa foa egto --parallel
+bioalgo benchmark --run-benchmark --instances "E-n22-k4,P-n16-k8" --algorithms "hoa,foa,egto" --parallel
 
 # Analizar resultados existentes
 bioalgo benchmark --input results/benchmark_20250508_123456.json
@@ -125,8 +125,8 @@ bioalgo analyze-csv results/benchmark_results.csv
 |--------|-------------|----------------------|
 | `--input`, `-i` | Ruta al archivo CSV o JSON de resultados | None |
 | `--run-benchmark/--no-run-benchmark` | Ejecutar nuevo benchmark | False |
-| `--instances`, `-inst` | Instancias para el benchmark (múltiple) | ['P-n16-k8', 'E-n22-k4'] |
-| `--algorithms`, `-a` | Algoritmos para el benchmark (múltiple) | [todos] |
+| `--instances`, `-inst` | Instancias para el benchmark (lista separada por comas, ej: "P-n16-k8,E-n22-k4") | "P-n16-k8,E-n22-k4" |
+| `--algorithms`, `-a` | Algoritmos para el benchmark (lista separada por comas, ej: "hoa,foa,egto") | todos |
 | `--runs`, `-r` | Número de ejecuciones por algoritmo | 5 |
 | `--iterations`, `-n` | Iteraciones por ejecución | 100 |
 | `--population`, `-p` | Tamaño de población | 30 |
