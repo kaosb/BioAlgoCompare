@@ -1,148 +1,144 @@
-import random as rnd
-import copy
-import time
+import numpy as np
+import random
+import math
+from .base import Individual, MetaheuristicAlgorithm
 
-class Gorilla:
-    def __init__(self):
-        self.nVariables = Problem.subnetworks
-        self.x = [rnd.randint(0, 1) for _ in range(self.nVariables)]  # Posición inicial del gorila
-        self.fitness = None  # Fitness de la solución
-        self.D = [0] * self.nVariables  # Diferencia entre el gorila y la mejor solución
-
-    def is_better_than(self, g):
-        return self.scalering() <= g.scalering()
-
-    def scalering(self):
-        return abs(self.fitness_z1() * (-1) + self.fitness_z2() + self.fitness_z3() * (-1))
-
-    def fitness_z1(self):
-        return sum(x * cost for x, cost in zip(self.x, Problem.costs))
-
-    def fitness_z2(self):
-        return sum(x * direct for x, direct in zip(self.x, Problem.directs))
-
-    def fitness_z3(self):
-        return sum(x * indirect for x, indirect in zip(self.x, Problem.indirects))
-
+class Gorilla(Individual):
+    """Clase para representar un individuo en el algoritmo GTO (Gorilla Troops Optimization)."""
+    
+    def __init__(self, problem):
+        """
+        Inicializa un gorila con una posición aleatoria.
+        
+        Args:
+            problem: Instancia del problema a resolver
+        """
+        self.problem = problem
+        self.dimension = problem.get_dimension()
+        self.position = np.random.uniform(0, 1, self.dimension)
+        self._fitness = None
+        # Para problemas VRP, los límites son [0,1]
+        self.lower_bounds = np.zeros(self.dimension)
+        self.upper_bounds = np.ones(self.dimension)
+    
+    def fitness(self):
+        """Calcula el fitness del individuo."""
+        if self._fitness is None:
+            self._fitness = self.problem.evaluate(self.position)
+        return self._fitness
+    
+    def is_better_than(self, other):
+        """Compara si este individuo es mejor que otro."""
+        return self.fitness() < other.fitness()
+    
     def is_feasible(self):
-        return self.is_feasible_probability() and self.is_feasible_cover()
+        """Verifica si el individuo representa una solución factible."""
+        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
+    
+    def move(self, best_gorilla, C, L, W, beta, p, iteration, max_iter):
+        dim = self.dimension
+        r = random.random()
 
-    def is_feasible_probability(self):
-        sum_num = sum(prob * (1 - xi) for prob, xi in zip(Problem.probabilities, self.x))
-        sum_den = sum(Problem.probabilities)
-        return sum_num / sum_den <= 1 - Problem.umbral
+        if C >= W:
+            # Follow the silverback (Eq. 7)
+            M = np.mean([self.position])  # simula promedio de GX
+            for i in range(dim):
+                self.position[i] = L * (M - self.position[i]) + best_gorilla.position[i]
+        else:
+            # Competition for adult females (Eq. 10)
+            Q = 2 * random.random() - 1
+            E = np.random.rand(dim) if random.random() >= 0.5 else np.random.randn(dim)
+            A = beta * E
+            for i in range(dim):
+                self.position[i] = best_gorilla.position[i] - Q * (best_gorilla.position[i] - self.position[i]) * A[i]
 
-    def is_feasible_cover(self):
-        return any(self.x)
-
-    def move(self, g):
-        for j in range(self.nVariables):
-            r = rnd.random()  # Aleatorio entre 0 y 1
-            if r < 0.5:  # Movimiento de exploración
-                self.D[j] = abs(g.x[j] - self.x[j])
-                self.x[j] = g.x[j] - r * self.D[j]
-            else:  # Movimiento de ataque
-                self.D[j] = abs(g.x[j] - self.x[j])
-                self.x[j] = self.x[j] + r * (g.x[j] - self.x[j])
-            self.x[j] = 1 if (1 / (1 + math.exp(-self.x[j]))) > rnd.uniform(0, 1) else 0
-
+        # Clipping
+        self.position = np.clip(self.position, self.lower_bounds, self.upper_bounds)
+        self._fitness = None
+    
     def copy(self, other):
-        if isinstance(other, Gorilla):
-            self.x = other.x.copy()
+        """
+        Copia los valores de otro individuo a este.
+        
+        Args:
+            other: Otro individuo (Gorilla)
+        """
+        self.position = np.copy(other.position)
+        self._fitness = other._fitness
 
-class GTO:
-    def __init__(self):
-        self.nGorillas = 10  # Número de gorilas
-        self.T = 100  # Número de iteraciones
 
-        self.flock = None  # Enjambre de gorilas
-        self.g = None  # Mejor solución global
-        self.sTime = 0
-        self.eTime = 0
-        # Parámetros para Q-learning
-        self.num_states = 10
-        self.actions = [
-            (0.75, 1.25),
-            (0.85, 1.15),
-            (0.65, 1.35),
-            # ... otras combinaciones pueden ser agregadas
-        ]
-        self.num_actions = len(self.actions)
-        self.q_learner = QLearner(self.num_states, self.num_actions)
-
-    def execute(self):
-        self.start_time()
-        self.init()
-        self.run()
-        self.end_time()
-        self.log()
-
-    def start_time(self):
-        self.sTime = time.time()
-
-    def init(self):
-        self.flock = []
-        self.g = Gorilla()  # Instancia de la mejor solución
-        g = None
-        for _ in range(1, self.nGorillas + 1):
-            while True:
-                g = Gorilla()
-                if g.is_feasible():
-                    break
-            self.flock.append(g)
-
+class GTO(MetaheuristicAlgorithm):
+    """Implementación del algoritmo de optimización de tropas de gorilas (Gorilla Troops Optimization)."""
+    
+    def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
+        """
+        Inicializa el algoritmo GTO.
+        
+        Args:
+            problem: Instancia del problema
+            population_size: Tamaño de la población
+            max_iterations: Número máximo de iteraciones
+            seed: Semilla para reproducibilidad
+        """
+        super().__init__(problem, population_size, max_iterations, seed)
+        self.exploitation_factor = 0.5  # Factor para balancear exploración y explotación
+        self.social_factor = 0.2       # Factor para aprendizaje social
+        self.beta = 3
+        self.p = 0.03
+        self.W = 0.8
+    
+    def initialize_population(self):
+        """Inicializa la población de gorilas."""
+        self.population = []
+        for _ in range(self.population_size):
+            gorilla = Gorilla(self.problem)
+            self.population.append(gorilla)
+        
         # Encontrar el mejor gorila inicial
-        self.g.copy(self.flock[0])
-        for i in range(1, self.nGorillas):
-            if self.flock[i].is_better_than(self.g):
-                self.g.copy(self.flock[i])
-
-    def run(self):
-        t = 1
-        g = Gorilla()
-        while t <= self.T:
-            # Guardar una copia profunda del mejor gorila actual
-            previous_g = copy.deepcopy(self.g)
-
-            # Calcular la diversidad del enjambre actual
-            previous_diversity = Utils.compute_diversity(self.flock)
-
-            # Obtener el estado actual basado en la diversidad
-            current_state = Utils.get_diversity_state(previous_diversity, self.num_states)
-
-            # Elegir una acción usando Q-learning
-            action_idx = self.q_learner.choose_action(current_state)
-
-            # Actualizar los parámetros de GTO basados en la acción elegida
-            self.fmin, self.fmax = self.actions[action_idx]
-
-            for i in range(self.nGorillas):
-                while True:
-                    g.copy(self.flock[i])
-                    g.move(self.g)
-
-                    if g.is_feasible():
-                        break
-
-                if g.is_better_than(self.flock[i]):
-                    self.flock[i].copy(g)
-
-                if g.is_better_than(self.g):
-                    self.g.copy(g)
-
-            # Calcular la recompensa basada en la mejora de la función objetivo y la diversidad
-            current_g = self.g
-            current_diversity = Utils.compute_diversity(self.flock)
-            reward = Utils.compute_reward(previous_g, current_g, previous_diversity, current_diversity)
-
-            # Actualizar la tabla Q con la recompensa obtenida
-            next_state = Utils.get_diversity_state(current_diversity, self.num_states)
-            self.q_learner.update_q_table(current_state, action_idx, reward, next_state)
-
-            t += 1
-
-    def end_time(self):
-        self.eTime = time.time()
-
-    def log(self):
-        print(f"{self.g}\t t={self.eTime - self.sTime}")
+        self.best_solution = self.population[0]
+        for i in range(1, self.population_size):
+            if self.population[i].is_better_than(self.best_solution):
+                self.best_solution = self.population[i]
+    
+    def update_population(self):
+        """Actualiza la población en cada iteración."""
+        t = len(self.convergence_curve)
+        F = math.cos(2 * math.pi * random.random()) + 1
+        C = F * (1 - t / self.max_iterations)
+        l = random.uniform(-1, 1)
+        L = C * l
+        
+        # Ajustar el factor de explotación basado en la iteración actual
+        self.exploitation_factor = 0.5 - 0.3 * (len(self.convergence_curve) / self.max_iterations)
+        
+        # Actualizar cada gorila
+        for i in range(self.population_size):
+            # No mover el mejor gorila
+            if self.population[i] is not self.best_solution:
+                # Movimiento principal siguiendo al líder
+                self.population[i].move(self.best_solution, C, L, self.W, self.beta, self.p, t, self.max_iterations)
+                
+                # Comportamiento social: interacción entre gorilas
+                if random.random() < self.social_factor:
+                    # Seleccionar otro gorila aleatoriamente
+                    other_idx = random.randint(0, self.population_size - 1)
+                    while other_idx == i:
+                        other_idx = random.randint(0, self.population_size - 1)
+                    
+                    # Aprendizaje social
+                    for j in range(self.population[i].dimension):
+                        if random.random() < 0.3:  # Probabilidad de aprendizaje
+                            self.population[i].position[j] = (
+                                self.population[i].position[j] + 
+                                random.random() * (self.population[other_idx].position[j] - self.population[i].position[j])
+                            )
+                    
+                    # Asegurar valores en rango [0, 1]
+                    self.population[i].position = np.clip(self.population[i].position, 0, 1)
+                    self.population[i]._fitness = None
+                
+                # Actualizar mejor solución si es necesario
+                if self.population[i].is_better_than(self.best_solution):
+                    gorilla_copy = Gorilla(self.problem)
+                    gorilla_copy.copy(self.population[i])
+                    self.best_solution = gorilla_copy
