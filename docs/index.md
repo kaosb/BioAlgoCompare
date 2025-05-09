@@ -11,6 +11,11 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Uso General](guides/usage.md) - Guía completa de uso del sistema
 - [Benchmarking](guides/benchmarking.md) - Instrucciones para ejecutar y analizar benchmarks
 
+### Documentación Científica
+
+- [Reproducibilidad y Rigor Científico](scientific/reproducibility.md) - Garantías de reproducibilidad y rigor en experimentos
+- [Análisis Estadístico](scientific/statistical_analysis.md) - Metodología estadística detallada
+
 ### Algoritmos Implementados
 
 - [Visión General](algorithms/overview.md) - Descripción general de todos los algoritmos
@@ -45,6 +50,7 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 - [Arquitectura](technical/architecture.md) - Arquitectura del sistema
 - [Implementación](technical/implementation.md) - Detalles técnicos de implementación
+- [Referencia de Scripts](technical/scripts_reference.md) - Documentación completa de los scripts ejecutables
 
 ## Acerca del Proyecto
 
