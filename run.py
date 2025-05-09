@@ -12,11 +12,21 @@ from functools import partial
 from tqdm import tqdm
 
 # Importar algoritmos
-from algorithms.hoa import HOA
-from algorithms.apo import APO
-from algorithms.egto import EGTO
-from algorithms.fgo import FGO
-from algorithms.foa import FOA
+from algorithms.sho import SHO  # Spotted Hyena Optimizer (anteriormente HOA)
+from algorithms.apo import APO  # Artificial Protozoa Optimizer
+from algorithms.egto import EGTO  # Enhanced Gorilla Troops Optimizer
+from algorithms.fsa import FSA  # Flamingo Search Algorithm (anteriormente FGO)
+from algorithms.foa import FOA  # Fossa Optimization Algorithm
+from algorithms.woa import WOA  # Whale Optimization Algorithm
+from algorithms.hho import HHO  # Harris Hawks Optimization
+from algorithms.mrfo import MRFO  # Manta Ray Foraging Optimization
+from algorithms.sma import SMA  # Slime Mould Algorithm
+from algorithms.gto import GTO  # Gorilla Troops Optimizer
+from algorithms.ewa import EWA  # Earthworm Algorithm
+
+# Aliases para mantener la compatibilidad con código antiguo
+HOA = SHO  # Spotted Hyena Optimizer (anteriormente Hyena Optimization Algorithm)
+FGO = FSA  # Flamingo Search Algorithm (anteriormente Flamingo Optimization Algorithm)
 
 # Importar problema
 from problems.vrp import VRPProblem
@@ -28,16 +38,28 @@ from utils.visualization import plot_vrp_solution, plot_convergence, compare_alg
 def run_algorithm(algo_name, problem, population, iterations, run_seed, run_id):
     try:
         # Inicializar algoritmo
-        if algo_name == 'hoa':
-            algo = HOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        if algo_name == 'hoa' or algo_name == 'sho':
+            algo = SHO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
         elif algo_name == 'apo':
             algo = APO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
         elif algo_name == 'egto':
             algo = EGTO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-        elif algo_name == 'fgo':
-            algo = FGO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'fgo' or algo_name == 'fsa':
+            algo = FSA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
         elif algo_name == 'foa':
             algo = FOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'woa':
+            algo = WOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'hho':
+            algo = HHO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'mrfo':
+            algo = MRFO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'sma':
+            algo = SMA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'gto':
+            algo = GTO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'ewa':
+            algo = EWA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
         
         # Ejecutar algoritmo
         start_time = time.time()
@@ -64,7 +86,7 @@ def run_algo_wrapper(args):
     return run_algorithm(*args)
 
 @click.command()
-@click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'all']), 
+@click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'all']), 
               required=True, help='Algoritmo a ejecutar')
 @click.option('--instance', '-i', required=True, help='Nombre de la instancia VRP')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones')
@@ -99,7 +121,7 @@ def main(algorithm, instance, iterations, population, runs, seed, visualize, sav
     # Determinar qué algoritmos ejecutar
     algorithms_to_run = []
     if algorithm == 'all':
-        algorithms_to_run = ['hoa', 'apo', 'egto', 'fgo', 'foa']
+        algorithms_to_run = ['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa']
     else:
         algorithms_to_run = [algorithm]
     

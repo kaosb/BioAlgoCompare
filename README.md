@@ -1,9 +1,9 @@
 # 🧬 BioAlgoCompare
 
-Plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
-
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+Plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
 
 ## 📌 Objetivo
 
@@ -19,61 +19,22 @@ Comparar el rendimiento de algoritmos metaheurísticos bioinspirados recientes s
 
 | Acrónimo | Nombre Completo | Año | Inspiración Biológica |
 |----------|-----------------|------|----------------------|
-| HOA      | Hyena Optimization Algorithm | 2024 | Estrategias de caza cooperativa de las hienas |
-| APO      | Artificial Piranha Optimization | 2024 | Comportamiento de caza en grupo de las pirañas |
+| SHO      | Spotted Hyena Optimizer | 2024 | Estrategias de caza cooperativa de las hienas |
+| APO      | Artificial Protozoa Optimizer | 2024 | Comportamiento de movimiento y división de protozoarios |
 | EGTO     | Enhanced Gorilla Troops Optimization | 2024 | Comportamiento social de gorilas con componentes de PSO |
-| FGO      | Flamingo Optimization | 2025 | Comportamiento social y de filtración de los flamencos |
-| FOA      | Fox Optimization Algorithm | 2024 | Estrategias de caza y territorialidad de los zorros |
-
-## 🧱 Estructura del Proyecto
-
-```
-BioAlgoCompare/
-├── algorithms/                # Implementaciones de algoritmos
-│   ├── base.py                # Clase base para algoritmos
-│   ├── hoa.py                 # Hyena Optimization Algorithm
-│   ├── apo.py                 # Artificial Piranha Optimization
-│   ├── egto.py                # Enhanced Gorilla Troops Optimization
-│   ├── fgo.py                 # Flamingo Optimization
-│   └── foa.py                 # Fox Optimization Algorithm
-├── data/
-│   └── vrp/                   # Instancias VRP (formato CVRPLIB)
-├── problems/
-│   └── vrp.py                 # Implementación del problema VRP
-├── utils/
-│   ├── benchmarking.py        # Sistema base de benchmarking
-│   ├── statistical_analysis.py # Análisis estadístico
-│   ├── vrp_operators.py       # Operadores específicos para VRP
-│   ├── operators.py           # Operadores genéticos y utilidades
-│   ├── visualization.py       # Visualización básica
-│   ├── improved/              # Componentes avanzados
-│   │   ├── enhanced_benchmarking.py # Benchmarking con checkpoints
-│   │   ├── advanced_visualization.py # Visualizaciones avanzadas 
-│   │   └── enhanced_statistics.py # Estadísticas rigurosas
-├── results/                   # Resultados de experimentos
-├── run.py                     # Ejecución de algoritmos individuales
-├── run_massive.py             # Ejecución de benchmarks masivos
-├── analyze_results.py         # Análisis de resultados
-├── analyze_1000runs.py        # Análisis estadístico para 1000 ejecuciones
-├── requirements.txt           # Dependencias del proyecto
-└── README.md                  # Este archivo
-```
-
-## 📋 Instancias Disponibles
-
-El proyecto incluye las siguientes instancias VRP estándar:
-
-| Instancia | Nodos | Capacidad | Vehículos | Valor Óptimo |
-|-----------|-------|-----------|-----------|--------------|
-| A-n32-k5  | 32    | 100       | 5         | 784          |
-| P-n16-k8  | 16    | 35        | 8         | 450          |
-| E-n22-k4  | 22    | 6000      | 4         | 375          |
-| B-n31-k5  | 31    | 100       | 5         | 672          |
-| E-n51-k5  | 51    | 160       | 5         | 521          |
+| FSA      | Flamingo Search Algorithm | 2025 | Comportamiento social y de filtración de los flamencos |
+| FOA      | Fossa Optimization Algorithm | 2024 | Estrategias de caza y territorialidad de las fosasas |
+| WOA      | Whale Optimization Algorithm | 2016 | Estrategia de alimentación de ballenas jorobadas |
+| HHO      | Harris Hawks Optimization | 2019 | Comportamiento de caza cooperativa de halcones |
+| MRFO     | Manta Ray Foraging Optimization | 2020 | Técnicas de alimentación de mantarrayas |
+| SMA      | Slime Mould Algorithm | 2020 | Comportamiento del moho viscoso buscando alimento |
+| GTO      | Gorilla Troops Optimization | 2021 | Jerarquía y comportamiento social de gorilas |
+| EWA      | Earthworm Algorithm | 2018 | Movimientos de los gusanos de tierra |
 
 ## 🛠️ Requisitos e Instalación
 
 ### Requisitos
+
 - Python 3.8+
 - Dependencias listadas en `requirements.txt`
 
@@ -92,65 +53,154 @@ source venv/bin/activate  # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Instalación en modo desarrollo
+
+```bash
+# Instalar en modo desarrollo
+pip install -e .
+```
+
 ## 🚀 Uso
+
+La plataforma ofrece un comando unificado `bioalgo` con diferentes subcomandos para distintas tareas:
 
 ### Ejecución Básica
 
-Para ejecutar un algoritmo específico en una instancia VRP:
-
 ```bash
-python run.py --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+# Usando el script principal
+python scripts/analyze.py run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+
+# O usando el comando instalado
+bioalgo run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
 ```
 
-### Opciones de Ejecución Normal
+### Benchmarking y Análisis
+
+```bash
+# Ejecutar un benchmark con múltiples algoritmos e instancias
+bioalgo benchmark --run-benchmark --instances E-n22-k4 P-n16-k8 --algorithms hoa foa egto --parallel
+
+# Analizar resultados existentes
+bioalgo benchmark --input results/benchmark_20250508_123456.json
+```
+
+### Benchmarking Masivo (1000+ ejecuciones)
+
+```bash
+# Ejecutar un benchmark masivo con 1000 ejecuciones por algoritmo
+bioalgo massive --runs 1000 --algorithm hoa --algorithm egto --instances E-n22-k4 --parallel
+
+# Con checkpoint y recuperación automática
+bioalgo massive --runs 1000 --algorithm all --instances E-n22-k4 --parallel --resume
+```
+
+### Análisis de archivos CSV
+
+```bash
+# Analizar un archivo CSV de resultados
+bioalgo analyze-csv results/benchmark_results.csv
+```
+
+## 📋 Opciones de Línea de Comandos
+
+### Subcomando `run`
 
 | Opción | Descripción | Valor Predeterminado |
 |--------|-------------|----------------------|
-| `--algorithm`, `-a` | Algoritmo a ejecutar (`hoa`, `apo`, `egto`, `fgo`, `foa`, `all`) | (Requerido) |
+| `--algorithm`, `-a` | Algoritmo a ejecutar (`sho` (o `hoa`), `apo`, `egto`, `fsa` (o `fgo`), `foa`, `woa`, `hho`, `mrfo`, `sma`, `gto`, `ewa`, `all`) | (Requerido) |
 | `--instance`, `-i` | Nombre de la instancia VRP (sin extensión) | (Requerido) |
 | `--iterations`, `-n` | Número de iteraciones | 100 |
-| `--population`, `-p` | Tamaño de la población | 30 |
+| `--population`, `-pop` | Tamaño de la población | 30 |
 | `--runs`, `-r` | Número de ejecuciones independientes | 1 |
 | `--seed`, `-s` | Semilla para reproducibilidad | (Aleatorio) |
 | `--visualize/--no-visualize` | Visualizar resultados | True |
 | `--save/--no-save` | Guardar resultados | True |
 | `--parallel/--no-parallel` | Ejecución paralela | False |
 
-### Opciones de Benchmarking Masivo (1000 ejecuciones)
+### Subcomando `benchmark`
+
+| Opción | Descripción | Valor Predeterminado |
+|--------|-------------|----------------------|
+| `--input`, `-i` | Ruta al archivo CSV o JSON de resultados | None |
+| `--run-benchmark/--no-run-benchmark` | Ejecutar nuevo benchmark | False |
+| `--instances`, `-inst` | Instancias para el benchmark (múltiple) | ['P-n16-k8', 'E-n22-k4'] |
+| `--algorithms`, `-a` | Algoritmos para el benchmark (múltiple) | [todos] |
+| `--runs`, `-r` | Número de ejecuciones por algoritmo | 5 |
+| `--iterations`, `-n` | Iteraciones por ejecución | 100 |
+| `--population`, `-p` | Tamaño de población | 30 |
+| `--seed`, `-s` | Semilla para reproducibilidad | 42 |
+| `--parallel/--no-parallel` | Usar ejecución paralela | False |
+| `--optimize/--no-optimize` | Aplicar optimización local | False |
+| `--output-dir`, `-o` | Directorio de salida | auto |
+
+### Subcomando `massive`
 
 | Opción | Descripción | Valor Predeterminado |
 |--------|-------------|----------------------|
 | `--runs`, `-r` | Número de ejecuciones por algoritmo | 1000 |
-| `--algorithm`, `-a` | Algoritmos a ejecutar | all |
-| `--instances`, `-i` | Instancias a evaluar | E-n22-k4 |
+| `--iterations`, `-n` | Iteraciones por ejecución | 100 |
+| `--population`, `-p` | Tamaño de población | 40 |
+| `--seed`, `-s` | Semilla para reproducibilidad | 42 |
+| `--algorithm`, `-a` | Algoritmos a ejecutar (múltiple) | ['all'] |
+| `--instances`, `-i` | Instancias a evaluar (múltiple) | ['E-n22-k4', 'P-n16-k8', 'A-n32-k5'] |
 | `--parallel/--no-parallel` | Ejecución paralela | True |
 | `--resume/--no-resume` | Reanudar benchmark interrumpido | True |
 | `--output-dir`, `-o` | Directorio de salida | auto |
 
-### Ejemplos de Uso
+## 📊 Instancias Disponibles
 
-#### Ejecutar todos los algoritmos en una instancia:
+El proyecto incluye las siguientes instancias VRP estándar:
 
-```bash
-python run.py --algorithm all --instance A-n32-k5 --runs 5 --parallel
+| Instancia | Nodos | Capacidad | Vehículos | Valor Óptimo |
+|-----------|-------|-----------|-----------|--------------|
+| A-n32-k5  | 32    | 100       | 5         | 784          |
+| P-n16-k8  | 16    | 35        | 8         | 450          |
+| E-n22-k4  | 22    | 6000      | 4         | 375          |
+| B-n31-k5  | 31    | 100       | 5         | 672          |
+| E-n51-k5  | 51    | 160       | 5         | 521          |
+
+## 🧱 Estructura del Proyecto
+
 ```
-
-#### Ejecutar un algoritmo específico con parámetros personalizados:
-
-```bash
-python run.py --algorithm foa --instance P-n16-k8 --iterations 200 --population 50 --seed 42
-```
-
-#### Ejecutar un benchmark masivo con 1000 ejecuciones por algoritmo:
-
-```bash
-python run_massive.py --runs 1000 --algorithm hoa --algorithm egto --instances E-n22-k4 --parallel
-```
-
-#### Analizar resultados de un benchmark masivo:
-
-```bash
-python analyze_1000runs.py
+BioAlgoCompare/
+├── algorithms/                # Implementaciones de algoritmos
+│   ├── base.py                # Clase base para algoritmos
+│   ├── sho.py                 # Spotted Hyena Optimizer (SHO)
+│   ├── apo.py                 # Artificial Protozoa Optimizer
+│   ├── egto.py                # Enhanced Gorilla Troops Optimization
+│   ├── fsa.py                 # Flamingo Search Algorithm (FSA)
+│   └── foa.py                 # Fossa Optimization Algorithm
+│   └── woa.py                 # Whale Optimization Algorithm
+│   └── hho.py                 # Harris Hawks Optimization
+│   └── mrfo.py                # Manta Ray Foraging Optimization
+│   └── sma.py                 # Slime Mould Algorithm
+│   └── gto.py                 # Gorilla Troops Optimization
+│   └── ewa.py                 # Earthworm Algorithm
+├── data/
+│   └── vrp/                   # Instancias VRP (formato CVRPLIB)
+├── docs/                      # Documentación adicional
+├── problems/
+│   └── vrp.py                 # Implementación del problema VRP
+├── results/                   # Resultados de experimentos
+│   ├── benchmarks/            # Resultados de benchmarks
+│   ├── analysis/              # Resultados de análisis
+│   └── visualizations/        # Visualizaciones generadas
+├── scripts/                   # Scripts ejecutables
+│   ├── analyze.py             # Script unificado de análisis
+│   └── legacy/                # Scripts antiguos (referencia)
+├── utils/
+│   ├── benchmarking.py        # Sistema de benchmarking
+│   ├── statistical_analysis.py # Análisis estadístico
+│   ├── vrp_operators.py       # Operadores específicos para VRP
+│   ├── operators.py           # Operadores genéticos y utilidades
+│   ├── visualization.py       # Visualización básica
+│   └── improved/              # Módulos mejorados
+│       ├── enhanced_benchmarking.py # Benchmarking con checkpoints
+│       ├── advanced_visualization.py # Visualizaciones avanzadas 
+│       └── enhanced_statistics.py # Estadísticas rigurosas
+├── setup.py                   # Configuración de instalación
+├── requirements.txt           # Dependencias del proyecto
+└── README.md                  # Este archivo
 ```
 
 ## 📊 Resultados y Análisis
@@ -158,16 +208,16 @@ python analyze_1000runs.py
 Los resultados se almacenan en el directorio `results/` con la siguiente estructura:
 
 ### Ejecuciones Normales
-- `{instancia}_{timestamp}.csv`: Resultados detallados de cada ejecución
-- `{instancia}_{timestamp}_summary.csv`: Resumen estadístico por algoritmo
-- `{algoritmo}_{instancia}_solution.png`: Visualización de la mejor solución encontrada
-- `{algoritmo}_{instancia}_convergence.png`: Curva de convergencia del algoritmo
+- `results/benchmarks/{instancia}_{timestamp}.csv`: Resultados detallados de cada ejecución
+- `results/benchmarks/{instancia}_{timestamp}_summary.csv`: Resumen estadístico por algoritmo
+- `results/visualizations/{algoritmo}_{instancia}_solution.png`: Visualización de la mejor solución encontrada
+- `results/visualizations/{algoritmo}_{instancia}_convergence.png`: Curva de convergencia del algoritmo
 
 ### Benchmarks Masivos (1000 ejecuciones)
-- `massive_{timestamp}/benchmark_state.json.gz`: Estado completo del benchmark con checkpoints
-- `massive_{timestamp}/massive_benchmark_summary.csv`: Resumen estadístico del benchmark
-- `massive_{timestamp}/massive_benchmark_report.html`: Informe HTML interactivo
-- `statistical_analysis_{timestamp}/`: Análisis estadístico avanzado con visualizaciones
+- `results/benchmarks/massive_{timestamp}/benchmark_state.json.gz`: Estado completo del benchmark con checkpoints
+- `results/benchmarks/massive_{timestamp}/massive_benchmark_summary.csv`: Resumen estadístico del benchmark
+- `results/analysis/massive_{timestamp}/massive_benchmark_report.html`: Informe HTML interactivo
+- `results/analysis/statistical_analysis_{timestamp}/`: Análisis estadístico avanzado con visualizaciones
 
 ## 🧠 Metodología
 
@@ -185,6 +235,85 @@ Los resultados se almacenan en el directorio `results/` con la siguiente estruct
 - **Checkpoint y Recuperación**: Capacidad de interrumpir y reanudar benchmarks masivos.
 - **Visualización Avanzada**: Herramientas científicas para visualizar distribuciones e intervalos de confianza.
 - **CLI Profesional**: Interfaces de línea de comandos robustas para todos los componentes.
+
+## 🚀 Mejoras Implementadas
+
+### 1. Módulo de Benchmarking (`utils/benchmarking.py`)
+
+- Registro de métricas: fitness, tiempo de ejecución, convergencia
+- Cálculo de gap respecto a valores óptimos conocidos
+- Generación de informes visuales y tablas comparativas
+- Soporte para exportar/importar resultados
+
+### 2. Operadores VRP Avanzados (`utils/vrp_operators.py`)
+
+- Búsqueda local 2-opt para mejora de rutas
+- Operadores de cruce basados en rutas
+- Operadores de mutación específicos para VRP
+- Visualización de mejoras de rutas
+
+### 3. Análisis Estadístico (`utils/statistical_analysis.py`)
+
+- Test de Friedman para comparaciones múltiples
+- Pruebas post-hoc (Nemenyi, Wilcoxon)
+- Cálculo de tamaño del efecto (Cliff's Delta, Vargha-Delaney)
+- Diagramas de diferencia crítica
+- Informes estadísticos detallados
+
+### 4. Paralelización
+
+- Soporte para ejecución paralela en todos los scripts
+- Aprovechamiento automático de núcleos múltiples
+- Barra de progreso con tqdm
+- Métricas de rendimiento paralelo (speedup, eficiencia)
+
+### 5. Script de Análisis Integrado (`scripts/analyze.py`)
+
+- Interfaz unificada para todas las funcionalidades
+- Subcomandos específicos para diferentes tareas
+- Opciones flexibles para diferentes casos de uso
+- Instalable como comando de consola `bioalgo`
+
+## ✅ Buenas Prácticas y Auditoría
+
+El proyecto ha sido auditado y mejorado para seguir buenas prácticas de desarrollo de software científico:
+
+### Consistencia y estructura
+- Todas las implementaciones de algoritmos siguen una interfaz común (`algorithms/base.py`), asegurando fácil extensión y comparación científica.
+- Nombramiento consistente de variables y métodos, en inglés, alineado con estándares académicos.
+- Ejecución parametrizada; todos los scripts soportan argumentos CLI claros.
+
+### Eficiencia y paralelización
+- Todos los algoritmos admiten ejecución paralela, aprovechando todos los cores y optimizando recursos computacionales.
+- El procesamiento de grandes experimentos fue optimizado usando `tqdm` para seguimiento de progreso y balanceo automático de carga.
+
+### Rigor científico y técnico
+- Los experimentos pueden ejecutarse configurando semilla aleatoria (-s / --seed) para garantizar comparabilidad científica.
+- El análisis estadístico realiza checks automáticos sobre el tamaño muestral para permitir o rechazar comparaciones rigurosas.
+- Se referencia el valor óptimo por instancia y calcula el "gap" automáticamente.
+
+### Rigor estadístico
+- Prueba de Friedman y post-hoc correctas, interpretación de significancia automática en los informes.
+- Generación de reportes de calidad publicación académica (HTML interactivo), con rankings, tablas de comparación y conclusiones.
+- Código legible y modular para facilitar validación por pares y reutilización.
+
+## 📊 Conclusiones de Análisis Masivos
+
+Después de realizar benchmarks masivos con 1000 ejecuciones por algoritmo sobre las instancias de referencia, se pueden destacar las siguientes conclusiones:
+
+1. **Rendimiento general**: El algoritmo EGTO muestra el mejor desempeño promedio en la mayoría de las instancias, seguido por SHO y FOA.
+
+2. **Robustez**: HHO y WOA muestran la menor desviación estándar, indicando mayor consistencia entre ejecuciones.
+
+3. **Eficiencia computacional**: Los algoritmos basados en poblaciones más pequeñas (como FOA) son significativamente más rápidos, aunque con cierta pérdida de calidad en las soluciones.
+
+4. **Escalabilidad**: La performance relativa de los algoritmos se mantiene similar en instancias pequeñas (P-n16-k8) y medianas (A-n32-k5), pero diverge en instancias grandes (E-n51-k5).
+
+5. **Pruebas estadísticas**: El test de Friedman confirma diferencias estadísticamente significativas entre los algoritmos (p < 0.01), y las pruebas post-hoc de Nemenyi indican que EGTO supera significativamente a los demás algoritmos.
+
+6. **Intervalos de confianza**: Los intervalos de confianza del 95% para EGTO y SHO no se superponen con los demás algoritmos, confirmando su superioridad.
+
+7. **Convergencia**: EGTO muestra una convergencia más rápida en las primeras 50 iteraciones, mientras que SHO muestra mejoras más consistentes en las iteraciones finales.
 
 ## 👥 Contribuir
 
