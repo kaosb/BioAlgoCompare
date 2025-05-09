@@ -101,11 +101,12 @@ Este documento presenta un análisis detallado del impacto que tiene el número 
 - **Destaca por:** Patrón de mejora inverso al de HOA, con mejores resultados en etapas tardías
 
 ### EWA (Earthworm Algorithm)
-- **Mejora más significativa:** Mejora constante con más iteraciones (15.1% total)
-- **Mejor solución:** 479.12 (27.7% sobre el óptimo)
-- **Comportamiento:** Mejora gradual en todas las fases
-- **Eficiencia:** Tiempo moderado (0.92s con 1000 iteraciones)
-- **Destaca por:** Comportamiento equilibrado y mejora consistente
+- **Mejora más significativa:** Mejora constante que se mantiene incluso con iteraciones extendidas (ver análisis extendido)
+- **Mejor solución:** 479.12 (27.7% sobre el óptimo) con 1000 iteraciones; 447.05 (19.2%) con 10000 iteraciones
+- **Comportamiento:** Mejora gradual en todas las fases sin signos de estancamiento
+- **Eficiencia:** Tiempo moderado (0.92s con 1000 iteraciones); 8.05s con 10000 iteraciones
+- **Destaca por:** Comportamiento equilibrado y mejora consistente incluso en ejecuciones muy largas
+- **Nota:** Análisis extendido muestra que alcanza 436.56 (16.4% sobre el óptimo) con 10000 iteraciones y población 50
 
 ### SMA (Slime Mould Algorithm)
 - **Mejora más significativa:** Mejora solo en fase tardía (9.4% entre 100-1000 iteraciones)
@@ -135,7 +136,8 @@ Este documento presenta un análisis detallado del impacto que tiene el número 
 Identificamos cuatro patrones principales de convergencia:
 
 1. **Mejora Constante:** Algoritmos que muestran mejora significativa tanto en etapas tempranas como tardías (GTO, FOA, EGTO, EWA).
-   
+   - Nota: El análisis extendido de EWA hasta 10000 iteraciones confirmó que este patrón se mantiene incluso en ejecuciones extremadamente largas, sin signos claros de estancamiento.
+
 2. **Convergencia Temprana:** Algoritmos que convergen rápidamente y muestran poca mejora después de 100 iteraciones (WOA, FGO, HOA).
 
 3. **Convergencia Tardía:** Algoritmos que mejoran más significativamente en etapas avanzadas (HHO, SMA).
@@ -162,16 +164,19 @@ Considerando tanto la calidad de la solución como el tiempo de ejecución con 1
 1. **Número óptimo de iteraciones:**
    - Para la mayoría de los algoritmos, 100 iteraciones ofrecen un buen balance entre calidad y costo computacional
    - GTO, FOA y HHO se benefician significativamente de 1000 iteraciones
+   - EWA muestra mejora continua incluso hasta 10000 iteraciones (ver análisis extendido)
    - WOA y FGO alcanzan convergencia efectiva con solo 100 iteraciones
 
 2. **Mejor algoritmo según iteraciones:**
    - Con 10 iteraciones: FGO ofrece el mejor resultado inicial (515.55)
    - Con 100 iteraciones: HOA proporciona el mejor resultado (471.68)
    - Con 1000 iteraciones: GTO alcanza la mejor solución global (426.29)
+   - Con 10000 iteraciones: EWA alcanza 447.05 (19.2% sobre el óptimo), mejorando a 436.56 (16.4%) con población 50
 
 3. **Recomendaciones prácticas:**
    - Para resultados rápidos: WOA con 100 iteraciones ofrece buen balance
-   - Para máxima calidad: GTO con 1000 iteraciones proporciona los mejores resultados
+   - Para máxima calidad: GTO con 1000 iteraciones proporciona los mejores resultados en tiempo razonable
+   - Para aplicaciones donde el tiempo no es crítico: EWA con 10000 iteraciones y población 50
    - Para máxima eficiencia: EGTO con 100 iteraciones ofrece resultados aceptables en tiempo mínimo
 
 4. **Diferencias de comportamiento:**
@@ -196,4 +201,9 @@ Considerando tanto la calidad de la solución como el tiempo de ejecución con 1
 
 ---
 
-*Análisis realizado el 8 de mayo de 2025*
+**Nota:** Se ha realizado un análisis extendido del algoritmo EWA con mayor número de iteraciones (hasta 10000) y variación en el tamaño de población. Los resultados completos de este estudio se encuentran en el documento [ANALISIS_ITERACIONES_EXTENDIDO.md](/docs/ANALISIS_ITERACIONES_EXTENDIDO.md).
+
+---
+
+*Análisis inicial realizado el 8 de mayo de 2025*
+*Actualizado el 9 de mayo de 2025 con análisis extendido de EWA*
