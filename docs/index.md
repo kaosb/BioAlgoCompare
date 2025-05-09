@@ -45,6 +45,7 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Flujo de Trabajo Git](development/git_workflow.md) - Guía del flujo de trabajo con Git
 - [Contribución](development/contribution.md) - Cómo contribuir al proyecto
 - [Estándares de Código](development/code_standards.md) - Estándares y mejores prácticas
+- [Requisitos Algorítmicos](development/algorithmic_requirements.md) - Requisitos para implementación de algoritmos
 
 ### Documentación Técnica
 
