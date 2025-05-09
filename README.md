@@ -336,6 +336,21 @@ Después de realizar benchmarks masivos con 1000 ejecuciones por algoritmo sobre
 
 Desarrollado como parte de una investigación académica para el Magíster en Informática Aplicada – Universidad de Valparaíso.
 
+## 📝 Documentación
+
+La documentación completa del proyecto está disponible en el directorio `docs/`:
+
+- **[Guía de instalación](docs/guides/installation.md)** - Instrucciones detalladas de instalación
+- **[Guía de inicio rápido](docs/guides/getting_started.md)** - Cómo empezar a usar el proyecto
+- **[Visión general de algoritmos](docs/algorithms/overview.md)** - Descripción de todos los algoritmos implementados
+- **[Pseudocódigo de algoritmos](docs/algorithms/pseudocode.md)** - Pseudocódigo detallado de cada algoritmo
+- **[Documentación técnica](docs/development/git_workflow.md)** - Guía del flujo de trabajo Git
+- **[Guía de contribución](docs/development/contribution.md)** - Cómo contribuir al proyecto
+- **[Análisis comparativo](docs/analysis/comparison.md)** - Análisis exhaustivo comparando algoritmos
+- **[Impacto de iteraciones](docs/analysis/iteration_impact.md)** - Análisis del impacto del número de iteraciones
+
+Para más detalles, consulta el [índice de documentación](docs/index.md).
+
 ## 📄 Licencia
 
 MIT – Uso académico libre con atribución.

@@ -101,8 +101,6 @@ class EWA(MetaheuristicAlgorithm):
         super().__init__(problem, population_size, max_iterations, seed)
         self.alpha = 0.8  # Parámetro de intensificación
         self.beta = 0.2   # Parámetro de exploración
-        self.reproduction_rate = 0.3  # Tasa de reproducción
-        self.mutation_rate = 0.1      # Tasa de mutación
         self.convergence_curve = []
     
     def initialize_population(self):
@@ -119,7 +117,7 @@ class EWA(MetaheuristicAlgorithm):
                 self.best_solution = self.population[i]
     
     def update_population(self):
-        """Actualiza la población en cada iteración."""
+        """Actualiza la población en cada iteración (fase de movimiento y registro de convergencia)."""
         current_iter = len(self.convergence_curve)
         # 1. Fase de movimiento: mover todos los gusanos
         for i in range(self.population_size):
@@ -133,45 +131,5 @@ class EWA(MetaheuristicAlgorithm):
                     worm_copy.copy(self.population[i])
                     self.best_solution = worm_copy
         
-        # 2. Fase de reproducción: generar nuevos gusanos
-        num_offspring = int(self.population_size * self.reproduction_rate)
-        if num_offspring > 0:
-            # Seleccionar padres basados en torneo
-            parents = []
-            for _ in range(num_offspring):
-                # Selección por torneo
-                idx1 = random.randint(0, self.population_size - 1)
-                idx2 = random.randint(0, self.population_size - 1)
-                if self.population[idx1].is_better_than(self.population[idx2]):
-                    parents.append(self.population[idx1])
-                else:
-                    parents.append(self.population[idx2])
-            
-            # Generar descendencia
-            offspring = []
-            for parent in parents:
-                child = Earthworm(self.problem)
-                # Copiar posición del padre
-                child.copy(parent)
-                
-                # Aplicar mutación
-                for j in range(child.dimension):
-                    if random.random() < self.mutation_rate:
-                        child.position[j] = random.random()  # Mutación aleatoria
-                
-                # Resetear fitness
-                child._fitness = None
-                offspring.append(child)
-            
-            # Reemplazar los peores individuos con la descendencia
-            self.population.sort(key=lambda x: x.fitness(), reverse=True)  # Ordenar de peor a mejor
-            for i in range(min(num_offspring, len(offspring))):
-                self.population[i] = offspring[i]
-            
-            # Actualizar la mejor solución si es necesario
-            for worm in offspring:
-                if worm.is_better_than(self.best_solution):
-                    worm_copy = Earthworm(self.problem)
-                    worm_copy.copy(worm)
-                    self.best_solution = worm_copy
+        # 2. Registrar convergencia
         self.convergence_curve.append(self.best_solution.fitness())
