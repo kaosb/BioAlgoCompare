@@ -63,6 +63,9 @@ results/**/*
 !results/statistical_analysis_1000runs/algorithm_comparison.csv
 !results/massive_1000runs/massive_benchmark_report.html
 
+# Temporary files
+*.tmp
+
 # Archivos Claude
 .claude/
 **/.claude/settings.local.json

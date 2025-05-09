@@ -2,6 +2,8 @@
 
 Plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
 
+Este proyecto forma parte de una investigación académica para la **Jornada Chilena de Computación 2025**, cuyo objetivo es **evaluar y comparar algoritmos bioinspirados recientes (2024–2025)** aplicados al **Vehicle Routing Problem (VRP)**.
+
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -153,6 +155,12 @@ python run_massive.py --runs 1000 --algorithm hoa --algorithm egto --instances E
 python analyze_1000runs.py
 ```
 
+#### Prueba de rendimiento con instancia grande:
+
+```bash
+python run.py --algorithm egto --instance E-n51-k5 --iterations 300 --population 50
+```
+
 ## 📊 Resultados y Análisis
 
 Los resultados se almacenan en el directorio `results/` con la siguiente estructura:
@@ -174,17 +182,18 @@ Los resultados se almacenan en el directorio `results/` con la siguiente estruct
 - **Codificación**: Adaptación de algoritmos continuos mediante codificación ordinal → se ordenan los valores reales para generar una permutación de visitas.
 - **Evaluación**: Decodificación de soluciones respetando restricciones de capacidad vehicular.
 - **Benchmark Masivo**: Ejecución de 1000 repeticiones por algoritmo con checkpoint y recuperación.
-- **Análisis Estadístico**: Tests no paramétricos (Kruskal-Wallis, Mann-Whitney), corrección de Bonferroni, intervalos de confianza del 95%.
+- **Análisis Estadístico**: Tests no paramétricos (Kruskal-Wallis, Mann-Whitney, Friedman, Wilcoxon post-hoc), corrección de Bonferroni, intervalos de confianza del 95%.
 - **Visualización Científica**: Boxplots, distribuciones, curvas de convergencia con intervalos de confianza.
 
 ## 🔍 Características Técnicas
 
 - **Arquitectura Modular**: Sistema de benchmarking avanzado para muestras grandes.
+- **Interfaz Común**: Todos los algoritmos implementan una interfaz común para facilitar la comparación.
 - **Paralelización**: Ejecución paralela eficiente con gestión de procesos.
 - **Reproducibilidad**: Control de semillas aleatorias para garantizar resultados reproducibles.
 - **Checkpoint y Recuperación**: Capacidad de interrumpir y reanudar benchmarks masivos.
 - **Visualización Avanzada**: Herramientas científicas para visualizar distribuciones e intervalos de confianza.
-- **CLI Profesional**: Interfaces de línea de comandos robustas para todos los componentes.
+- **CLI Profesional**: Interfaces de línea de comandos robustas para todos los componentes configurables mediante `click`.
 
 ## 👥 Contribuir
 

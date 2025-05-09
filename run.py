@@ -62,18 +62,17 @@ def run_algorithm(algo_name, problem, population, iterations, run_seed, run_id):
 # Función auxiliar para la ejecución paralela
 def run_algo_wrapper(args):
     return run_algorithm(*args)
-
 @click.command()
 @click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'all']), 
               required=True, help='Algoritmo a ejecutar')
 @click.option('--instance', '-i', required=True, help='Nombre de la instancia VRP')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones')
-@click.option('--population', '-pop', default=30, help='Tamaño de la población')
+@click.option('--population', '-p', default=30, help='Tamaño de la población')
 @click.option('--runs', '-r', default=1, help='Número de ejecuciones independientes')
 @click.option('--seed', '-s', default=None, type=int, help='Semilla para reproducibilidad')
 @click.option('--visualize/--no-visualize', default=True, help='Visualizar resultados')
 @click.option('--save/--no-save', default=True, help='Guardar resultados')
-@click.option('--parallel/--no-parallel', '-p', default=False, help='Ejecutar en paralelo')
+@click.option('--parallel/--no-parallel', default=False, help='Ejecutar en paralelo')
 def main(algorithm, instance, iterations, population, runs, seed, visualize, save, parallel):
     """
     Ejecuta algoritmos de optimización para resolver problemas VRP con soporte para ejecución paralela.
