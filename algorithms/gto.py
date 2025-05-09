@@ -155,3 +155,6 @@ class GTO(MetaheuristicAlgorithm):
                     gorilla_copy = Gorilla(self.problem)
                     gorilla_copy.copy(self.population[i])
                     self.best_solution = gorilla_copy
+
+        # Registrar el mejor fitness en la curva de convergencia
+        self.convergence_curve.append(self.best_solution.fitness())

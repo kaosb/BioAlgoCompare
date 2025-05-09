@@ -148,3 +148,6 @@ class HHO(MetaheuristicAlgorithm):
                     hawk_copy = Hawk(self.problem)
                     hawk_copy.copy(self.population[i])
                     self.best_solution = hawk_copy
+
+        # Registrar el mejor fitness en la curva de convergencia
+        self.convergence_curve.append(self.best_solution.fitness())

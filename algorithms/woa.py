@@ -131,3 +131,6 @@ class WOA(MetaheuristicAlgorithm):
                     whale_copy = Whale(self.problem)
                     whale_copy.copy(self.population[i])
                     self.best_solution = whale_copy
+
+        # Registrar el mejor fitness en la curva de convergencia
+        self.convergence_curve.append(self.best_solution.fitness())

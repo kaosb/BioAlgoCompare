@@ -157,3 +157,6 @@ class SMA(MetaheuristicAlgorithm):
                     mould_copy = SlimeMould(self.problem)
                     mould_copy.copy(self.population[i])
                     self.best_solution = mould_copy
+
+        # Registrar el mejor fitness en la curva de convergencia
+        self.convergence_curve.append(self.best_solution.fitness())

@@ -133,3 +133,6 @@ class MRFO(MetaheuristicAlgorithm):
                     ray_copy = MantaRay(self.problem)
                     ray_copy.copy(self.population[i])
                     self.best_solution = ray_copy
+
+        # Registrar el mejor fitness en la curva de convergencia
+        self.convergence_curve.append(self.best_solution.fitness())
