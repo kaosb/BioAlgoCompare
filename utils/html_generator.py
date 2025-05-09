@@ -18,7 +18,7 @@ def generate_html_report(metric_str, test_info, algo_ranks, friedman_result, pos
     html.append('<head>')
     html.append(f'<title>Análisis Estadístico - {metric_str}</title>')
     html.append('<style>')
-    html.append('body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }')
+    html.append('body { font-family: "Arial", sans-serif; margin: 20px; line-height: 1.6; }')
     html.append('h1, h2, h3 { color: #2c3e50; }')
     html.append('table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }')
     html.append('th, td { text-align: left; padding: 8px; border: 1px solid #ddd; }')

@@ -1197,163 +1197,160 @@ class StatisticalAnalysis:
         # Crear contenido HTML
         # Convertir la métrica a string seguro para prevenir errores de formato
         metric_str = str(metric).capitalize() if metric else "Desconocida"
-        
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Análisis Estadístico - {metric_str}</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                    line-height: 1.6;
-                }}
-                h1, h2, h3 {{
-                    color: #2c3e50;
-                }}
-                table {{
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin-bottom: 20px;
-                }}
-                th, td {{
-                    text-align: left;
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                }}
-                th {{
-                    background-color: #f2f2f2;
-                }}
-                tr:nth-child(even) {{
-                    background-color: #f9f9f9;
-                }}
-                .section {{
-                    margin-bottom: 30px;
-                }}
-                .figure {{
-                    margin: 20px 0;
-                    text-align: center;
-                }}
-                .figure img {{
-                    max-width: 100%;
-                    height: auto;
-                }}
-                .caption {{
-                    margin-top: 10px;
-                    font-style: italic;
-                    color: #666;
-                }}
-                .highlight {{
-                    font-weight: bold;
-                    color: #e74c3c;
-                }}
-                .mejor {{
-                    color: green;
-                    font-weight: bold;
-                }}
-                .peor {{
-                    color: red;
-                    font-weight: bold;
-                }}
-                .equal {{
-                    color: gray;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>Análisis Estadístico - {metric_str}</h1>
-            <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-            
-            <div class="section">
-                <h2>Resultados de la Prueba {test_info['Prueba']}</h2>
-                <table>
-                    <tr>
-                        <th>Estadístico</th>
-                        <th>p-value</th>
-                        <th>Diferencia Significativa</th>
-                        <th>Distancia Crítica</th>
-                    </tr>
-                    <tr>
-                        <td>{test_info['Estadístico']:.4f}</td>
-                        <td>{test_info['p-value']:.4f}</td>
-                        <td>{test_info['Diferencia significativa']}</td>
-                        <td>{test_info['Distancia crítica']}</td>
-                    </tr>
-                </table>
-                
-                <p>
-                    <strong>Interpretación:</strong> 
-                    {
-                    "La prueba " + test_info['Prueba'] + " indica que hay diferencias estadísticamente significativas entre los algoritmos comparados (p-value < " + str(alpha) + ")."
-                    if test_info['Diferencia significativa'] == 'Sí' else
-                    "La prueba " + test_info['Prueba'] + " NO indica diferencias estadísticamente significativas entre los algoritmos comparados (p-value >= " + str(alpha) + ")."
-                    }
-                </p>
-            </div>
-            
-            <div class="section">
-                <h2>Ranking de Algoritmos</h2>
-                <table>
-                    <tr>
-                        <th>Posición</th>
-                        <th>Algoritmo</th>
-                        <th>Rango Promedio</th>
-                    </tr>
-                    """
+
+        # Crear contenido HTML evitando problemas con indentación y newlines
+        css_style = """body {
+    font-family: "Arial", sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+}
+h1, h2, h3 {
+    color: #2c3e50;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+th, td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+th {
+    background-color: #f2f2f2;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.section {
+    margin-bottom: 30px;
+}
+.figure {
+    margin: 20px 0;
+    text-align: center;
+}
+.figure img {
+    max-width: 100%;
+    height: auto;
+}
+.caption {
+    margin-top: 10px;
+    font-style: italic;
+    color: #666;
+}
+.highlight {
+    font-weight: bold;
+    color: #e74c3c;
+}
+.mejor {
+    color: green;
+    font-weight: bold;
+}
+.peor {
+    color: red;
+    font-weight: bold;
+}
+.equal {
+    color: gray;
+}"""
+
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Análisis Estadístico - {metric_str}</title>
+    <style>
+{css_style}
+    </style>
+</head>
+<body>
+    <h1>Análisis Estadístico - {metric_str}</h1>
+    <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+
+    <div class="section">
+        <h2>Resultados de la Prueba {test_info['Prueba']}</h2>
+        <table>
+            <tr>
+                <th>Estadístico</th>
+                <th>p-value</th>
+                <th>Diferencia Significativa</th>
+                <th>Distancia Crítica</th>
+            </tr>
+            <tr>
+                <td>{test_info['Estadístico']:.4f}</td>
+                <td>{test_info['p-value']:.4f}</td>
+                <td>{test_info['Diferencia significativa']}</td>
+                <td>{test_info['Distancia crítica']}</td>
+            </tr>
+        </table>
+
+        <p>
+            <strong>Interpretación:</strong>
+            {
+            "La prueba " + test_info['Prueba'] + " indica que hay diferencias estadísticamente significativas entre los algoritmos comparados (p-value < " + str(alpha) + ")."
+            if test_info['Diferencia significativa'] == 'Sí' else
+            "La prueba " + test_info['Prueba'] + " NO indica diferencias estadísticamente significativas entre los algoritmos comparados (p-value >= " + str(alpha) + ")."
+            }
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>Ranking de Algoritmos</h2>
+        <table>
+            <tr>
+                <th>Posición</th>
+                <th>Algoritmo</th>
+                <th>Rango Promedio</th>
+            </tr>"""
         
         # Añadir filas para cada algoritmo (ordenados por rango)
         if not 'error' in friedman_result:
             algo_ranks = [(algo, friedman_result['rank_dict'][algo]) for algo in friedman_result['algorithms']]
             algo_ranks.sort(key=lambda x: x[1])
-            
+
             for i, (algo, rank) in enumerate(algo_ranks):
                 html_content += f"""
-                    <tr>
-                        <td>{i+1}</td>
-                        <td>{algo}</td>
-                        <td>{rank:.2f}</td>
-                    </tr>
-                    """
-        
+            <tr>
+                <td>{i+1}</td>
+                <td>{algo}</td>
+                <td>{rank:.2f}</td>
+            </tr>"""
+
         html_content += """
-                </table>
-            </div>
-            
-            <div class="section">
-                <h2>Comparaciones entre Algoritmos</h2>
-                <p>Simbología: + (mejor), - (peor), = (no hay diferencia significativa)</p>
-                <table>
-                    <tr>
-                        <th>Algoritmo</th>
-                        <th>Rango</th>
-                    """
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Comparaciones entre Algoritmos</h2>
+        <p>Simbología: + (mejor), - (peor), = (no hay diferencia significativa)</p>
+        <table>
+            <tr>
+                <th>Algoritmo</th>
+                <th>Rango</th>"""
         
         # Añadir columnas para cada algoritmo
         if not 'error' in friedman_result:
             for algo in algo_ranks:
                 html_content += f"<th>{algo[0]}</th>"
-        
+
         html_content += """
-                    </tr>
-                    """
-        
+            </tr>"""
+
         # Añadir filas para cada algoritmo
         if not 'error' in friedman_result:
             for i, (algo_i, rank_i) in enumerate(algo_ranks):
                 html_content += f"""
-                    <tr>
-                        <td>{algo_i}</td>
-                        <td>{rank_i:.2f}</td>
-                    """
-                
+            <tr>
+                <td>{algo_i}</td>
+                <td>{rank_i:.2f}</td>"""
+
                 for j, (algo_j, _) in enumerate(algo_ranks):
                     if i == j:
                         html_content += "<td>-</td>"
                     else:
                         p_value = posthoc_matrix.loc[algo_i, algo_j]
                         effect = cliff_delta.loc[algo_i, algo_j]
-                        
+
                         if p_value < alpha:
                             if rank_i < friedman_result['rank_dict'][algo_j]:
                                 symbol = '<span class="mejor">+</span>'  # Mejor
@@ -1361,66 +1358,61 @@ class StatisticalAnalysis:
                                 symbol = '<span class="peor">-</span>'  # Peor
                         else:
                             symbol = '<span class="equal">=</span>'  # No diferencia significativa
-                        
+
                         html_content += f"""
-                            <td>
-                                {symbol} (p={p_value:.3f}, d={effect:.3f})
-                            </td>
-                        """
-                
+                <td>{symbol} (p={p_value:.3f}, d={effect:.3f})</td>"""
+
                 html_content += """
-                    </tr>
-                    """
-        
+            </tr>"""
+
         html_content += """
-                </table>
-            </div>
-            
-            <div class="section">
-                <h2>Visualizaciones</h2>
-                
-                <div class="figure">
-                    <img src="data:image/png;base64,{cd_img}" alt="Critical Difference Diagram">
-                    <div class="caption">Figura 1: Diagrama de diferencia crítica</div>
-                </div>
-                
-                <div class="figure">
-                    <img src="data:image/png;base64,{rank_img}" alt="Rank Distribution">
-                    <div class="caption">Figura 2: Distribución de rangos por algoritmo</div>
-                </div>
-                
-                <div class="figure">
-                    <img src="data:image/png;base64,{posthoc_img}" alt="Post-hoc Test p-values">
-                    <div class="caption">Figura 3: Matriz de p-values de prueba post-hoc</div>
-                </div>
-                
-                <div class="figure">
-                    <img src="data:image/png;base64,{effect_img}" alt="Effect Size - Cliff's Delta">
-                    <div class="caption">Figura 4: Tamaño del efecto (Cliff's Delta)</div>
-                </div>
-                
-                <div class="figure">
-                    <img src="data:image/png;base64,{vd_img}" alt="Effect Size - Vargha-Delaney A">
-                    <div class="caption">Figura 5: Tamaño del efecto (Vargha-Delaney A)</div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>Interpretación de los Resultados</h2>
-                <p>
-                    Este análisis estadístico para la métrica <strong>{metric_str}</strong> 
-                    {
-                    "muestra diferencias significativas entre los algoritmos. "
-                    if test_info['Diferencia significativa'] == 'Sí' else
-                    "no muestra diferencias significativas entre los algoritmos. "
-                    }
-                </p>
-                
-                <p>
-                    <strong>Principales conclusiones:</strong>
-                </p>
-                <ul>
-        """
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Visualizaciones</h2>
+
+        <div class="figure">
+            <img src="data:image/png;base64,{cd_img}" alt="Critical Difference Diagram">
+            <div class="caption">Figura 1: Diagrama de diferencia crítica</div>
+        </div>
+
+        <div class="figure">
+            <img src="data:image/png;base64,{rank_img}" alt="Rank Distribution">
+            <div class="caption">Figura 2: Distribución de rangos por algoritmo</div>
+        </div>
+
+        <div class="figure">
+            <img src="data:image/png;base64,{posthoc_img}" alt="Post-hoc Test p-values">
+            <div class="caption">Figura 3: Matriz de p-values de prueba post-hoc</div>
+        </div>
+
+        <div class="figure">
+            <img src="data:image/png;base64,{effect_img}" alt="Effect Size - Cliff's Delta">
+            <div class="caption">Figura 4: Tamaño del efecto (Cliff's Delta)</div>
+        </div>
+
+        <div class="figure">
+            <img src="data:image/png;base64,{vd_img}" alt="Effect Size - Vargha-Delaney A">
+            <div class="caption">Figura 5: Tamaño del efecto (Vargha-Delaney A)</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Interpretación de los Resultados</h2>
+        <p>
+            Este análisis estadístico para la métrica <strong>{metric_str}</strong>
+            {
+            "muestra diferencias significativas entre los algoritmos. "
+            if test_info['Diferencia significativa'] == 'Sí' else
+            "no muestra diferencias significativas entre los algoritmos. "
+            }
+        </p>
+
+        <p>
+            <strong>Principales conclusiones:</strong>
+        </p>
+        <ul>"""
         
         # Preparar diccionario para el formato
         format_dict = {
@@ -1431,45 +1423,42 @@ class StatisticalAnalysis:
             'vd_img': vd_img,
             'metric_str': metric_str  # Añadir la métrica al diccionario de formato
         }
-        
+
         # Añadir conclusiones basadas en los resultados
         if not 'error' in friedman_result and test_info['Diferencia significativa'] == 'Sí':
             best_algo = algo_ranks[0][0]
             worst_algo = algo_ranks[-1][0]
-            
+
             html_content += f"""
-                    <li>El algoritmo <strong>{best_algo}</strong> obtuvo el mejor ranking promedio ({algo_ranks[0][1]:.2f}).</li>
-                    <li>El algoritmo <strong>{worst_algo}</strong> obtuvo el peor ranking promedio ({algo_ranks[-1][1]:.2f}).</li>
-            """
-            
+            <li>El algoritmo <strong>{best_algo}</strong> obtuvo el mejor ranking promedio ({algo_ranks[0][1]:.2f}).</li>
+            <li>El algoritmo <strong>{worst_algo}</strong> obtuvo el peor ranking promedio ({algo_ranks[-1][1]:.2f}).</li>"""
+
             # Buscar algoritmos que no sean significativamente diferentes del mejor
             not_diff_from_best = []
             for algo_j, _ in algo_ranks[1:]:
                 if posthoc_matrix.loc[best_algo, algo_j] >= alpha:
                     not_diff_from_best.append(algo_j)
-            
+
             if not_diff_from_best:
                 html_content += f"""
-                    <li>Los algoritmos {', '.join(not_diff_from_best)} no son significativamente diferentes del mejor algoritmo ({best_algo}).</li>
-                """
+            <li>Los algoritmos {', '.join(not_diff_from_best)} no son significativamente diferentes del mejor algoritmo ({best_algo}).</li>"""
         else:
             html_content += """
-                    <li>No se encontraron diferencias estadísticamente significativas entre los algoritmos comparados.</li>
-            """
-        
+            <li>No se encontraron diferencias estadísticamente significativas entre los algoritmos comparados.</li>"""
+
         html_content += """
-                </ul>
-            </div>
-        </body>
-        </html>
-        """
-        
-        # Formatear el contenido HTML utilizando el diccionario
-        html_content = html_content.format(**format_dict)
-        
-        # Guardar el informe
+        </ul>
+    </div>
+</body>
+</html>"""
+
+        # Guardar el informe directamente sin usar format() que puede causar problemas con f-strings
         with open(output_file, 'w') as f:
-            f.write(html_content)
+            f.write(html_content.replace('{cd_img}', cd_img)
+                              .replace('{rank_img}', rank_img)
+                              .replace('{posthoc_img}', posthoc_img)
+                              .replace('{effect_img}', effect_img)
+                              .replace('{vd_img}', vd_img))
         
         return output_file
     
@@ -1568,61 +1557,56 @@ class StatisticalAnalysis:
         
         # Generar índice HTML
         index_path = os.path.join(output_dir, "index.html")
-        
-        # Contenido del índice
-        index_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Análisis Estadístico Completo</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                    line-height: 1.6;
-                }}
-                h1, h2, h3 {{
-                    color: #2c3e50;
-                }}
-                ul {{
-                    list-style-type: none;
-                    padding: 0;
-                }}
-                li {{
-                    margin-bottom: 10px;
-                }}
-                a {{
-                    text-decoration: none;
-                    color: #3498db;
-                    padding: 5px 10px;
-                    border: 1px solid #3498db;
-                    border-radius: 5px;
-                }}
-                a:hover {{
-                    background-color: #3498db;
-                    color: white;
-                }}
-                .warning {{
-                    color: #e67e22;
-                    background-color: #fff3e0;
-                    padding: 10px;
-                    border-left: 5px solid #e67e22;
-                    margin-bottom: 20px;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>Análisis Estadístico Completo</h1>
-            <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-            
-            {
-            f'<div class="warning"><p>⚠️ Algunas métricas no pudieron ser analizadas: {", ".join(set(metrics) - set(successful_metrics))}</p></div>'
-            if len(successful_metrics) < len(metrics) else ''
-            }
-            
-            <h2>Informes por Métrica</h2>
-            <ul>
-        """
+
+        # Contenido del índice - manteniendo el CSS en formato inline
+        index_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Análisis Estadístico Completo</title>
+    <style>
+body {{
+    font-family: "Arial", sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+}}
+h1, h2, h3 {{
+    color: #2c3e50;
+}}
+ul {{
+    list-style-type: none;
+    padding: 0;
+}}
+li {{
+    margin-bottom: 10px;
+}}
+a {{
+    text-decoration: none;
+    color: #3498db;
+    padding: 5px 10px;
+    border: 1px solid #3498db;
+    border-radius: 5px;
+}}
+a:hover {{
+    background-color: #3498db;
+    color: white;
+}}
+.warning {{
+    color: #e67e22;
+    background-color: #fff3e0;
+    padding: 10px;
+    border-left: 5px solid #e67e22;
+    margin-bottom: 20px;
+}}
+    </style>
+</head>
+<body>
+    <h1>Análisis Estadístico Completo</h1>
+    <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+
+    {f'<div class="warning"><p>⚠️ Algunas métricas no pudieron ser analizadas: {", ".join(set(metrics) - set(successful_metrics))}</p></div>' if len(successful_metrics) < len(metrics) else ''}
+
+    <h2>Informes por Métrica</h2>
+    <ul>"""
         
         # Añadir enlaces a los informes generados
         for metric in successful_metrics:

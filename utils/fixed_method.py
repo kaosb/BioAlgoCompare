@@ -30,7 +30,7 @@ def generate_html_report(data_df, metric, friedman_result, test_info, posthoc_ma
     html_parts.append('<head>')
     html_parts.append(f'<title>Análisis Estadístico - {metric_str}</title>')
     html_parts.append('<style>')
-    html_parts.append('body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }')
+    html_parts.append('body { font-family: "Arial", sans-serif; margin: 20px; line-height: 1.6; }')
     html_parts.append('h1, h2, h3 { color: #2c3e50; }')
     html_parts.append('table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }')
     html_parts.append('th, td { text-align: left; padding: 8px; border: 1px solid #ddd; }')

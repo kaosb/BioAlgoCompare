@@ -12,6 +12,19 @@ from matplotlib.patches import Polygon
 from matplotlib.table import Table
 import matplotlib.gridspec as gridspec
 from scipy.stats import friedmanchisquare, wilcoxon
+import multiprocessing as mp
+
+# Función auxiliar para la ejecución de algoritmos en paralelo
+# Definida a nivel de módulo para evitar problemas de pickle
+def _run_algo_task(params):
+    AlgoClass, problem, population, iterations, run_seed, _ = params
+    algo = AlgoClass(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+
+    start_time = time.time()
+    best_solution = algo.execute()
+    execution_time = time.time() - start_time
+
+    return best_solution.fitness(), execution_time, algo.get_convergence_curve()
 
 class BenchmarkResult:
     """Clase para almacenar y analizar resultados de benchmarking."""
@@ -180,7 +193,7 @@ def load_benchmark_results(filename):
 def run_benchmark(algorithms, problem_instances, runs=10, iterations=100, population=30, seed=None, parallel=False):
     """
     Ejecuta un benchmark comparativo de algoritmos sobre instancias de problemas.
-    
+
     Args:
         algorithms: Diccionario de algoritmos {nombre: clase}
         problem_instances: Lista de instancias VRP
@@ -189,13 +202,11 @@ def run_benchmark(algorithms, problem_instances, runs=10, iterations=100, popula
         population: Tamaño de población para los algoritmos
         seed: Semilla inicial para reproducibilidad
         parallel: Si es True, se ejecutan en paralelo
-        
+
     Returns:
         Lista de objetos BenchmarkResult
     """
-    import multiprocessing as mp
     from problems.vrp import VRPProblem
-    import time
     
     results = []
     
@@ -252,18 +263,8 @@ def run_benchmark(algorithms, problem_instances, runs=10, iterations=100, popula
     
     # Ejecutar tareas en paralelo si está habilitado
     if parallel and tasks:
-        def run_algo_task(params):
-            AlgoClass, problem, population, iterations, run_seed, _ = params
-            algo = AlgoClass(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-            
-            start_time = time.time()
-            best_solution = algo.execute()
-            execution_time = time.time() - start_time
-            
-            return best_solution.fitness(), execution_time, algo.get_convergence_curve()
-        
-        # Ejecutar las tareas en paralelo
-        parallel_results = pool.map(run_algo_task, tasks)
+        # Ejecutar las tareas en paralelo utilizando la función _run_algo_task definida a nivel de módulo
+        parallel_results = pool.map(_run_algo_task, tasks)
         pool.close()
         pool.join()
         
@@ -583,7 +584,7 @@ def create_benchmark_report(benchmark_results, filename=None):
     css = """
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Arial", sans-serif;
             margin: 20px;
             line-height: 1.6;
         }

@@ -708,72 +708,71 @@ class EnhancedStatisticalAnalysis:
         # Crear índice general
         try:
             index_file = os.path.join(output_dir, "index.html")
+
+            # Definir el CSS de forma separada para evitar problemas de formateo
+            css_style = """body {
+    font-family: "Arial", sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+}
+h1, h2, h3 {
+    color: #2c3e50;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    margin-bottom: 10px;
+}
+a {
+    text-decoration: none;
+    color: #3498db;
+    padding: 5px 10px;
+    border: 1px solid #3498db;
+    border-radius: 5px;
+}
+a:hover {
+    background-color: #3498db;
+    color: white;
+}
+.warning {
+    color: #e67e22;
+    background-color: #fff3e0;
+    padding: 10px;
+    border-left: 5px solid #e67e22;
+    margin-bottom: 20px;
+}"""
+
+            # Crear HTML con header
+            html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Análisis Estadístico Completo</title>
+    <style>
+{css_style}
+    </style>
+</head>
+<body>
+    <h1>Análisis Estadístico Completo</h1>
+    <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+
+    <h2>Informes por Métrica</h2>
+    <ul>"""
+
+            for metric, path in report_paths.items():
+                rel_path = os.path.relpath(path, output_dir)
+                html_content += f"""
+        <li><a href="{rel_path}">{metric}</a></li>"""
+
+            html_content += """
+    </ul>
+</body>
+</html>"""
+
             with open(index_file, 'w') as f:
-                html_content = f"""
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Análisis Estadístico Completo</title>
-                    <style>
-                        body {{
-                            font-family: Arial, sans-serif;
-                            margin: 20px;
-                            line-height: 1.6;
-                        }}
-                        h1, h2, h3 {{
-                            color: #2c3e50;
-                        }}
-                        ul {{
-                            list-style-type: none;
-                            padding: 0;
-                        }}
-                        li {{
-                            margin-bottom: 10px;
-                        }}
-                        a {{
-                            text-decoration: none;
-                            color: #3498db;
-                            padding: 5px 10px;
-                            border: 1px solid #3498db;
-                            border-radius: 5px;
-                        }}
-                        a:hover {{
-                            background-color: #3498db;
-                            color: white;
-                        }}
-                        .warning {{
-                            color: #e67e22;
-                            background-color: #fff3e0;
-                            padding: 10px;
-                            border-left: 5px solid #e67e22;
-                            margin-bottom: 20px;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <h1>Análisis Estadístico Completo</h1>
-                    <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-                    
-                    
-                    
-                    <h2>Informes por Métrica</h2>
-                    <ul>
-                """
-                
-                for metric, path in report_paths.items():
-                    rel_path = os.path.relpath(path, output_dir)
-                    html_content += f"""
-                        <li><a href="{rel_path}">{metric}</a></li>
-                    """
-                
-                html_content += """
-                    </ul>
-                </body>
-                </html>
-                """
-                
                 f.write(html_content)
-            
+
             report_paths['index'] = index_file
         except Exception as e:
             logger.warning(f"Error al generar índice: {str(e)}")
@@ -784,13 +783,13 @@ class EnhancedStatisticalAnalysis:
     def generate_statistical_analysis_report(data_df, metric='best_fitness', alpha=0.05, output_file=None):
         """
         Genera un informe HTML con resultados de análisis estadístico.
-        
+
         Args:
             data_df: DataFrame con datos para análisis
             metric: Métrica analizada
             alpha: Nivel de significancia
             output_file: Ruta para guardar el informe
-            
+
         Returns:
             Ruta al informe generado
         """
@@ -798,188 +797,177 @@ class EnhancedStatisticalAnalysis:
         if output_file is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_file = f"results/statistical_report_{metric}_{timestamp}.html"
-        
+
         # Ejecutar test de Friedman
         friedman_result = EnhancedStatisticalAnalysis.perform_friedman_test(data_df, alpha=alpha)
-        
-        # Generar contenido HTML
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Análisis Estadístico - {metric}</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                    line-height: 1.6;
-                }}
-                h1, h2, h3 {{
-                    color: #2c3e50;
-                }}
-                table {{
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin-bottom: 20px;
-                }}
-                th, td {{
-                    text-align: left;
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                }}
-                th {{
-                    background-color: #f2f2f2;
-                }}
-                tr:nth-child(even) {{
-                    background-color: #f9f9f9;
-                }}
-                .significant {{
-                    font-weight: bold;
-                    color: #e74c3c;
-                }}
-                .not-significant {{
-                    color: #7f8c8d;
-                }}
-                .conclusion {{
-                    background-color: #f8f9fa;
-                    padding: 10px;
-                    border-left: 5px solid #3498db;
-                    margin-bottom: 20px;
-                }}
-                .highlight {{
-                    font-weight: bold;
-                    background-color: #ffffcc;
-                    padding: 2px 5px;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>Análisis Estadístico - {metric}</h1>
-            <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-            
-            <h2>Test de Friedman</h2>
-        """
-        
+
+        # Definir el CSS de forma separada para evitar problemas de formateo
+        css_style = """body {
+    font-family: "Arial", sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+}
+h1, h2, h3 {
+    color: #2c3e50;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
+}
+th, td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+th {
+    background-color: #f2f2f2;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.significant {
+    font-weight: bold;
+    color: #e74c3c;
+}
+.not-significant {
+    color: #7f8c8d;
+}
+.conclusion {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-left: 5px solid #3498db;
+    margin-bottom: 20px;
+}
+.highlight {
+    font-weight: bold;
+    background-color: #ffffcc;
+    padding: 2px 5px;
+}"""
+
+        # Generar HTML con header
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Análisis Estadístico - {metric}</title>
+    <style>
+{css_style}
+    </style>
+</head>
+<body>
+    <h1>Análisis Estadístico - {metric}</h1>
+    <p>Generado: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+
+    <h2>Test de Friedman</h2>"""
+
         # Añadir resultados de Friedman
         if 'error' in friedman_result:
             html_content += f"""
-            <p>Error en test de Friedman: {friedman_result['error']}</p>
-            """
+    <p>Error en test de Friedman: {friedman_result['error']}</p>"""
         else:
             p_value = friedman_result['p_value']
             statistic = friedman_result['statistic']
             reject_h0 = friedman_result['reject_h0']
             rank_dict = friedman_result['rank_dict']
-            
+
             # Ordenar algoritmos por ranking
             sorted_algos = sorted(rank_dict.items(), key=lambda x: x[1])
-            
+
             html_content += f"""
-            <p>Estadístico de Friedman: {statistic:.4f}</p>
-            <p>p-valor: {p_value:.6f}</p>
-            <p>Nivel de significancia: {alpha}</p>
-            <p>Conclusión: {'Rechazar' if reject_h0 else 'No rechazar'} H0 
-               <span class="{'significant' if reject_h0 else 'not-significant'}">
-                   (Hay{'diferencias significativas' if reject_h0 else 'diferencias NO significativas'} entre algoritmos)
-               </span>
-            </p>
-            
-            <h3>Rankings promedio</h3>
-            <table>
-                <tr>
-                    <th>Algoritmo</th>
-                    <th>Ranking promedio</th>
-                </tr>
-            """
-            
+    <p>Estadístico de Friedman: {statistic:.4f}</p>
+    <p>p-valor: {p_value:.6f}</p>
+    <p>Nivel de significancia: {alpha}</p>
+    <p>Conclusión: {'Rechazar' if reject_h0 else 'No rechazar'} H0
+       <span class="{'significant' if reject_h0 else 'not-significant'}">
+           (Hay {'diferencias significativas' if reject_h0 else 'diferencias NO significativas'} entre algoritmos)
+       </span>
+    </p>
+
+    <h3>Rankings promedio</h3>
+    <table>
+        <tr>
+            <th>Algoritmo</th>
+            <th>Ranking promedio</th>
+        </tr>"""
+
             # Añadir filas de ranking
             for algo, rank in sorted_algos:
                 html_content += f"""
-                <tr>
-                    <td>{algo}</td>
-                    <td>{rank:.2f}</td>
-                </tr>
-                """
-            
+        <tr>
+            <td>{algo}</td>
+            <td>{rank:.2f}</td>
+        </tr>"""
+
             html_content += """
-            </table>
-            """
-            
+    </table>"""
+
             # Si Friedman es significativo, añadir resultados de Nemenyi
             if reject_h0:
                 html_content += """
-                <h2>Test post-hoc de Nemenyi</h2>
-                """
-                
+    <h2>Test post-hoc de Nemenyi</h2>"""
+
                 # Ejecutar Nemenyi
                 nemenyi_result = EnhancedStatisticalAnalysis.perform_nemenyi_test(friedman_result)
-                
+
                 if 'error' in nemenyi_result:
                     html_content += f"""
-                    <p>Error en test de Nemenyi: {nemenyi_result['error']}</p>
-                    """
+    <p>Error en test de Nemenyi: {nemenyi_result['error']}</p>"""
                 else:
                     cd = nemenyi_result['critical_distance']
                     algorithms = nemenyi_result['algorithms']
                     significant_diff = nemenyi_result['significant_diff']
                     rank_diff = nemenyi_result['rank_diff']
-                    
+
                     html_content += f"""
-                    <p>Diferencia crítica (CD): {cd:.4f}</p>
-                    
-                    <h3>Comparaciones por pares</h3>
-                    <table>
-                        <tr>
-                            <th>Algoritmo 1</th>
-                            <th>Algoritmo 2</th>
-                            <th>Diferencia de ranking</th>
-                            <th>Significativa</th>
-                        </tr>
-                    """
-                    
+    <p>Diferencia crítica (CD): {cd:.4f}</p>
+
+    <h3>Comparaciones por pares</h3>
+    <table>
+        <tr>
+            <th>Algoritmo 1</th>
+            <th>Algoritmo 2</th>
+            <th>Diferencia de ranking</th>
+            <th>Significativa</th>
+        </tr>"""
+
                     # Añadir filas de comparaciones
                     for i, algo1 in enumerate(algorithms):
                         for j, algo2 in enumerate(algorithms):
                             if i < j:  # Evitar duplicados
                                 diff = rank_diff[i, j]
                                 is_significant = significant_diff[i, j]
-                                
+
                                 html_content += f"""
-                                <tr>
-                                    <td>{algo1}</td>
-                                    <td>{algo2}</td>
-                                    <td>{diff:.4f}</td>
-                                    <td class="{'significant' if is_significant else 'not-significant'}">
-                                        {'Sí' if is_significant else 'No'}
-                                    </td>
-                                </tr>
-                                """
-                    
+        <tr>
+            <td>{algo1}</td>
+            <td>{algo2}</td>
+            <td>{diff:.4f}</td>
+            <td class="{'significant' if is_significant else 'not-significant'}">
+                {'Sí' if is_significant else 'No'}
+            </td>
+        </tr>"""
+
                     html_content += """
-                    </table>
-                    """
-                    
-                    # Añadir conclusiones
-                    html_content += """
-                    <h3>Conclusiones</h3>
-                    <div class="conclusion">
-                    """
-                    
+    </table>
+
+    <h3>Conclusiones</h3>
+    <div class="conclusion">"""
+
                     # Identificar grupos significativamente diferentes
                     groups = []
                     visited = set()
-                    
+
                     for i, algo1 in enumerate(algorithms):
                         if algo1 in visited:
                             continue
-                            
+
                         group = [algo1]
                         visited.add(algo1)
-                        
+
                         for j, algo2 in enumerate(algorithms):
                             if algo2 in visited:
                                 continue
-                                
+
                             # Si no hay diferencia significativa, añadir al grupo
                             if i < j and not significant_diff[i, j]:
                                 group.append(algo2)
@@ -987,95 +975,86 @@ class EnhancedStatisticalAnalysis:
                             elif j < i and not significant_diff[j, i]:
                                 group.append(algo2)
                                 visited.add(algo2)
-                        
+
                         if group:
                             groups.append(group)
-                    
+
                     # Mostrar grupos
                     if groups:
                         html_content += """
-                        <p>Se identificaron los siguientes grupos de algoritmos sin diferencias significativas entre sí:</p>
-                        <ul>
-                        """
-                        
+        <p>Se identificaron los siguientes grupos de algoritmos sin diferencias significativas entre sí:</p>
+        <ul>"""
+
                         for i, group in enumerate(groups):
                             html_content += f"""
-                            <li>Grupo {i+1}: {', '.join(group)}</li>
-                            """
-                        
+            <li>Grupo {i+1}: {', '.join(group)}</li>"""
+
                         html_content += """
-                        </ul>
-                        """
-                    
+        </ul>"""
+
                     # Identificar algoritmo con mejor ranking
                     best_algo = sorted_algos[0][0]
                     best_rank = sorted_algos[0][1]
-                    
+
                     html_content += f"""
-                    <p>El algoritmo con mejor ranking promedio es <span class="highlight">{best_algo}</span> con un ranking de {best_rank:.2f}.</p>
-                    """
-                    
+        <p>El algoritmo con mejor ranking promedio es <span class="highlight">{best_algo}</span> con un ranking de {best_rank:.2f}.</p>"""
+
                     # Verificar si es significativamente mejor que todos
                     all_better = True
                     for i, (algo, _) in enumerate(sorted_algos):
                         if i > 0:  # Comparar con los demás
                             idx1 = algorithms.index(best_algo)
                             idx2 = algorithms.index(algo)
-                            
+
                             if idx1 < idx2 and not significant_diff[idx1, idx2]:
                                 all_better = False
                                 break
                             elif idx2 < idx1 and not significant_diff[idx2, idx1]:
                                 all_better = False
                                 break
-                    
+
                     if all_better:
                         html_content += f"""
-                        <p><span class="highlight">{best_algo}</span> es significativamente mejor que todos los demás algoritmos.</p>
-                        """
+        <p><span class="highlight">{best_algo}</span> es significativamente mejor que todos los demás algoritmos.</p>"""
                     else:
                         # Identificar algoritmos no significativamente diferentes al mejor
                         similar_algos = [best_algo]
-                        
+
                         for i, (algo, _) in enumerate(sorted_algos):
                             if i > 0:  # Comparar con los demás
                                 idx1 = algorithms.index(best_algo)
                                 idx2 = algorithms.index(algo)
-                                
+
                                 if idx1 < idx2 and not significant_diff[idx1, idx2]:
                                     similar_algos.append(algo)
                                 elif idx2 < idx1 and not significant_diff[idx2, idx1]:
                                     similar_algos.append(algo)
-                        
+
                         if len(similar_algos) > 1:
                             html_content += f"""
-                            <p>No hay diferencias significativas entre los siguientes algoritmos: <span class="highlight">{', '.join(similar_algos)}</span>.</p>
-                            """
-                    
+        <p>No hay diferencias significativas entre los siguientes algoritmos: <span class="highlight">{', '.join(similar_algos)}</span>.</p>"""
+
                     html_content += """
-                    </div>
-                    """
-            
+    </div>"""
+
             else:
                 # Si Friedman no es significativo, añadir conclusión
                 html_content += """
-                <div class="conclusion">
-                    <p>El test de Friedman no encontró diferencias significativas entre los algoritmos.</p>
-                    <p>No es necesario realizar pruebas post-hoc.</p>
-                </div>
-                """
-        
+    <div class="conclusion">
+        <p>El test de Friedman no encontró diferencias significativas entre los algoritmos.</p>
+        <p>No es necesario realizar pruebas post-hoc.</p>
+    </div>"""
+
         # Cerrar HTML
         html_content += """
-        </body>
-        </html>
-        """
-        
+</body>
+</html>"""
+
         # Guardar archivo
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, 'w') as f:
             f.write(html_content)
-        
+
         logger.info(f"Informe generado: {output_file}")
-        
+
         return output_file

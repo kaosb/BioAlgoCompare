@@ -578,7 +578,7 @@ def create_enhanced_report(benchmark_results, output_file=None, include_converge
         <title>Informe Avanzado de Benchmark</title>
         <style>
             body {{
-                font-family: Arial, sans-serif;
+                font-family: "Arial", sans-serif;
                 margin: 20px;
                 line-height: 1.6;
             }}

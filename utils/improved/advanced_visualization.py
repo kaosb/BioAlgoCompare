@@ -612,7 +612,7 @@ def create_visual_report(figures, output_file=None):
         <title>Informe Visual de Análisis</title>
         <style>
             body {{
-                font-family: Arial, sans-serif;
+                font-family: "Arial", sans-serif;
                 margin: 20px;
                 line-height: 1.6;
             }}
