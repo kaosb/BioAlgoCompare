@@ -344,10 +344,14 @@ La documentación completa del proyecto está disponible en el directorio `docs/
 - **[Guía de inicio rápido](docs/guides/getting_started.md)** - Cómo empezar a usar el proyecto
 - **[Visión general de algoritmos](docs/algorithms/overview.md)** - Descripción de todos los algoritmos implementados
 - **[Pseudocódigo de algoritmos](docs/algorithms/pseudocode.md)** - Pseudocódigo detallado de cada algoritmo
-- **[Documentación técnica](docs/development/git_workflow.md)** - Guía del flujo de trabajo Git
+- **[Documentación de algoritmos individuales](docs/algorithms/individual/)** - Análisis detallado de cada algoritmo
+- **[Arquitectura del sistema](docs/technical/architecture.md)** - Descripción de la arquitectura y componentes
+- **[Detalles de implementación](docs/technical/implementation.md)** - Detalles técnicos de implementación
+- **[Procedimientos de prueba](docs/development/testing.md)** - Guía para verificar implementaciones
 - **[Guía de contribución](docs/development/contribution.md)** - Cómo contribuir al proyecto
 - **[Análisis comparativo](docs/analysis/comparison.md)** - Análisis exhaustivo comparando algoritmos
 - **[Impacto de iteraciones](docs/analysis/iteration_impact.md)** - Análisis del impacto del número de iteraciones
+- **[Requisitos algorítmicos](docs/development/algorithmic_requirements.md)** - Requisitos para implementación de algoritmos
 
 Para más detalles, consulta el [índice de documentación](docs/index.md).
 
