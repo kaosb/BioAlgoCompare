@@ -21,8 +21,17 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Visión General](algorithms/overview.md) - Descripción general de todos los algoritmos
 - [Pseudocódigo](algorithms/pseudocode.md) - Pseudocódigo de los algoritmos implementados
 - Documentación Individual de Algoritmos:
+  - [Artificial Protozoa Optimizer (APO)](algorithms/individual/apo.md)
   - [Earthworm Algorithm (EWA)](algorithms/individual/ewa.md)
-  - La documentación completa de los demás algoritmos está en desarrollo.
+  - [Enhanced Gorilla Troops Optimization (EGTO)](algorithms/individual/egto.md)
+  - [Flamingo Search Algorithm (FSA/FGO)](algorithms/individual/fsa.md)
+  - [Fossa Optimization Algorithm (FOA)](algorithms/individual/foa.md)
+  - [Gorilla Troops Optimization (GTO)](algorithms/individual/gto.md)
+  - [Harris Hawks Optimization (HHO)](algorithms/individual/hho.md)
+  - [Manta Ray Foraging Optimization (MRFO)](algorithms/individual/mrfo.md)
+  - [Slime Mould Algorithm (SMA)](algorithms/individual/sma.md)
+  - [Spotted Hyena Optimizer (SHO)](algorithms/individual/sho.md)
+  - [Whale Optimization Algorithm (WOA)](algorithms/individual/woa.md)
 
 ### Informes de Análisis
 
@@ -38,6 +47,8 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 ### Documentación Técnica
 
+- [Arquitectura del Sistema](technical/architecture.md) - Descripción de la arquitectura y componentes
+- [Detalles de Implementación](technical/implementation.md) - Detalles técnicos de implementación
 - [Referencia de Scripts](technical/scripts_reference.md) - Documentación completa de los scripts ejecutables
 - [Estado de Consolidación](technical/consolidation_status.md) - Estado actual de la consolidación de scripts
 
