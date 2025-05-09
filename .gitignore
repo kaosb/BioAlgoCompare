@@ -48,6 +48,7 @@ logs/*.log
 benchmark.log
 massive_benchmark.log
 analyze_massive.log
+analyze.log
 
 # Resultados masivos y temporales
 results/massive_*/checkpoints/
