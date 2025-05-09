@@ -15,6 +15,9 @@ class EnhancedGorilla(Individual):
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
+        # Para problemas VRP, los límites son [0,1]
+        self.lower_bounds = np.zeros(self.dimension)
+        self.upper_bounds = np.ones(self.dimension)
         self.position = np.random.uniform(0, 1, self.dimension)
         self._fitness = None
         self.velocity = np.zeros(self.dimension)  # Vector de velocidad para el movimiento mejorado
@@ -35,43 +38,41 @@ class EnhancedGorilla(Individual):
     
     def move(self, best, iteration, max_iterations, w=0.7, c1=1.5, c2=1.5):
         """
-        Mueve el gorila según las reglas del algoritmo EGTO.
-        
+        Movimiento del gorila según el algoritmo EGTO (versión con MPA).
         Args:
-            best: Mejor gorila (líder)
+            best: Mejor solución encontrada (silverback)
             iteration: Iteración actual
-            max_iterations: Número máximo de iteraciones
-            w: Factor de inercia
-            c1, c2: Coeficientes de aceleración
+            max_iterations: Número total de iteraciones
+            w, c1, c2: Coeficientes heredados de la versión tipo PSO (opcional)
         """
-        # Parámetros de control
-        a = 2 * (1 - iteration / max_iterations)  # Decrece linealmente de 2 a 0
-        
-        for i in range(self.dimension):
-            r1 = random.random()
-            r2 = random.random()
-            r3 = random.random()
-            
-            if r3 < 0.5:  # Exploración - Movimiento inspirado en PSO
-                # Actualizar velocidad
-                self.velocity[i] = w * self.velocity[i] + \
-                                  c1 * r1 * (best.position[i] - self.position[i]) + \
-                                  c2 * r2 * (best.position[i] - self.position[i])
-                
-                # Actualizar posición
-                self.position[i] = self.position[i] + self.velocity[i]
-            else:  # Explotación - Movimiento inspirado en GTO original
-                if r1 < 0.5:
-                    # Movimiento de exploración local
-                    self.position[i] = best.position[i] + a * (2 * r2 - 1) * abs(best.position[i] - self.position[i])
-                else:
-                    # Movimiento de explotación
-                    self.position[i] = self.position[i] + a * r2 * (best.position[i] - self.position[i])
-            
-            # Mantener la posición dentro de los límites [0, 1]
-            self.position[i] = max(0, min(1, self.position[i]))
-        
-        # Invalidar el fitness ya que la posición ha cambiado
+        dim = self.dimension
+        P = 0.5  # constante de balance
+        C = (math.cos(2 * random.random()) + 1) * (1 - iteration / max_iterations)
+        k = random.uniform(-1, 1)
+        D = C * k
+        z = 0.03
+
+        r = random.random()
+
+        # Fase de alta velocidad (exploración)
+        if iteration < max_iterations / 3:
+            # Movimiento Browniano (alta velocidad)
+            RB = np.random.normal(0, 1, dim)
+            S = D * np.random.rand(dim) * self.position
+            delta = P * RB * S
+            self.position = self.position + delta
+
+        # Fase de baja velocidad (explotación con Lévy)
+        else:
+            RL = np.random.uniform(size=dim)
+            E = np.tile(best.position, (dim, 1))  # Matriz E construida con el mejor
+            S = RL * (RL * best.position - self.position)
+            CF = 0.5  # Coeficiente de control
+            delta = P * CF * S
+            self.position = best.position + delta
+
+        # Clip y reset fitness
+        self.position = np.clip(self.position, self.lower_bounds, self.upper_bounds)
         self._fitness = None
     
     def copy(self, other):
@@ -95,9 +96,6 @@ class EGTO(MetaheuristicAlgorithm):
             seed: Semilla para reproducibilidad
         """
         super().__init__(problem, population_size, max_iterations, seed)
-        self.w = 0.7  # Factor de inercia
-        self.c1 = 1.5  # Coeficiente cognitivo
-        self.c2 = 1.5  # Coeficiente social
     
     def initialize_population(self):
         """Inicializa la población de gorilas."""
@@ -121,9 +119,6 @@ class EGTO(MetaheuristicAlgorithm):
         """Actualiza la población en cada iteración."""
         iteration = len(self.convergence_curve)
         
-        # Actualizar factor de inercia
-        self.w = 0.9 - 0.5 * (iteration / self.max_iterations)
-        
         # Ordenar la población por fitness
         self.population.sort(key=lambda x: x.fitness())
         
@@ -131,7 +126,7 @@ class EGTO(MetaheuristicAlgorithm):
         
         for i in range(self.population_size):
             # Mover cada gorila
-            self.population[i].move(best_gorilla, iteration, self.max_iterations, self.w, self.c1, self.c2)
+            self.population[i].move(best_gorilla, iteration, self.max_iterations)
         
         # Ordenar la población actualizada
         self.population.sort(key=lambda x: x.fitness())
@@ -140,33 +135,5 @@ class EGTO(MetaheuristicAlgorithm):
         if self.population[0].is_better_than(self.best_solution):
             self.best_solution.copy(self.population[0])
         
-        # Implementar operador de cruce entre los mejores individuos
-        if iteration % 10 == 0:  # Cada 10 iteraciones
-            self._perform_crossover()
-        
         # Actualizar curva de convergencia
         self.convergence_curve.append(self.best_solution.fitness())
-    
-    def _perform_crossover(self):
-        """Realiza operaciones de cruce entre los mejores individuos."""
-        elite_size = max(2, self.population_size // 5)  # 20% de la población
-        
-        for i in range(elite_size, self.population_size):
-            # Seleccionar dos padres de la élite
-            parent1_idx = random.randint(0, elite_size - 1)
-            parent2_idx = random.randint(0, elite_size - 1)
-            
-            # Asegurar que son diferentes
-            while parent2_idx == parent1_idx:
-                parent2_idx = random.randint(0, elite_size - 1)
-            
-            parent1 = self.population[parent1_idx]
-            parent2 = self.population[parent2_idx]
-            
-            # Cruce aritmético
-            alpha = random.random()
-            for j in range(self.problem.get_dimension()):
-                self.population[i].position[j] = alpha * parent1.position[j] + (1 - alpha) * parent2.position[j]
-            
-            # Invalidar el fitness
-            self.population[i]._fitness = None
