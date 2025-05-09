@@ -39,7 +39,8 @@ logging.basicConfig(
 logger = logging.getLogger("analyze")
 
 # Importar utilidades
-from utils.benchmarking import BenchmarkResult, OPTIMAL_VALUES, run_benchmark, create_benchmark_report
+from utils.benchmarking import BenchmarkResult, OPTIMAL_VALUES, create_benchmark_report
+from utils.benchmarking import run_benchmark as benchmark_function
 from utils.statistical_analysis import StatisticalAnalysis
 from utils.vrp_operators import VRPOperators
 from utils.improved.enhanced_benchmarking import run_complete_analysis, run_massive_benchmark
@@ -110,10 +111,8 @@ def run(algorithm, instance, iterations, population, runs, seed, visualize, save
 @click.option('--input', '-i', help='Ruta al archivo CSV o JSON de resultados')
 @click.option('--run-benchmark/--no-run-benchmark', default=False, 
               help='Ejecutar nuevo benchmark en lugar de cargar resultados existentes')
-@click.option('--instances', '-inst', multiple=True, 
-              help='Instancias para el benchmark (si se selecciona run-benchmark)')
-@click.option('--algorithms', '-a', multiple=True, 
-              help='Algoritmos para el benchmark (si se selecciona run-benchmark)')
+@click.option('--instances', '-inst', help='Instancias para el benchmark (lista separada por comas, ej: "P-n16-k8,E-n22-k4")')
+@click.option('--algorithms', '-a', help='Algoritmos para el benchmark (lista separada por comas, ej: "ewa,foa,egto")')
 @click.option('--runs', '-r', default=5, help='Número de ejecuciones por algoritmo/instancia')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones por ejecución')
 @click.option('--population', '-p', default=30, help='Tamaño de población')
@@ -140,18 +139,22 @@ def benchmark(input, run_benchmark, instances, algorithms, runs, iterations, pop
     
     if run_benchmark:
         if not instances:
-            instances = ['P-n16-k8', 'E-n22-k4']  # Por defecto, usar instancias pequeñas
+            instance_list = ['P-n16-k8', 'E-n22-k4']  # Por defecto, usar instancias pequeñas
+        else:
+            instance_list = instances.split(',')
         
         if not algorithms:
-            algorithms = ['hoa', 'apo', 'egto', 'fgo', 'foa']  # Por defecto, usar algoritmos principales
-        
+            algo_list = ['hoa', 'apo', 'egto', 'fgo', 'foa']  # Por defecto, usar algoritmos principales
+        else:
+            algo_list = algorithms.split(',')
+
         # Preparar diccionario de algoritmos
-        algo_dict = {algo: ALGORITHMS[algo] for algo in algorithms if algo in ALGORITHMS}
+        algo_dict = {algo: ALGORITHMS[algo] for algo in algo_list if algo in ALGORITHMS}
         
         # Ejecutar benchmark
-        logger.info(f"Ejecutando benchmark con {len(algo_dict)} algoritmos en {len(instances)} instancias...")
-        benchmark_results = run_benchmark(
-            algo_dict, instances, runs=runs, iterations=iterations, 
+        logger.info(f"Ejecutando benchmark con {len(algo_dict)} algoritmos en {len(instance_list)} instancias...")
+        benchmark_results = benchmark_function(
+            algo_dict, instance_list, runs=runs, iterations=iterations,
             population=population, seed=seed, parallel=parallel
         )
         
