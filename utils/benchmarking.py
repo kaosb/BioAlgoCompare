@@ -809,12 +809,12 @@ def create_benchmark_report(benchmark_results, filename=None):
 
 # Ejemplo de uso:
 if __name__ == "__main__":
-    from algorithms.HOA import HOA
-    from algorithms.FOA import FOA
+    from algorithms.sho import SHO  # Previously HOA
+    from algorithms.foa import FOA
     
     # Definir algoritmos para el benchmark
     algorithms = {
-        "HOA": HOA,
+        "SHO": SHO,  # Previously HOA
         "FOA": FOA
     }
     

@@ -40,42 +40,54 @@ class Flamingo(Individual):
         """Verifica si el individuo representa una solución factible."""
         return True  # En VRP todas las soluciones son factibles con nuestro decodificador
     
-    def move(self, best, iteration, max_iterations):
+    def move(self, best, iteration, max_iterations, mode="forage"):
         """
-        Mueve el flamenco según las reglas del algoritmo FGO.
+        Mueve el flamenco según el modelo oficial FSA (IEEE Access 2021).
         
         Args:
-            best: Mejor flamenco (líder)
+            best: Individuo con mejor fitness (xbj)
             iteration: Iteración actual
-            max_iterations: Número máximo de iteraciones
+            max_iterations: Iteraciones totales
+            mode: 'forage' o 'migrate'
         """
-        # Parámetros de control
-        a = 2 * (1 - iteration / max_iterations)  # Decrece linealmente de 2 a 0
-        
-        for i in range(self.dimension):
-            r1 = random.random()
-            r2 = random.random()
-            r3 = random.random()
-            
-            # Comportamiento de filtración (inspirado en los flamencos filtrando comida)
-            if r3 < 0.3:  # Exploración - Movimiento aleatorio
-                self.position[i] = self.position[i] + a * (2 * r1 - 1)
-            elif r3 < 0.6:  # Explotación local - Basado en la mejor posición personal
-                self.position[i] = self.personal_best_position[i] + a * r1 * (best.position[i] - self.position[i])
-            else:  # Explotación global - Seguir al líder
-                # Movimiento en V (formación de vuelo de los flamencos)
-                self.position[i] = best.position[i] + a * r2 * (best.position[i] - self.position[i])
-                
-                # Añadir componente de perturbación basado en la distancia al líder
-                if random.random() < 0.2:  # 20% de probabilidad de perturbación
-                    distance = abs(best.position[i] - self.position[i])
-                    self.position[i] += (2 * random.random() - 1) * distance * 0.1
-            
-            # Mantener la posición dentro de los límites [0, 1]
-            self.position[i] = max(0, min(1, self.position[i]))
-        
-        # Invalidar el fitness ya que la posición ha cambiado
-        self._fitness = None
+        t = iteration + 1
+        n = self.dimension  # para grados de libertad
+        x_new = self.position.copy()
+
+        for j in range(self.dimension):
+            xij = self.position[j]
+            xbj = best.position[j]
+
+            if mode == "forage":
+                G1 = np.random.normal(0, 1)
+                G2 = np.random.normal(0, 1)
+                ε1 = random.choice([-1, 1])
+                ε2 = random.choice([-1, 1])
+                K = np.random.chisquare(n)
+
+                # Forrajeo: Eq. (2)
+                step = G1 * xbj + ε2 * xij
+                scan = G2 * abs(step)
+                foot = ε1 * xbj
+                delta = scan + foot + K
+
+                x_new[j] = xij + delta
+
+            elif mode == "migrate":
+                ω = np.random.normal(0, n)
+                delta = ω * (xbj - xij)
+
+                # Migración: Eq. (3)
+                x_new[j] = xij + delta
+
+            # Clip
+            x_new[j] = np.clip(x_new[j], 0, 1)
+
+        # Reemplazo si mejora
+        new_fit = self.problem.evaluate(x_new)
+        if new_fit < self.fitness():
+            self.position = x_new
+            self._fitness = new_fit
     
     def copy(self, other):
         """Copia los valores de otro individuo a este."""
@@ -122,31 +134,24 @@ class FGO(MetaheuristicAlgorithm):
         """Actualiza la población en cada iteración."""
         iteration = len(self.convergence_curve)
         
-        # Ordenar la población por fitness
+        MPb = int(0.1 * self.population_size)
+        MPo = MPb
+        MPr = int(random.random() * self.population_size * (1 - MPb / self.population_size))
+        MPt = self.population_size - MPo - MPr
+        
         self.population.sort(key=lambda x: x.fitness())
         
-        best_flamingo = self.population[0]
-        
-        # Dividir la población en subgrupos (simulando bandadas de flamencos)
-        num_groups = 3
-        group_size = self.population_size // num_groups
-        
-        for g in range(num_groups):
-            start_idx = g * group_size
-            end_idx = (g + 1) * group_size if g < num_groups - 1 else self.population_size
-            
-            # Identificar el líder del grupo (el mejor del grupo)
-            group = self.population[start_idx:end_idx]
-            group.sort(key=lambda x: x.fitness())
-            group_leader = group[0]
-            
-            # Mover cada flamenco en el grupo
-            for i in range(start_idx, end_idx):
-                # Los flamencos siguen a su líder de grupo y también al líder global
-                if random.random() < 0.5:
-                    self.population[i].move(group_leader, iteration, self.max_iterations)
-                else:
-                    self.population[i].move(best_flamingo, iteration, self.max_iterations)
+        # Migración inicial: MPo mejores
+        for i in range(MPo):
+            self.population[i].move(self.population[0], iteration, self.max_iterations, mode="migrate")
+
+        # Forrajeo: intermedios
+        for i in range(MPo, MPo + MPr):
+            self.population[i].move(self.population[0], iteration, self.max_iterations, mode="forage")
+
+        # Migración final: MPt peores
+        for i in range(MPo + MPr, self.population_size):
+            self.population[i].move(self.population[0], iteration, self.max_iterations, mode="migrate")
         
         # Ordenar la población actualizada
         self.population.sort(key=lambda x: x.fitness())
