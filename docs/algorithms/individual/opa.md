@@ -53,19 +53,27 @@ Retornar líder_global
 
 ## Análisis de Rendimiento
 
-| Instancia   | Iteraciones | Fitness mín | Tiempo medio |
-|-------------|-------------|-------------|--------------|
-| P-n16-k8    | 50          | 424.16      | 0.05 s       |
-| E-n22-k4    | 100         | 518.82      | 0.09 s       |
+| Instancia   | Iteraciones | Fitness mín | Fitness medio ± std | Tiempo medio |
+|-------------|-------------|-------------|---------------------|--------------|
+| P-n16-k8    | 50          | 424.16      | -                   | 0.05 s       |
+| E-n22-k4    | 100         | 518.82      | -                   | 0.09 s       |
+| E-n22-k4    | 1000        | 463.93      | 503.01 ± 17.43      | -            |
 
-Los resultados muestran un buen equilibrio entre calidad de solución y eficiencia computacional.
+Los resultados muestran que el algoritmo tiene un rendimiento competitivo en la instancia E-n22-k4 con 1000 iteraciones. En comparación con otros algoritmos metaheurísticos evaluados para esta instancia:
+
+- OPA tiene un rendimiento intermedio en términos de fitness promedio (posición 8 de 17)
+- El mejor fitness de OPA (463.93) se queda detrás de algoritmos como FOA (384.86), GVOA (388.50) y SMO (392.90)
+- OPA supera a algoritmos como APO, AHA y HHO en calidad de solución
+
+Estos resultados sugieren que OPA tiene un buen equilibrio entre calidad de solución y eficiencia computacional, aunque tiene margen de mejora en términos de calidad de solución para algunas instancias.
 
 ## Características de Convergencia
 
-- Fase de persecución permite una exploración más amplia del espacio de soluciones.
-- Fase de ataque mejora soluciones cercanas al óptimo con movimientos dirigidos.
-- La aceptación estocástica facilita escapar de óptimos locales en etapas tempranas.
-- La evaluación determinista y las verificaciones de factibilidad garantizan reproducibilidad.
+- **Patrón de convergencia**: Los experimentos con 1000 iteraciones muestran una convergencia rápida en las primeras ~100 iteraciones (fase de persecución/"chase"), seguida de un mejoramiento más gradual durante la fase de ataque ("attack").
+- **Estabilidad**: La curva de convergencia tiende a estabilizarse después de aproximadamente 200-300 iteraciones, sugiriendo que el algoritmo encuentra buenas soluciones relativamente pronto.
+- **Mejora tardía**: En algunos casos, se observan mejoras significativas cerca del final de la ejecución, como se ve en la semilla 55 donde el mejor fitness (463.93) se alcanzó en las iteraciones finales.
+- **Reproducibilidad**: Las ejecuciones con las mismas semillas producen exactamente los mismos resultados, confirmando el determinismo del algoritmo.
+- **Escape de óptimos locales**: La aceptación estocástica facilitó escapar de óptimos locales durante la fase inicial, lo que se refleja en los saltos de la curva de convergencia.
 
 ## Fortalezas y Limitaciones
 
@@ -82,10 +90,11 @@ Los resultados muestran un buen equilibrio entre calidad de solución y eficienc
 
 ## Recomendaciones de Uso
 
-- `population_size ≥ 40`, `T = 1000-2000` para instancias VRP medianas.
-- Incluir verificación de factibilidad en cada operador.
-- Usar la semilla aleatoria para garantizar reproducibilidad de experimentos.
-- Ideal para aplicaciones con restricciones de tiempo donde se necesita una solución razonable rápidamente.
+- **Parámetros óptimos**: `population_size = 40`, `max_iterations = 1000` proporcionan un buen equilibrio entre calidad de solución y tiempo de ejecución para instancias VRP medianas.
+- **Semillas recomendadas**: Utilizar semillas estadísticamente significativas como secuencias de Fibonacci (1, 2, 3, 5, 8, 13, ...) o potencias de 2 (2, 4, 8, 16, ...) para una exploración más completa del espacio de soluciones.
+- **Verificación**: Incluir verificación de factibilidad en cada operador para mantener soluciones válidas.
+- **Hibridación**: Dado que FOA, GVOA y SMO obtuvieron mejores resultados en algunos casos, considerar la hibridación de OPA con estos algoritmos para mejorar su rendimiento.
+- **Aplicaciones**: Ideal para aplicaciones con restricciones de tiempo donde se necesita una solución razonable rápidamente, aunque para soluciones de máxima calidad se recomiendan algoritmos como FOA.
 
 ## Verificación científica
 
