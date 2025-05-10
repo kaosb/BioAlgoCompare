@@ -33,37 +33,41 @@ class SlimeMould(Individual):
         """Verifica si el individuo representa una solución factible."""
         return True  # En VRP todas las soluciones son factibles con nuestro decodificador
     
-    def move(self, best_mould, weights, z=0.03, t=1, max_t=100):
+    def move(self, best_mould, population, z=0.03, t=1, max_t=100):
         """
         Movimiento del moho del limo basado en el algoritmo SMA original.
 
         Args:
             best_mould: El mejor individuo encontrado hasta ahora.
-            weights: Lista de pesos de la población.
+            population: Lista de todos los individuos en la población.
             z: Probabilidad de exploración aleatoria.
             t: Iteración actual.
             max_t: Número total de iteraciones.
         """
         dim = self.dimension
+        epsilon = 1e-8
+        bF = best_mould.fitness()
+        fitness_values = [ind.fitness() for ind in population]
+        wF = max(fitness_values)
+        DF = bF
+        S_i = self.fitness()
+        p = math.tanh(abs((S_i - DF) / (bF - wF + epsilon)))
+
         r = random.random()
-        p = math.tanh(abs(self.fitness() - best_mould.fitness()))
         a = math.atanh(-t / max_t + 1)
         vb = np.random.uniform(-a, a, size=dim)
         vc = np.random.uniform(-1, 1, size=dim) * (1 - t / max_t)
 
-        # Movimiento
         if random.random() < z:
             self.position = np.random.uniform(0, 1, size=dim)
         else:
-            for i in range(dim):
-                if r < p:
-                    A = np.random.uniform(size=dim)
-                    B = np.random.uniform(size=dim)
-                    X_A = np.random.uniform(0, 1, size=dim)
-                    X_B = np.random.uniform(0, 1, size=dim)
-                    self.position[i] = best_mould.position[i] + vb[i] * weights[i] * (X_A[i] - X_B[i])
-                else:
-                    self.position[i] = vc[i] * self.position[i]
+            if r < p:
+                A, B = random.sample(population, 2)
+                X_A = A.position
+                X_B = B.position
+                self.position = best_mould.position + vb * self.weight * (X_A - X_B)
+            else:
+                self.position = vc * self.position
 
         # Clip en dominio [0,1]
         self.position = np.clip(self.position, 0, 1)
@@ -118,18 +122,18 @@ class SMA(MetaheuristicAlgorithm):
         """Actualiza los pesos de los mohos según su aptitud."""
         # Obtener todos los valores de fitness
         fitness_values = [m.fitness() for m in self.population]
-        
-        # Calcular valores normalizados (peor: 0, mejor: 1)
-        if max(fitness_values) == min(fitness_values):
-            normalized_fitness = [0.5 for _ in fitness_values]
-        else:
-            # Normalización para problemas de minimización
-            normalized_fitness = [(max(fitness_values) - f) / (max(fitness_values) - min(fitness_values) + 1e-10) 
-                                  for f in fitness_values]
-        
-        # Actualizar peso de cada moho
+        epsilon = 1e-8
+        bF = min(fitness_values)
+        wF = max(fitness_values)
+        med = np.median(fitness_values)
+
         for i, mould in enumerate(self.population):
-            mould.weight = normalized_fitness[i]
+            S_i = fitness_values[i]
+            rand_coeff = random.random()
+            if S_i <= med:
+                mould.weight = 1 + rand_coeff * math.log((bF - S_i) / (bF - wF + epsilon) + 1)
+            else:
+                mould.weight = 1 - rand_coeff * math.log((bF - S_i) / (bF - wF + epsilon) + 1)
     
     def update_population(self):
         """Actualiza la población en cada iteración."""
@@ -142,15 +146,12 @@ class SMA(MetaheuristicAlgorithm):
         # Factor de volatilidad que disminuye con las iteraciones
         z = self.z - current_iter * (0.03 / self.max_iterations)
         
-        # Obtener todos los pesos
-        weights = [m.weight for m in self.population]
-        
         # Actualizar cada moho
         for i in range(self.population_size):
             # No mover el mejor moho
             if self.population[i] is not self.best_solution:
                 # Mover según el algoritmo SMA
-                self.population[i].move(self.best_solution, weights, z, current_iter + 1, self.max_iterations)
+                self.population[i].move(self.best_solution, self.population, z, current_iter + 1, self.max_iterations)
                 
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
