@@ -1,6 +1,6 @@
 # Pseudocódigo de Algoritmos Metaheurísticos implementados
 
-Este documento recopila el pseudocódigo de los 11 algoritmos bioinspirados que hemos implementado, basado en los artículos científicos originales:
+Este documento recopila el pseudocódigo de los 12 algoritmos bioinspirados que hemos implementado, basado en los artículos científicos originales:
 
 ---
 
@@ -335,5 +335,50 @@ Retornar mejor
 ```
 
 ---
+
+## 12. Orca Predator Algorithm (OPA)
+
+**Paper:** Jiang et al. (2021), *Orca Predation Algorithm: A Novel Bio-inspired Algorithm for Global Optimization Problems*
+
+```
+Inicializar población de orcas con posiciones aleatorias
+Para t = 1 hasta T:
+  frac = t / T  # Fracción de iteraciones completadas
+  accept_prob = 0.3 * (1 - frac)  # Probabilidad de aceptación decreciente
+
+  Para cada orca X_i:
+    # Determinar fase según avance del algoritmo
+    phase = "chase" si frac < 0.5 else "attack"
+
+    Si phase == "chase":
+      # Fase de exploración (primera mitad de iteraciones)
+      # Operadores de exploración aleatorios tipo swap
+      Seleccionar aleatoriamente 2 índices i,j
+      Intercambiar valores X_i[i] ↔ X_i[j]
+
+      # Perturbaciones aleatorias para algunos elementos
+      Para algunos elementos aleatorios:
+        Aplicar pequeña perturbación ±0.1
+    Sino:
+      # Fase de ataque (segunda mitad de iteraciones)
+      # Mezcla ponderada con la mejor solución (líder)
+      Seleccionar subconjunto aleatorio de dimensiones
+      Copiar esos valores directamente del líder X_best
+      Realizar mezcla ponderada en otras dimensiones
+      X_i[k] = α·X_i[k] + (1-α)·X_best[k]
+
+    # Verificar factibilidad y evaluar nueva solución
+    Si no es válida:
+      Corregir con clipping al rango [0,1]
+
+    # Actualizar posición con probabilidad decreciente
+    Si new_fitness < fitness(X_i) o rand < accept_prob:
+      X_i = new_X_i
+      Si new_fitness < personal_best_fitness:
+        Actualizar personal_best
+
+  Actualizar mejor orca global (líder)
+Retornar mejor solución encontrada
+```
 
 *Referencias bibliográficas completas en la carpeta **`docs/references.bib`**.*

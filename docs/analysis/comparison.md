@@ -257,6 +257,7 @@ Este análisis exhaustivo proporciona una comprensión profunda del comportamien
 | EWA       | 478.27        | 0.83       |
 | GTO       | 481.68        | 0.58       |
 | MRFO      | 472.81        | 0.63       |
+| OPA       | 472.71        | 0.65       |
 | WOA       | 497.86        | 0.76       |
 | HOA/SHO   | 513.70        | 1.18       |
 | EGTO      | 553.01        | 0.38       |

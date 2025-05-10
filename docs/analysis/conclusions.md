@@ -19,7 +19,7 @@ Basado en nuestro análisis para el problema VRP E-n22-k4:
 2. **GVOA** (Griffon Vultures Optimization Algorithm): 423.11
 3. **FOA** (Fossa Optimization Algorithm): 443.23
 4. **SMO** (Starling Murmuration Optimizer): 458.78
-5. **EWA** (Earthworm Algorithm): 478.27
+5. **OPA** (Orca Predator Algorithm): 472.71
 
 ### Mejor Eficiencia (Calidad/Tiempo)
 1. **SMO**: Excelente calidad (458.78) con tiempo muy eficiente (0.50s)
@@ -34,6 +34,7 @@ Basado en nuestro análisis para el problema VRP E-n22-k4:
 3. **SMO** (Starling Murmuration Optimizer): 0.50s
 4. **SMA** (Slime Mould Algorithm): 0.54s
 5. **MRFO** (Manta Ray Foraging Optimization): 0.63s
+6. **OPA** (Orca Predator Algorithm): 0.65s
 
 ## Características de los Mejores Algoritmos
 
@@ -79,6 +80,7 @@ Basado en nuestro análisis para el problema VRP E-n22-k4:
    - Los algoritmos basados en aves rapaces/carroñeras (RRO, GVOA) logran la mejor calidad de soluciones
    - Los algoritmos basados en comportamiento de bandada (SMO) ofrecen excelente balance calidad/tiempo
    - Los algoritmos basados en comportamientos de búsqueda de alimento (FOA, MRFO) son generalmente efectivos para VRP
+   - Los algoritmos basados en depredadores marinos (OPA) muestran buen balance entre calidad y rendimiento computacional
    - Algoritmos basados en comportamientos sociales/manada muestran mayor variabilidad
 
 2. **Relación número de iteraciones y calidad**:

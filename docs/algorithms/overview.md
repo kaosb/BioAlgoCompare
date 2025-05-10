@@ -21,6 +21,7 @@ Este documento proporciona una visión general de todos los algoritmos metaheur�
 | RRO      | Raven Roosting Optimization | 2016 | Comportamiento de dormidero de los cuervos |
 | GVOA     | Griffon Vultures Optimization Algorithm | 2025 | Comportamiento de vuelo termal de buitres leonados |
 | SMO      | Starling Murmuration Optimizer | 2022 | Murmullos y comportamiento emergente de estorninos |
+| OPA      | Orca Predator Algorithm | 2021 | Estrategias de caza cooperativa de orcas |
 
 ## Rendimiento Comparativo
 
@@ -33,14 +34,15 @@ Basado en análisis exhaustivos, presentamos un resumen comparativo del rendimie
 | 1       | FOA       | 396.00        | 5.5%          | 10000       | 16.72      |
 | 2       | WOA       | 411.32        | 9.6%          | 10000       | 6.58       |
 | 3       | GTO       | 420.32        | 12.0%         | 10000       | 5.24       |
-| 4       | EWA       | 448.86        | 19.6%         | 10000       | 8.16       |
-| 5       | SMA       | 453.17        | 20.8%         | 1000        | 3.98       |
-| 6       | EGTO      | 459.08        | 22.3%         | 1000        | 0.37       |
-| 7       | HOA       | 466.02        | 24.2%         | 1000        | 1.14       |
-| 8       | APO       | 469.69        | 25.2%         | 1000        | 0.53       |
-| 9       | MRFO      | 470.19        | 25.3%         | 1000        | 0.63       |
-| 10      | FGO       | 478.50        | 27.5%         | 1000        | 2.66       |
-| 11      | HHO       | 491.71        | 31.0%         | 1000        | 0.59       |
+| 4       | OPA       | 472.71        | 25.9%         | 1000        | 0.65       |
+| 5       | EWA       | 448.86        | 19.6%         | 10000       | 8.16       |
+| 6       | SMA       | 453.17        | 20.8%         | 1000        | 3.98       |
+| 7       | EGTO      | 459.08        | 22.3%         | 1000        | 0.37       |
+| 8       | HOA       | 466.02        | 24.2%         | 1000        | 1.14       |
+| 9       | APO       | 469.69        | 25.2%         | 1000        | 0.53       |
+| 10      | MRFO      | 470.19        | 25.3%         | 1000        | 0.63       |
+| 11      | FGO       | 478.50        | 27.5%         | 1000        | 2.66       |
+| 12      | HHO       | 491.71        | 31.0%         | 1000        | 0.59       |
 
 *Nota: El óptimo conocido para E-n22-k4 es 375.28*
 
