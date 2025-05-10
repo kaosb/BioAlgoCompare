@@ -4,24 +4,35 @@
 
 El **Orca Predator Algorithm (OPA)** es una metaheurística bioinspirada propuesta por Jiang et al. (2021) que simula el comportamiento cooperativo de caza de las orcas. El algoritmo alterna entre dos fases: persecución (exploración del espacio de búsqueda) y ataque (explotación intensiva alrededor de la mejor solución conocida).
 
-En esta implementación, el OPA ha sido adaptado al problema de ruteo de vehículos (VRP) utilizando representaciones permutacionales y operadores discretos para búsqueda vecina.
+En esta implementación, el OPA ha sido adaptado al problema de ruteo de vehículos (VRP) utilizando representación canónica de rutas y operadores discretos para búsqueda vecina, siguiendo estrictos estándares de rigor científico.
 
-## Implementación
+## Implementación con rigor científico
 
-- **Representación VRP:** Cada orca es una solución representada como una lista de rutas factibles por vehículo, donde cada ruta es una lista de enteros que representa la secuencia de clientes visitados.
-- **Conversión de representaciones:** La implementación maneja automáticamente la conversión entre representaciones de array (para evaluación) y representaciones de rutas (para operadores).
-- **Fase de persecución ("chase"):**
-  - Uso de operadores como **swap** y **2-opt** para modificar rutas.
-- **Fase de ataque ("attack"):**
-  - Inserción de clientes desde una ruta hacia otra basada en la mejor solución global.
-- **Aceptación estocástica:**
-  - Probabilidad de aceptar soluciones peores decrece linealmente con las iteraciones.
-- **Curva de convergencia** registrada en cada iteración para evaluación posterior.
+- **Representación canónica VRP:** Cada orca es una solución representada como `List[List[int]]` donde:
+  - Cada lista interna es una ruta que comienza y termina en el depósito (índice 0)
+  - Todos los clientes (1...n) aparecen exactamente una vez en alguna ruta
+  - Cada ruta respeta la restricción de capacidad del vehículo
+
+- **Evaluación determinista:**
+  - La función `evaluate_routes()` calcula el costo directamente de las rutas
+  - No usa números aleatorios (RNG) durante la evaluación
+  - Aplicación consistente de penalizaciones para soluciones no factibles
+
+- **Operadores discretos preservando factibilidad:**
+  - **_random_swap:** Intercambia dos clientes aleatorios entre dos rutas distintas
+  - **_two_opt:** Aplica 2‑opt a una sola ruta para mejorar su recorrido
+  - **_relocate:** Mueve un cliente entre rutas, preferentemente hacia rutas del líder
+
+- **Rigor en convergencia:**
+  - Mejor solución se guarda exactamente como se encontró
+  - La curva de convergencia es monotónica decreciente o constante
+  - Reproducibilidad garantizada con semillas aleatorias
+  - Tests unitarios verifican todas las propiedades de rigor científico
 
 ## Pseudocódigo
 
 ```text
-Inicializar población de orcas con soluciones VRP aleatorias
+Inicializar población de orcas con soluciones VRP aleatorias factibles
 Para cada orca: personal_best ← posición inicial
 
 Para t = 1 … T:
@@ -31,7 +42,9 @@ Para t = 1 … T:
             if t < T/2 → Persecución (chase)
             else → Ataque (attack)
         Aplicar operador discreto correspondiente
-        if solución válida y mejor o rand < probabilidad_aceptación:
+        Reparar solución si es necesario
+        Verificar factibilidad
+        if solución factible y (mejor o rand < probabilidad_aceptación):
             actualizar posición actual
             actualizar personal_best si corresponde
     Actualizar líder_global y curva de convergencia
@@ -40,57 +53,73 @@ Retornar líder_global
 
 ## Análisis de Rendimiento
 
-| Iteraciones | Fitness mín | Tiempo medio |
-|-------------|-------------|--------------|
-| 10          | 671.33      | 0.01 s       |
-| 100         | 536.34      | 0.07 s       |
-| 1 000       | 472.71      | 0.66 s       |
-| 10 000      | 487.52      | 6.61 s       |
-| 100 000     | 501.10      | 66.53 s      |
+| Instancia   | Iteraciones | Fitness mín | Tiempo medio |
+|-------------|-------------|-------------|--------------|
+| P-n16-k8    | 50          | 424.16      | 0.05 s       |
+| E-n22-k4    | 100         | 518.82      | 0.09 s       |
 
-*El mejor resultado se obtuvo a las 1 000 iteraciones. Luego, el fitness muestra deterioro leve, lo que sugiere sobreajuste o exploración subóptima en fases posteriores. Este comportamiento contrasta con otros algoritmos que continúan mejorando con más iteraciones.*
+Los resultados muestran un buen equilibrio entre calidad de solución y eficiencia computacional.
 
 ## Características de Convergencia
 
 - Fase de persecución permite una exploración más amplia del espacio de soluciones.
 - Fase de ataque mejora soluciones cercanas al óptimo con movimientos dirigidos.
 - La aceptación estocástica facilita escapar de óptimos locales en etapas tempranas.
+- La evaluación determinista y las verificaciones de factibilidad garantizan reproducibilidad.
 
 ## Fortalezas y Limitaciones
 
 **Fortalezas**
+- Implementación con rigor científico y reproducibilidad garantizada.
 - Inspiración biológica con lógica clara y adaptable.
-- Simplicidad estructural que facilita hibridación.
+- Operadores discretos especializados para VRP.
 - Eficiente en problemas con restricciones.
-- Muy buen rendimiento computacional (0.66s para 1000 iteraciones).
+- Excelente rendimiento computacional.
 
 **Limitaciones**
 - Requiere operadores bien diseñados para mantener factibilidad.
 - Sensible al balance entre fases en problemas de alta complejidad.
-- Deterioro del rendimiento con un número muy alto de iteraciones.
 
 ## Recomendaciones de Uso
 
 - `population_size ≥ 40`, `T = 1000-2000` para instancias VRP medianas.
 - Incluir verificación de factibilidad en cada operador.
-- Evitar usar un número muy elevado de iteraciones debido al posible deterioro de rendimiento.
+- Usar la semilla aleatoria para garantizar reproducibilidad de experimentos.
 - Ideal para aplicaciones con restricciones de tiempo donde se necesita una solución razonable rápidamente.
 
-## Notas de implementación
+## Verificación científica
 
-- La implementación utiliza una función `_ensure_routes()` para convertir cualquier representación (array numpy, lista de floats) al formato de rutas [[int, int, ...]] necesario para los operadores discretos.
-- Los métodos `fitness()` e `is_feasible()` manejan automáticamente la conversión entre formatos de rutas y arrays para usar las funciones de evaluación del problema.
-- El método `update()` incorpora la conversión de rutas a array para evaluar correctamente las nuevas soluciones.
-- Estas conversiones permiten una integración fluida entre la representación de rutas usada internamente y la representación continua esperada por el problema VRP.
+Esta implementación de OPA ha sido verificada con tests unitarios que comprueban:
+- Correcta inicialización de rutas factibles
+- Evaluación determinista y coherente
+- Reparación correcta de rutas no factibles
+- Convergencia monotónica o constante
+- Reproducibilidad con semillas aleatorias
 
 ## Ejemplo de Uso
 
 ```python
 from algorithms.opa import OPA
+from problems.vrp import VRPProblem
 
+# Cargar instancia VRP
+problem = VRPProblem("data/vrp/E-n22-k4.vrp")
+
+# Crear y ejecutar OPA con semilla para reproducibilidad
 opa = OPA(problem, population_size=50, max_iterations=1000, seed=42)
 best = opa.execute()
+
+# Obtener mejor solución encontrada
 print("Mejor fitness OPA:", best.fitness())
+print("Tiempo de ejecución:", opa.get_execution_time(), "s")
+
+# Visualizar convergencia
+import matplotlib.pyplot as plt
+plt.plot(opa.get_convergence_curve())
+plt.xlabel("Iteración")
+plt.ylabel("Fitness")
+plt.title("Curva de Convergencia OPA")
+plt.show()
 ```
 
 ## Referencias

@@ -4,11 +4,11 @@ import math
 
 class VRPProblem:
     """Clase para representar y evaluar problemas de VRP (Vehicle Routing Problem)."""
-    
+
     def __init__(self, instance_path):
         """
         Inicializa el problema VRP desde un archivo de instancia.
-        
+
         Args:
             instance_path: Ruta al archivo de instancia VRP
         """
@@ -20,7 +20,8 @@ class VRPProblem:
         self.nodes = []  # Lista de coordenadas (x, y) de cada nodo
         self.demands = []  # Demanda de cada nodo
         self.distance_matrix = None
-        
+        self.penalty_factor = 1000.0  # Factor de penalización para rutas no factibles
+
         self.load_instance()
         self.compute_distance_matrix()
     
@@ -145,16 +146,104 @@ class VRPProblem:
     def evaluate(self, solution):
         """
         Evalúa una solución y retorna su fitness.
-        
+
         Args:
-            solution: Vector de valores continuos
-            
+            solution: Vector de valores continuos o lista de rutas
+
         Returns:
             fitness: Valor de fitness (menor es mejor)
         """
+        # Si es una lista de rutas, usar evaluación directa
+        if isinstance(solution, list) and len(solution) > 0 and isinstance(solution[0], list):
+            return self.evaluate_routes(solution)
+
+        # Si es un vector continuo, decodificar y evaluar
         routes, total_distance, is_feasible = self.decode_solution(solution)
         return total_distance
-    
+
+    def evaluate_routes(self, routes):
+        """
+        Evalúa directamente una solución de rutas.
+
+        Args:
+            routes: Lista de rutas (cada ruta es una lista de índices de nodos)
+
+        Returns:
+            fitness: Valor de fitness (menor es mejor)
+        """
+        total_distance = 0
+        penalty = 0
+
+        for route in routes:
+            # Calcular distancia de la ruta
+            route_distance = 0
+            for i in range(len(route) - 1):
+                route_distance += self.distance_matrix[route[i], route[i+1]]
+            total_distance += route_distance
+
+            # Calcular carga y verificar factibilidad
+            route_load = 0
+            for node in route[1:-1]:  # Excluir depósito al inicio y fin
+                route_load += self.demands[node]
+
+            # Aplicar penalización si excede capacidad
+            if route_load > self.capacity:
+                excess = route_load - self.capacity
+                penalty += excess * self.penalty_factor
+
+        # Verificar que todos los clientes están cubiertos
+        covered_nodes = set()
+        for route in routes:
+            for node in route[1:-1]:  # Excluir depósito
+                covered_nodes.add(node)
+
+        required_nodes = set(range(1, self.dimension))  # Todos excepto depósito
+        missing_nodes = required_nodes - covered_nodes
+
+        # Aplicar penalización por nodos faltantes
+        if missing_nodes:
+            penalty += len(missing_nodes) * self.penalty_factor * 10  # Mayor penalización por nodos faltantes
+
+        return total_distance + penalty
+
+    def routes_are_feasible(self, routes):
+        """
+        Verifica si una solución de rutas es factible.
+
+        Args:
+            routes: Lista de rutas (cada ruta es una lista de índices de nodos)
+
+        Returns:
+            bool: True si las rutas son factibles, False en caso contrario
+        """
+        # Verificar que todas las rutas respetan la capacidad
+        for route in routes:
+            route_load = 0
+            for node in route[1:-1]:  # Excluir depósito al inicio y fin
+                route_load += self.demands[node]
+
+            if route_load > self.capacity:
+                return False
+
+        # Verificar que todos los clientes están cubiertos
+        covered_nodes = set()
+        for route in routes:
+            for node in route[1:-1]:  # Excluir depósito
+                covered_nodes.add(node)
+
+        required_nodes = set(range(1, self.dimension))  # Todos excepto depósito
+        missing_nodes = required_nodes - covered_nodes
+
+        # Verificar duplicados (un nodo no debe aparecer en múltiples rutas)
+        all_nodes = []
+        for route in routes:
+            all_nodes.extend(route[1:-1])  # Excluir depósito
+
+        if len(all_nodes) != len(set(all_nodes)):
+            return False
+
+        return len(missing_nodes) == 0
+
     def get_dimension(self):
         """Retorna la dimensión del problema (número de nodos)."""
         return self.dimension - 1  # Excluir el depósito
@@ -169,6 +258,43 @@ class VRPProblem:
         dim = self.get_dimension()
         return np.random.rand(dim)
 
+    def random_routes(self):
+        """
+        Genera una solución aleatoria en forma de rutas para el problema VRP.
+        Usa una estrategia de construcción simplificada tipo Clarke-Wright.
+
+        Returns:
+            routes: Lista de rutas que respetan restricciones de capacidad
+        """
+        depot = self.depot_index
+        customers = list(range(1, self.dimension))
+        np.random.shuffle(customers)
+
+        routes = []
+        current_route = [depot]
+        current_load = 0
+
+        for customer in customers:
+            # Si agregar el cliente excede capacidad, cerrar ruta y comenzar nueva
+            if current_load + self.demands[customer] > self.capacity:
+                current_route.append(depot)  # Cerrar ruta volviendo al depósito
+                routes.append(current_route)
+
+                # Iniciar nueva ruta
+                current_route = [depot, customer]
+                current_load = self.demands[customer]
+            else:
+                # Agregar cliente a la ruta actual
+                current_route.append(customer)
+                current_load += self.demands[customer]
+
+        # Cerrar última ruta
+        if len(current_route) > 1:
+            current_route.append(depot)
+            routes.append(current_route)
+
+        return routes
+
     def is_valid(self, solution):
         """
         Verifica si una solución es válida.
@@ -176,14 +302,83 @@ class VRPProblem:
         con valores dentro del rango [0,1]
 
         Args:
-            solution: Vector de solución a verificar
+            solution: Vector de solución o lista de rutas a verificar
 
         Returns:
             bool: True si la solución es válida, False en caso contrario
         """
+        # Si es una lista de rutas, verificar directamente
+        if isinstance(solution, list) and len(solution) > 0 and isinstance(solution[0], list):
+            return self.routes_are_feasible(solution)
+
         # En el contexto de VRP con permutación/prioridad, consideramos válido
         # cualquier vector de la dimensión correcta con valores entre 0 y 1
         if len(solution) != self.get_dimension():
             return False
 
         return np.all(solution >= 0) and np.all(solution <= 1)
+
+    def repair_routes(self, routes):
+        """
+        Repara una solución de rutas para hacerla factible.
+
+        Args:
+            routes: Lista de rutas a reparar
+
+        Returns:
+            Lista de rutas reparadas
+        """
+        depot = self.depot_index
+
+        # Paso 1: Recolectar todos los clientes de todas las rutas
+        all_customers = []
+        for route in routes:
+            for node in route:
+                if node != depot:
+                    all_customers.append(node)
+
+        # Eliminar duplicados manteniendo el orden de aparición
+        seen = set()
+        unique_customers = [x for x in all_customers if x not in seen and not seen.add(x)]
+
+        # Paso 2: Verificar clientes faltantes
+        required_customers = set(range(1, self.dimension))
+        missing_customers = list(required_customers - set(unique_customers))
+
+        # Paso 3: Crear nuevas rutas factibles
+        new_routes = []
+        current_route = [depot]
+        current_load = 0
+
+        # Agregar primero los clientes de las rutas originales (sin duplicados)
+        for customer in unique_customers:
+            if current_load + self.demands[customer] > self.capacity:
+                # Cerrar ruta actual y comenzar nueva
+                current_route.append(depot)
+                new_routes.append(current_route)
+
+                current_route = [depot, customer]
+                current_load = self.demands[customer]
+            else:
+                current_route.append(customer)
+                current_load += self.demands[customer]
+
+        # Agregar clientes faltantes
+        for customer in missing_customers:
+            if current_load + self.demands[customer] > self.capacity:
+                # Cerrar ruta actual y comenzar nueva
+                current_route.append(depot)
+                new_routes.append(current_route)
+
+                current_route = [depot, customer]
+                current_load = self.demands[customer]
+            else:
+                current_route.append(customer)
+                current_load += self.demands[customer]
+
+        # Cerrar última ruta
+        if len(current_route) > 1:
+            current_route.append(depot)
+            new_routes.append(current_route)
+
+        return new_routes

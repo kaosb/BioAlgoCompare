@@ -4,36 +4,14 @@ import numpy as np
 import time
 from algorithms.base import Individual, MetaheuristicAlgorithm
 
-# ---------------------------------------------------------------------------
-# util para convertir cualquier representación 1‑D (np.ndarray o lista plana)
-# a la codificación de rutas [[clientes...]]
-def _ensure_routes(solution):
-    """
-    Convierte una solución devuelta por `problem.random_solution()` a formato
-    List[List[int]] requerido por los operadores discretos.  Maneja:
-      • np.ndarray -> [[1, 2, ...]] (convertimos valores float a índices)
-      • lista plana -> [[1, 2, ...]] (convertimos valores float a índices)
-      • lista de rutas (ya correcto) -> se devuelve igual
-    """
-    if isinstance(solution, np.ndarray):
-        # Para representación VRP: convertir a índices de 1..n en lugar de valores
-        indices = list(range(1, len(solution) + 1))
-        indices.sort(key=lambda i: solution[i-1])
-        return [indices]
-    elif solution and isinstance(solution[0], (float, int, np.integer, np.floating)):
-        indices = list(range(1, len(solution) + 1))
-        indices.sort(key=lambda i: solution[i-1] if i-1 < len(solution) else 0)
-        return [indices]
-    return solution
-
 class Orca(Individual):
-    """Una orca (solución VRP)."""
+    """Una orca (solución VRP) con representación basada en rutas."""
 
     def __init__(self, problem):
         self.problem = problem
-        self.position = _ensure_routes(self.problem.random_solution())
+        # Inicializar con rutas aleatorias directamente
+        self.position = self.problem.random_routes()
         self._fitness = None
-        self.velocity = None  # Se omite para implementación continua
         self.personal_best_position = copy.deepcopy(self.position)
         self.personal_best_fitness = self.fitness()
 
@@ -49,148 +27,112 @@ class Orca(Individual):
 
     def fitness(self):
         if self._fitness is None:
-            # Si la posición es una lista de rutas, convertirla a un vector para evaluate
-            if isinstance(self.position, list) and len(self.position) > 0 and isinstance(self.position[0], list):
-                # Forma inversa de _ensure_routes: convertir rutas a un array para evaluate
-                # Crear un array aleatorio
-                dim = self.problem.get_dimension()
-                vector = np.random.rand(dim)
-
-                # Las rutas contienen índices de nodos ordenados por prioridad
-                # Asignar valores crecientes a los nodos según su posición en las rutas
-                all_nodes = []
-                for route in self.position:
-                    for node in route:
-                        if node != 0 and node not in all_nodes:  # Excluir depósito
-                            all_nodes.append(node)
-
-                # Asignar valores crecientes para mantener el orden deseado
-                for i, node in enumerate(all_nodes):
-                    if 1 <= node <= dim:  # Verificar que el índice esté en rango
-                        vector[node-1] = i / (len(all_nodes) + 1)  # Valores entre 0 y 1
-
-                self._fitness = self.problem.evaluate(vector)
-            else:
-                self._fitness = self.problem.evaluate(self.position)
+            # Evaluación directa usando las rutas
+            self._fitness = self.problem.evaluate_routes(self.position)
         return self._fitness
 
     def is_feasible(self):
-        # Si la posición es una lista de rutas, convertirla a un vector para is_valid
-        if isinstance(self.position, list) and len(self.position) > 0 and isinstance(self.position[0], list):
-            # Convertir de manera similar a fitness()
-            dim = self.problem.get_dimension()
-            vector = np.random.rand(dim)
-
-            all_nodes = []
-            for route in self.position:
-                for node in route:
-                    if node != 0 and node not in all_nodes:  # Excluir depósito
-                        all_nodes.append(node)
-
-            for i, node in enumerate(all_nodes):
-                if 1 <= node <= dim:  # Verificar que el índice esté en rango
-                    vector[node-1] = i / (len(all_nodes) + 1)
-
-            return self.problem.is_valid(vector)
-        else:
-            return self.problem.is_valid(self.position)
+        return self.problem.routes_are_feasible(self.position)
 
     # --- util operators --------------------------------------------------
     def _random_swap(self, routes):
         """Intercambia dos clientes aleatorios entre dos rutas distintas."""
-        non_empty = [r for r in routes if len(r) > 0]
+        non_empty = [r for r in routes if len(r) > 2]  # Rutas con al menos un cliente
         if len(non_empty) < 2:
             return
         r1, r2 = random.sample(non_empty, 2)
-        i = random.randrange(len(r1))
-        j = random.randrange(len(r2))
+        # Elegir clientes aleatorios (excluyendo depósito al inicio y fin)
+        i = random.randrange(1, len(r1) - 1) if len(r1) > 2 else 1
+        j = random.randrange(1, len(r2) - 1) if len(r2) > 2 else 1
         r1[i], r2[j] = r2[j], r1[i]
 
     def _two_opt(self, route):
         """Aplica 2‑opt a una sola ruta."""
-        if len(route) < 4:
+        if len(route) < 4:  # Ruta debe tener al menos 2 clientes
             return
-        i, k = sorted(random.sample(range(len(route)), 2))
+        # Elegir dos posiciones dentro de la ruta (excluyendo depósito)
+        i = random.randrange(1, len(route) - 2)
+        k = random.randrange(i + 1, len(route) - 1)
+        # Invertir el segmento entre i y k
         route[i:k+1] = list(reversed(route[i:k+1]))
 
     def _relocate(self, routes, leader_routes):
         """
-        Mueve un cliente desde una ruta aleatoria a una posición de la mejor ruta
-        (o, si esta no tiene rutas no vacías, a cualquier otra ruta no vacía).
-        Si todas las rutas quedan vacías tras la operación se crea una nueva ruta.
+        Mueve un cliente desde una ruta aleatoria a otra posición.
+        Si se provee leader_routes, preferentemente inserta en una de estas rutas.
         """
-        # elegir ruta fuente con al menos 1 cliente
-        src_candidates = [r for r in routes if len(r) > 0]
+        # Identificar rutas con al menos un cliente
+        src_candidates = [r for r in routes if len(r) > 2]
         if not src_candidates:
-            return  # nada que mover
+            return  # No hay rutas con clientes
+
+        # Elegir ruta fuente y cliente a mover
         src = random.choice(src_candidates)
-        idx = random.randrange(len(src))
+        idx = random.randrange(1, len(src) - 1)  # Elegir un cliente (no depósito)
         cust = src.pop(idx)
 
-        # si la ruta fuente quedó vacía, elimínala para no tener rutas vacías
-        if len(src) == 0:
+        # Si la ruta fuente queda solo con depósitos, eliminarla
+        if len(src) <= 2:
             routes.remove(src)
 
-        # destino: preferir rutas no vacías del líder
-        dst_candidates = [r for r in leader_routes if len(r) > 0]
+        # Elegir ruta destino, preferentemente del líder
+        dst_candidates = []
+        if leader_routes:
+            dst_candidates = [r for r in leader_routes if r != src]
+        
+        # Si no hay rutas del líder, usar cualquier otra ruta existente
         if not dst_candidates:
-            dst_candidates = [r for r in routes if len(r) > 0]
+            dst_candidates = [r for r in routes if r != src]
 
-        # si aún no hay candidatas, crea una nueva ruta con el cliente movido
+        # Si no hay rutas destino, crear una nueva
         if not dst_candidates:
-            routes.append([cust])
+            new_route = [0, cust, 0]  # Nueva ruta con depósito - cliente - depósito
+            routes.append(new_route)
             return
 
+        # Insertar en la ruta destino
         dst = random.choice(dst_candidates)
-        insert_pos = random.randrange(len(dst) + 1)
+        insert_pos = random.randrange(1, len(dst))  # Posición después del depósito inicial
         dst.insert(insert_pos, cust)
 
-    def update(self, g_best, phase: str, accept_prob: float):
-        # Crear una nueva posición copiando la actual
-        new_pos = _ensure_routes(copy.deepcopy(self.position))
+    def update(self, g_best, phase, accept_prob):
+        """
+        Actualiza la posición de la Orca según la fase y probabilidad.
+        
+        Args:
+            g_best: Mejor posición global (rutas del líder)
+            phase: "chase" para exploración, "attack" para explotación
+            accept_prob: Probabilidad de aceptar soluciones peores
+        """
+        # Crear una copia de la posición actual para modificar
+        new_pos = copy.deepcopy(self.position)
 
-        # Exploración o explotación dependiendo de la fase
-        if phase == "chase":
+        # Aplicar operadores según la fase
+        if phase == "chase":  # Fase de exploración
             self._random_swap(new_pos)
             candidates_2opt = [r for r in new_pos if len(r) >= 4]
             if candidates_2opt:
                 route_for_2opt = random.choice(candidates_2opt)
                 self._two_opt(route_for_2opt)
-        else:
+        else:  # Fase de ataque (explotación)
             self._relocate(new_pos, g_best)
 
-        # Para verificar validez y evaluar, necesitamos convertir a formato array para el problema
-        if hasattr(self.problem, "repair"):
-            new_pos = self.problem.repair(new_pos)
-
-        # Verificar si la solución es factible
-        is_valid = True
-
-        # Evaluación especial para OPA que trabaja con rutas
-        # Convertir rutas a array para evaluate()
-        dim = self.problem.get_dimension()
-        vector = np.random.rand(dim)
-
-        all_nodes = []
-        for route in new_pos:
-            for node in route:
-                if node != 0 and node not in all_nodes:  # Excluir depósito
-                    all_nodes.append(node)
-
-        for i, node in enumerate(all_nodes):
-            if 1 <= node <= dim:
-                vector[node-1] = i / (len(all_nodes) + 1)
-
-        # Evaluar con el vector convertido
-        is_valid = self.problem.is_valid(vector)
-        if not is_valid:
-            return
-
-        new_fit = self.problem.evaluate(vector)
-
+        # Reparar solución si el problema ofrece esa funcionalidad
+        if hasattr(self.problem, "repair_routes"):
+            new_pos = self.problem.repair_routes(new_pos)
+        
+        # Verificar factibilidad
+        if not self.problem.routes_are_feasible(new_pos):
+            return  # No actualizar si no es factible
+        
+        # Evaluar nueva posición
+        new_fit = self.problem.evaluate_routes(new_pos)
+        
+        # Actualizar si mejora o según probabilidad de aceptación
         if new_fit < self.fitness() or random.random() < accept_prob:
-            self.position = _ensure_routes(new_pos)
+            self.position = new_pos
             self._fitness = new_fit
+            # Actualizar mejor posición personal si corresponde
             if new_fit < self.personal_best_fitness:
                 self.personal_best_position = copy.deepcopy(new_pos)
                 self.personal_best_fitness = new_fit
@@ -200,6 +142,8 @@ class OPA(MetaheuristicAlgorithm):
     """
     Orca Predator Algorithm (OPA) – Adaptado al problema de ruteo de vehículos (VRP)
     Inspirado en: Jiang et al. (2021)
+    
+    Esta implementación trabaja directamente con la representación de rutas para VRP.
     """
 
     def __init__(self, problem, population_size=40, max_iterations=1000, seed=None):
@@ -215,28 +159,37 @@ class OPA(MetaheuristicAlgorithm):
         self.convergence_curve = []
 
     def initialize_population(self) -> None:
+        """Inicializa la población de orcas con soluciones aleatorias."""
         if self.seed is not None:
             random.seed(self.seed)
             np.random.seed(self.seed)
+        
         self.population = [Orca(self.problem) for _ in range(self.population_size)]
         self.best_solution = min(self.population, key=lambda o: o.fitness()).copy()
         self.convergence_curve = [self.best_solution.fitness()]
         self.current_iter = 0
 
     def update_population(self) -> None:
+        """Actualiza la población para una iteración."""
+        # Determinar fase actual y probabilidad de aceptación
         frac = self.current_iter / self.max_iterations
-        leader_pos = copy.deepcopy(self.best_solution.position)
-
+        phase = "chase" if frac < 0.5 else "attack"
         accept_prob = 0.3 * (1 - frac)
-
+        
+        # Obtener la mejor posición global actual
+        leader_pos = copy.deepcopy(self.best_solution.position)
+        
+        # Actualizar cada orca
         for orca in self.population:
-            phase = "chase" if frac < 0.5 else "attack"
             orca.update(leader_pos, phase, accept_prob)
-
-        self.best_solution = min(self.population, key=lambda o: o.fitness()).copy()
-        previous_best = self.convergence_curve[-1]
-        current_best = self.best_solution.fitness()
-        self.convergence_curve.append(min(previous_best, current_best))
+        
+        # Actualizar mejor solución global
+        current_best = min(self.population, key=lambda o: o.fitness())
+        if current_best.is_better_than(self.best_solution):
+            self.best_solution = current_best.copy()
+        
+        # Actualizar curva de convergencia
+        self.convergence_curve.append(self.best_solution.fitness())
         self.current_iter += 1
         
     def execute(self):

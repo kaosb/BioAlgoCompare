@@ -222,24 +222,17 @@ def main(algorithm, instance, iterations, population, runs, seed, visualize, sav
             best_solution = results['best_solution'][best_idx]
             
             # Visualizar solución
-            # Manejar caso especial de OPA que devuelve posición en formato de rutas
-            if algo == "OPA" and isinstance(best_solution.position, list) and isinstance(best_solution.position[0], list):
-                # Convertir de lista de rutas a representación continua para VRP
-                dim = problem.get_dimension()
-                vector = np.random.rand(dim)
-
-                all_nodes = []
-                for route in best_solution.position:
-                    for node in route:
-                        if node != 0 and node not in all_nodes:  # Excluir depósito
-                            all_nodes.append(node)
-
-                for i, node in enumerate(all_nodes):
-                    if 1 <= node <= dim:  # Verificar que el índice esté en rango
-                        vector[node-1] = i / (len(all_nodes) + 1)
-
-                routes, total_distance, _ = problem.decode_solution(vector)
+            # Manejar algoritmos que devuelven posición en formato de rutas
+            if isinstance(best_solution.position, list) and isinstance(best_solution.position[0], list):
+                # Ya tenemos las rutas directamente
+                routes = best_solution.position
+                # Calcular la distancia total (sin penalizaciones)
+                total_distance = 0
+                for route in routes:
+                    for i in range(len(route) - 1):
+                        total_distance += problem.distance_matrix[route[i], route[i+1]]
             else:
+                # Convertir representación continua a rutas
                 routes, total_distance, _ = problem.decode_solution(best_solution.position)
 
             plt = plot_vrp_solution(problem, routes, f"{algo} - {instance} - Distancia: {total_distance:.2f}")
