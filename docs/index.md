@@ -4,6 +4,12 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 ## Estructura de la Documentación
 
+### Documentación Principal
+
+- [README del proyecto](../README.md) - Visión general del proyecto
+- [Análisis de Iteraciones](/ANALISIS_ITERACIONES.md) - Impacto del número de iteraciones
+- [Conclusiones de Optimización](/CONCLUSIONES_OPTIMIZACION.md) - Conclusiones generales
+
 ### Guías de Usuario
 
 - [Inicio Rápido](guides/getting_started.md) - Primeros pasos con BioAlgoCompare
@@ -41,6 +47,10 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 - [Impacto de Iteraciones](analysis/iteration_impact.md) - Análisis del impacto del número de iteraciones
 - [Análisis Comparativo](analysis/comparison.md) - Comparación exhaustiva entre algoritmos
+  - Incluye comparativas de algoritmos por familia biológica
+  - Análisis detallado de versiones modificadas (SMO, GVOA)
+  - Recomendaciones por contexto de uso
+- [Conclusiones de Optimización](analysis/conclusions.md) - Conclusiones generales y recomendaciones prácticas
 
 ### Guías para Desarrolladores
 
@@ -56,6 +66,10 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Referencia de Scripts](technical/scripts_reference.md) - Documentación completa de los scripts ejecutables
 - [Estado de Consolidación](technical/consolidation_status.md) - Estado actual de la consolidación de scripts
 
+## Resultados de Experimentos
+
+Los resultados de todas las ejecuciones experimentales se encuentran en el directorio `/results/` organizados por fecha y configuración.
+
 ## Acerca del Proyecto
 
 BioAlgoCompare es una plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
@@ -65,4 +79,7 @@ El proyecto forma parte de una investigación académica para la Jornada Chilena
 ## Referencias
 
 - [Repositorio en GitHub](https://github.com/kaosb/BioAlgoCompare)
-- [README del proyecto](../README.md)
+
+---
+
+*Última actualización: 10 de mayo de 2025*

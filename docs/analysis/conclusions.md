@@ -119,3 +119,7 @@ Basado en nuestro análisis para el problema VRP E-n22-k4:
    - Ejecuciones múltiples para análisis estadístico
 
 Este análisis confirma que tanto la selección del algoritmo como el número de iteraciones son factores críticos en el rendimiento de las metaheurísticas. Los algoritmos basados en el comportamiento de aves rapaces/carroñeras (RRO, GVOA) destacan por su capacidad para alcanzar soluciones de alta calidad, mientras que los basados en comportamiento de bandada (SMO) ofrecen un excelente balance entre calidad y eficiencia computacional.
+
+---
+
+*Análisis actualizado el 10 de mayo de 2025*
