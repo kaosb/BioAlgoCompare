@@ -23,6 +23,10 @@ from algorithms.mrfo import MRFO  # Manta Ray Foraging Optimization
 from algorithms.sma import SMA  # Slime Mould Algorithm
 from algorithms.gto import GTO  # Gorilla Troops Optimizer
 from algorithms.ewa import EWA  # Earthworm Algorithm
+from algorithms.aha import AHA  # Artificial Hummingbird Algorithm
+from algorithms.rro import RRO  # Raven Roosting Optimization
+from algorithms.gvoa import GVOA  # Griffon Vultures Optimization Algorithm
+from algorithms.smo import SMO  # Starling Murmuration Optimizer
 
 # Aliases para mantener la compatibilidad con código antiguo
 HOA = SHO  # Spotted Hyena Optimizer (anteriormente Hyena Optimization Algorithm)
@@ -60,7 +64,15 @@ def run_algorithm(algo_name, problem, population, iterations, run_seed, run_id):
             algo = GTO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
         elif algo_name == 'ewa':
             algo = EWA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
-        
+        elif algo_name == 'aha':
+            algo = AHA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'rro':
+            algo = RRO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'gvoa':
+            algo = GVOA(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+        elif algo_name == 'smo':
+            algo = SMO(problem, population_size=population, max_iterations=iterations, seed=run_seed)
+
         # Ejecutar algoritmo
         start_time = time.time()
         best_solution = algo.execute()
@@ -85,7 +97,7 @@ def run_algorithm(algo_name, problem, population, iterations, run_seed, run_id):
 def run_algo_wrapper(args):
     return run_algorithm(*args)
 @click.command()
-@click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'all']), 
+@click.option('--algorithm', '-a', type=click.Choice(['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'aha', 'rro', 'gvoa', 'smo', 'all']),
               required=True, help='Algoritmo a ejecutar')
 @click.option('--instance', '-i', required=True, help='Nombre de la instancia VRP')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones')
@@ -120,7 +132,7 @@ def main(algorithm, instance, iterations, population, runs, seed, visualize, sav
     # Determinar qué algoritmos ejecutar
     algorithms_to_run = []
     if algorithm == 'all':
-        algorithms_to_run = ['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa']
+        algorithms_to_run = ['hoa', 'apo', 'egto', 'fgo', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'aha', 'rro', 'gvoa', 'smo']
     else:
         algorithms_to_run = [algorithm]
     

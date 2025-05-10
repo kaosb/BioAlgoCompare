@@ -158,3 +158,32 @@ class VRPProblem:
     def get_dimension(self):
         """Retorna la dimensión del problema (número de nodos)."""
         return self.dimension - 1  # Excluir el depósito
+
+    def random_solution(self):
+        """
+        Genera una solución aleatoria para el problema VRP.
+
+        Returns:
+            solution: Vector de valores continuos aleatorios en el rango [0,1]
+        """
+        dim = self.get_dimension()
+        return np.random.rand(dim)
+
+    def is_valid(self, solution):
+        """
+        Verifica si una solución es válida.
+        Para VRP con representación de permutación, verificamos que sea un vector
+        con valores dentro del rango [0,1]
+
+        Args:
+            solution: Vector de solución a verificar
+
+        Returns:
+            bool: True si la solución es válida, False en caso contrario
+        """
+        # En el contexto de VRP con permutación/prioridad, consideramos válido
+        # cualquier vector de la dimensión correcta con valores entre 0 y 1
+        if len(solution) != self.get_dimension():
+            return False
+
+        return np.all(solution >= 0) and np.all(solution <= 1)
