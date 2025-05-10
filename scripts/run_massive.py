@@ -37,14 +37,19 @@ from algorithms.mrfo import MRFO
 from algorithms.sma import SMA
 from algorithms.gto import GTO
 from algorithms.ewa import EWA
+from algorithms.aha import AHA
+from algorithms.rro import RRO
+from algorithms.gvoa import GVOA
+from algorithms.smo import SMO
+from algorithms.opa import OPA
 
 @click.command()
 @click.option('--runs', '-r', default=1000, help='Número de ejecuciones por algoritmo/instancia')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones por ejecución')
 @click.option('--population', '-p', default=40, help='Tamaño de población')
 @click.option('--seed', '-s', default=42, help='Semilla para reproducibilidad')
-@click.option('--algorithm', '-a', multiple=True, 
-              type=click.Choice(['hoa', 'sho', 'apo', 'egto', 'fgo', 'fsa', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'all']),
+@click.option('--algorithm', '-a', multiple=True,
+              type=click.Choice(['hoa', 'sho', 'apo', 'egto', 'fgo', 'fsa', 'foa', 'woa', 'hho', 'mrfo', 'sma', 'gto', 'ewa', 'aha', 'rro', 'gvoa', 'smo', 'opa', 'all']),
               default=['all'], help='Algoritmos a ejecutar')
 @click.option('--instances', '-i', multiple=True, 
               help='Instancias a evaluar (sin extensión)')
@@ -90,7 +95,12 @@ def main(runs, iterations, population, seed, algorithm, instances, parallel, res
             'mrfo': MRFO,
             'sma': SMA,
             'gto': GTO,
-            'ewa': EWA
+            'ewa': EWA,
+            'aha': AHA,
+            'rro': RRO,
+            'gvoa': GVOA,
+            'smo': SMO,
+            'opa': OPA
         }
     else:
         algo_classes = {
@@ -106,7 +116,12 @@ def main(runs, iterations, population, seed, algorithm, instances, parallel, res
             'mrfo': MRFO,
             'sma': SMA,
             'gto': GTO,
-            'ewa': EWA
+            'ewa': EWA,
+            'aha': AHA,
+            'rro': RRO,
+            'gvoa': GVOA,
+            'smo': SMO,
+            'opa': OPA
         }
         algo_dict = {algo: algo_classes[algo] for algo in algorithm}
     

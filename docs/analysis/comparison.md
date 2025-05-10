@@ -144,21 +144,23 @@ Observaciones destacadas:
 
 ## 5. Clasificación Algoritmos por Rendimiento Final
 
-Considerando los resultados con 10000 iteraciones (o 1000 cuando no disponible):
+Considerando los resultados con mayor número de iteraciones disponibles:
 
-| Ranking | Algoritmo | Mejor Fitness | Gap al Óptimo | Tiempo (10000 iter.) |
-|---------|-----------|---------------|---------------|----------------------|
-| 1       | FOA       | 396.00        | 5.5%          | 16.72s               |
-| 2       | WOA       | 411.32        | 9.6%          | 6.58s                |
-| 3       | GTO       | 420.32        | 12.0%         | 5.24s                |
-| 4       | EWA       | 448.86        | 19.6%         | 8.16s                |
-| 5       | SMA       | 453.17*       | 20.8%*        | -                    |
-| 6       | EGTO      | 459.08*       | 22.3%*        | -                    |
-| 7       | HOA       | 466.02*       | 24.2%*        | -                    |
-| 8       | APO       | 469.69*       | 25.2%*        | -                    |
-| 9       | MRFO      | 470.19*       | 25.3%*        | -                    |
-| 10      | FGO       | 478.50*       | 27.5%*        | -                    |
-| 11      | HHO       | 491.71*       | 31.0%*        | -                    |
+| Ranking | Algoritmo | Mejor Fitness | Gap al Óptimo | Iteraciones | Tiempo (s) |
+|---------|-----------|---------------|---------------|-------------|------------|
+| 1       | FOA       | 384.86        | 2.6%          | 10000       | 18.54      |
+| 2       | GVOA      | 388.50        | 3.5%          | 10000       | 6.11       |
+| 3       | SMO       | 392.90        | 4.7%          | 100000      | 50.05      |
+| 4       | WOA       | 399.98        | 6.6%          | 100000      | 99.53      |
+| 5       | GTO       | 425.79        | 13.5%         | 10000       | 5.67       |
+| 6       | SMA       | 421.80        | 12.4%         | 1000        | 0.54       |
+| 7       | AHA       | 434.59        | 15.8%         | 1000        | 2.56       |
+| 8       | HOA       | 440.55        | 17.4%         | 1000        | 1.13       |
+| 9       | FGO       | 462.03        | 23.1%         | 1000        | 2.59       |
+| 10      | EWA       | 468.06        | 24.7%         | 1000        | 0.80       |
+| 11      | OPA       | 472.71        | 26.0%         | 1000        | 0.66       |
+| 12      | HHO       | 475.13        | 26.6%         | 1000        | 0.65       |
+| 13      | EGTO      | 504.91        | 34.5%         | 1000        | 0.37       |
 
 *Resultados basados en 1000 iteraciones
 
@@ -166,12 +168,13 @@ Considerando los resultados con 10000 iteraciones (o 1000 cuando no disponible):
 
 | Ranking | Algoritmo | Mejor Fitness | Tiempo (s) | Relación Fitness/Tiempo |
 |---------|-----------|---------------|------------|-------------------------|
-| 1       | GTO       | 420.32        | 5.24       | 80.21                   |
-| 2       | WOA       | 411.32        | 6.58       | 62.51                   |
-| 3       | EWA       | 448.86        | 8.16       | 55.01                   |
-| 4       | FOA       | 396.00        | 16.72      | 23.68                   |
-| 5       | EGTO      | 459.08*       | 0.37*      | -                       |
-| 6       | SMA       | 453.17*       | 3.98*      | -                       |
+| 1       | SMA       | 421.80        | 0.54       | 781.11                  |
+| 2       | GVOA      | 388.50        | 6.11       | 63.58                   |
+| 3       | GTO       | 425.79        | 5.67       | 75.09                   |
+| 4       | SMO       | 392.90        | 50.05      | 7.85                    |
+| 5       | FOA       | 384.86        | 18.54      | 20.76                   |
+| 6       | WOA       | 399.98        | 99.53      | 4.02                    |
+| 7       | OPA       | 472.71        | 0.66       | 716.23                  |
 
 *Resultados basados en 1000 iteraciones, no comparable directamente
 
@@ -250,22 +253,20 @@ Este análisis exhaustivo proporciona una comprensión profunda del comportamien
 
 | Algoritmo | Mejor Fitness | Tiempo (s) |
 |-----------|---------------|------------|
+| GVOA      | 409.52        | 0.60       |
+| FOA       | 416.85        | 1.90       |
+| SMA       | 421.80        | 0.54       |
+| GTO       | 426.29        | 0.58       |
+| AHA       | 434.59        | 2.56       |
+| WOA       | 436.29        | 0.64       |
+| HOA/SHO   | 440.55        | 1.13       |
+| SMO       | 446.76        | 0.49       |
+| FGO/FSA   | 462.03        | 2.59       |
+| EWA       | 468.06        | 0.80       |
+| OPA       | 472.71        | 0.66       |
+| HHO       | 475.13        | 0.65       |
+| EGTO      | 504.91        | 0.37       |
 | RRO       | 406.94        | 48.85      |
-| GVOA      | 423.11        | 2.34       |
-| FOA       | 443.23        | 2.01       |
-| SMO       | 458.78        | 0.50       |
-| EWA       | 478.27        | 0.83       |
-| GTO       | 481.68        | 0.58       |
-| MRFO      | 472.81        | 0.63       |
-| OPA       | 472.71        | 0.65       |
-| WOA       | 497.86        | 0.76       |
-| HOA/SHO   | 513.70        | 1.18       |
-| EGTO      | 553.01        | 0.38       |
-| APO       | 519.79        | 0.54       |
-| HHO       | 494.21        | 0.66       |
-| SMA       | 482.26        | 0.54       |
-| FGO/FSA   | 475.79        | 2.72       |
-| AHA       | 610.64        | 2.61       |
 
 ### SMO Original vs Modificado
 

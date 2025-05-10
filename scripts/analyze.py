@@ -62,6 +62,11 @@ from algorithms.mrfo import MRFO
 from algorithms.sma import SMA
 from algorithms.gto import GTO
 from algorithms.ewa import EWA
+from algorithms.aha import AHA
+from algorithms.rro import RRO
+from algorithms.gvoa import GVOA
+from algorithms.smo import SMO
+from algorithms.opa import OPA
 
 # Todos los algoritmos disponibles
 ALGORITHMS = {
@@ -77,7 +82,12 @@ ALGORITHMS = {
     'mrfo': MRFO,
     'sma': SMA,
     'gto': GTO,
-    'ewa': EWA
+    'ewa': EWA,
+    'aha': AHA,
+    'rro': RRO,
+    'gvoa': GVOA,
+    'smo': SMO,
+    'opa': OPA
 }
 
 # Comando principal
