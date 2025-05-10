@@ -21,16 +21,20 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Visión General](algorithms/overview.md) - Descripción general de todos los algoritmos
 - [Pseudocódigo](algorithms/pseudocode.md) - Pseudocódigo de los algoritmos implementados
 - Documentación Individual de Algoritmos:
+  - [Artificial Hummingbird Algorithm (AHA)](algorithms/individual/aha.md)
   - [Artificial Protozoa Optimizer (APO)](algorithms/individual/apo.md)
   - [Earthworm Algorithm (EWA)](algorithms/individual/ewa.md)
   - [Enhanced Gorilla Troops Optimization (EGTO)](algorithms/individual/egto.md)
   - [Flamingo Search Algorithm (FSA/FGO)](algorithms/individual/fsa.md)
   - [Fossa Optimization Algorithm (FOA)](algorithms/individual/foa.md)
   - [Gorilla Troops Optimization (GTO)](algorithms/individual/gto.md)
+  - [Griffon Vultures Optimization Algorithm (GVOA)](algorithms/individual/gvoa.md)
   - [Harris Hawks Optimization (HHO)](algorithms/individual/hho.md)
   - [Manta Ray Foraging Optimization (MRFO)](algorithms/individual/mrfo.md)
+  - [Raven Roosting Optimization (RRO)](algorithms/individual/rro.md)
   - [Slime Mould Algorithm (SMA)](algorithms/individual/sma.md)
   - [Spotted Hyena Optimizer (SHO)](algorithms/individual/sho.md)
+  - [Starling Murmuration Optimizer (SMO)](algorithms/individual/smo.md)
   - [Whale Optimization Algorithm (WOA)](algorithms/individual/woa.md)
 
 ### Informes de Análisis

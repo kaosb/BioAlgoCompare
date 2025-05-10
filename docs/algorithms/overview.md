@@ -6,10 +6,10 @@ Este documento proporciona una visión general de todos los algoritmos metaheur�
 
 | Acrónimo | Nombre Completo | Año | Inspiración Biológica |
 |----------|-----------------|------|----------------------|
-| SHO      | Spotted Hyena Optimizer | 2024 | Estrategias de caza cooperativa de las hienas |
+| SHO      | Spotted Hyena Optimizer | 2017 | Estrategias de caza cooperativa de las hienas |
 | APO      | Artificial Protozoa Optimizer | 2024 | Comportamiento de movimiento y división de protozoarios |
 | EGTO     | Enhanced Gorilla Troops Optimization | 2024 | Comportamiento social de gorilas con componentes de PSO |
-| FSA      | Flamingo Search Algorithm | 2025 | Comportamiento social y de filtración de los flamencos |
+| FSA      | Flamingo Search Algorithm | 2021 | Comportamiento social y de filtración de los flamencos |
 | FOA      | Fossa Optimization Algorithm | 2024 | Estrategias de caza y territorialidad de las fosasas |
 | WOA      | Whale Optimization Algorithm | 2016 | Estrategia de alimentación de ballenas jorobadas |
 | HHO      | Harris Hawks Optimization | 2019 | Comportamiento de caza cooperativa de halcones |
@@ -17,6 +17,10 @@ Este documento proporciona una visión general de todos los algoritmos metaheur�
 | SMA      | Slime Mould Algorithm | 2020 | Comportamiento del moho viscoso buscando alimento |
 | GTO      | Gorilla Troops Optimization | 2021 | Jerarquía y comportamiento social de gorilas |
 | EWA      | Earthworm Algorithm | 2018 | Movimientos de los gusanos de tierra |
+| AHA      | Artificial Hummingbird Algorithm | 2022 | Comportamiento de vuelo y forrajeo de colibríes |
+| RRO      | Raven Roosting Optimization | 2016 | Comportamiento de dormidero de los cuervos |
+| GVOA     | Griffon Vultures Optimization Algorithm | 2025 | Comportamiento de vuelo termal de buitres leonados |
+| SMO      | Starling Murmuration Optimizer | 2022 | Murmullos y comportamiento emergente de estorninos |
 
 ## Rendimiento Comparativo
 

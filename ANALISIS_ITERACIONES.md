@@ -21,6 +21,8 @@ Este análisis examina el impacto del número de iteraciones en el rendimiento d
 | WOA       | 536.99        | 497.02          | 497.86           | 7.44%        | -0.17%         |
 | AHA       | 658.22        | 564.27          | 610.64           | 14.27%       | -8.22%         |
 | RRO       | 599.06        | 528.05          | 406.94           | 11.85%       | 22.94%         |
+| GVOA      | 631.47        | 517.56          | 423.11           | 18.04%       | 18.25%         |
+| SMO       | 634.50        | 563.87          | 458.78           | 11.13%       | 18.64%         |
 
 ### Tiempos de Ejecución (segundos)
 
@@ -39,6 +41,8 @@ Este análisis examina el impacto del número de iteraciones en el rendimiento d
 | WOA       | 0.01          | 0.07            | 0.76             | 7.0x         | 10.9x          |
 | AHA       | 0.03          | 0.26            | 2.61             | 8.7x         | 10.0x          |
 | RRO       | 0.43          | 4.69            | 48.85            | 10.9x        | 10.4x          |
+| GVOA      | 0.02          | 0.22            | 2.34             | 11.0x        | 10.6x          |
+| SMO       | 0.01          | 0.05            | 0.50             | 5.0x         | 10.0x          |
 
 ## Análisis por Algoritmo
 
@@ -67,8 +71,20 @@ Este análisis examina el impacto del número de iteraciones en el rendimiento d
 
 ### AHA (Artificial Hummingbird Algorithm)
 - **Rendimiento inconsistente**: Peor con 10 iteraciones (658.22), mejora con 100 (564.27), pero empeora con 1000 (610.64)
-- Tiempo de ejecución relativamente alto 
+- Tiempo de ejecución relativamente alto
 - No muestra beneficio claro al aumentar iteraciones
+
+### GVOA (Griffon Vultures Optimization Algorithm)
+- **Mejora sostenida excepcional**: Mantiene tasa de mejora similar en ambas etapas (18.04% y 18.25%)
+- Excelente progresión (631.47 → 517.56 → 423.11) con mejora total del 32.99%
+- Segundo mejor fitness general con 1000 iteraciones (423.11)
+- Tiempo de ejecución moderado (2.34s para 1000 iteraciones)
+
+### SMO (Starling Murmuration Optimizer)
+- **Mejora destacada en fase tardía**: Gran salto entre 100 y 1000 iteraciones (18.64%)
+- Buena progresión general (634.50 → 563.87 → 458.78) con mejora total del 27.7%
+- Excelente eficiencia computacional (0.50s para 1000 iteraciones)
+- Buen balance entre calidad de solución y velocidad de ejecución
 
 ## Comportamiento en 10000 iteraciones (datos parciales)
 
@@ -100,19 +116,21 @@ Notablemente:
    - RRO es significativamente más costoso computacionalmente (10x más lento que otros)
 
 3. **Mejores algoritmos para VRP**:
-   - **Mejor calidad global**: RRO con 1000 iteraciones (406.94) y FOA/GTO con 10000 iteraciones (~383)
-   - **Mejor balance calidad/tiempo**: FOA con 1000 iteraciones (443.23 en 2.01s)
+   - **Mejor calidad global**: RRO con 1000 iteraciones (406.94), GVOA con 1000 iteraciones (423.11) y FOA/GTO con 10000 iteraciones (~383)
+   - **Mejor balance calidad/tiempo**: SMO con 1000 iteraciones (458.78 en 0.50s) y FOA con 1000 iteraciones (443.23 en 2.01s)
    - **Mejor con pocas iteraciones**: FGO y MRFO obtienen buenos resultados incluso con 10 iteraciones
 
 4. **Recomendaciones de uso**:
    - Para exploraciones rápidas: MRFO o FGO con 10-100 iteraciones
-   - Para soluciones de alta calidad con tiempo limitado: FOA con 1000 iteraciones
+   - Para soluciones de alta calidad con tiempo limitado: SMO o FOA con 1000 iteraciones
+   - Para soluciones óptimas con tiempo moderado: GVOA con 1000 iteraciones
    - Para soluciones óptimas sin restricción de tiempo: RRO con 1000+ iteraciones o GTO/FOA con 10000 iteraciones
 
 5. **Comportamiento por familias de algoritmos**:
-   - Los algoritmos basados en comportamiento de búsqueda de alimento (FOA, MRFO) parecen funcionar mejor
-   - Los algoritmos basados en comportamiento de manada/social (HOA, GTO) muestran variabilidad
-   - Los algoritmos híbridos como RRO muestran mejores resultados con más iteraciones
-   - AHA (basado en colibríes) muestra rendimiento inconsistente con diferentes números de iteraciones
+   - **Aves rapaces/carroñeras**: Excelente desempeño (RRO, GVOA) con mejoras sostenidas al aumentar iteraciones
+   - **Comportamiento de bandada/conjunto**: SMO muestra buen equilibrio entre calidad y eficiencia
+   - **Búsqueda de alimento**: (FOA, MRFO) parecen funcionar mejor en términos generales
+   - **Comportamiento de manada/social**: (HOA, GTO) muestran variabilidad
+   - **Vuelo singular**: AHA (colibríes) muestra rendimiento inconsistente con diferentes números de iteraciones
 
 Este análisis demuestra la importancia de seleccionar no solo el algoritmo adecuado sino también el número óptimo de iteraciones según las restricciones de tiempo y calidad requeridas.
