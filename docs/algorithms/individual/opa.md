@@ -9,11 +9,12 @@ En esta implementación, el OPA ha sido adaptado al problema de ruteo de vehícu
 ## Implementación
 
 - **Representación VRP:** Cada orca es una solución representada como una lista de rutas factibles por vehículo, donde cada ruta es una lista de enteros que representa la secuencia de clientes visitados.
-- **Fase de persecución ("chase"):**  
+- **Conversión de representaciones:** La implementación maneja automáticamente la conversión entre representaciones de array (para evaluación) y representaciones de rutas (para operadores).
+- **Fase de persecución ("chase"):**
   - Uso de operadores como **swap** y **2-opt** para modificar rutas.
-- **Fase de ataque ("attack"):**  
+- **Fase de ataque ("attack"):**
   - Inserción de clientes desde una ruta hacia otra basada en la mejor solución global.
-- **Aceptación estocástica:**  
+- **Aceptación estocástica:**
   - Probabilidad de aceptar soluciones peores decrece linealmente con las iteraciones.
 - **Curva de convergencia** registrada en cada iteración para evaluación posterior.
 
@@ -43,11 +44,11 @@ Retornar líder_global
 |-------------|-------------|--------------|
 | 10          | 671.33      | 0.01 s       |
 | 100         | 536.34      | 0.07 s       |
-| 1 000       | 472.71      | 0.65 s       |
-| 10 000      | 555.16      | 6.71 s       |
-| 100 000     | 501.10      | 67.87 s      |
+| 1 000       | 472.71      | 0.66 s       |
+| 10 000      | 487.52      | 6.61 s       |
+| 100 000     | 501.10      | 66.53 s      |
 
-*El mejor resultado se obtuvo a las 1 000 iteraciones. Luego, el fitness muestra deterioro leve, lo que sugiere sobreajuste o exploración subóptima en fases posteriores.*
+*El mejor resultado se obtuvo a las 1 000 iteraciones. Luego, el fitness muestra deterioro leve, lo que sugiere sobreajuste o exploración subóptima en fases posteriores. Este comportamiento contrasta con otros algoritmos que continúan mejorando con más iteraciones.*
 
 ## Características de Convergencia
 
@@ -61,23 +62,33 @@ Retornar líder_global
 - Inspiración biológica con lógica clara y adaptable.
 - Simplicidad estructural que facilita hibridación.
 - Eficiente en problemas con restricciones.
+- Muy buen rendimiento computacional (0.66s para 1000 iteraciones).
 
 **Limitaciones**
 - Requiere operadores bien diseñados para mantener factibilidad.
 - Sensible al balance entre fases en problemas de alta complejidad.
+- Deterioro del rendimiento con un número muy alto de iteraciones.
 
 ## Recomendaciones de Uso
 
-- `population_size ≥ 40`, `T ≥ 2 000` para instancias VRP medianas.
+- `population_size ≥ 40`, `T = 1000-2000` para instancias VRP medianas.
 - Incluir verificación de factibilidad en cada operador.
-- Usar reinicio poblacional o intensificación local si la convergencia se estanca.
+- Evitar usar un número muy elevado de iteraciones debido al posible deterioro de rendimiento.
+- Ideal para aplicaciones con restricciones de tiempo donde se necesita una solución razonable rápidamente.
+
+## Notas de implementación
+
+- La implementación utiliza una función `_ensure_routes()` para convertir cualquier representación (array numpy, lista de floats) al formato de rutas [[int, int, ...]] necesario para los operadores discretos.
+- Los métodos `fitness()` e `is_feasible()` manejan automáticamente la conversión entre formatos de rutas y arrays para usar las funciones de evaluación del problema.
+- El método `update()` incorpora la conversión de rutas a array para evaluar correctamente las nuevas soluciones.
+- Estas conversiones permiten una integración fluida entre la representación de rutas usada internamente y la representación continua esperada por el problema VRP.
 
 ## Ejemplo de Uso
 
 ```python
 from algorithms.opa import OPA
 
-opa = OPA(problem, population_size=50, max_iterations=2000, seed=42)
+opa = OPA(problem, population_size=50, max_iterations=1000, seed=42)
 best = opa.execute()
 print("Mejor fitness OPA:", best.fitness())
 ```
@@ -85,4 +96,4 @@ print("Mejor fitness OPA:", best.fitness())
 ## Referencias
 
 - Jiang, Y., Wu, Q., Zhu, S., & Zhang, L. (2021). Orca predation algorithm: A novel bio-inspired algorithm for global optimization problems. *Expert Systems with Applications*, 188, 116026. https://doi.org/10.1016/j.eswa.2021.116026
-- [Análisis comparativo de todos los algoritmos](../../COMPARATIVA_GLOBAL.md)
+- [Análisis comparativo de todos los algoritmos](../../analysis/comparison.md)
