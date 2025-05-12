@@ -9,6 +9,8 @@ import os
 
 # Add parent directory to path to allow imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# ruff: noqa: E402
 from utils.fixed_method import perform_statistical_analysis_report
 
 
