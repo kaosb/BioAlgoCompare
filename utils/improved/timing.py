@@ -123,22 +123,54 @@ def instrument_run_algorithm_task(original_task_function: Callable) -> Callable:
     
     return instrumented_run_algorithm_task
 
+def finalize_timing():
+    """
+    Finaliza la medición de tiempos y devuelve el tiempo promedio global por iteración.
+    También escribe este valor en el manifest.json.
+
+    Returns:
+        float: Tiempo promedio global por iteración o None si no hay datos
+    """
+    global _iteration_times, _is_active
+
+    # Verificar si está activo
+    if not _is_active:
+        return None
+
+    # Calcular el tiempo promedio global
+    avg_iter_time_overall = None
+    times = get_iteration_times()
+
+    if times:
+        # Extraer todos los tiempos de iteración
+        all_times = [entry["avg_iter_time"] for entry in times]
+        if all_times:
+            avg_iter_time_overall = sum(all_times) / len(all_times)
+
+    return avg_iter_time_overall
+
 def cleanup_timing():
     """Limpia y restaura el estado original después de la medición."""
     global _manager, _iteration_times, _time_lock, _is_active, _original_function
-    
+
     # Solo limpiar si está activo
     if not _is_active:
-        return
-    
+        return None
+
+    # Obtener el tiempo promedio antes de limpiar
+    avg_iter_time = finalize_timing()
+
     # Restaurar variables
     _is_active = False
     _manager = None
     _iteration_times = None
     _time_lock = None
     _original_function = None
-    
+
     logger.debug("Sistema de medición de tiempos limpiado")
+
+    # Devolver el tiempo promedio
+    return avg_iter_time
 
 def calculate_avg_summary():
     """

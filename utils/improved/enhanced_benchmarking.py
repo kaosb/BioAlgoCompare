@@ -231,24 +231,24 @@ def _run_algorithm_task(args):
         best_solution = algorithm.execute()
         execution_time = time.time() - start_time
 
-        # Si son las primeras 5 ejecuciones, medir tiempo promedio por iteración
-        if run_id <= 5:
-            avg_iter_time = execution_time / iterations
-            new_entry = {
-                "algorithm": algo_class.__name__,
-                "instance": instance_name,
-                "run_id": run_id,
-                "avg_iter_time": avg_iter_time,
-                "total_time": execution_time,
-                "iterations": iterations
-            }
+        # Para todas las ejecuciones, medir tiempo promedio por iteración
+        # (para pruebas, quitamos la restricción de las primeras 5)
+        avg_iter_time = execution_time / iterations
+        new_entry = {
+            "algorithm": algo_class.__name__,
+            "instance": instance_name,
+            "run_id": run_id,
+            "avg_iter_time": avg_iter_time,
+            "total_time": execution_time,
+            "iterations": iterations
+        }
 
-            # Usar lock para acceso sincronizado a la lista compartida
-            if _time_lock:
-                with _time_lock:
-                    _iteration_times.append(new_entry)
-            else:
+        # Usar lock para acceso sincronizado a la lista compartida
+        if _time_lock:
+            with _time_lock:
                 _iteration_times.append(new_entry)
+        else:
+            _iteration_times.append(new_entry)
 
         # Preparar resultado
         result = {
@@ -607,6 +607,19 @@ def create_summary_dataframe(benchmark_results):
     """Crea un DataFrame con el resumen de los resultados del benchmark"""
     summary_data = []
 
+    # Intentar obtener los tiempos promedio por iteración
+    try:
+        from utils.improved.timing import calculate_avg_summary
+        avg_times = calculate_avg_summary()
+        # Crear un diccionario para acceso rápido
+        avg_times_dict = {
+            (item["algorithm"], item["instance"]): item["avg_iter_time"]
+            for item in avg_times
+        }
+    except Exception as e:
+        logger.warning(f"No se pudieron obtener tiempos promedio por iteración: {str(e)}")
+        avg_times_dict = {}
+
     for result in benchmark_results:
         if not result.fitness_values:  # Omitir resultados vacíos
             continue
@@ -630,6 +643,11 @@ def create_summary_dataframe(benchmark_results):
         if result.success_rate is not None:
             row["Success (%)"] = result.success_rate
 
+        # Añadir tiempo promedio por iteración si está disponible
+        algo_inst_key = (result.algorithm_name, result.instance_name)
+        if algo_inst_key in avg_times_dict:
+            row["avg_iter_time"] = avg_times_dict[algo_inst_key]
+
         summary_data.append(row)
 
     # Crear DataFrame
@@ -637,7 +655,7 @@ def create_summary_dataframe(benchmark_results):
         # Si no hay datos, crear un DataFrame vacío con las columnas requeridas
         summary_df = pd.DataFrame(columns=[
             "Algorithm", "Instance", "Runs", "Best", "Mean", "Std", "Time", "Time_Std",
-            "Gap (%)", "Success (%)"
+            "Gap (%)", "Success (%)", "avg_iter_time"
         ])
     else:
         summary_df = pd.DataFrame(summary_data)
