@@ -81,4 +81,4 @@ results/**/*
 backup/
 */backup/
 **/backup/
-algorithms/backup/
+algorithms/backup/.coverage*
