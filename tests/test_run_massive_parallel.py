@@ -41,9 +41,16 @@ def test_run_massive_non_parallel():
         ]
 
         try:
-            # Ejecutar el script
+            # Configurar el entorno para añadir el proyecto a PYTHONPATH
+            env = os.environ.copy()
+            # Usar el separador de ruta correcto según el sistema operativo
+            separator = os.pathsep
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            env["PYTHONPATH"] = project_root + (separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else "")
+
+            # Ejecutar el script con el entorno modificado
             subprocess.run(
-                cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
             )
 
             # Verificar que se creó el manifest.json
@@ -114,9 +121,16 @@ def test_run_massive_parallel():
         ]
 
         try:
-            # Ejecutar el script
+            # Configurar el entorno para añadir el proyecto a PYTHONPATH
+            env = os.environ.copy()
+            # Usar el separador de ruta correcto según el sistema operativo
+            separator = os.pathsep
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            env["PYTHONPATH"] = project_root + (separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else "")
+
+            # Ejecutar el script con el entorno modificado
             process = subprocess.run(
-                cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
             )
 
             stdout = process.stdout.decode()

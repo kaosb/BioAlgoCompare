@@ -18,16 +18,27 @@ def test_crossover_operations():
     # Crear soluciones de prueba
     solution1 = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
     solution2 = np.array([0.9, 0.8, 0.7, 0.6, 0.5])
-    
+
     # Test de cruce binario simulado (SBX)
     result = operators.sbx_crossover(solution1, solution2, probability=1.0, distribution_index=20)
-    
+
     # Verificar que el resultado es del tipo y forma esperados
     assert isinstance(result, np.ndarray)
     assert result.shape == solution1.shape
-    
+
     # Verificar que el resultado está en el rango [0, 1]
     assert np.all(result >= 0) and np.all(result <= 1)
+
+    # Test para cubrir el caso en que y1 > y2 (línea 30)
+    solution3 = np.array([0.9, 0.8, 0.7, 0.6, 0.5])
+    solution4 = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+
+    # Forzamos np.random.random() a devolver 0.5 para entrar en la condición
+    np.random.seed(42)
+    result2 = operators.sbx_crossover(solution3, solution4, probability=1.0, distribution_index=20)
+
+    # Verificar que el resultado está en el rango [0, 1]
+    assert np.all(result2 >= 0) and np.all(result2 <= 1)
 
 
 def test_mutation_operations():

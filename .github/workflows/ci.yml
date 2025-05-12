@@ -40,9 +40,12 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install pytest pytest-cov
+        # Install the package in development mode to ensure imports work correctly
+        pip install -e .
     - name: Test with pytest
       run: |
-        pytest -q -m "not slow"
+        # Run with PYTHONPATH set to current directory to ensure all modules are found
+        PYTHONPATH=$PYTHONPATH:$(pwd) pytest -q -m "not slow"
 
   coverage-report:
     runs-on: ubuntu-latest
@@ -59,9 +62,12 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install pytest pytest-cov
+        # Install the package in development mode to ensure imports work correctly
+        pip install -e .
     - name: Generate coverage report
       run: |
-        pytest -m "not slow" --cov=algorithms,problems,utils --cov-report=xml --cov-fail-under=50
+        # Run with PYTHONPATH set to current directory to ensure all modules are found
+        PYTHONPATH=$PYTHONPATH:$(pwd) pytest -m "not slow" --cov=algorithms,problems,utils --cov-report=xml --cov-fail-under=55
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
