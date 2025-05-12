@@ -114,7 +114,9 @@ def test_feasibility_check():
     routes = problem.random_routes()
 
     # Verificar que las rutas generadas son factibles
-    assert problem.routes_are_feasible(routes)
+    is_feasible, errors = problem.routes_are_feasible(routes)
+    assert is_feasible
+    assert len(errors) == 0
 
     # Crear una ruta infactible (excede capacidad)
     infeasible_route = [
@@ -122,14 +124,18 @@ def test_feasibility_check():
         + list(range(1, problem.dimension))
         + [problem.depot_index]
     ]
-    assert not problem.routes_are_feasible(infeasible_route)
+    is_feasible, errors = problem.routes_are_feasible(infeasible_route)
+    assert not is_feasible
+    assert any("excede capacidad" in msg for msg in errors)
 
     # Crear una ruta con cliente faltante
     missing_client_routes = [
         [problem.depot_index, 1, problem.depot_index],
         [problem.depot_index, 3, 4, 5, problem.depot_index],
     ]
-    assert not problem.routes_are_feasible(missing_client_routes)
+    is_feasible, errors = problem.routes_are_feasible(missing_client_routes)
+    assert not is_feasible
+    assert any("Nodos faltantes" in msg for msg in errors)
 
 
 def test_repair_mechanism():
@@ -148,7 +154,9 @@ def test_repair_mechanism():
     repaired_routes = problem.repair_routes(infeasible_routes)
 
     # Verificar que las rutas reparadas son factibles
-    assert problem.routes_are_feasible(repaired_routes)
+    is_feasible, errors = problem.routes_are_feasible(repaired_routes)
+    assert is_feasible
+    assert len(errors) == 0
 
 
 def test_different_instances():
