@@ -189,6 +189,11 @@ def _run_algorithm_task(args):
     """Función para ejecutar un algoritmo como parte de un benchmark paralelo"""
     global _iteration_times, _time_lock
 
+    # Inicializar sistema de medición de tiempos en el proceso worker
+    from utils.improved.timing import initialize_timing
+    if "SHARED_TIMES" not in globals():
+        initialize_timing()      # asegura lista compartida en el proceso worker
+
     (
         algo_class,
         instance_name,
@@ -293,12 +298,23 @@ def _run_algorithm_task(args):
             # Guardar a CSV
             convergence_df.to_csv(csv_file, index=False)
 
+        # Finalizar timing para enviar los datos al Manager principal
+        from utils.improved.timing import finalize_timing
+        finalize_timing()            # envía tiempos del worker al Manager
+
         return result
 
     except Exception as e:
         logger.error(
             f"Error en ejecución {run_id} de {algo_class.__name__} para {instance_name}: {str(e)}"
         )
+        # Finalizar timing incluso en caso de error
+        try:
+            from utils.improved.timing import finalize_timing
+            finalize_timing()
+        except:
+            pass
+
         return {
             "algorithm": algo_class.__name__ if algo_class else "Unknown",
             "instance": instance_name,
