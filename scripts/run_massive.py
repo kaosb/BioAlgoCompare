@@ -36,6 +36,7 @@ from utils.improved.enhanced_benchmarking import (
     cleanup_timing,
     calculate_avg_summary
 )
+from utils.improved.timing import initialize_timing, finalize_timing
 
 # Importar algoritmos
 from algorithms.sho import SHO  # Previously HOA
@@ -215,6 +216,9 @@ def main(
     logger.info(f"Tamaño de población: {population}")
     logger.info(f"Semilla base: {seed}")
 
+    # Inicializar el sistema de medición de tiempos
+    initialize_timing()
+
     # Establecer semillas globales si se proporciona una semilla
     if seed is not None:
         import random
@@ -359,6 +363,43 @@ def main(
 
                 # Calcular promedios por algoritmo e instancia
                 avg_summary = calculate_avg_summary()
+
+                # Actualizar el CSV con los tiempos promedio por iteración
+                summary_path = Path(output_dir) / "massive_benchmark_summary.csv"
+                if summary_path.exists():
+                    try:
+                        # Leer CSV existente
+                        import pandas as pd
+                        df = pd.read_csv(summary_path)
+
+                        # Añadir o actualizar columna de tiempo promedio por iteración
+                        for entry in avg_summary:
+                            mask = (df["Algorithm"] == entry["algorithm"]) & (df["Instance"] == entry["instance"])
+                            if mask.any():
+                                df.loc[mask, "avg_iter_time"] = entry["avg_iter_time"]
+
+                        # Guardar CSV actualizado
+                        df.to_csv(summary_path, index=False)
+                        logger.info(f"CSV actualizado con tiempos promedio por iteración: {summary_path}")
+                    except Exception as e:
+                        logger.warning(f"No se pudo actualizar el CSV con tiempos por iteración: {str(e)}")
+
+                # Actualizar el manifest con los tiempos promedio por iteración
+                if Path(manifest_path).exists():
+                    try:
+                        with open(manifest_path, "r") as f:
+                            manifest_data = json.load(f)
+
+                        # Añadir tiempos promedio por iteración
+                        manifest_data["avg_iter_times"] = avg_summary
+
+                        # Guardar manifest actualizado
+                        with open(manifest_path, "w") as f:
+                            json.dump(manifest_data, f, indent=2)
+
+                        logger.info("Manifest actualizado con datos de tiempos por iteración")
+                    except Exception as e:
+                        logger.warning(f"No se pudo actualizar el manifest con tiempos por iteración: {str(e)}")
             else:
                 logger.warning("No se registraron mediciones de tiempo por iteración")
                 avg_summary = []
@@ -366,45 +407,6 @@ def main(
             logger.error(f"Error al obtener tiempos de iteración: {str(e)}")
             recorded_times = []
             avg_summary = []
-
-            # Actualizar el CSV con los tiempos promedio por iteración
-            summary_path = Path(output_dir) / "massive_benchmark_summary.csv"
-            if summary_path.exists():
-                try:
-                    # Leer CSV existente
-                    import pandas as pd
-                    df = pd.read_csv(summary_path)
-
-                    # Añadir o actualizar columna de tiempo promedio por iteración
-                    for entry in avg_summary:
-                        mask = (df["Algorithm"] == entry["algorithm"]) & (df["Instance"] == entry["instance"])
-                        if mask.any():
-                            df.loc[mask, "avg_iter_time"] = entry["avg_iter_time"]
-
-                    # Guardar CSV actualizado
-                    df.to_csv(summary_path, index=False)
-                    logger.info(f"CSV actualizado con tiempos promedio por iteración: {summary_path}")
-                except Exception as e:
-                    logger.warning(f"No se pudo actualizar el CSV con tiempos por iteración: {str(e)}")
-
-            # Actualizar el manifest con los tiempos promedio por iteración
-            if Path(manifest_path).exists():
-                try:
-                    with open(manifest_path, "r") as f:
-                        manifest_data = json.load(f)
-
-                    # Añadir tiempos promedio por iteración
-                    manifest_data["avg_iter_times"] = avg_summary
-
-                    # Guardar manifest actualizado
-                    with open(manifest_path, "w") as f:
-                        json.dump(manifest_data, f, indent=2)
-
-                    logger.info("Manifest actualizado con datos de tiempos por iteración")
-                except Exception as e:
-                    logger.warning(f"No se pudo actualizar el manifest con tiempos por iteración: {str(e)}")
-        else:
-            logger.warning("No se registraron mediciones de tiempo por iteración")
 
         # Mostrar resultado
         if report_path:
@@ -425,8 +427,37 @@ def main(
 
         logger.error(traceback.format_exc())
     finally:
-        # Limpiar el sistema de medición de tiempos
+        # Finalizar y limpiar el sistema de medición de tiempos
         try:
+            # Obtener los tiempos registrados
+            times = get_iteration_times()
+
+            # Calcular el tiempo promedio global por iteración
+            avg_iter_time_overall = None
+            if times:
+                all_times = [entry["avg_iter_time"] for entry in times]
+                if all_times:
+                    avg_iter_time_overall = sum(all_times) / len(all_times)
+                    logger.info(f"Tiempo promedio global por iteración: {avg_iter_time_overall:.6f} segundos")
+
+            # Actualizar el manifest con el tiempo promedio global por iteración
+            if avg_iter_time_overall and Path(manifest_path).exists():
+                try:
+                    with open(manifest_path, "r") as f:
+                        manifest_data = json.load(f)
+
+                    # Añadir el tiempo promedio global por iteración
+                    manifest_data["avg_iter_time_overall"] = avg_iter_time_overall
+
+                    # Guardar manifest actualizado
+                    with open(manifest_path, "w") as f:
+                        json.dump(manifest_data, f, indent=2)
+
+                    logger.info(f"Manifest actualizado con tiempo promedio: {avg_iter_time_overall:.6f} segundos")
+                except Exception as e:
+                    logger.warning(f"No se pudo actualizar el manifest con el tiempo promedio global: {str(e)}")
+
+            # Ahora podemos finalizar y limpiar
             cleanup_timing()
         except Exception as e:
             logger.warning(f"No se pudo limpiar el sistema de medición de tiempos: {str(e)}")
