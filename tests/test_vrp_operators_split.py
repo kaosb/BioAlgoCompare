@@ -95,6 +95,6 @@ def test_vrp_route_feasibility():
     route3 = [0, 1, 2, 3, 1, 0]
     
     # Verificar factibilidad
-    assert vrp_operators.check_route_capacity(route1, demands, capacity) == True
-    assert vrp_operators.check_route_capacity(route2, demands, capacity) == True
-    assert vrp_operators.check_route_capacity(route3, demands, capacity) == False
+    assert vrp_operators.check_route_capacity(route1, demands, capacity) is True
+    assert vrp_operators.check_route_capacity(route2, demands, capacity) is True
+    assert vrp_operators.check_route_capacity(route3, demands, capacity) is False
