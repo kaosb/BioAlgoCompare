@@ -180,6 +180,9 @@ def main(
     original_run_task = _run_algorithm_task
     iteration_times = []
 
+    # Crear un lock para acceso sincronizado a iteration_times
+    time_lock = mp.Manager().Lock() if mp.current_process().name == 'MainProcess' else None
+
     def new_run_algorithm_task(args):
         """Envuelve la función original para medir tiempos por iteración y usar semillas por proceso"""
         (
@@ -204,14 +207,21 @@ def main(
         # Si los primeros 5 runs, medimos tiempo promedio por iteración
         if run_id <= 5 and "error" not in result:
             avg_iter_time = total_time / iterations
-            iteration_times.append({
+            new_entry = {
                 "algorithm": result["algorithm"],
                 "instance": result["instance"],
                 "run_id": run_id,
                 "avg_iter_time": avg_iter_time,
                 "total_time": total_time,
                 "iterations": iterations
-            })
+            }
+
+            # Usar un lock para evitar problemas con acceso concurrente a iteration_times
+            if time_lock:
+                with time_lock:
+                    iteration_times.append(new_entry)
+            else:
+                iteration_times.append(new_entry)
 
         return result
 
@@ -363,6 +373,18 @@ def main(
             report_path = str(output_path / "massive_benchmark_report.html")
         else:
             # Ejecutar normalmente sin perfil
+            # Verificar si el CSV existe y tiene la columna Instance antes de ejecutar el análisis completo
+            summary_path = Path(output_dir) / "massive_benchmark_summary.csv"
+            if summary_path.exists():
+                import pandas as pd
+                try:
+                    df = pd.read_csv(summary_path)
+                    if "Instance" not in df.columns:
+                        logger.warning("'Instance' missing – forcing rewrite of headers")
+                        df.to_csv(summary_path, index=False, header=True)
+                except Exception as e:
+                    logger.error(f"Error al verificar CSV: {str(e)}")
+
             report_path = run_complete_analysis(
                 algo_dict,
                 valid_instances,
@@ -421,12 +443,37 @@ def main(
                 with open(manifest_path, "r") as f:
                     manifest_data = json.load(f)
 
-                # Añadir tiempos promedio por iteración
-                manifest_data["avg_iter_times"] = avg_summary
+                # Añadir tiempos promedio por iteración (si hay datos)
+                if iteration_times:
+                    # Calcular promedios por algoritmo e instancia
+                    avg_iter_times = {}
+                    for entry in iteration_times:
+                        key = (entry["algorithm"], entry["instance"])
+                        if key not in avg_iter_times:
+                            avg_iter_times[key] = []
+                        avg_iter_times[key].append(entry["avg_iter_time"])
+
+                    # Calcular promedio final
+                    avg_summary = []
+                    for (algo, inst), times in avg_iter_times.items():
+                        avg_summary.append({
+                            "algorithm": algo,
+                            "instance": inst,
+                            "avg_iter_time": sum(times) / len(times),
+                            "samples": len(times)
+                        })
+
+                    # Añadir al manifest
+                    manifest_data["avg_iter_times"] = avg_summary
+                else:
+                    # Crear un valor predeterminado si no hay datos de tiempos
+                    manifest_data["avg_iter_times"] = []
 
                 # Guardar manifest actualizado
                 with open(manifest_path, "w") as f:
                     json.dump(manifest_data, f, indent=2)
+
+                logger.info(f"Manifest actualizado con datos de tiempos por iteración")
             except Exception as e:
                 logger.error(f"Error al actualizar manifest con tiempos por iteración: {str(e)}")
 
