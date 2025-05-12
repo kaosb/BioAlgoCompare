@@ -468,7 +468,7 @@ def run_massive_benchmark(
         num_processes = 1
 
     # Función para guardar el estado actual del benchmark
-    def save_checkpoint():
+    def save_checkpoint(silent=False):
         checkpoint_data = {
             "timestamp": datetime.now().isoformat(),
             "results": [result.to_dict() for result in benchmark_results],
@@ -486,7 +486,8 @@ def run_massive_benchmark(
         with gzip.open(checkpoint_file, "wt") as f:
             json.dump(checkpoint_data, f)
 
-        logger.info(f"Checkpoint guardado: {checkpoint_file}")
+        if not silent:
+            logger.info(f"Checkpoint guardado: {checkpoint_file}")
 
     # Guardar checkpoint inicial
     save_checkpoint()
@@ -567,7 +568,7 @@ def run_massive_benchmark(
             if checkpoint_counter >= checkpoint_interval:
                 for res in benchmark_results:
                     res.compute_metrics()
-                save_checkpoint()
+                save_checkpoint(silent=True)  # Guardar sin mensaje para reducir ruido
                 checkpoint_counter = 0
 
     except KeyboardInterrupt:
@@ -580,7 +581,7 @@ def run_massive_benchmark(
             result.compute_metrics()
             result.mark_completed()
 
-        save_checkpoint()
+        save_checkpoint()  # Este mensaje final sí es importante mostrarlo
 
         # Guardar resultados
         duration = time.time() - start_time
@@ -609,16 +610,18 @@ def create_summary_dataframe(benchmark_results):
 
     # Intentar obtener los tiempos promedio por iteración
     try:
-        from utils.improved.timing import calculate_avg_summary
+        from utils.improved.timing import calculate_avg_summary, get_iteration_times
         avg_times = calculate_avg_summary()
         # Crear un diccionario para acceso rápido
         avg_times_dict = {
             (item["algorithm"], item["instance"]): item["avg_iter_time"]
             for item in avg_times
         }
+        recorded = get_iteration_times()
     except Exception as e:
         logger.warning(f"No se pudieron obtener tiempos promedio por iteración: {str(e)}")
         avg_times_dict = {}
+        recorded = []
 
     for result in benchmark_results:
         if not result.fitness_values:  # Omitir resultados vacíos
@@ -647,6 +650,13 @@ def create_summary_dataframe(benchmark_results):
         algo_inst_key = (result.algorithm_name, result.instance_name)
         if algo_inst_key in avg_times_dict:
             row["avg_iter_time"] = avg_times_dict[algo_inst_key]
+        else:
+            # Si no está disponible en avg_times_dict pero hay datos de tiempos, calcular el promedio
+            matching_records = [entry for entry in recorded if
+                               entry["algorithm"] == result.algorithm_name and
+                               entry["instance"] == result.instance_name]
+            if matching_records:
+                row["avg_iter_time"] = sum(r["avg_iter_time"] for r in matching_records) / len(matching_records)
 
         summary_data.append(row)
 
