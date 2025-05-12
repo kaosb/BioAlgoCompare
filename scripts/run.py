@@ -33,6 +33,7 @@ from algorithms.opa import OPA  # Orca Predator Algorithm
 HOA = SHO  # Spotted Hyena Optimizer (anteriormente Hyena Optimization Algorithm)
 FGO = FSA  # Flamingo Search Algorithm (anteriormente Flamingo Optimization Algorithm)
 
+# ruff: noqa: E402
 # Importar problema
 from problems.vrp import VRPProblem
 
@@ -217,8 +218,10 @@ def run_algo_wrapper(args):
 @click.option("--visualize/--no-visualize", default=True, help="Visualizar resultados")
 @click.option("--save/--no-save", default=True, help="Guardar resultados")
 @click.option("--parallel/--no-parallel", default=False, help="Ejecutar en paralelo")
+@click.option("--profile/--no-profile", default=False, help="Generar perfil de rendimiento (cProfile)")
 def main(
-    algorithm, instance, iterations, population, runs, seed, visualize, save, parallel
+    algorithm, instance, iterations, population, runs, seed, visualize, save, parallel,
+    profile
 ):
     """
     Ejecuta algoritmos de optimización para resolver problemas VRP con soporte para ejecución paralela.
@@ -228,6 +231,7 @@ def main(
     - Incluir varios algoritmos para comparación (--algorithm all)
     - Usar semillas fijas para reproducibilidad (--seed <número>)
     - Guardar resultados para análisis posterior (--save)
+    - Usar perfiles de rendimiento para análisis de rendimiento (--profile)
     """
 
     # Verificar que la instancia exista
@@ -499,4 +503,28 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    # Implementación del perfil de rendimiento
+    if "--profile" in sys.argv:
+        import cProfile
+        import pstats
+
+        # Crear directorio results si no existe
+        os.makedirs("results", exist_ok=True)
+
+        # Generar el archivo de perfil
+        profile_file = "profile.out"
+        profiler = cProfile.Profile()
+        profiler.enable()
+        main()
+        profiler.disable()
+        profiler.dump_stats(profile_file)
+
+        # Mostrar estadísticas básicas
+        stats = pstats.Stats(profile_file).sort_stats('cumulative')
+        stats.print_stats(20)  # Mostrar las 20 funciones que más tiempo consumen
+
+        print(f"\nPerfil de rendimiento guardado en {profile_file}")
+    else:
+        main()
