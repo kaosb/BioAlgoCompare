@@ -197,9 +197,17 @@ def main(
     # Verificar instancias
     valid_instances = []
     for instance in instances:
+        # Buscar primero en la ruta principal
         instance_path = f"data/vrp/{instance}.vrp"
+        # Buscar también en la carpeta Solomon si es necesario
+        solomon_path = f"data/vrp/Solomon/{instance}.vrp"
+
         if os.path.exists(instance_path):
             valid_instances.append(instance)
+        elif os.path.exists(solomon_path):
+            # Usar la ruta alternativa para Solomon
+            valid_instances.append(instance)
+            logger.info(f"Instancia encontrada en ruta Solomon: {solomon_path}")
         else:
             logger.warning(f"Instancia no encontrada: {instance}")
 
