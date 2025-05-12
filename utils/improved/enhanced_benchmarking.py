@@ -127,8 +127,68 @@ def generate_benchmark_id(algorithm_classes, instances, seed, iterations, popula
     return benchmark_id
 
 
+# Variables globales para medición de tiempos
+_iteration_times = []
+_time_lock = None
+_csv_lock = None
+
+def setup_parallel_timers():
+    """Configura las estructuras para medir tiempos en modo paralelo"""
+    global _time_lock, _csv_lock
+    if mp.current_process().name == 'MainProcess':
+        manager = mp.Manager()
+        _time_lock = manager.Lock()
+        _csv_lock = manager.Lock()
+
+def get_iteration_times():
+    """Retorna la lista de tiempos de iteración"""
+    global _iteration_times
+    return _iteration_times
+
+def cleanup_timing():
+    """Limpia las estructuras de medición de tiempos"""
+    global _iteration_times, _time_lock, _csv_lock
+    _iteration_times = []
+    _time_lock = None
+    _csv_lock = None
+
+def calculate_avg_summary():
+    """Calcula un resumen de los tiempos promedio por iteración por algoritmo e instancia"""
+    global _iteration_times
+
+    if not _iteration_times:
+        return []
+
+    # Agrupar por algoritmo e instancia
+    summary = {}
+    for entry in _iteration_times:
+        key = (entry['algorithm'], entry['instance'])
+        if key not in summary:
+            summary[key] = {
+                'times': [],
+                'algorithm': entry['algorithm'],
+                'instance': entry['instance']
+            }
+        summary[key]['times'].append(entry['avg_iter_time'])
+
+    # Calcular promedios
+    result = []
+    for key, data in summary.items():
+        if data['times']:
+            avg_time = sum(data['times']) / len(data['times'])
+            result.append({
+                'algorithm': data['algorithm'],
+                'instance': data['instance'],
+                'avg_iter_time': avg_time,
+                'measurements': len(data['times'])
+            })
+
+    return result
+
 def _run_algorithm_task(args):
     """Función para ejecutar un algoritmo como parte de un benchmark paralelo"""
+    global _iteration_times, _time_lock
+
     (
         algo_class,
         instance_name,
@@ -154,6 +214,10 @@ def _run_algorithm_task(args):
         # Crear semilla específica para esta ejecución
         run_seed = seed + run_id if seed is not None else None
 
+        # Establecer semilla para este proceso
+        if seed is not None:
+            np.random.seed(seed + run_id)
+
         # Inicializar algoritmo
         algorithm = algo_class(
             problem,
@@ -162,10 +226,29 @@ def _run_algorithm_task(args):
             seed=run_seed,
         )
 
-        # Ejecutar algoritmo
+        # Ejecutar algoritmo y medir tiempo
         start_time = time.time()
         best_solution = algorithm.execute()
         execution_time = time.time() - start_time
+
+        # Si son las primeras 5 ejecuciones, medir tiempo promedio por iteración
+        if run_id <= 5:
+            avg_iter_time = execution_time / iterations
+            new_entry = {
+                "algorithm": algo_class.__name__,
+                "instance": instance_name,
+                "run_id": run_id,
+                "avg_iter_time": avg_iter_time,
+                "total_time": execution_time,
+                "iterations": iterations
+            }
+
+            # Usar lock para acceso sincronizado a la lista compartida
+            if _time_lock:
+                with _time_lock:
+                    _iteration_times.append(new_entry)
+            else:
+                _iteration_times.append(new_entry)
 
         # Preparar resultado
         result = {
@@ -379,10 +462,8 @@ def run_massive_benchmark(
     if parallel:
         num_processes = min(cpu_count(), len(all_tasks))
         logger.info(f"Modo paralelo activado. Usando {num_processes} procesos.")
-        # Crear un lock para sincronización en modo paralelo
-        # (solo el proceso principal accederá a los archivos CSV)
-        global _csv_lock
-        _csv_lock = mp.Manager().Lock()
+        # Configurar timers para modo paralelo (incluye locks)
+        setup_parallel_timers()
     else:
         num_processes = 1
 
