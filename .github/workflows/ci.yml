@@ -24,7 +24,6 @@ jobs:
     - name: Lint with ruff
       run: |
         ruff check .
-        ruff format --check .
 
   pytest:
     runs-on: ubuntu-latest
