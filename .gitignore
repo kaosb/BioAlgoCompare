@@ -53,6 +53,7 @@ analyze.log
 
 # Testing and coverage
 .coverage
+.coverage.*
 coverage.xml
 .pytest_cache/
 
