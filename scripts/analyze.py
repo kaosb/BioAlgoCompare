@@ -265,6 +265,15 @@ def benchmark(
             try:
                 df = pd.read_csv(input)
 
+                # Renombrar columnas si es necesario para compatibilidad
+                rename_map = {
+                    "Best": "Best Fitness",
+                    "Mean": "Mean Fitness",
+                    "Time": "Execution Time (s)",
+                    "Time_Std": "Time Std"
+                }
+                df.rename(columns=rename_map, inplace=True)
+
                 # Agrupar por algoritmo e instancia
                 grouped = df.groupby(["Algorithm", "Instance"])
 
@@ -605,6 +614,15 @@ def analyze_csv(csv_file, output_dir):
     # Cargar datos
     logger.info(f"Cargando datos desde {csv_file}")
     df = pd.read_csv(csv_file)
+
+    # Renombrar columnas si es necesario para compatibilidad
+    rename_map = {
+        "Best": "Best Fitness",
+        "Mean": "Mean Fitness",
+        "Time": "Execution Time (s)",
+        "Time_Std": "Time Std"
+    }
+    df.rename(columns=rename_map, inplace=True)
 
     # Mostrar resumen
     logger.info("\nResumen de datos:")
