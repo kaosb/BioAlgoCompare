@@ -383,9 +383,17 @@ def run_massive_benchmark(
     # Verificar instancias
     valid_instances = []
     for instance_name in instances:
+        # Buscar primero en la ruta principal
         instance_path = f"data/vrp/{instance_name}.vrp"
+        # Buscar también en la carpeta Solomon si es necesario
+        solomon_path = f"data/vrp/Solomon/{instance_name}.vrp"
+
         if os.path.exists(instance_path):
             valid_instances.append((instance_name, instance_path))
+        elif os.path.exists(solomon_path):
+            # Usar la ruta alternativa para Solomon
+            valid_instances.append((instance_name, solomon_path))
+            logger.info(f"Instancia encontrada en ruta Solomon: {solomon_path}")
         else:
             logger.warning(f"Instancia no encontrada: {instance_name}")
 
