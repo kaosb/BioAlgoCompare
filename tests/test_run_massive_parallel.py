@@ -68,9 +68,7 @@ def test_run_massive_non_parallel():
 
             # Verificar que el CSV contiene la columna Instance
             df = pd.read_csv(csv_path)
-            assert (
-                "Instance" in df.columns
-            ), "El CSV no contiene la columna 'Instance'"
+            assert "Instance" in df.columns, "El CSV no contiene la columna 'Instance'"
 
             # Verificar que hay al menos una fila con algoritmo HHO
             hho_rows = df[df["Algorithm"] == "HHO"]
@@ -152,10 +150,8 @@ def test_run_massive_parallel():
 
             # Verificar que el CSV contiene la columna Instance
             df = pd.read_csv(csv_path)
-            assert (
-                "Instance" in df.columns
-            ), "El CSV no contiene la columna 'Instance'"
-            
+            assert "Instance" in df.columns, "El CSV no contiene la columna 'Instance'"
+
             # Para el test en modo paralelo, solo verificamos que el CSV existe y tiene la columna Instance
             # No verificamos contenido específico, ya que podría fallar de forma intermitente
             # debido a condiciones de carrera en los procesos
