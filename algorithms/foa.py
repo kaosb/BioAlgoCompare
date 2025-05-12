@@ -48,7 +48,7 @@ class Fossa(Individual):
         x_new = self.position.copy()
 
         for j in range(dim):
-            r = random.random()
+            random.random()
             if t <= max_iterations // 2:
                 # Exploración (Eq. 5)
                 I = random.choice([1, 2])

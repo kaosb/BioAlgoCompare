@@ -80,7 +80,7 @@ def create_result_distribution_plot(
             plt.figure(figsize=(12, 7))
 
             # Crear violin plot
-            ax = sns.violinplot(
+            sns.violinplot(
                 x="algorithm",
                 y=metric,
                 data=instance_data,
@@ -128,7 +128,7 @@ def create_result_distribution_plot(
             plt.figure(figsize=(12, 7))
 
             # Crear violin plot
-            ax = sns.violinplot(
+            sns.violinplot(
                 x="instance", y=metric, data=algo_data, inner="box", cut=0
             )
 
@@ -362,7 +362,7 @@ def create_heatmap(data, row_var, col_var, value_var, title=None, output_file=No
     plt.figure(figsize=(12, 8))
 
     # Crear mapa de calor
-    ax = sns.heatmap(
+    sns.heatmap(
         pivot,
         annot=True,
         fmt=".2f",
@@ -417,7 +417,7 @@ def create_radar_chart(data, categories, group_var, value_var, output_file=None)
         )
 
     # Preparar gráfico
-    n_groups = len(grouped.index)
+    len(grouped.index)
     n_cats = len(categories)
 
     # Calcular ángulos para cada categoría

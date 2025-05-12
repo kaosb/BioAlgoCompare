@@ -465,7 +465,7 @@ def benchmark(
                             )
 
                     if valid_metrics:
-                        report_paths = (
+                        (
                             StatisticalAnalysis.run_comprehensive_statistical_analysis(
                                 benchmark_results,
                                 metrics=valid_metrics,

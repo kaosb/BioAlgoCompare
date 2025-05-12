@@ -46,7 +46,7 @@ class EnhancedGorilla(Individual):
         P = 0.5
         CF = 0.5
         FADs = 0.2
-        r = random.random()
+        random.random()
 
         if iteration < max_iterations / 3:
             # Alta velocidad (fase exploratoria con movimiento browniano)

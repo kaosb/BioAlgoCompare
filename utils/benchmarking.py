@@ -525,7 +525,7 @@ def plot_performance_radar(benchmark_results, instance_name, metrics=None, title
 
     # Obtener datos normalizados para cada métrica
     algorithms = [r.algorithm_name for r in results]
-    n_algorithms = len(algorithms)
+    len(algorithms)
     n_metrics = len(metrics)
 
     # Ángulos para el gráfico radar

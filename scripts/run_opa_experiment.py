@@ -91,7 +91,7 @@ def run_with_seed(seed):
     start_time = time.time()
     try:
         best_solution = algo.execute()
-        execution_time = time.time() - start_time
+        time.time() - start_time
         fitness = best_solution.fitness()
         curve = algo.get_convergence_curve()
 

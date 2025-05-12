@@ -28,23 +28,9 @@ exclude = [
 
 # Same as Black.
 line-length = 88
-indent-width = 4
 
 # Allow inputs to have unused imports.
 ignore = ["F401"]
 
 # Target Python 3.8+
 target-version = "py38"
-
-[tool.ruff.format]
-# Use double quotes for strings.
-quote-style = "double"
-
-# Indent with spaces, rather than tabs.
-indent-style = "space"
-
-# Respect magic trailing commas.
-skip-magic-trailing-comma = false
-
-# Automatically detect the appropriate line ending.
-line-ending = "auto"

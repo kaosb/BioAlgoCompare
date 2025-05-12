@@ -379,8 +379,8 @@ def perform_statistical_analysis_report(
             print(f"Debug - Error en Wilcoxon: {str(e)}")
             # Crear matrices vacías si falla
             algorithms = friedman_result.get("algorithms", [])
-            wilcoxon_matrix = pd.DataFrame(1.0, index=algorithms, columns=algorithms)
-            wilcoxon_effect = pd.DataFrame(0.0, index=algorithms, columns=algorithms)
+            pd.DataFrame(1.0, index=algorithms, columns=algorithms)
+            pd.DataFrame(0.0, index=algorithms, columns=algorithms)
 
         # Calcular diferentes medidas de efecto tamaño
         try:

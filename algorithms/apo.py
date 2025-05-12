@@ -131,8 +131,8 @@ class APO(MetaheuristicAlgorithm):
         """Actualiza la población en cada iteración."""
         iteration = len(self.convergence_curve)
         self.population.sort(key=lambda x: x.fitness())
-        best_protozoa = self.population[0]
-        worst_protozoa = self.population[-1]
+        self.population[0]
+        self.population[-1]
         for i in range(self.population_size):
             self.population[i].move(self.population, iteration, self.max_iterations)
         self.population.sort(key=lambda x: x.fitness())

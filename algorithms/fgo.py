@@ -53,7 +53,7 @@ class Flamingo(Individual):
             max_iterations: Iteraciones totales
             mode: 'forage' o 'migrate'
         """
-        t = iteration + 1
+        iteration + 1
         n = self.dimension  # para grados de libertad
         x_new = self.position.copy()
 
@@ -143,7 +143,7 @@ class FGO(MetaheuristicAlgorithm):
         MPr = int(
             random.random() * self.population_size * (1 - MPb / self.population_size)
         )
-        MPt = self.population_size - MPo - MPr
+        self.population_size - MPo - MPr
 
         self.population.sort(key=lambda x: x.fitness())
 

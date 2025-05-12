@@ -383,7 +383,7 @@ class StatisticalAnalysis:
         # Aplicar corrección de Bonferroni si se solicita
         if bonferroni_correction and len(all_p_values) > 0:
             # Calcular número de comparaciones
-            n_comparisons = n_algorithms * (n_algorithms - 1) / 2
+            n_algorithms * (n_algorithms - 1) / 2
 
             # Aplicar corrección de Bonferroni
             reject, adj_p_values, _, _ = multipletests(
@@ -799,7 +799,7 @@ class StatisticalAnalysis:
             np.fill_diagonal(mask, True)
 
             # Crear el mapa de calor con validación de datos
-            heatmap = sns.heatmap(
+            sns.heatmap(
                 heatmap_data.astype(float),
                 mask=mask,
                 cmap=cmap,
@@ -928,7 +928,7 @@ class StatisticalAnalysis:
             np.fill_diagonal(mask, True)
 
             # Crear el mapa de calor con validación de datos
-            heatmap = sns.heatmap(
+            sns.heatmap(
                 heatmap_data.astype(float),
                 mask=mask,
                 cmap=cmap,
@@ -1245,8 +1245,8 @@ class StatisticalAnalysis:
             print(f"Debug - Error en Wilcoxon: {str(e)}")
             # Crear matrices vacías si falla
             algorithms = friedman_result.get("algorithms", [])
-            wilcoxon_matrix = pd.DataFrame(1.0, index=algorithms, columns=algorithms)
-            wilcoxon_effect = pd.DataFrame(0.0, index=algorithms, columns=algorithms)
+            pd.DataFrame(1.0, index=algorithms, columns=algorithms)
+            pd.DataFrame(0.0, index=algorithms, columns=algorithms)
 
         # Calcular diferentes medidas de efecto tamaño
         try:
@@ -1586,14 +1586,6 @@ tr:nth-child(even) {
         <ul>"""
 
         # Preparar diccionario para el formato
-        format_dict = {
-            "cd_img": cd_img,
-            "rank_img": rank_img,
-            "posthoc_img": posthoc_img,
-            "effect_img": effect_img,
-            "vd_img": vd_img,
-            "metric_str": metric_str,  # Añadir la métrica al diccionario de formato
-        }
 
         # Añadir conclusiones basadas en los resultados
         if (
