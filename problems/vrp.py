@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import math
 
+
 class VRPProblem:
     """Clase para representar y evaluar problemas de VRP (Vehicle Routing Problem)."""
 
@@ -24,12 +25,12 @@ class VRPProblem:
 
         self.load_instance()
         self.compute_distance_matrix()
-    
+
     def load_instance(self):
         """Carga la instancia desde el archivo."""
-        with open(self.instance_path, 'r') as f:
+        with open(self.instance_path, "r") as f:
             lines = f.readlines()
-        
+
         # Parsear encabezado
         for line in lines:
             line = line.strip()
@@ -41,14 +42,14 @@ class VRPProblem:
                 self.capacity = int(line.split(":")[1].strip())
             elif line.startswith("NODE_COORD_SECTION"):
                 break
-        
+
         # Parsear coordenadas de nodos
         node_section = False
         demand_section = False
-        
+
         for line in lines:
             line = line.strip()
-            
+
             if line == "NODE_COORD_SECTION":
                 node_section = True
                 continue
@@ -61,7 +62,7 @@ class VRPProblem:
                 continue
             elif line == "EOF":
                 break
-            
+
             if node_section:
                 parts = line.split()
                 if len(parts) >= 3:
@@ -69,7 +70,7 @@ class VRPProblem:
                     x = float(parts[1])
                     y = float(parts[2])
                     self.nodes.append((x, y))
-            
+
             if demand_section:
                 parts = line.split()
                 if len(parts) >= 2:
@@ -78,27 +79,29 @@ class VRPProblem:
                     self.demands.append(demand)
                     if demand == 0:
                         self.depot_index = node_id
-    
+
     def compute_distance_matrix(self):
         """Calcula la matriz de distancias entre todos los nodos."""
         n = len(self.nodes)
         self.distance_matrix = np.zeros((n, n))
-        
+
         for i in range(n):
             for j in range(n):
                 if i != j:
                     x1, y1 = self.nodes[i]
                     x2, y2 = self.nodes[j]
                     # Distancia euclidiana
-                    self.distance_matrix[i, j] = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-    
+                    self.distance_matrix[i, j] = math.sqrt(
+                        (x2 - x1) ** 2 + (y2 - y1) ** 2
+                    )
+
     def decode_solution(self, solution):
         """
         Decodifica una solución continua en una solución VRP.
-        
+
         Args:
             solution: Vector de valores continuos
-            
+
         Returns:
             routes: Lista de rutas (cada ruta es una lista de índices de nodos)
             total_distance: Distancia total recorrida
@@ -106,24 +109,28 @@ class VRPProblem:
         """
         # Convertir solución continua a permutación (excluyendo el depósito)
         indices = list(range(1, self.dimension))  # Excluir el depósito (índice 0)
-        indices.sort(key=lambda i: solution[i-1])  # Ordenar por valores de la solución
-        
+        indices.sort(
+            key=lambda i: solution[i - 1]
+        )  # Ordenar por valores de la solución
+
         routes = []
         current_route = [self.depot_index]
         current_load = 0
         total_distance = 0
-        
+
         for idx in indices:
             # Si agregar el siguiente nodo excede la capacidad, iniciar nueva ruta
             if current_load + self.demands[idx] > self.capacity:
                 # Cerrar la ruta actual volviendo al depósito
                 current_route.append(self.depot_index)
                 routes.append(current_route)
-                
+
                 # Calcular distancia de la ruta actual
                 for i in range(len(current_route) - 1):
-                    total_distance += self.distance_matrix[current_route[i], current_route[i+1]]
-                
+                    total_distance += self.distance_matrix[
+                        current_route[i], current_route[i + 1]
+                    ]
+
                 # Iniciar nueva ruta
                 current_route = [self.depot_index, idx]
                 current_load = self.demands[idx]
@@ -131,18 +138,20 @@ class VRPProblem:
                 # Agregar nodo a la ruta actual
                 current_route.append(idx)
                 current_load += self.demands[idx]
-        
+
         # Cerrar la última ruta
         if len(current_route) > 1:
             current_route.append(self.depot_index)
             routes.append(current_route)
-            
+
             # Calcular distancia de la última ruta
             for i in range(len(current_route) - 1):
-                total_distance += self.distance_matrix[current_route[i], current_route[i+1]]
-        
+                total_distance += self.distance_matrix[
+                    current_route[i], current_route[i + 1]
+                ]
+
         return routes, total_distance, True
-    
+
     def evaluate(self, solution):
         """
         Evalúa una solución y retorna su fitness.
@@ -154,7 +163,11 @@ class VRPProblem:
             fitness: Valor de fitness (menor es mejor)
         """
         # Si es una lista de rutas, usar evaluación directa
-        if isinstance(solution, list) and len(solution) > 0 and isinstance(solution[0], list):
+        if (
+            isinstance(solution, list)
+            and len(solution) > 0
+            and isinstance(solution[0], list)
+        ):
             return self.evaluate_routes(solution)
 
         # Si es un vector continuo, decodificar y evaluar
@@ -178,7 +191,7 @@ class VRPProblem:
             # Calcular distancia de la ruta
             route_distance = 0
             for i in range(len(route) - 1):
-                route_distance += self.distance_matrix[route[i], route[i+1]]
+                route_distance += self.distance_matrix[route[i], route[i + 1]]
             total_distance += route_distance
 
             # Calcular carga y verificar factibilidad
@@ -202,7 +215,9 @@ class VRPProblem:
 
         # Aplicar penalización por nodos faltantes
         if missing_nodes:
-            penalty += len(missing_nodes) * self.penalty_factor * 10  # Mayor penalización por nodos faltantes
+            penalty += (
+                len(missing_nodes) * self.penalty_factor * 10
+            )  # Mayor penalización por nodos faltantes
 
         return total_distance + penalty
 
@@ -308,7 +323,11 @@ class VRPProblem:
             bool: True si la solución es válida, False en caso contrario
         """
         # Si es una lista de rutas, verificar directamente
-        if isinstance(solution, list) and len(solution) > 0 and isinstance(solution[0], list):
+        if (
+            isinstance(solution, list)
+            and len(solution) > 0
+            and isinstance(solution[0], list)
+        ):
             return self.routes_are_feasible(solution)
 
         # En el contexto de VRP con permutación/prioridad, consideramos válido
@@ -339,7 +358,9 @@ class VRPProblem:
 
         # Eliminar duplicados manteniendo el orden de aparición
         seen = set()
-        unique_customers = [x for x in all_customers if x not in seen and not seen.add(x)]
+        unique_customers = [
+            x for x in all_customers if x not in seen and not seen.add(x)
+        ]
 
         # Paso 2: Verificar clientes faltantes
         required_customers = set(range(1, self.dimension))

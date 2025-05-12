@@ -47,26 +47,28 @@ class Hummingbird(Individual):
         # y no a través de esta interfaz, por lo que no necesitamos implementar la lógica aquí
         pass
 
-    def aha_move(self, best_individual, population: List['Hummingbird'], memory_table: set):
+    def aha_move(
+        self, best_individual, population: List["Hummingbird"], memory_table: set
+    ):
         """
         Implementa el movimiento del colibrí según el tipo de vuelo y modo de forrajeo.
         """
         # Selección aleatoria del tipo de vuelo: axial, diagonal u omnidireccional
-        flight_type = np.random.choice(['axial', 'diagonal', 'omnidirectional'])
+        flight_type = np.random.choice(["axial", "diagonal", "omnidirectional"])
 
         # Selección aleatoria del modo de forrajeo: guiado, territorial, migratorio
-        forage_mode = np.random.choice(['guided', 'territorial', 'migratory'])
+        forage_mode = np.random.choice(["guided", "territorial", "migratory"])
 
         new_position = self.position.copy()
         dim = self.dimension
 
-        if flight_type == 'axial':
+        if flight_type == "axial":
             # Movimiento en una sola dimensión (eje)
             axis = np.random.randint(0, dim)
             step = np.random.uniform(-1, 1)
             direction = np.zeros(dim)
             direction[axis] = step
-        elif flight_type == 'diagonal':
+        elif flight_type == "diagonal":
             # Movimiento en una diagonal (subconjunto de dimensiones)
             direction = np.random.uniform(-1, 1, size=dim)
             # Para simular diagonal, poner algunos ceros aleatorios
@@ -84,13 +86,15 @@ class Hummingbird(Individual):
         # Parámetros del paso (pueden ajustarse)
         step_size = 0.1  # tamaño base del paso
 
-        if forage_mode == 'guided':
+        if forage_mode == "guided":
             # Eq. 6: Movimiento hacia el mejor individuo con memoria
             diff = best_individual.personal_best_position - self.position
             new_position = self.position + step_size * diff + step_size * direction
-        elif forage_mode == 'territorial':
+        elif forage_mode == "territorial":
             # Eq. 7: Perturbación aleatoria local
-            new_position = self.position + step_size * direction * np.random.uniform(-1, 1)
+            new_position = self.position + step_size * direction * np.random.uniform(
+                -1, 1
+            )
         else:  # migratory
             # Eq. 8: Hacia un individuo aleatorio lejos
             other = self

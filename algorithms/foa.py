@@ -3,6 +3,7 @@ import random
 import math
 from .base import Individual, MetaheuristicAlgorithm
 
+
 class Fossa(Individual):
     def __init__(self, problem):
         self.problem = problem
@@ -17,15 +18,17 @@ class Fossa(Individual):
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
-        
+
     def is_better_than(self, other):
         """Compara si este individuo es mejor que otro."""
         return self.fitness() < other.fitness()
-    
+
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
-        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
-        
+        return (
+            True  # En VRP todas las soluciones son factibles con nuestro decodificador
+        )
+
     def copy(self, other):
         """Copia los valores de otro individuo a este."""
         self.position = np.copy(other.position)
@@ -50,7 +53,9 @@ class Fossa(Individual):
                 # Exploración (Eq. 5)
                 I = random.choice([1, 2])
                 r_ij = random.random()
-                xj_p1 = self.position[j] + r_ij * (lemur.position[j] - I * self.position[j])
+                xj_p1 = self.position[j] + r_ij * (
+                    lemur.position[j] - I * self.position[j]
+                )
                 x_new[j] = np.clip(xj_p1, self.lower_bounds[j], self.upper_bounds[j])
             else:
                 # Explotación (Eq. 7)
@@ -64,6 +69,7 @@ class Fossa(Individual):
         if new_fit <= self.fitness():
             self.position = x_new
             self._fitness = new_fit
+
 
 class FOA(MetaheuristicAlgorithm):
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):

@@ -1,0 +1,403 @@
+.
+|-- .DS_Store
+|-- .claude
+|   `-- settings.local.json
+|-- .coverage
+|-- .git
+|   |-- COMMIT_EDITMSG
+|   |-- FETCH_HEAD
+|   |-- HEAD
+|   |-- ORIG_HEAD
+|   |-- config
+|   |-- description
+|   |-- hooks
+|   |   |-- applypatch-msg.sample
+|   |   |-- commit-msg.sample
+|   |   |-- fsmonitor-watchman.sample
+|   |   |-- post-update.sample
+|   |   |-- pre-applypatch.sample
+|   |   |-- pre-commit
+|   |   |-- pre-commit.sample
+|   |   |-- pre-merge-commit.sample
+|   |   |-- pre-push.sample
+|   |   |-- pre-rebase.sample
+|   |   |-- pre-receive.sample
+|   |   |-- prepare-commit-msg.sample
+|   |   |-- push-to-checkout.sample
+|   |   |-- sendemail-validate.sample
+|   |   `-- update.sample
+|   |-- index
+|   |-- info
+|   |   `-- exclude
+|   |-- logs
+|   |   |-- HEAD
+|   |   `-- refs
+|   |-- objects
+|   |   |-- 01
+|   |   |-- 03
+|   |   |-- 04
+|   |   |-- 05
+|   |   |-- 06
+|   |   |-- 07
+|   |   |-- 08
+|   |   |-- 09
+|   |   |-- 0a
+|   |   |-- 0e
+|   |   |-- 0f
+|   |   |-- 10
+|   |   |-- 11
+|   |   |-- 13
+|   |   |-- 14
+|   |   |-- 15
+|   |   |-- 17
+|   |   |-- 18
+|   |   |-- 19
+|   |   |-- 1a
+|   |   |-- 1c
+|   |   |-- 1d
+|   |   |-- 1f
+|   |   |-- 20
+|   |   |-- 21
+|   |   |-- 22
+|   |   |-- 23
+|   |   |-- 24
+|   |   |-- 25
+|   |   |-- 26
+|   |   |-- 29
+|   |   |-- 2a
+|   |   |-- 2c
+|   |   |-- 2d
+|   |   |-- 2e
+|   |   |-- 2f
+|   |   |-- 30
+|   |   |-- 31
+|   |   |-- 32
+|   |   |-- 33
+|   |   |-- 36
+|   |   |-- 37
+|   |   |-- 38
+|   |   |-- 39
+|   |   |-- 3a
+|   |   |-- 3b
+|   |   |-- 3c
+|   |   |-- 3d
+|   |   |-- 3e
+|   |   |-- 3f
+|   |   |-- 40
+|   |   |-- 41
+|   |   |-- 42
+|   |   |-- 43
+|   |   |-- 44
+|   |   |-- 45
+|   |   |-- 46
+|   |   |-- 47
+|   |   |-- 48
+|   |   |-- 4a
+|   |   |-- 4b
+|   |   |-- 4d
+|   |   |-- 4f
+|   |   |-- 50
+|   |   |-- 51
+|   |   |-- 52
+|   |   |-- 53
+|   |   |-- 54
+|   |   |-- 55
+|   |   |-- 56
+|   |   |-- 57
+|   |   |-- 58
+|   |   |-- 59
+|   |   |-- 5a
+|   |   |-- 5b
+|   |   |-- 5c
+|   |   |-- 5d
+|   |   |-- 5e
+|   |   |-- 5f
+|   |   |-- 60
+|   |   |-- 61
+|   |   |-- 62
+|   |   |-- 63
+|   |   |-- 64
+|   |   |-- 65
+|   |   |-- 66
+|   |   |-- 67
+|   |   |-- 68
+|   |   |-- 69
+|   |   |-- 6a
+|   |   |-- 6b
+|   |   |-- 6c
+|   |   |-- 6d
+|   |   |-- 6e
+|   |   |-- 70
+|   |   |-- 71
+|   |   |-- 72
+|   |   |-- 73
+|   |   |-- 74
+|   |   |-- 75
+|   |   |-- 76
+|   |   |-- 77
+|   |   |-- 78
+|   |   |-- 79
+|   |   |-- 7a
+|   |   |-- 7b
+|   |   |-- 7c
+|   |   |-- 7d
+|   |   |-- 7f
+|   |   |-- 80
+|   |   |-- 81
+|   |   |-- 83
+|   |   |-- 84
+|   |   |-- 85
+|   |   |-- 86
+|   |   |-- 87
+|   |   |-- 88
+|   |   |-- 89
+|   |   |-- 8a
+|   |   |-- 8b
+|   |   |-- 8c
+|   |   |-- 8d
+|   |   |-- 8e
+|   |   |-- 91
+|   |   |-- 92
+|   |   |-- 94
+|   |   |-- 95
+|   |   |-- 96
+|   |   |-- 97
+|   |   |-- 98
+|   |   |-- 99
+|   |   |-- 9b
+|   |   |-- 9c
+|   |   |-- 9d
+|   |   |-- 9e
+|   |   |-- 9f
+|   |   |-- a0
+|   |   |-- a1
+|   |   |-- a2
+|   |   |-- a3
+|   |   |-- a4
+|   |   |-- a5
+|   |   |-- a6
+|   |   |-- a7
+|   |   |-- a8
+|   |   |-- a9
+|   |   |-- aa
+|   |   |-- ab
+|   |   |-- ac
+|   |   |-- ad
+|   |   |-- ae
+|   |   |-- af
+|   |   |-- b1
+|   |   |-- b2
+|   |   |-- b3
+|   |   |-- b4
+|   |   |-- b5
+|   |   |-- b6
+|   |   |-- b7
+|   |   |-- b8
+|   |   |-- b9
+|   |   |-- ba
+|   |   |-- bb
+|   |   |-- bc
+|   |   |-- bd
+|   |   |-- be
+|   |   |-- c0
+|   |   |-- c1
+|   |   |-- c2
+|   |   |-- c3
+|   |   |-- c5
+|   |   |-- c6
+|   |   |-- c7
+|   |   |-- c8
+|   |   |-- c9
+|   |   |-- ca
+|   |   |-- cb
+|   |   |-- cc
+|   |   |-- cd
+|   |   |-- ce
+|   |   |-- cf
+|   |   |-- d1
+|   |   |-- d2
+|   |   |-- d3
+|   |   |-- d4
+|   |   |-- d5
+|   |   |-- d6
+|   |   |-- d7
+|   |   |-- d8
+|   |   |-- d9
+|   |   |-- da
+|   |   |-- db
+|   |   |-- dc
+|   |   |-- dd
+|   |   |-- de
+|   |   |-- df
+|   |   |-- e0
+|   |   |-- e1
+|   |   |-- e2
+|   |   |-- e3
+|   |   |-- e4
+|   |   |-- e5
+|   |   |-- e6
+|   |   |-- e7
+|   |   |-- e8
+|   |   |-- e9
+|   |   |-- ea
+|   |   |-- eb
+|   |   |-- ec
+|   |   |-- ee
+|   |   |-- ef
+|   |   |-- f0
+|   |   |-- f1
+|   |   |-- f3
+|   |   |-- f4
+|   |   |-- f5
+|   |   |-- f6
+|   |   |-- f7
+|   |   |-- f8
+|   |   |-- f9
+|   |   |-- fa
+|   |   |-- fb
+|   |   |-- fc
+|   |   |-- fd
+|   |   |-- ff
+|   |   |-- info
+|   |   `-- pack
+|   `-- refs
+|       |-- heads
+|       |-- remotes
+|       `-- tags
+|-- .github
+|   `-- workflows
+|       `-- ci.yml
+|-- .gitignore
+|-- .pre-commit-config.yaml
+|-- .ruff_cache
+|   |-- .gitignore
+|   |-- 0.1.5
+|   |   |-- 10759177128610339596
+|   |   |-- 12806540398743671555
+|   |   |-- 16163168885210450670
+|   |   |-- 16379898304236477089
+|   |   |-- 7620446533685426355
+|   |   `-- 8629954752010187395
+|   `-- CACHEDIR.TAG
+|-- LICENSE
+|-- README.md
+|-- VERSION
+|-- algorithms
+|   |-- aha.py
+|   |-- apo.py
+|   |-- base.py
+|   |-- egto.py
+|   |-- ewa.py
+|   |-- fgo.py
+|   |-- foa.py
+|   |-- fsa.py
+|   |-- gto.py
+|   |-- gvoa.py
+|   |-- hho.py
+|   |-- hoa.py
+|   |-- mrfo.py
+|   |-- opa.py
+|   |-- rro.py
+|   |-- sho.py
+|   |-- sma.py
+|   |-- smo.py
+|   `-- woa.py
+|-- analyze.log
+|-- benchmark.log
+|-- bioalgocompare.egg-info
+|   |-- PKG-INFO
+|   |-- SOURCES.txt
+|   |-- dependency_links.txt
+|   |-- entry_points.txt
+|   |-- requires.txt
+|   `-- top_level.txt
+|-- coverage.xml
+|-- data
+|   |-- .DS_Store
+|   `-- vrp
+|       |-- A-n32-k5.vrp
+|       |-- B-n31-k5.vrp
+|       |-- E-n22-k4.vrp
+|       |-- E-n51-k5.vrp
+|       `-- P-n16-k8.vrp
+|-- debug_opa.py
+|-- docs
+|   |-- .DS_Store
+|   |-- algorithms
+|   |   |-- individual
+|   |   |-- overview.md
+|   |   |-- pseudocode.md
+|   |   `-- template.md
+|   |-- analysis
+|   |   |-- comparison.md
+|   |   |-- conclusions.md
+|   |   `-- iteration_impact.md
+|   |-- development
+|   |   |-- algorithmic_requirements.md
+|   |   |-- consolidation_plan.md
+|   |   |-- consolidation_plan_revised.md
+|   |   |-- contribution.md
+|   |   |-- git_workflow.md
+|   |   `-- testing.md
+|   |-- guides
+|   |   |-- benchmarking.md
+|   |   |-- getting_started.md
+|   |   |-- installation.md
+|   |   `-- usage.md
+|   |-- index.md
+|   |-- references.bib
+|   |-- scientific
+|   |   |-- reproducibility.md
+|   |   `-- statistical_analysis.md
+|   `-- technical
+|       |-- architecture.md
+|       |-- consolidation_status.md
+|       |-- implementation.md
+|       |-- scripts_reference.md
+|       `-- tree_snapshot.txt
+|-- logs
+|-- massive_benchmark.log
+|-- problems
+|   `-- vrp.py
+|-- pyproject.toml
+|-- requirements.txt
+|-- scripts
+|   |-- analyze.py
+|   |-- run.py
+|   |-- run_massive.py
+|   `-- run_opa_experiment.py
+|-- setup.py
+|-- test_opa.py
+|-- tests
+|   |-- __init__.py
+|   |-- test_algorithms_regression.py
+|   |-- test_cli.py
+|   |-- test_vrp_operators.py
+|   `-- test_vrp_parser.py
+|-- tox.ini
+`-- utils
+    |-- .DS_Store
+    |-- backup
+    |   |-- benchmarking.py
+    |   |-- fixed_method.py
+    |   |-- html_generator.py
+    |   |-- improved
+    |   |-- modify_statistical_analysis.py
+    |   |-- operators.py
+    |   |-- statistical_analysis.py
+    |   |-- visualization.py
+    |   `-- vrp_operators.py
+    |-- benchmarking.py
+    |-- fixed_method.py
+    |-- html_generator.py
+    |-- improved
+    |   |-- advanced_visualization.py
+    |   |-- enhanced_benchmarking.py
+    |   `-- enhanced_statistics.py
+    |-- modify_statistical_analysis.py
+    |-- operators.py
+    |-- statistical_analysis.py
+    |-- visualization.py
+    `-- vrp_operators.py
+
+263 directories, 138 files

@@ -3,13 +3,14 @@ import random
 import math
 from .base import Individual, MetaheuristicAlgorithm
 
+
 class Whale(Individual):
     """Clase para representar un individuo en el algoritmo WOA (Whale Optimization Algorithm)."""
-    
+
     def __init__(self, problem):
         """
         Inicializa una ballena con una posición aleatoria.
-        
+
         Args:
             problem: Instancia del problema a resolver
         """
@@ -17,25 +18,27 @@ class Whale(Individual):
         self.dimension = problem.get_dimension()
         self.position = np.random.uniform(0, 1, self.dimension)
         self._fitness = None
-    
+
     def fitness(self):
         """Calcula el fitness del individuo."""
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
-    
+
     def is_better_than(self, other):
         """Compara si este individuo es mejor que otro."""
         return self.fitness() < other.fitness()
-    
+
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
-        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
-    
+        return (
+            True  # En VRP todas las soluciones son factibles con nuestro decodificador
+        )
+
     def move(self, best_whale, a, a2, leader_type=0):
         """
         Mueve la ballena según las reglas del algoritmo WOA.
-        
+
         Args:
             best_whale: Mejor ballena (líder)
             a: Parámetro de control que disminuye linealmente de 2 a 0
@@ -44,13 +47,15 @@ class Whale(Individual):
         """
         r1 = random.random()  # Número aleatorio en [0, 1]
         r2 = random.random()  # Número aleatorio en [0, 1]
-        
+
         A = 2 * a * r1 - a  # Parámetro de comportamiento
         C = 2 * r2  # Parámetro de ponderación
-        
+
         # Seleccionar estrategia de movimiento
-        p = random.random()  # Probabilidad para seleccionar entre encogimiento o espiral
-        
+        p = (
+            random.random()
+        )  # Probabilidad para seleccionar entre encogimiento o espiral
+
         if p < 0.5:  # Encogimiento (estrategia de exploración/explotación)
             if abs(A) < 1:  # Explotación: acercarse a la presa (mejor solución)
                 for i in range(self.dimension):
@@ -64,21 +69,26 @@ class Whale(Individual):
         else:  # Estrategia de espiral (movimiento en espiral alrededor de la presa)
             for i in range(self.dimension):
                 D = abs(best_whale.position[i] - self.position[i])
-                l = random.uniform(-1, 1)  # Parámetro aleatorio para definir la forma de la espiral
-                self.position[i] = D * math.exp(a2 * l) * math.cos(2 * math.pi * l) + best_whale.position[i]
-        
+                l = random.uniform(
+                    -1, 1
+                )  # Parámetro aleatorio para definir la forma de la espiral
+                self.position[i] = (
+                    D * math.exp(a2 * l) * math.cos(2 * math.pi * l)
+                    + best_whale.position[i]
+                )
+
         # Asegurar que los valores estén dentro del rango [0, 1]
         LB = np.zeros_like(self.position)
         UB = np.ones_like(self.position)
         self.position = np.clip(self.position, LB, UB)
-        
+
         # Reset fitness para recalcular
         self._fitness = None
-    
+
     def copy(self, other):
         """
         Copia los valores de otro individuo a este.
-        
+
         Args:
             other: Otro individuo (Whale)
         """
@@ -88,11 +98,11 @@ class Whale(Individual):
 
 class WOA(MetaheuristicAlgorithm):
     """Implementación del algoritmo de optimización de ballenas (Whale Optimization Algorithm)."""
-    
+
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         """
         Inicializa el algoritmo WOA.
-        
+
         Args:
             problem: Instancia del problema
             population_size: Tamaño de la población
@@ -101,31 +111,33 @@ class WOA(MetaheuristicAlgorithm):
         """
         super().__init__(problem, population_size, max_iterations, seed)
         self.a2 = 0.5  # Constante para definir la forma de la espiral logarítmica
-    
+
     def initialize_population(self):
         """Inicializa la población de ballenas."""
         self.population = []
         for _ in range(self.population_size):
             whale = Whale(self.problem)
             self.population.append(whale)
-        
+
         # Encontrar la mejor ballena inicial
         self.best_solution = self.population[0]
         for i in range(1, self.population_size):
             if self.population[i].is_better_than(self.best_solution):
                 self.best_solution = self.population[i]
-    
+
     def update_population(self):
         """Actualiza la población en cada iteración."""
         # Calcular el valor de 'a' que disminuye linealmente de 2 a 0
-        a = 2 - self.convergence_curve.count(self.best_solution.fitness()) * (2 / self.max_iterations)
-        
+        a = 2 - self.convergence_curve.count(self.best_solution.fitness()) * (
+            2 / self.max_iterations
+        )
+
         # Actualizar posición de cada ballena
         for i in range(self.population_size):
             # No mover la mejor ballena
             if self.population[i] is not self.best_solution:
                 self.population[i].move(self.best_solution, a, self.a2)
-                
+
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
                     whale_copy = Whale(self.problem)

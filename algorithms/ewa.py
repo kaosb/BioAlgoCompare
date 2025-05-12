@@ -3,13 +3,14 @@ import random
 import time
 from .base import Individual, MetaheuristicAlgorithm
 
+
 class Earthworm(Individual):
     """Clase para representar un individuo en el algoritmo EWA (Earthworm Algorithm)."""
-    
+
     def __init__(self, problem):
         """
         Inicializa un gusano de tierra con una posición aleatoria.
-        
+
         Args:
             problem: Instancia del problema a resolver
         """
@@ -17,21 +18,23 @@ class Earthworm(Individual):
         self.dimension = problem.get_dimension()
         self.position = np.random.uniform(0, 1, self.dimension)
         self._fitness = None
-    
+
     def fitness(self):
         """Calcula el fitness del individuo."""
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
-    
+
     def is_better_than(self, other):
         """Compara si este individuo es mejor que otro."""
         return self.fitness() < other.fitness()
-    
+
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
-        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
-    
+        return (
+            True  # En VRP todas las soluciones son factibles con nuestro decodificador
+        )
+
     def move(self, best_worm, alpha=0.8, beta=0.2, generation=0, gamma=0.99):
         """
         Movimiento y reproducción según el algoritmo EWA original.
@@ -62,7 +65,7 @@ class Earthworm(Individual):
         u2 = u12 if random.random() < 0.5 else u22
 
         # Suma ponderada
-        beta_t = beta * (gamma ** generation)
+        beta_t = beta * (gamma**generation)
         u_prime = beta_t * u1 + (1 - beta_t) * u2
 
         # Mutación Cauchy
@@ -73,11 +76,11 @@ class Earthworm(Individual):
         # Clip
         self.position = np.clip(u_final, LB, UB)
         self._fitness = None
-    
+
     def copy(self, other):
         """
         Copia los valores de otro individuo a este.
-        
+
         Args:
             other: Otro individuo (Earthworm)
         """
@@ -87,11 +90,11 @@ class Earthworm(Individual):
 
 class EWA(MetaheuristicAlgorithm):
     """Implementación del algoritmo de optimización de gusanos de tierra (Earthworm Algorithm)."""
-    
+
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         """
         Inicializa el algoritmo EWA.
-        
+
         Args:
             problem: Instancia del problema
             population_size: Tamaño de la población
@@ -100,22 +103,22 @@ class EWA(MetaheuristicAlgorithm):
         """
         super().__init__(problem, population_size, max_iterations, seed)
         self.alpha = 0.8  # Parámetro de intensificación
-        self.beta = 0.2   # Parámetro de exploración
+        self.beta = 0.2  # Parámetro de exploración
         self.convergence_curve = []
-    
+
     def initialize_population(self):
         """Inicializa la población de gusanos de tierra."""
         self.population = []
         for _ in range(self.population_size):
             worm = Earthworm(self.problem)
             self.population.append(worm)
-        
+
         # Encontrar el mejor gusano inicial
         self.best_solution = self.population[0]
         for i in range(1, self.population_size):
             if self.population[i].is_better_than(self.best_solution):
                 self.best_solution = self.population[i]
-    
+
     def update_population(self):
         """Actualiza la población en cada iteración (fase de movimiento y registro de convergencia)."""
         current_iter = len(self.convergence_curve)
@@ -123,13 +126,15 @@ class EWA(MetaheuristicAlgorithm):
         for i in range(self.population_size):
             # No mover el mejor gusano
             if self.population[i] is not self.best_solution:
-                self.population[i].move(self.best_solution, self.alpha, self.beta, current_iter)
-                
+                self.population[i].move(
+                    self.best_solution, self.alpha, self.beta, current_iter
+                )
+
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
                     worm_copy = Earthworm(self.problem)
                     worm_copy.copy(self.population[i])
                     self.best_solution = worm_copy
-        
+
         # 2. Registrar convergencia
         self.convergence_curve.append(self.best_solution.fitness())
