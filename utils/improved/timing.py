@@ -253,16 +253,16 @@ def cleanup_timing():
 def calculate_avg_summary():
     """
     Calcula un resumen de tiempos promedio por algoritmo e instancia.
-    
+
     Returns:
         Lista de diccionarios con promedios por algoritmo e instancia
     """
     # Obtener tiempos registrados
     times = get_iteration_times()
-    
+
     if not times:
         return []
-    
+
     # Agrupar por algoritmo e instancia
     avg_iter_times = {}
     for entry in times:
@@ -270,7 +270,7 @@ def calculate_avg_summary():
         if key not in avg_iter_times:
             avg_iter_times[key] = []
         avg_iter_times[key].append(entry["avg_iter_time"])
-    
+
     # Calcular promedio final para cada grupo
     avg_summary = []
     for (algo, inst), time_values in avg_iter_times.items():
@@ -280,5 +280,23 @@ def calculate_avg_summary():
             "avg_iter_time": sum(time_values) / len(time_values),
             "samples": len(time_values)
         })
-    
+
     return avg_summary
+
+
+def flush_worker_times():
+    """
+    Llamado solo por procesos worker.
+    Copia los tiempos locales a SHARED_TIMES sin vaciar la lista global
+    que el maestro necesita para calcular avg_iter_time_overall.
+    """
+    global _iteration_times, SHARED_TIMES, _time_lock
+    if not _iteration_times:
+        return
+    if _time_lock:
+        with _time_lock:
+            SHARED_TIMES.extend(_iteration_times)
+            _iteration_times = []
+    else:
+        SHARED_TIMES.extend(_iteration_times)
+        _iteration_times = []

@@ -191,8 +191,7 @@ def _run_algorithm_task(args):
 
     # Inicializar sistema de medición de tiempos en el proceso worker
     from utils.improved.timing import initialize_timing
-    if "SHARED_TIMES" not in globals():
-        initialize_timing()      # asegura lista compartida en el proceso worker
+    initialize_timing()      # asegura SHARED_TIMES en el worker
 
     (
         algo_class,
@@ -298,9 +297,9 @@ def _run_algorithm_task(args):
             # Guardar a CSV
             convergence_df.to_csv(csv_file, index=False)
 
-        # Finalizar timing para enviar los datos al Manager principal
-        from utils.improved.timing import finalize_timing
-        finalize_timing()            # envía tiempos del worker al Manager
+        # Enviar los tiempos locales al Manager principal sin vaciar SHARED_TIMES
+        from utils.improved.timing import flush_worker_times
+        flush_worker_times()     # pasa tiempos al Manager sin vaciar SHARED_TIMES
 
         return result
 
@@ -308,10 +307,10 @@ def _run_algorithm_task(args):
         logger.error(
             f"Error en ejecución {run_id} de {algo_class.__name__} para {instance_name}: {str(e)}"
         )
-        # Finalizar timing incluso en caso de error
+        # Enviar tiempos incluso en caso de error
         try:
-            from utils.improved.timing import finalize_timing
-            finalize_timing()
+            from utils.improved.timing import flush_worker_times
+            flush_worker_times()
         except:
             pass
 
