@@ -1,5 +1,4 @@
 [run]
-source = algorithms, problems, utils
 omit =
     scripts/*
     utils/improved/*
