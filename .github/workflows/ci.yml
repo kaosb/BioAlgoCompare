@@ -67,7 +67,7 @@ jobs:
     - name: Generate coverage report
       run: |
         # Run with PYTHONPATH set to current directory to ensure all modules are found
-        PYTHONPATH=$PYTHONPATH:$(pwd) pytest -m "not slow" --cov=algorithms,problems,utils --cov-report=xml --cov-fail-under=55
+        PYTHONPATH=$PYTHONPATH:$(pwd) pytest -m "not slow" --cov=algorithms,problems,utils --cov-report=xml --cov-fail-under=65
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
