@@ -32,7 +32,9 @@ logger = logging.getLogger("run_massive")
 from utils.improved.enhanced_benchmarking import (
     run_complete_analysis,
     run_massive_benchmark,
-    _run_algorithm_task,
+    get_iteration_times,
+    cleanup_timing,
+    calculate_avg_summary
 )
 
 # Importar algoritmos
@@ -176,58 +178,9 @@ def main(
 
     logger.info(f"Directorio de salida: {output_dir}")
 
-    # Monkey patch para medir tiempos por iteración
-    original_run_task = _run_algorithm_task
-    iteration_times = []
-
-    # Crear un lock para acceso sincronizado a iteration_times
-    time_lock = mp.Manager().Lock() if mp.current_process().name == 'MainProcess' else None
-
-    def new_run_algorithm_task(args):
-        """Envuelve la función original para medir tiempos por iteración y usar semillas por proceso"""
-        (
-            algo_class,
-            instance_name,
-            instance_path,
-            run_id,
-            iterations,
-            population,
-            seed,
-            checkpoint_dir,
-        ) = args
-
-        # Establecer semilla específica para este proceso
-        np.random.seed(seed + run_id)
-
-        # Ejecutamos el algoritmo
-        start_time = time.time()
-        result = original_run_task(args)
-        total_time = time.time() - start_time
-
-        # Si los primeros 5 runs, medimos tiempo promedio por iteración
-        if run_id <= 5 and "error" not in result:
-            avg_iter_time = total_time / iterations
-            new_entry = {
-                "algorithm": result["algorithm"],
-                "instance": result["instance"],
-                "run_id": run_id,
-                "avg_iter_time": avg_iter_time,
-                "total_time": total_time,
-                "iterations": iterations
-            }
-
-            # Usar un lock para evitar problemas con acceso concurrente a iteration_times
-            if time_lock:
-                with time_lock:
-                    iteration_times.append(new_entry)
-            else:
-                iteration_times.append(new_entry)
-
-        return result
-
-    # Reemplazar función original con nuestra versión instrumentada
-    from utils.improved import enhanced_benchmarking
-    enhanced_benchmarking._run_algorithm_task = new_run_algorithm_task
+    # El sistema de medición de tiempos ahora está integrado
+    # directamente en el módulo enhanced_benchmarking
+    # No es necesario hacer monkey patching
 
     # Determinar algoritmos a ejecutar usando el mapa DRY global
     if "all" in algorithm:
@@ -398,34 +351,31 @@ def main(
             )
 
         # Calcular y guardar tiempos promedio por iteración
-        if iteration_times:
-            # Calcular promedios por algoritmo e instancia
-            avg_iter_times = {}
-            for entry in iteration_times:
-                key = (entry["algorithm"], entry["instance"])
-                if key not in avg_iter_times:
-                    avg_iter_times[key] = []
-                avg_iter_times[key].append(entry["avg_iter_time"])
+        # Obtener los tiempos registrados durante la ejecución
+        try:
+            recorded_times = get_iteration_times()
+            if recorded_times:
+                logger.info(f"Se registraron {len(recorded_times)} mediciones de tiempo por iteración")
 
-            # Calcular promedio final
+                # Calcular promedios por algoritmo e instancia
+                avg_summary = calculate_avg_summary()
+            else:
+                logger.warning("No se registraron mediciones de tiempo por iteración")
+                avg_summary = []
+        except Exception as e:
+            logger.error(f"Error al obtener tiempos de iteración: {str(e)}")
+            recorded_times = []
             avg_summary = []
-            for (algo, inst), times in avg_iter_times.items():
-                avg_summary.append({
-                    "algorithm": algo,
-                    "instance": inst,
-                    "avg_iter_time": sum(times) / len(times),
-                    "samples": len(times)
-                })
 
-            # Añadir tiempos promedio por iteración al CSV
-            try:
-                summary_path = Path(output_dir) / "massive_benchmark_summary.csv"
-                if summary_path.exists():
-                    import pandas as pd
+            # Actualizar el CSV con los tiempos promedio por iteración
+            summary_path = Path(output_dir) / "massive_benchmark_summary.csv"
+            if summary_path.exists():
+                try:
                     # Leer CSV existente
+                    import pandas as pd
                     df = pd.read_csv(summary_path)
 
-                    # Añadir columna de tiempo promedio por iteración
+                    # Añadir o actualizar columna de tiempo promedio por iteración
                     for entry in avg_summary:
                         mask = (df["Algorithm"] == entry["algorithm"]) & (df["Instance"] == entry["instance"])
                         if mask.any():
@@ -434,48 +384,27 @@ def main(
                     # Guardar CSV actualizado
                     df.to_csv(summary_path, index=False)
                     logger.info(f"CSV actualizado con tiempos promedio por iteración: {summary_path}")
-            except Exception as e:
-                logger.error(f"Error al actualizar CSV con tiempos por iteración: {str(e)}")
+                except Exception as e:
+                    logger.warning(f"No se pudo actualizar el CSV con tiempos por iteración: {str(e)}")
 
-        # Actualizar manifest con tiempos promedio por iteración
-        if Path(manifest_path).exists():
-            try:
-                with open(manifest_path, "r") as f:
-                    manifest_data = json.load(f)
+            # Actualizar el manifest con los tiempos promedio por iteración
+            if Path(manifest_path).exists():
+                try:
+                    with open(manifest_path, "r") as f:
+                        manifest_data = json.load(f)
 
-                # Añadir tiempos promedio por iteración (si hay datos)
-                if iteration_times:
-                    # Calcular promedios por algoritmo e instancia
-                    avg_iter_times = {}
-                    for entry in iteration_times:
-                        key = (entry["algorithm"], entry["instance"])
-                        if key not in avg_iter_times:
-                            avg_iter_times[key] = []
-                        avg_iter_times[key].append(entry["avg_iter_time"])
-
-                    # Calcular promedio final
-                    avg_summary = []
-                    for (algo, inst), times in avg_iter_times.items():
-                        avg_summary.append({
-                            "algorithm": algo,
-                            "instance": inst,
-                            "avg_iter_time": sum(times) / len(times),
-                            "samples": len(times)
-                        })
-
-                    # Añadir al manifest
+                    # Añadir tiempos promedio por iteración
                     manifest_data["avg_iter_times"] = avg_summary
-                else:
-                    # Crear un valor predeterminado si no hay datos de tiempos
-                    manifest_data["avg_iter_times"] = []
 
-                # Guardar manifest actualizado
-                with open(manifest_path, "w") as f:
-                    json.dump(manifest_data, f, indent=2)
+                    # Guardar manifest actualizado
+                    with open(manifest_path, "w") as f:
+                        json.dump(manifest_data, f, indent=2)
 
-                logger.info(f"Manifest actualizado con datos de tiempos por iteración")
-            except Exception as e:
-                logger.error(f"Error al actualizar manifest con tiempos por iteración: {str(e)}")
+                    logger.info("Manifest actualizado con datos de tiempos por iteración")
+                except Exception as e:
+                    logger.warning(f"No se pudo actualizar el manifest con tiempos por iteración: {str(e)}")
+        else:
+            logger.warning("No se registraron mediciones de tiempo por iteración")
 
         # Mostrar resultado
         if report_path:
@@ -495,6 +424,12 @@ def main(
         import traceback
 
         logger.error(traceback.format_exc())
+    finally:
+        # Limpiar el sistema de medición de tiempos
+        try:
+            cleanup_timing()
+        except Exception as e:
+            logger.warning(f"No se pudo limpiar el sistema de medición de tiempos: {str(e)}")
 
 
 if __name__ == "__main__":
