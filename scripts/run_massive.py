@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para ejecutar benchmarks masivos (1000 runs por algoritmo) con sistema 
+Script para ejecutar benchmarks masivos (1000 runs por algoritmo) con sistema
 de checkpoint y recuperación para algoritmos metaheurísticos de optimización.
 """
 
@@ -8,21 +8,31 @@ import os
 import click
 import logging
 import time
+import json
+import platform
+import cProfile
+import pstats
+import sys
+import numpy as np
 from datetime import datetime
 import multiprocessing as mp
+from pathlib import Path
+import subprocess
 
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("massive_benchmark.log"), logging.StreamHandler()],
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("run_massive")
 
+# ruff: noqa: E402
 # Importar módulo mejorado de benchmarking
 from utils.improved.enhanced_benchmarking import (
     run_complete_analysis,
     run_massive_benchmark,
+    _run_algorithm_task,
 )
 
 # Importar algoritmos
@@ -42,6 +52,28 @@ from algorithms.rro import RRO
 from algorithms.gvoa import GVOA
 from algorithms.smo import SMO
 from algorithms.opa import OPA
+
+# Mapa de algoritmos (DRY)
+ALGO_MAP = {
+    "hoa": SHO,  # Previously HOA
+    "sho": SHO,
+    "apo": APO,
+    "egto": EGTO,
+    "fgo": FSA,  # Previously FGO
+    "fsa": FSA,
+    "foa": FOA,
+    "woa": WOA,
+    "hho": HHO,
+    "mrfo": MRFO,
+    "sma": SMA,
+    "gto": GTO,
+    "ewa": EWA,
+    "aha": AHA,
+    "rro": RRO,
+    "gvoa": GVOA,
+    "smo": SMO,
+    "opa": OPA,
+}
 
 
 @click.command()
@@ -98,6 +130,11 @@ from algorithms.opa import OPA
     default=None,
     help="Directorio de salida (automático si no se especifica)",
 )
+@click.option(
+    "--profile/--no-profile",
+    default=False,
+    help="Generar perfil de rendimiento (cProfile) por algoritmo",
+)
 def main(
     runs,
     iterations,
@@ -108,6 +145,7 @@ def main(
     parallel,
     resume,
     output_dir,
+    profile,
 ):
     """
     Ejecuta un benchmark masivo con 1000 ejecuciones por algoritmo/instancia,
@@ -127,53 +165,65 @@ def main(
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_dir = f"results/massive_benchmark_{timestamp}"
 
-    os.makedirs(output_dir, exist_ok=True)
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True, parents=True)
+
+    # Configurar logging específico para este benchmark
+    log_file = output_path / "massive_benchmark.log"
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+    logger.addHandler(file_handler)
+
     logger.info(f"Directorio de salida: {output_dir}")
 
-    # Determinar algoritmos a ejecutar
+    # Monkey patch para medir tiempos por iteración
+    original_run_task = _run_algorithm_task
+    iteration_times = []
+
+    def new_run_algorithm_task(args):
+        """Envuelve la función original para medir tiempos por iteración y usar semillas por proceso"""
+        (
+            algo_class,
+            instance_name,
+            instance_path,
+            run_id,
+            iterations,
+            population,
+            seed,
+            checkpoint_dir,
+        ) = args
+
+        # Establecer semilla específica para este proceso
+        np.random.seed(seed + run_id)
+
+        # Ejecutamos el algoritmo
+        start_time = time.time()
+        result = original_run_task(args)
+        total_time = time.time() - start_time
+
+        # Si los primeros 5 runs, medimos tiempo promedio por iteración
+        if run_id <= 5 and "error" not in result:
+            avg_iter_time = total_time / iterations
+            iteration_times.append({
+                "algorithm": result["algorithm"],
+                "instance": result["instance"],
+                "run_id": run_id,
+                "avg_iter_time": avg_iter_time,
+                "total_time": total_time,
+                "iterations": iterations
+            })
+
+        return result
+
+    # Reemplazar función original con nuestra versión instrumentada
+    from utils.improved import enhanced_benchmarking
+    enhanced_benchmarking._run_algorithm_task = new_run_algorithm_task
+
+    # Determinar algoritmos a ejecutar usando el mapa DRY global
     if "all" in algorithm:
-        algo_dict = {
-            "hoa": SHO,  # Previously HOA
-            "sho": SHO,
-            "apo": APO,
-            "egto": EGTO,
-            "fgo": FSA,  # Previously FGO
-            "fsa": FSA,
-            "foa": FOA,
-            "woa": WOA,
-            "hho": HHO,
-            "mrfo": MRFO,
-            "sma": SMA,
-            "gto": GTO,
-            "ewa": EWA,
-            "aha": AHA,
-            "rro": RRO,
-            "gvoa": GVOA,
-            "smo": SMO,
-            "opa": OPA,
-        }
+        algo_dict = ALGO_MAP
     else:
-        algo_classes = {
-            "hoa": SHO,  # Previously HOA
-            "sho": SHO,
-            "apo": APO,
-            "egto": EGTO,
-            "fgo": FSA,  # Previously FGO
-            "fsa": FSA,
-            "foa": FOA,
-            "woa": WOA,
-            "hho": HHO,
-            "mrfo": MRFO,
-            "sma": SMA,
-            "gto": GTO,
-            "ewa": EWA,
-            "aha": AHA,
-            "rro": RRO,
-            "gvoa": GVOA,
-            "smo": SMO,
-            "opa": OPA,
-        }
-        algo_dict = {algo: algo_classes[algo] for algo in algorithm}
+        algo_dict = {algo: ALGO_MAP[algo] for algo in algorithm}
 
     # Determinar instancias a evaluar
     if not instances:
@@ -232,19 +282,153 @@ def main(
         logger.info("Operación cancelada por el usuario")
         return
 
+    # Crear manifest.json con información del entorno
     try:
-        # Ejecutar análisis completo
-        report_path = run_complete_analysis(
-            algo_dict,
-            valid_instances,
-            runs=runs,
-            iterations=iterations,
-            population=population,
-            seed=seed,
-            parallel=parallel,
-            output_dir=output_dir,
-            resume=resume,
-        )
+        # Obtener hash del último commit
+        try:
+            git_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], universal_newlines=True
+            ).strip()
+        except:
+            git_commit = "unknown"
+
+        # Crear manifest con parámetros y metadatos
+        manifest = {
+            "params": {
+                "algorithms": list(algo_dict.keys()),
+                "instances": valid_instances,
+                "runs": runs,
+                "iterations": iterations,
+                "population": population,
+                "seed": seed,
+                "parallel": parallel,
+            },
+            "git_commit": git_commit,
+            "python_version": platform.python_version(),
+            "cpu_count": mp.cpu_count(),
+            "platform": platform.platform(),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        # Guardar manifest
+        manifest_path = output_path / "manifest.json"
+        with open(manifest_path, "w") as f:
+            json.dump(manifest, f, indent=2)
+
+        logger.info(f"Manifest creado: {manifest_path}")
+
+        # Lista para almacenar información de tiempo por iteración
+        iteration_times = []
+
+        # Ejecutar análisis completo, utilizando hook para tiempo por iteración si es necesario
+        if profile:
+            logger.info("Modo perfil activado, generando perfiles por algoritmo")
+
+            # Crear directorio para perfiles
+            profile_dir = output_path / "profiles"
+            profile_dir.mkdir(exist_ok=True)
+
+            # Ejecutar cada algoritmo con perfil separado
+            for algo_name, algo_class in algo_dict.items():
+                algo_profile_path = profile_dir / f"{algo_name}.prof"
+                logger.info(f"Generando perfil para {algo_name}: {algo_profile_path}")
+
+                # Crear profiler
+                profiler = cProfile.Profile()
+                profiler.enable()
+
+                # Ejecutar algoritmo específico
+                single_algo_dict = {algo_name: algo_class}
+                run_complete_analysis(
+                    single_algo_dict,
+                    valid_instances,
+                    runs=runs,
+                    iterations=iterations,
+                    population=population,
+                    seed=seed,
+                    parallel=parallel,
+                    output_dir=str(output_path / algo_name),
+                    resume=resume,
+                )
+
+                # Desactivar profiler y guardar resultados
+                profiler.disable()
+                profiler.dump_stats(str(algo_profile_path))
+
+                # Mostrar estadísticas básicas
+                stats = pstats.Stats(str(algo_profile_path)).sort_stats('cumulative')
+                stats.print_stats(10)
+
+            # Combinar resultados
+            report_path = str(output_path / "massive_benchmark_report.html")
+        else:
+            # Ejecutar normalmente sin perfil
+            report_path = run_complete_analysis(
+                algo_dict,
+                valid_instances,
+                runs=runs,
+                iterations=iterations,
+                population=population,
+                seed=seed,
+                parallel=parallel,
+                output_dir=output_dir,
+                resume=resume,
+            )
+
+        # Calcular y guardar tiempos promedio por iteración
+        if iteration_times:
+            # Calcular promedios por algoritmo e instancia
+            avg_iter_times = {}
+            for entry in iteration_times:
+                key = (entry["algorithm"], entry["instance"])
+                if key not in avg_iter_times:
+                    avg_iter_times[key] = []
+                avg_iter_times[key].append(entry["avg_iter_time"])
+
+            # Calcular promedio final
+            avg_summary = []
+            for (algo, inst), times in avg_iter_times.items():
+                avg_summary.append({
+                    "algorithm": algo,
+                    "instance": inst,
+                    "avg_iter_time": sum(times) / len(times),
+                    "samples": len(times)
+                })
+
+            # Añadir tiempos promedio por iteración al CSV
+            try:
+                summary_path = Path(output_dir) / "massive_benchmark_summary.csv"
+                if summary_path.exists():
+                    import pandas as pd
+                    # Leer CSV existente
+                    df = pd.read_csv(summary_path)
+
+                    # Añadir columna de tiempo promedio por iteración
+                    for entry in avg_summary:
+                        mask = (df["Algorithm"] == entry["algorithm"]) & (df["Instance"] == entry["instance"])
+                        if mask.any():
+                            df.loc[mask, "avg_iter_time"] = entry["avg_iter_time"]
+
+                    # Guardar CSV actualizado
+                    df.to_csv(summary_path, index=False)
+                    logger.info(f"CSV actualizado con tiempos promedio por iteración: {summary_path}")
+            except Exception as e:
+                logger.error(f"Error al actualizar CSV con tiempos por iteración: {str(e)}")
+
+        # Actualizar manifest con tiempos promedio por iteración
+        if Path(manifest_path).exists():
+            try:
+                with open(manifest_path, "r") as f:
+                    manifest_data = json.load(f)
+
+                # Añadir tiempos promedio por iteración
+                manifest_data["avg_iter_times"] = avg_summary
+
+                # Guardar manifest actualizado
+                with open(manifest_path, "w") as f:
+                    json.dump(manifest_data, f, indent=2)
+            except Exception as e:
+                logger.error(f"Error al actualizar manifest con tiempos por iteración: {str(e)}")
 
         # Mostrar resultado
         if report_path:
