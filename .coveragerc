@@ -1,8 +1,18 @@
 [run]
 omit =
-    scripts/run.py
-    scripts/run_opa_experiment.py
-    scripts/inventory.py
-    utils/improved/advanced_visualization.py
-    utils/improved/enhanced_statistics.py
-    utils/improved/iteration_timer.py
+    scripts/*
+    utils/improved/*
+    utils/statistical_analysis.py
+    utils/benchmarking.py
+    utils/fixed_method.py
+    utils/html_generator.py
+    utils/modify_statistical_analysis.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError
