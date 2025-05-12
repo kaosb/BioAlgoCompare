@@ -2,6 +2,21 @@
 
 Este documento proporciona detalles técnicos sobre la implementación de BioAlgoCompare, describiendo las clases clave, estructuras de datos, y decisiones de implementación relevantes.
 
+## Arquitectura General
+
+```
+optimizacion/
+├── algorithms/           # Implementaciones de algoritmos metaheurísticos
+├── problems/             # Problemas de optimización (VRP, etc.)
+├── scripts/              # Scripts de ejecución y análisis
+├── utils/                # Utilidades comunes
+│   └── improved/         # Versiones mejoradas de utilidades
+├── data/                 # Datasets para problemas de optimización
+│   └── vrp/              # Instancias de Vehicle Routing Problem
+│       └── Solomon/      # Instancias Solomon para VRP
+└── results/              # Resultados de benchmarks
+```
+
 ## Estructura de Clases
 
 ### Algoritmos Metaheurísticos
@@ -239,6 +254,82 @@ El sistema implementa múltiples tipos de visualizaciones:
 4. **Mapas de calor**: Comparación estadística entre pares de algoritmos
 5. **Diagramas de diferencia crítica**: Rankings relativos con significancia estadística
 
+## Instancias Solomon para VRP
+
+El proyecto incorpora las instancias Solomon, un conjunto estándar de benchmarks para VRP con ventanas de tiempo:
+
+### Series Incluidas
+
+1. **Series 101** (ventanas de tiempo estrechas):
+   - **C101**: Clientes agrupados geográficamente
+   - **R101**: Clientes distribuidos aleatoriamente
+   - **RC101**: Combinación de agrupados y aleatorios
+
+2. **Series 201** (ventanas de tiempo amplias):
+   - **C201**: Clientes agrupados
+   - **R201**: Clientes distribuidos aleatoriamente
+   - **RC201**: Combinación de agrupados y aleatorios
+
+### Formato de Datos
+
+Para que las instancias Solomon sean compatibles con nuestro parser `VRPProblem`, se requiere un formato específico que incluya:
+
+```
+NAME : <nombre_instancia>
+DIMENSION : <número_nodos>
+CAPACITY : <capacidad_vehículos>
+NODE_COORD_SECTION
+<id_nodo> <coord_x> <coord_y>
+...
+DEMAND_SECTION
+<id_nodo> <demanda>
+...
+DEPOT_SECTION
+<id_depósito>
+-1
+EOF
+```
+
+### Herramientas de Conversión
+
+Se ha desarrollado el script `convert_solomon_format.py` para convertir las instancias Solomon originales al formato requerido:
+
+```python
+def convert_to_vrp_format(data, output_path):
+    """Convierte datos Solomon al formato VRP requerido"""
+    # Escribir encabezado y datos originales
+    # ...
+
+    # Agregar secciones requeridas
+    f.write(f"\nNAME : {data['name']}\n")
+    f.write(f"DIMENSION : {data['dimension']}\n")
+    f.write(f"CAPACITY : {data['capacity']}\n")
+
+    # Sección de coordenadas
+    f.write("NODE_COORD_SECTION\n")
+    for node_id, x, y in sorted_nodes:
+        f.write(f"{node_id} {x} {y}\n")
+
+    # Sección de demandas
+    f.write("DEMAND_SECTION\n")
+    for node_id, x, y in sorted_nodes:
+        f.write(f"{node_id} {demands_dict[node_id]}\n")
+
+    # Sección de depósito
+    f.write("DEPOT_SECTION\n")
+    f.write("0\n")
+    f.write("-1\n")
+    f.write("EOF")
+```
+
+### Scripts de Benchmarking Específicos
+
+Se han desarrollado scripts especializados para trabajar con estas instancias:
+
+1. `run_full_solomon_benchmark.py`: Ejecuta benchmarks en todas las instancias Solomon
+2. `run_extended_solomon_benchmark.py`: Ejecuta benchmarks extendidos con más iteraciones
+3. `analyze_solomon_results.py`: Genera visualizaciones y análisis comparativos
+
 ## Decisiones de Implementación Destacables
 
 1. **Inmutabilidad de soluciones**: Al encontrar una mejor solución, se crea una copia para evitar modificaciones accidentales:
@@ -264,5 +355,52 @@ El sistema implementa múltiples tipos de visualizaciones:
    ```
 
 4. **Interfaces CLI robustas**: Uso de Click para crear interfaces de línea de comandos profesionales con validación de parámetros.
+
+5. **Medición de tiempos por iteración**: Implementación de un sistema de medición precisa del tiempo por iteración:
+   ```python
+   # En utils/improved/timing.py
+   def record_iteration_time(algorithm, instance, run_id, iter_time, total_time, iterations):
+       """Registra el tiempo promedio por iteración"""
+       global _iteration_times, _time_lock
+
+       avg_iter_time = iter_time / iterations
+
+       new_entry = {
+           "algorithm": algorithm,
+           "instance": instance,
+           "run_id": run_id,
+           "avg_iter_time": avg_iter_time,
+           "total_time": total_time,
+           "iterations": iterations
+       }
+
+       # Acceso sincronizado para ejecución paralela
+       if _time_lock:
+           with _time_lock:
+               _iteration_times.append(new_entry)
+       else:
+           _iteration_times.append(new_entry)
+   ```
+
+6. **Propagación de métricas de tiempo**: Asegurando que los tiempos por iteración se incluyan siempre en los informes de benchmark:
+   ```python
+   # En enhanced_benchmarking.py
+   def create_summary_dataframe(benchmark_results):
+       # ...
+
+       # Añadir tiempo promedio por iteración si está disponible
+       algo_inst_key = (result.algorithm_name, result.instance_name)
+       if algo_inst_key in avg_times_dict:
+           row["avg_iter_time"] = avg_times_dict[algo_inst_key]
+       else:
+           # Si no está disponible directamente, calcular el promedio
+           matching_records = [entry for entry in recorded if
+                             entry["algorithm"] == result.algorithm_name and
+                             entry["instance"] == result.instance_name]
+           if matching_records:
+               row["avg_iter_time"] = sum(r["avg_iter_time"] for r in matching_records) / len(matching_records)
+
+       # ...
+   ```
 
 Estas decisiones de implementación contribuyen a un sistema coherente, eficiente y científicamente riguroso para la evaluación y comparación de algoritmos metaheurísticos bio-inspirados.

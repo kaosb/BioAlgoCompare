@@ -83,3 +83,4 @@ backup/
 */backup/
 **/backup/
 algorithms/backup/.coverage*
+data/vrp/Solomon/converted/
