@@ -4,10 +4,10 @@
 
 ## Resumen General
 
-- **Total de archivos:** 114
-- **Archivos Python:** 55
-- **Líneas de código Python:** 22700
-- **Módulos:** 59
+- **Total de archivos:** 100
+- **Archivos Python:** 45
+- **Líneas de código Python:** 18000
+- **Módulos:** 45
 
 ## Módulos y quién los importa
 
@@ -15,12 +15,12 @@
 |--------|--------------|------------------------|
 | problems/vrp.py | debug_opa.py, test_opa.py, tests/test_algorithms_regression.py, tests/test_vrp_parser.py, tests/test_vrp_operators.py y 7 más | 12 |
 | algorithms/opa.py | debug_opa.py, test_opa.py, scripts/run_massive.py, scripts/run.py, scripts/run_opa_experiment.py y 1 más | 6 |
-| algorithms/foa.py | utils/benchmarking.py, utils/backup/benchmarking.py, scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 5 |
-| algorithms/sho.py | utils/benchmarking.py, utils/backup/benchmarking.py, scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 5 |
+| algorithms/foa.py | utils/benchmarking.py, scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 4 |
+| algorithms/sho.py | utils/benchmarking.py, scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 4 |
 | algorithms/base.py | algorithms/gvoa.py, algorithms/opa.py, algorithms/smo.py, algorithms/aha.py | 4 |
-| utils/statistical_analysis.py | utils/modify_statistical_analysis.py, utils/backup/modify_statistical_analysis.py, scripts/analyze.py | 3 |
-| utils/improved/advanced_visualization.py | utils/improved/enhanced_statistics.py, utils/backup/improved/enhanced_statistics.py, scripts/analyze.py | 3 |
-| utils/benchmarking.py | utils/improved/enhanced_benchmarking.py, utils/backup/improved/enhanced_benchmarking.py, scripts/analyze.py | 3 |
+| utils/statistical_analysis.py | utils/modify_statistical_analysis.py, scripts/analyze.py | 2 |
+| utils/improved/advanced_visualization.py | utils/improved/enhanced_statistics.py, scripts/analyze.py | 2 |
+| utils/benchmarking.py | utils/improved/enhanced_benchmarking.py, scripts/analyze.py | 2 |
 | algorithms/aha.py | scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 3 |
 | algorithms/apo.py | scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 3 |
 | algorithms/egto.py | scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 3 |
@@ -36,7 +36,7 @@
 | algorithms/woa.py | scripts/run_massive.py, scripts/run.py, scripts/analyze.py | 3 |
 | utils/vrp_operators.py | tests/test_vrp_operators.py, scripts/analyze.py | 2 |
 | scripts/run.py | tests/test_cli.py, scripts/analyze.py | 2 |
-| utils/fixed_method.py | utils/modify_statistical_analysis.py, utils/backup/modify_statistical_analysis.py | 2 |
+| utils/fixed_method.py | utils/modify_statistical_analysis.py | 1 |
 | utils/improved/enhanced_benchmarking.py | scripts/run_massive.py, scripts/analyze.py | 2 |
 | utils/visualization.py | scripts/run.py | 1 |
 | scripts/run_massive.py | scripts/analyze.py | 1 |
@@ -47,19 +47,12 @@
 | Archivo | Tamaño (bytes) | Líneas |
 |---------|----------------|--------|
 | utils/statistical_analysis.py | 69062 | 1830 |
-| utils/backup/statistical_analysis.py | 67620 | 1630 |
-| utils/backup/vrp_operators.py | 54943 | 1373 |
 | utils/vrp_operators.py | 54795 | 1560 |
-| utils/backup/improved/advanced_visualization.py | 27184 | 810 |
 | utils/improved/advanced_visualization.py | 26564 | 837 |
 | utils/fixed_method.py | 20166 | 540 |
-| utils/backup/fixed_method.py | 19390 | 421 |
 | scripts/inventory.py | 14856 | 348 |
 | utils/html_generator.py | 9163 | 262 |
-| utils/backup/html_generator.py | 8976 | 209 |
-| utils/backup/visualization.py | 3049 | 105 |
 | utils/visualization.py | 2964 | 108 |
-| utils/backup/operators.py | 2730 | 88 |
 | utils/operators.py | 2698 | 98 |
 | setup.py | 1209 | 39 |
 
