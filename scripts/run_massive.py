@@ -217,6 +217,7 @@ def main(
     logger.info(f"Semilla base: {seed}")
 
     # Inicializar el sistema de medición de tiempos
+    from utils.improved.timing import initialize_timing, finalize_timing
     initialize_timing()
 
     # Establecer semillas globales si se proporciona una semilla
@@ -457,7 +458,9 @@ def main(
                 except Exception as e:
                     logger.warning(f"No se pudo actualizar el manifest con el tiempo promedio global: {str(e)}")
 
-            # Ahora podemos finalizar y limpiar
+            # Finalizar el sistema de medición de tiempos
+            finalize_timing()
+            # Ahora podemos limpiar
             cleanup_timing()
         except Exception as e:
             logger.warning(f"No se pudo limpiar el sistema de medición de tiempos: {str(e)}")
