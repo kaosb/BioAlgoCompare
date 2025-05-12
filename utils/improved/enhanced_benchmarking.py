@@ -140,6 +140,11 @@ def _run_algorithm_task(args):
         checkpoint_dir,
     ) = args
 
+    # Nota: En ejecución paralela, asegurar que instance_name sea siempre una cadena
+    # ya que puede llegar como bytes u otro formato que cause problemas después
+    if not isinstance(instance_name, str):
+        instance_name = str(instance_name)
+
     try:
         from problems.vrp import VRPProblem
 
@@ -374,6 +379,10 @@ def run_massive_benchmark(
     if parallel:
         num_processes = min(cpu_count(), len(all_tasks))
         logger.info(f"Modo paralelo activado. Usando {num_processes} procesos.")
+        # Crear un lock para sincronización en modo paralelo
+        # (solo el proceso principal accederá a los archivos CSV)
+        global _csv_lock
+        _csv_lock = mp.Manager().Lock()
     else:
         num_processes = 1
 
@@ -500,8 +509,15 @@ def run_massive_benchmark(
         # Generar archivo CSV resumen
         summary_df = create_summary_dataframe(benchmark_results)
         summary_file = os.path.join(output_dir, "massive_benchmark_summary.csv")
-        summary_df.to_csv(summary_file, index=False)
-        logger.info(f"Resumen guardado en {summary_file}")
+
+        # Usar lock para escritura sincronizada del CSV en modo paralelo
+        if parallel and '_csv_lock' in globals():
+            with _csv_lock:
+                summary_df.to_csv(summary_file, index=False)
+                logger.info(f"Resumen guardado en {summary_file} (sincronizado)")
+        else:
+            summary_df.to_csv(summary_file, index=False)
+            logger.info(f"Resumen guardado en {summary_file}")
 
         return benchmark_results
 
@@ -536,7 +552,26 @@ def create_summary_dataframe(benchmark_results):
         summary_data.append(row)
 
     # Crear DataFrame
-    summary_df = pd.DataFrame(summary_data)
+    if not summary_data:
+        # Si no hay datos, crear un DataFrame vacío con las columnas requeridas
+        summary_df = pd.DataFrame(columns=[
+            "Algorithm", "Instance", "Runs", "Best", "Mean", "Std", "Time", "Time_Std",
+            "Gap (%)", "Success (%)"
+        ])
+    else:
+        summary_df = pd.DataFrame(summary_data)
+
+        # Verificar que la columna 'Instance' esté presente
+        if "Instance" not in summary_df.columns:
+            # Intentar recuperar la instancia de los datos originales
+            for result in benchmark_results:
+                if result.fitness_values:  # Si hay al menos algunos resultados
+                    summary_df["Instance"] = result.instance_name
+                    logger.warning(f"Corrigiendo columna 'Instance' ausente con valor: {result.instance_name}")
+                    break
+            else:
+                # Si todavía no hay columna Instance, es un error crítico
+                raise ValueError("Missing column 'Instance' in summary DataFrame")
 
     return summary_df
 
@@ -972,9 +1007,44 @@ def run_complete_analysis(
         if output_dir
         else None
     )
-    report_path = create_enhanced_report(
-        benchmark_results, output_file=report_file, include_convergence=True
-    )
+
+    # Verificar que el CSV contiene la columna 'Instance' antes de crear el reporte
+    summary_path = os.path.join(output_dir, "massive_benchmark_summary.csv") if output_dir else None
+
+    # Usar lock para acceso sincronizado al CSV en modo paralelo
+    use_lock = parallel and '_csv_lock' in globals()
+
+    if summary_path and os.path.exists(summary_path):
+        try:
+            # Acceso sincronizado al archivo CSV
+            if use_lock:
+                with _csv_lock:
+                    df = pd.read_csv(summary_path)
+                    if "Instance" not in df.columns:
+                        logger.warning("'Instance' missing in CSV – forcing rewrite of headers")
+                        # Crear de nuevo el CSV a partir de los resultados del benchmark
+                        summary_df = create_summary_dataframe(benchmark_results)
+                        summary_df.to_csv(summary_path, index=False)
+            else:
+                df = pd.read_csv(summary_path)
+                if "Instance" not in df.columns:
+                    logger.warning("'Instance' missing in CSV – forcing rewrite of headers")
+                    # Crear de nuevo el CSV a partir de los resultados del benchmark
+                    summary_df = create_summary_dataframe(benchmark_results)
+                    summary_df.to_csv(summary_path, index=False)
+        except Exception as e:
+            logger.error(f"Error al verificar CSV: {str(e)}")
+
+    # Crear el reporte (también con acceso sincronizado si es necesario)
+    if use_lock:
+        with _csv_lock:
+            report_path = create_enhanced_report(
+                benchmark_results, output_file=report_file, include_convergence=True
+            )
+    else:
+        report_path = create_enhanced_report(
+            benchmark_results, output_file=report_file, include_convergence=True
+        )
 
     logger.info(f"Análisis completo generado: {report_path}")
 
