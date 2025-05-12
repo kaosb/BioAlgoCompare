@@ -4,6 +4,7 @@ import numpy as np
 import time
 from algorithms.base import Individual, MetaheuristicAlgorithm
 
+
 class Orca(Individual):
     """Una orca (solución VRP) con representación basada en rutas."""
 
@@ -17,10 +18,10 @@ class Orca(Individual):
 
     def copy(self):
         return copy.deepcopy(self)
-        
+
     def is_better_than(self, other):
         return self.fitness() < other.fitness()
-        
+
     def move(self, population, iteration, max_iterations):
         # No se usa directamente, se usa update en su lugar
         pass
@@ -54,7 +55,7 @@ class Orca(Individual):
         i = random.randrange(1, len(route) - 2)
         k = random.randrange(i + 1, len(route) - 1)
         # Invertir el segmento entre i y k
-        route[i:k+1] = list(reversed(route[i:k+1]))
+        route[i : k + 1] = list(reversed(route[i : k + 1]))
 
     def _relocate(self, routes, leader_routes):
         """
@@ -79,7 +80,7 @@ class Orca(Individual):
         dst_candidates = []
         if leader_routes:
             dst_candidates = [r for r in leader_routes if r != src]
-        
+
         # Si no hay rutas del líder, usar cualquier otra ruta existente
         if not dst_candidates:
             dst_candidates = [r for r in routes if r != src]
@@ -92,13 +93,15 @@ class Orca(Individual):
 
         # Insertar en la ruta destino
         dst = random.choice(dst_candidates)
-        insert_pos = random.randrange(1, len(dst))  # Posición después del depósito inicial
+        insert_pos = random.randrange(
+            1, len(dst)
+        )  # Posición después del depósito inicial
         dst.insert(insert_pos, cust)
 
     def update(self, g_best, phase, accept_prob):
         """
         Actualiza la posición de la Orca según la fase y probabilidad.
-        
+
         Args:
             g_best: Mejor posición global (rutas del líder)
             phase: "chase" para exploración, "attack" para explotación
@@ -120,14 +123,14 @@ class Orca(Individual):
         # Reparar solución si el problema ofrece esa funcionalidad
         if hasattr(self.problem, "repair_routes"):
             new_pos = self.problem.repair_routes(new_pos)
-        
+
         # Verificar factibilidad
         if not self.problem.routes_are_feasible(new_pos):
             return  # No actualizar si no es factible
-        
+
         # Evaluar nueva posición
         new_fit = self.problem.evaluate_routes(new_pos)
-        
+
         # Actualizar si mejora o según probabilidad de aceptación
         if new_fit < self.fitness() or random.random() < accept_prob:
             self.position = new_pos
@@ -142,7 +145,7 @@ class OPA(MetaheuristicAlgorithm):
     """
     Orca Predator Algorithm (OPA) – Adaptado al problema de ruteo de vehículos (VRP)
     Inspirado en: Jiang et al. (2021)
-    
+
     Esta implementación trabaja directamente con la representación de rutas para VRP.
     """
 
@@ -163,7 +166,7 @@ class OPA(MetaheuristicAlgorithm):
         if self.seed is not None:
             random.seed(self.seed)
             np.random.seed(self.seed)
-        
+
         self.population = [Orca(self.problem) for _ in range(self.population_size)]
         self.best_solution = min(self.population, key=lambda o: o.fitness()).copy()
         self.convergence_curve = [self.best_solution.fitness()]
@@ -175,23 +178,23 @@ class OPA(MetaheuristicAlgorithm):
         frac = self.current_iter / self.max_iterations
         phase = "chase" if frac < 0.5 else "attack"
         accept_prob = 0.3 * (1 - frac)
-        
+
         # Obtener la mejor posición global actual
         leader_pos = copy.deepcopy(self.best_solution.position)
-        
+
         # Actualizar cada orca
         for orca in self.population:
             orca.update(leader_pos, phase, accept_prob)
-        
+
         # Actualizar mejor solución global
         current_best = min(self.population, key=lambda o: o.fitness())
         if current_best.is_better_than(self.best_solution):
             self.best_solution = current_best.copy()
-        
+
         # Actualizar curva de convergencia
         self.convergence_curve.append(self.best_solution.fitness())
         self.current_iter += 1
-        
+
     def execute(self):
         """Ejecuta el algoritmo completo."""
         self.start_time = time.time()
@@ -202,11 +205,11 @@ class OPA(MetaheuristicAlgorithm):
         finally:
             self.end_time = time.time()
         return self.best_solution
-    
+
     def get_execution_time(self):
         """Retorna el tiempo de ejecución en segundos."""
         return self.end_time - self.start_time
-    
+
     def get_convergence_curve(self):
         """Retorna la curva de convergencia."""
         return self.convergence_curve

@@ -13,26 +13,91 @@ BioAlgoCompare está diseñado siguiendo principios de modularidad, extensibilid
 
 ## Diagrama de Componentes
 
+```mermaid
+graph TD
+    A[Algoritmos\nalgorithms/] <--> B[Problemas\nproblems/]
+    B <--> C[Operadores\nutils/]
+    A <--> C
+    A --> D[Scripts\nscripts/]
+    B --> D
+    C --> D
+    D --> E[Benchmarking\nutils/]
+    D --> F[Análisis\nutils/]
+    D --> G[Visualización\nutils/]
+    E --> H[CI/CD\n.github/workflows/]
+    F --> H
+    I[Tests\ntests/] --> H
 ```
-┌─────────────────┐      ┌───────────────┐      ┌────────────────┐
-│    Algoritmos   │◄────►│   Problemas   │◄────►│   Operadores   │
-│  (algorithms/)  │      │  (problems/)  │      │    (utils/)    │
-└─────────────────┘      └───────────────┘      └────────────────┘
-        ▲                       ▲                      ▲
-        │                       │                      │
-        │                       │                      │
-        ▼                       ▼                      ▼
-┌───────────────────────────────────────────────────────────────┐
-│                        Scripts                                 │
-│                      (scripts/)                                │
-└───────────────────────────────────────────────────────────────┘
-        ▲                       ▲                      ▲
-        │                       │                      │
-        ▼                       ▼                      ▼
-┌─────────────────┐      ┌───────────────┐      ┌────────────────┐
-│  Benchmarking   │      │   Análisis    │      │ Visualización  │
-│    (utils/)     │      │    (utils/)   │      │    (utils/)    │
-└─────────────────┘      └───────────────┘      └────────────────┘
+
+## Inventario de Módulos
+
+### Algoritmos
+```
+algorithms/
+├── aha.py         # Artificial Hummingbird Algorithm
+├── apo.py         # Artificial Protozoa Optimizer
+├── base.py        # Clase base para algoritmos metaheurísticos
+├── egto.py        # Enhanced Gorilla Troops Optimizer
+├── ewa.py         # Earthworm Algorithm
+├── foa.py         # Fossa Optimization Algorithm
+├── fsa.py         # Flamingo Search Algorithm
+├── gto.py         # Gorilla Troops Optimizer
+├── gvoa.py        # Griffon Vultures Optimization Algorithm
+├── hho.py         # Harris Hawks Optimization
+├── mrfo.py        # Manta Ray Foraging Optimization
+├── opa.py         # Orca Predator Algorithm
+├── rro.py         # Raven Roosting Optimization
+├── sho.py         # Spotted Hyena Optimizer
+├── sma.py         # Slime Mould Algorithm
+├── smo.py         # Starling Murmuration Optimizer
+└── woa.py         # Whale Optimization Algorithm
+```
+
+### Problemas
+```
+problems/
+└── vrp.py         # Implementación del Vehicle Routing Problem
+```
+
+### Scripts
+```
+scripts/
+├── analyze.py             # Análisis de resultados experimentales
+├── run.py                 # Ejecución de algoritmos individuales
+├── run_massive.py         # Benchmarking masivo con checkpoint
+└── run_opa_experiment.py  # Experimentos específicos para OPA
+```
+
+### Utilidades
+```
+utils/
+├── benchmarking.py                  # Funciones para benchmarking
+├── fixed_method.py                  # Métodos corregidos para optimización
+├── html_generator.py                # Generación de reportes HTML
+├── modify_statistical_analysis.py   # Modificador de análisis estadístico
+├── operators.py                     # Operadores genéticos generales
+├── statistical_analysis.py          # Funciones de análisis estadístico
+├── visualization.py                 # Visualización de resultados
+├── vrp_operators.py                 # Operadores específicos para VRP
+└── improved/                        # Versiones mejoradas de módulos
+    ├── advanced_visualization.py    # Visualización avanzada
+    ├── enhanced_benchmarking.py     # Benchmarking mejorado
+    └── enhanced_statistics.py       # Estadísticas mejoradas
+```
+
+### Tests
+```
+tests/
+├── test_algorithms_regression.py    # Tests de regresión para algoritmos
+├── test_cli.py                      # Tests para la interfaz de línea de comandos
+├── test_vrp_operators.py            # Tests para operadores VRP
+└── test_vrp_parser.py               # Tests para el parser VRP
+```
+
+### CI/CD
+```
+.github/workflows/
+└── ci.yml                          # Workflow de integración continua
 ```
 
 ## Componentes Principales
@@ -84,6 +149,26 @@ Interfaces de línea de comandos para interactuar con el sistema:
 
 **Patrones de diseño:** Command, Facade.
 
+### 5. Tests (`tests/`)
+
+Pruebas automatizadas para garantizar el correcto funcionamiento del sistema:
+
+- **Tests unitarios**: Para componentes individuales
+- **Tests de regresión**: Para algoritmos contra instancias conocidas
+- **Tests de CLI**: Para validar la interfaz de línea de comandos
+
+**Patrones de diseño:** Test Fixture, Test Suite.
+
+### 6. CI/CD (`.github/workflows/`)
+
+Pipeline de integración continua para asegurar la calidad del código:
+
+- **Linting**: Verificación de estilo y calidad de código con Ruff
+- **Tests**: Ejecución automatizada de pruebas
+- **Cobertura**: Generación de reportes de cobertura de código
+
+**Patrones de diseño:** Pipeline, Continuous Integration.
+
 ## Flujo de Datos
 
 1. **Entrada**:
@@ -110,7 +195,8 @@ El sistema está diseñado para garantizar la reproducibilidad científica media
 
 - Control explícito de semillas aleatorias
 - Registro completo de parámetros y configuraciones
-- Almacenamiento de resultados detallados
+- Almacenamiento de resultados detallados por corrida en formato CSV
+- Sistema de checkpoints para recuperación de ejecuciones largas
 
 ### Extensibilidad
 
@@ -128,6 +214,15 @@ El sistema soporta ejecución paralela para:
 - Benchmarking de múltiples algoritmos
 - Análisis estadístico paralelo
 
+### Calidad del Código
+
+La infraestructura de calidad garantiza:
+
+- Estándares consistentes (via Ruff y pre-commit hooks)
+- Detección temprana de errores (via pruebas automatizadas)
+- Medición de cobertura de código
+- Proceso de CI/CD automatizado
+
 ## Tecnologías Utilizadas
 
 - **Python**: Lenguaje principal de implementación
@@ -136,6 +231,9 @@ El sistema soporta ejecución paralela para:
 - **Matplotlib/Seaborn**: Visualización científica
 - **SciPy**: Análisis estadístico
 - **Click**: Interfaces de línea de comandos
+- **Pytest**: Framework de pruebas
+- **Ruff**: Linting y formateo de código
+- **GitHub Actions**: CI/CD
 
 ## Decisiones de Diseño
 

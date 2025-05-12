@@ -1,88 +1,108 @@
+"""
+Operadores genéricos para algoritmos metaheurísticos.
+Incluye operadores de cruce, mutación, selección, reparación, etc.
+"""
 import numpy as np
-import random
 
-def random_permutation(size):
-    """Genera una permutación aleatoria de tamaño 'size'."""
-    return np.random.permutation(size)
 
-def random_continuous_vector(size, lower_bound=0.0, upper_bound=1.0):
-    """Genera un vector aleatorio de valores continuos."""
-    return np.random.uniform(lower_bound, upper_bound, size)
-
-def sigmoid(x):
-    """Función sigmoide para binarización."""
-    return 1 / (1 + np.exp(-x))
-
-def continuous_to_binary(x, threshold=0.5):
-    """Convierte un vector continuo a binario usando umbral."""
-    return np.where(sigmoid(x) > threshold, 1, 0)
-
-def continuous_to_permutation(x):
-    """Convierte un vector continuo a una permutación."""
-    indices = list(range(len(x)))
-    indices.sort(key=lambda i: x[i])
-    return indices
-
-def crossover(parent1, parent2, crossover_rate=0.7):
-    """Operador de cruce uniforme."""
-    if random.random() > crossover_rate:
-        return parent1.copy(), parent2.copy()
+def sbx_crossover(parent1, parent2, probability=0.9, distribution_index=15):
+    """
+    Cruce binario simulado (SBX).
     
-    size = len(parent1)
-    child1 = parent1.copy()
-    child2 = parent2.copy()
+    Args:
+        parent1: Vector de genes del primer padre
+        parent2: Vector de genes del segundo padre
+        probability: Probabilidad de aplicar el cruce
+        distribution_index: Índice de distribución (mayor = más parecido a padres)
+        
+    Returns:
+        Nuevo vector de genes resultante del cruce
+    """
+    child = np.copy(parent1)
     
-    for i in range(size):
-        if random.random() < 0.5:
-            child1[i], child2[i] = child2[i], child1[i]
+    if np.random.random() <= probability:
+        for i in range(len(parent1)):
+            if np.random.random() <= 0.5:
+                y1, y2 = parent1[i], parent2[i]
+                
+                if abs(y1 - y2) > 1e-10:
+                    if y1 > y2:
+                        y1, y2 = y2, y1
+                    
+                    # Calcular beta
+                    rand = np.random.random()
+                    beta = 1.0 + (2.0 * (y1 - 0.0) / (y2 - y1))
+                    alpha = 2.0 - beta ** (-(distribution_index + 1.0))
+                    
+                    if rand <= (1.0 / alpha):
+                        beta_q = (rand * alpha) ** (1.0 / (distribution_index + 1.0))
+                    else:
+                        beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (distribution_index + 1.0))
+                    
+                    # Calcular hijo
+                    c = 0.5 * ((y1 + y2) - beta_q * (y2 - y1))
+                    
+                    # Limitar al rango [0, 1]
+                    c = max(0.0, min(1.0, c))
+                    
+                    child[i] = c
     
-    return child1, child2
+    return child
 
-def mutation(solution, mutation_rate=0.1):
-    """Operador de mutación."""
-    mutated = solution.copy()
-    size = len(solution)
+
+def polynomial_mutation(solution, probability=0.1, distribution_index=20):
+    """
+    Mutación polinomial.
     
-    for i in range(size):
-        if random.random() < mutation_rate:
-            mutated[i] = random.random()
+    Args:
+        solution: Vector de genes a mutar
+        probability: Probabilidad de mutar cada gen
+        distribution_index: Índice de distribución (mayor = cambios más pequeños)
+        
+    Returns:
+        Vector mutado
+    """
+    mutated = np.copy(solution)
+    
+    for i in range(len(solution)):
+        if np.random.random() <= probability:
+            y = solution[i]
+            lb, ub = 0.0, 1.0  # Límites inferior y superior
+            
+            # Calcular delta
+            delta1 = (y - lb) / (ub - lb)
+            delta2 = (ub - y) / (ub - lb)
+            
+            rand = np.random.random()
+            mut_pow = 1.0 / (distribution_index + 1.0)
+            
+            if rand < 0.5:
+                xy = 1.0 - delta1
+                val = 2.0 * rand + (1.0 - 2.0 * rand) * (xy ** (distribution_index + 1.0))
+                deltaq = val ** mut_pow - 1.0
+            else:
+                xy = 1.0 - delta2
+                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * (xy ** (distribution_index + 1.0))
+                deltaq = 1.0 - val ** mut_pow
+            
+            y = y + deltaq * (ub - lb)
+            y = max(lb, min(ub, y))  # Mantener en rango
+            
+            mutated[i] = y
     
     return mutated
 
-def compute_diversity(population):
-    """Calcula la diversidad de la población."""
-    if not population:
-        return 0
-    
-    n = len(population)
-    if n <= 1:
-        return 0
-    
-    total_distance = 0
-    for i in range(n):
-        for j in range(i+1, n):
-            # Distancia euclidiana entre individuos
-            distance = np.linalg.norm(population[i].position - population[j].position)
-            total_distance += distance
-    
-    # Normalizar por el número de pares
-    return total_distance / (n * (n - 1) / 2)
 
-def get_diversity_state(diversity, num_states):
-    """Convierte un valor de diversidad a un estado discreto."""
-    # Asumimos que la diversidad está en [0, 1]
-    state = int(diversity * num_states)
-    return min(state, num_states - 1)
-
-def compute_reward(previous_best, current_best, previous_diversity, current_diversity):
-    """Calcula la recompensa basada en la mejora y la diversidad."""
-    # Mejora en la función objetivo
-    improvement = previous_best.fitness() - current_best.fitness()
+def repair_bounds(solution, lb=0.0, ub=1.0):
+    """
+    Repara una solución para mantenerla dentro de los límites.
     
-    # Cambio en la diversidad
-    diversity_change = current_diversity - previous_diversity
-    
-    # Recompensa combinada
-    reward = improvement + 0.1 * diversity_change
-    
-    return reward
+    Args:
+        solution: Vector de genes a reparar
+        lb: Límite inferior
+        ub: Límite superior
+        
+    Returns:
+        Vector reparado
+    """
+    return np.clip(solution, lb, ub)

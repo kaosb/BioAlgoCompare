@@ -6,6 +6,7 @@ Este proyecto forma parte de una investigación académica para la **Jornada Chi
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-68%25-yellowgreen)]()
 
 ## 📌 Objetivo
 

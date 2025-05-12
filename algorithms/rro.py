@@ -7,14 +7,16 @@ DOI: 10.1007/s00500-014-1520-5
 import numpy as np
 from .base import Individual, MetaheuristicAlgorithm
 
+
 class Raven(Individual):
     """
     Representa un cuervo en RRO.
     """
+
     def __init__(self, problem):
         """
         Inicializa un cuervo con una posición aleatoria.
-        
+
         Args:
             problem: Instancia del problema a resolver
         """
@@ -24,7 +26,7 @@ class Raven(Individual):
         self.personal_best_position = np.copy(self.position)
         self._fitness = None
         self._personal_best_fitness = None
-        
+
         # Límites para el espacio de búsqueda en VRP (siempre entre 0 y 1)
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
@@ -38,16 +40,20 @@ class Raven(Individual):
     def personal_best_fitness(self):
         """Calcula el fitness de la mejor posición personal."""
         if self._personal_best_fitness is None:
-            self._personal_best_fitness = self.problem.evaluate(self.personal_best_position)
+            self._personal_best_fitness = self.problem.evaluate(
+                self.personal_best_position
+            )
         return self._personal_best_fitness
-    
+
     def is_better_than(self, other):
         """Compara si este individuo es mejor que otro."""
         return self.fitness() < other.fitness()
-    
+
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
-        return True  # En VRP todas las soluciones son factibles con nuestro decodificador
+        return (
+            True  # En VRP todas las soluciones son factibles con nuestro decodificador
+        )
 
     def copy(self):
         """Crea una copia del individuo."""
@@ -73,7 +79,9 @@ class Raven(Individual):
                 direction = direction / np.linalg.norm(direction)
             # Aleatoriedad en la dirección
             noisy_direction = direction + np.random.normal(0, 0.1, size=dim)
-            noisy_direction = noisy_direction / (np.linalg.norm(noisy_direction)+1e-12)
+            noisy_direction = noisy_direction / (
+                np.linalg.norm(noisy_direction) + 1e-12
+            )
             # Paso proporcional al radio de percepción
             step_size = Rpcpt / Nsteps
             next_pos = curr_pos + step_size * noisy_direction
@@ -84,7 +92,7 @@ class Raven(Individual):
             for _ in range(Npcpt):
                 # Percepción aleatoria en una bola de radio Rpcpt
                 rand_dir = np.random.normal(0, 1, size=dim)
-                rand_dir = rand_dir / (np.linalg.norm(rand_dir)+1e-12)
+                rand_dir = rand_dir / (np.linalg.norm(rand_dir) + 1e-12)
                 radius = np.random.uniform(0, Rpcpt)
                 percept_pos = curr_pos + rand_dir * radius
                 percept_pos = np.clip(percept_pos, self.lower_bounds, self.upper_bounds)
@@ -111,11 +119,23 @@ class RRO(MetaheuristicAlgorithm):
     """
     Raven Roosting Optimization (RRO)
     """
-    def __init__(self, problem, population_size=30, max_iterations=100, Rpcpt=None, Rleader=None,
-                 Npcpt=10, Nsteps=10, Percfollow=0.2, Pstop=0.1, seed=None):
+
+    def __init__(
+        self,
+        problem,
+        population_size=30,
+        max_iterations=100,
+        Rpcpt=None,
+        Rleader=None,
+        Npcpt=10,
+        Nsteps=10,
+        Percfollow=0.2,
+        Pstop=0.1,
+        seed=None,
+    ):
         """
         Inicializa el algoritmo RRO.
-        
+
         Args:
             problem: Instancia del problema
             population_size: Tamaño de la población
@@ -129,24 +149,28 @@ class RRO(MetaheuristicAlgorithm):
             seed: Semilla para reproducibilidad
         """
         super().__init__(problem, population_size, max_iterations, seed)
-        
+
         # Establecer dimensión del problema
         self.D = problem.get_dimension()
-        
+
         # Configurar parámetros específicos del algoritmo
         # Para VRP, el espacio de búsqueda está entre 0 y 1
         R = 1.0  # Radio del espacio de búsqueda
-        
+
         if Rpcpt is None:
-            self.Rpcpt = 0.1 * R * np.sqrt(self.D)  # Valor ajustado para el espacio [0,1]
+            self.Rpcpt = (
+                0.1 * R * np.sqrt(self.D)
+            )  # Valor ajustado para el espacio [0,1]
         else:
             self.Rpcpt = Rpcpt
-            
+
         if Rleader is None:
-            self.Rleader = 0.1 * R * np.sqrt(self.D)  # Valor ajustado para el espacio [0,1]
+            self.Rleader = (
+                0.1 * R * np.sqrt(self.D)
+            )  # Valor ajustado para el espacio [0,1]
         else:
             self.Rleader = Rleader
-            
+
         self.Npcpt = Npcpt
         self.Nsteps = Nsteps
         self.Percfollow = Percfollow
@@ -159,7 +183,7 @@ class RRO(MetaheuristicAlgorithm):
         for _ in range(self.population_size):
             raven = Raven(self.problem)
             self.population.append(raven)
-            
+
         # Inicializar mejor solución y curva de convergencia
         leader = min(self.population, key=lambda r: r.fitness())
         self.best_solution = leader.copy()
@@ -170,21 +194,21 @@ class RRO(MetaheuristicAlgorithm):
         # Asigna LEADER (mejor fitness actual)
         leader = min(self.population, key=lambda r: r.fitness())
         leader_pos = np.copy(leader.position)
-        
+
         for idx, raven in enumerate(self.population):
             if np.random.uniform() < self.Percfollow:
                 # Seguir al líder con perturbación dentro de bola de radio Rleader
                 rand_dir = np.random.normal(0, 1, size=self.D)
-                rand_dir = rand_dir / (np.linalg.norm(rand_dir)+1e-12)
+                rand_dir = rand_dir / (np.linalg.norm(rand_dir) + 1e-12)
                 radius = np.random.uniform(0, self.Rleader)
                 target_pos = leader_pos + rand_dir * radius
                 target_pos = np.clip(target_pos, 0, 1)  # Límites para VRP [0,1]
             else:
                 # Seguir su personal_best
                 target_pos = np.copy(raven.personal_best_position)
-                
+
             raven.move(target_pos, self.Rpcpt, self.Npcpt, self.Nsteps, self.Pstop)
-            
+
         # Actualizar mejor solución global y registrar convergencia
         leader = min(self.population, key=lambda r: r.fitness())
         self.best_solution = leader.copy()

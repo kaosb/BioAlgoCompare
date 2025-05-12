@@ -1,0 +1,8 @@
+[run]
+omit =
+    scripts/run_massive.py
+    scripts/analyze.py
+    utils/statistical_analysis.py
+    utils/benchmarking.py
+    utils/fixed_method.py
+    utils/html_generator.py
