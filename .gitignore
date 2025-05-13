@@ -84,3 +84,18 @@ backup/
 **/backup/
 algorithms/backup/.coverage*
 data/vrp/Solomon/converted/
+
+# temp LaTeX
+*.save
+paper.pdf
+
+# — LaTeX build files —
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.pdf
+
