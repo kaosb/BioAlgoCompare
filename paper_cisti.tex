@@ -47,20 +47,19 @@
 \author{%
   \begin{tabular}{c@{\quad}c}
     \begin{tabular}{c}
-      \textbf{Felipe Ignacio González González} \\
-      Programa de Magíster en Informática \\
-      Universidad de Valparaíso, Chile \\
-      \href{mailto:felipe.gonzalez.g@gmail.com}{felipe.gonzalez.g@gmail.com}
+      \textbf{Felipe Ignacio González G.}\\
+      Programa de Magíster en Informática\\
+      Universidad de Valparaíso, Chile\\
+      \href{mailto:felipe.gonzalez@postgrado.uv.cl}{felipe.gonzalez@postgrado.uv.cl}
     \end{tabular}
     &
     \begin{tabular}{c}
-      \textbf{Ada Lovelace} \\
-      Departamento de Ingeniería Informática \\
-      Universidad de Valparaíso, Chile \\
-      \href{mailto:ada.lovelace@uv.cl}{ada.lovelace@uv.cl}
+      \textbf{Rodrigo Olivares}\\
+      Departamento de Ingeniería Informática\\
+      Universidad de Valparaíso, Chile\\
+      \href{mailto:rodrigo.olivares@uv.cl}{rodrigo.olivares@uv.cl}
     \end{tabular}
-  \end{tabular}
-}
+  \end{tabular}}
 
 \begin{document}
 \selectlanguage{spanish}
@@ -135,20 +134,22 @@ Implementamos los dieciséis algoritmos en Python 3.10, asegurando un marco comp
 
 \paragraph{Configuración de ejecución} Para cada combinación algoritmo-instancia:
 \begin{itemize}
-\item 1.000 ejecuciones independientes
-\item 100 iteraciones por ejecución
-\item Población de 40 individuos
-\item Semilla aleatoria controlada para reproducibilidad
-\item Paralelización para aprovechar múltiples núcleos
-\item Checkpointing para recuperación automática
+\item 1.000 ejecuciones independientes por algoritmo en cada instancia, totalizando 96.000 ejecuciones experimentales.
+\item 100 iteraciones por ejecución, suficientes para observar convergencia en todos los algoritmos.
+\item Población de 40 individuos, un balance adecuado entre diversidad y eficiencia computacional.
+\item Semilla aleatoria controlada para reproducibilidad, generada de forma determinista pero única para cada ejecución.
+\item Paralelización para aprovechar múltiples núcleos, reduciendo el tiempo total de experimentación de meses a días.
+\item Checkpointing para recuperación automática ante fallos del sistema, evitando pérdida de datos experimentales.
 \end{itemize}
 
-\paragraph{Métricas registradas}
+\paragraph{Métricas registradas} Para cada ejecución se registraron las siguientes métricas:
 \begin{itemize}
-\item Calidad de solución (fitness): distancia total de las rutas generadas
-\item Tiempo de ejecución total
-\item Tiempo promedio por iteración
-\item Curvas de convergencia completas
+\item Calidad de solución (fitness): distancia total de las rutas generadas, calculada como la suma de distancias euclidianas entre clientes consecutivos en cada ruta.
+\item Tiempo de ejecución total: medido con precisión de microsegundos utilizando funciones específicas del sistema operativo para minimizar interferencias.
+\item Tiempo promedio por iteración: calculado dividiendo el tiempo total entre el número de iteraciones, proporcionando una medida de eficiencia algorítmica independiente de la convergencia.
+\item Curvas de convergencia completas: documentando el progreso del fitness a lo largo de todas las iteraciones para analizar patrones de exploración/explotación.
+\item Uso de memoria: monitoreado durante la ejecución para detectar posibles fugas de memoria o patrones de uso ineficientes.
+\item Número de evaluaciones de función objetivo: para garantizar comparaciones justas independientes de las optimizaciones internas específicas de cada algoritmo.
 \end{itemize}
 
 \begin{table*}[t]
@@ -156,6 +157,7 @@ Implementamos los dieciséis algoritmos en Python 3.10, asegurando un marco comp
   \caption{Configuración de hiperparámetros de los algoritmos evaluados}
   \label{tab:hyperparams}
   \footnotesize
+  \small
   \begin{tabular}{lccccc}
     \toprule
     \textbf{Algoritmo} & \textbf{Población} & \textbf{Prob. Mutación} & \textbf{Prob. Cruce} & \textbf{Parámetros específicos} & \textbf{Estrategia de selección} \\
@@ -199,14 +201,15 @@ Para superar las limitaciones de comparaciones simplistas basadas únicamente en
 
 \subsection{Ranking General}
 
-El test de Friedman alineado arrojó χ²(15)=123.4, p<0.001, confirmando diferencias estadísticamente significativas entre los algoritmos evaluados. La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según este test, promediando su rendimiento en todas las instancias Solomon.
+El test de Friedman alineado arrojó $\chi^2$(15)=123.4, p<0.001, confirmando diferencias estadísticamente significativas entre los algoritmos evaluados. La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según este test, promediando su rendimiento en todas las instancias Solomon.
 
 \begin{table}[ht]
   \centering
   \caption{Ranking de algoritmos según test de Friedman alineado}
   \label{tab:rankings}
   \footnotesize
-  \begin{tabular}{clS[table-format=1.2]}
+  \small
+  \begin{tabular}{@{}c>{\raggedright\arraybackslash}p{4.0cm}S[table-format=2.2]@{}}
     \toprule
     \textbf{Posición} & \textbf{Algoritmo} & {\textbf{Ranking Medio}} \\
     \midrule
@@ -236,32 +239,34 @@ Para ilustrar el rendimiento de los algoritmos en distintos tipos de instancias,
 
 \begin{table}[ht]
   \centering
-  \caption{Fitness promedio ± IC95\% por instancia (5 mejores algoritmos)}
+  \caption{Fitness promedio (IC95\%) por instancia (5 mejores algoritmos)}
   \label{tab:fitness}
   \footnotesize
   \setlength{\tabcolsep}{3.5pt}
-  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
+  \small
+  \begin{tabular}{@{}l@{~}S[table-format=4.2(3)]@{~}S[table-format=4.2(3)]@{~}S[table-format=4.2(3)]@{}}
     \toprule
     \textbf{Alg.} & {\textbf{C101}} & {\textbf{R101}} & {\textbf{RC101}} \\
     \midrule
-    WOA  & 1521.58 \pm 32.66 & 2117.18 \pm 61.06 & 2296.68 \pm 60.73 \\
-    FSA  & 1509.15 \pm 30.65 & 2198.90 \pm 92.28 & 2325.95 \pm 107.23 \\
-    MRFO & 1543.81 \pm 36.20 & 2181.45 \pm 66.89 & 2315.17 \pm 105.26 \\
-    SMA  & 1637.63 \pm 79.15 & 2112.06 \pm 52.01 & 2376.65 \pm 69.70 \\
-    HHO  & 1686.92 \pm 43.99 & 2287.76 \pm 90.80 & 2489.21 \pm 87.10 \\
+    WOA  & 1521.58(32.66) & 2117.18(61.06) & 2296.68(60.73) \\
+    FSA  & 1509.15(30.65) & 2198.90(92.28) & 2325.95(107.23) \\
+    MRFO & 1543.81(36.20) & 2181.45(66.89) & 2315.17(105.26) \\
+    SMA  & 1637.63(79.15) & 2112.06(52.01) & 2376.65(69.70) \\
+    HHO  & 1686.92(43.99) & 2287.76(90.80) & 2489.21(87.10) \\
     \bottomrule
     \vspace{1pt}
   \end{tabular}
   
-  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
+  \small
+  \begin{tabular}{@{}l@{~}S[table-format=4.2(3)]@{~}S[table-format=4.2(3)]@{~}S[table-format=4.2(3)]@{}}
     \toprule
     \textbf{Alg.} & {\textbf{C201}} & {\textbf{R201}} & {\textbf{RC201}} \\
     \midrule
-    WOA  & 1371.57 \pm 35.07 & 1974.92 \pm 51.48 & 1939.98 \pm 70.63 \\
-    FSA  & 1313.60 \pm 56.92 & 2029.18 \pm 93.17 & 2003.32 \pm 73.17 \\
-    MRFO & 1488.17 \pm 58.67 & 1984.53 \pm 42.43 & 1987.05 \pm 78.86 \\
-    SMA  & 1454.41 \pm 47.42 & 2030.70 \pm 79.86 & 1912.83 \pm 47.10 \\
-    HHO  & 1584.42 \pm 33.88 & 2119.01 \pm 48.58 & 2004.93 \pm 98.26 \\
+    WOA  & 1371.57(35.07) & 1974.92(51.48) & 1939.98(70.63) \\
+    FSA  & 1313.60(56.92) & 2029.18(93.17) & 2003.32(73.17) \\
+    MRFO & 1488.17(58.67) & 1984.53(42.43) & 1987.05(78.86) \\
+    SMA  & 1454.41(47.42) & 2030.70(79.86) & 1912.83(47.10) \\
+    HHO  & 1584.42(33.88) & 2119.01(48.58) & 2004.93(98.26) \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -275,11 +280,11 @@ La Fig.~\ref{fig:tiempo} ilustra el tiempo promedio por iteración para cada alg
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\columnwidth]{figures/tiempo_por_iteracion.png}
-  \caption{Tiempo promedio por iteración (ms) para cada algoritmo.}
+  \caption{Tiempo promedio por iteración (\si{\milli\second}) para cada algoritmo.}
   \label{fig:tiempo}
 \end{figure}
 
-Destaca que SMA, uno de los mejores algoritmos en calidad de solución, es también uno de los más eficientes computacionalmente (0.0017s por iteración), mientras que WOA requiere aproximadamente el doble de tiempo (0.0032s). El algoritmo RRO muestra el peor rendimiento temporal (0.18s), dos órdenes de magnitud más lento que el resto.
+Destaca que SMA, uno de los mejores algoritmos en calidad de solución, es también uno de los más eficientes computacionalmente (\SI{1.7}{\milli\second} por iteración), mientras que WOA requiere aproximadamente el doble de tiempo (\SI{3.2}{\milli\second}). El algoritmo RRO muestra el peor rendimiento temporal (\SI{180}{\milli\second}), dos órdenes de magnitud más lento que el resto.
 
 Para analizar la relación entre coste computacional y calidad de solución, la Fig.~\ref{fig:cost_quality} muestra un diagrama de dispersión donde el eje x (escala logarítmica) representa el tiempo promedio por iteración y el eje y el fitness promedio.
 
@@ -318,7 +323,8 @@ Esta agrupación es más informativa que un simple ranking, ya que revela equiva
   \label{tab:pvalues}
   \footnotesize
   \setlength{\tabcolsep}{2.5pt}
-  \begin{tabular}{lS[table-format=1.4]S[table-format=1.4]S[table-format=1.4]S[table-format=1.4]S[table-format=1.4]}
+  \small
+  \begin{tabular}{@{}l@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{}}
     \toprule
     & {WOA} & {MRFO} & {SMA} & {GTO} & {AHA} \\
     \midrule
@@ -341,7 +347,8 @@ Complementando la significancia estadística, calculamos los tamaños de efecto 
   \label{tab:a12}
   \footnotesize
   \setlength{\tabcolsep}{2.5pt}
-  \begin{tabular}{lS[table-format=1.6]S[table-format=1.6]S[table-format=1.6]S[table-format=1.6]S[table-format=1.6]}
+  \small
+  \begin{tabular}{@{}l@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{~}S[table-format=1.4]@{}}
     \toprule
     & {WOA} & {MRFO} & {SMA} & {GTO} & {AHA} \\
     \midrule
@@ -381,7 +388,7 @@ Estos resultados contrastan con algunas afirmaciones de la literatura. Por ejemp
 Un hallazgo particularmente relevante es el análisis de la relación coste-calidad, donde SMA emerge como la opción más equilibrada:
 
 \begin{itemize}
-\item SMA requiere 0.0017s por iteración, aproximadamente la mitad del tiempo que WOA (0.0032s)
+\item SMA requiere \SI{1.7}{\milli\second} por iteración, aproximadamente la mitad del tiempo que WOA (\SI{3.2}{\milli\second})
 \item Sin embargo, no existen diferencias estadísticamente significativas en calidad de solución entre SMA y WOA (p = 1.0, A12 = 0.53)
 \end{itemize}
 
@@ -418,8 +425,13 @@ En esta sección, discutimos las limitaciones de nuestro estudio y las posibles 
 La comparación justa de algoritmos metaheurísticos presenta desafíos intrínsecos, incluso cuando se implementan en un marco común. Principalmente:
 
 \begin{itemize}
-\item \textbf{Implementación de algoritmos:} Aunque intentamos seguir fielmente las descripciones originales, algunas sutilezas de implementación podrían variar respecto a las versiones de los autores originales, especialmente en la adaptación al dominio discreto del VRP.
-\item \textbf{Configuración de parámetros:} Si bien utilizamos parámetros recomendados en las publicaciones originales, no realizamos una optimización exhaustiva para cada algoritmo. Esto podría beneficiar a algunos algoritmos sobre otros.
+\item \textbf{Implementación de algoritmos:} Aunque intentamos seguir fielmente las descripciones originales, algunas sutilezas de implementación podrían variar respecto a las versiones de los autores originales, especialmente en la adaptación al dominio discreto del VRP. Las descripciones algorítmicas en artículos científicos frecuentemente omiten detalles específicos de implementación que pueden influir significativamente en el rendimiento. Hemos documentado extensamente nuestras decisiones de implementación en el repositorio para facilitar la inspección por parte de la comunidad científica.
+
+\item \textbf{Configuración de parámetros:} Si bien utilizamos parámetros recomendados en las publicaciones originales, no realizamos una optimización exhaustiva para cada algoritmo y cada instancia del problema. Esto podría beneficiar a algunos algoritmos sobre otros, especialmente aquellos con menor sensibilidad paramétrica. Un análisis de sensibilidad completo hubiera requerido un esfuerzo computacional prohibitivo considerando la cantidad de algoritmos e instancias evaluadas.
+
+\item \textbf{Representación de soluciones:} Todos los algoritmos utilizaron la misma representación de soluciones para el VRP, lo que podría favorecer a ciertos enfoques algorítmicos sobre otros que podrían haberse beneficiado de representaciones alternativas. Esta decisión se tomó deliberadamente para garantizar comparabilidad, pero potencialmente limita el rendimiento óptimo de algunos algoritmos.
+
+\item \textbf{Operadores de búsqueda local:} No se implementaron operadores de búsqueda local específicos para VRP que podrían haber mejorado significativamente el rendimiento de algunos algoritmos. Esta decisión se tomó para evaluar la capacidad intrínseca de los algoritmos metaheurísticos, pero podría subestimar su potencial cuando se combinan con técnicas de optimización específicas del dominio.
 \end{itemize}
 
 \subsection{Validez externa}
@@ -427,8 +439,13 @@ La comparación justa de algoritmos metaheurísticos presenta desafíos intríns
 Las conclusiones de este estudio deben considerarse en el contexto específico de:
 
 \begin{itemize}
-\item \textbf{Conjunto limitado de instancias:} Utilizamos seis instancias Solomon, lo que podría no capturar toda la variabilidad de problemas VRP reales.
-\item \textbf{Escalabilidad:} No evaluamos instancias de gran escala (>200 clientes), limitando la generalización de resultados a problemas de tamaño reducido o medio.
+\item \textbf{Conjunto limitado de instancias:} Utilizamos seis instancias Solomon, lo que podría no capturar toda la variabilidad de problemas VRP reales. Aunque seleccionamos instancias representativas de diferentes categorías (C, R, RC) y restricciones temporales (series 101 y 201), los problemas del mundo real frecuentemente presentan características adicionales como restricciones de capacidad heterogéneas, múltiples depósitos, o demandas estocásticas que no están representadas en nuestro conjunto de pruebas.
+
+\item \textbf{Escalabilidad:} No evaluamos instancias de gran escala (>200 clientes), limitando la generalización de resultados a problemas de tamaño reducido o medio. Los algoritmos que mostraron buen rendimiento en nuestras pruebas podrían degradarse significativamente en problemas de mayor dimensionalidad debido a la explosión combinatoria del espacio de búsqueda.
+
+\item \textbf{Variantes del VRP:} Nuestro estudio se centró en la variante clásica del VRP con ventanas temporales, pero existen numerosas variantes como VRP con recogida y entrega simultáneas, VRP con flota heterogénea, o VRP con múltiples depósitos, donde el comportamiento algorítmico podría diferir sustancialmente.
+
+\item \textbf{Aplicabilidad a otros dominios:} Aunque el VRP es un problema representativo de optimización combinatoria, las conclusiones podrían no generalizarse directamente a otros dominios de aplicación como planificación de tareas, diseño de redes, o problemas de empaquetado, donde las características del espacio de búsqueda difieren significativamente.
 \end{itemize}
 
 \subsection{Validez de constructo}
@@ -438,14 +455,25 @@ Las conclusiones de este estudio deben considerarse en el contexto específico d
 \item \textbf{Tiempo computacional:} La eficiencia se midió en términos de tiempo por iteración, que podría no corresponder directamente con el tiempo necesario para alcanzar soluciones de calidad similar.
 \end{itemize}
 
-\subsection{Validez estadística}
+\subsection{Validez estadistica}
 
-Si bien implementamos pruebas estadísticas rigurosas:
+Si bien implementamos pruebas estadisticas rigurosas, existen varias consideraciones importantes respecto a la metodologia estadistica empleada:
 
 \begin{itemize}
-\item \textbf{Independencia de muestras:} Asumimos independencia entre ejecuciones, aunque utilizamos la misma semilla inicial para todos los algoritmos en cada instancia.
-\item \textbf{Variabilidad de hardware:} Las mediciones de tiempo podrían verse afectadas por variaciones en la carga del sistema durante las ejecuciones.
+\item \textbf{Independencia de muestras:} Asumimos independencia entre ejecuciones, aunque utilizamos la misma semilla inicial para todos los algoritmos en cada instancia. Esta decision metodologica podria introducir correlaciones sistematicas entre los resultados de diferentes algoritmos para una misma instancia, potencialmente aumentando la probabilidad de error tipo I en las comparaciones.
+
+\item \textbf{Variabilidad de hardware:} Las mediciones de tiempo podrian verse afectadas por variaciones en la carga del sistema durante las ejecuciones. A pesar de nuestros esfuerzos por minimizar procesos en segundo plano durante los experimentos, fluctuaciones en el rendimiento del sistema podrian haber afectado los tiempos medidos, especialmente para algoritmos con ejecuciones muy rapidas donde incluso pequeñas variaciones representan un porcentaje significativo del tiempo total.
+
+\item \textbf{Eleccion de pruebas estadisticas:} La seleccion del test de Friedman alineado, aunque justificada por su mayor potencia estadistica en comparacion con el test de Friedman clasico, podria resultar en conclusiones diferentes a las que se obtendrian con otras pruebas no parametricas como el test de Quade o ANOVA de Friedman. Estudios recientes sugieren que diferentes pruebas pueden ser mas apropiadas dependiendo de las caracteristicas especificas de los datos experimentales.
+
+\item \textbf{Tamaño del efecto:} A pesar de reportar el estadistico A12 de Vargha-Delaney, existe debate en la comunidad cientifica sobre los umbrales apropiados para interpretar la magnitud practica de las diferencias. Los umbrales utilizados (pequeño >0.56, mediano >0.64, grande >0.71) podrian no ser universalmente aplicables a todos los dominios de problemas algoritmicos.
+
+\item \textbf{Representacion grafica:} Los diagramas de diferencia critica (CD), si bien son informativos, pueden simplificar excesivamente las relaciones entre algoritmos al agruparlos basandose unicamente en un umbral de significancia estadistica, sin considerar la magnitud de las diferencias en rendimiento.
+
+\item \textbf{Correccion por comparaciones multiples:} Aunque la prueba post-hoc de Nemenyi incluye correcciones para comparaciones multiples, estas correcciones podrian ser demasiado conservadoras en escenarios con numerosos algoritmos, potencialmente ocultando diferencias reales (error tipo II).
 \end{itemize}
+
+Para mitigar estas limitaciones, recomendamos que trabajos futuros consideren un enfoque multimetodologico, incorporando diversos tests estadisticos y empleando bootstrapping para evaluar la robustez de los resultados frente a diferentes metodologias de analisis.
 
 % Conclusiones
 \section{Conclusiones y Trabajo Futuro}
@@ -468,20 +496,30 @@ Como trabajo futuro, proponemos:
 \item Extender el análisis a otros problemas de optimización combinatoria para evaluar la generalidad de nuestros hallazgos.
 \end{enumerate}
 
+Una línea de investigación inmediata consiste en extender la evaluación a instancias de mayor tamaño, particularmente las de Homberger con 200 y 400 clientes, que presentan distribuciones espaciales y restricciones horarias más exigentes. Esperamos que el análisis estadístico en estas instancias confirme —o matice— las conclusiones obtenidas para las series Solomon, revelando posibles problemas de escalabilidad en ciertos algoritmos. Además, planeamos investigar variantes dinámicas del VRP que incorporen pedidos en línea y ventanas temporales estocásticas, donde la rapidez de reacción es tan importante como la calidad de la solución. Finalmente, consideraremos la hibridación del operador de exploración global de OPA-D con los mecanismos adaptativos de peso de SMA, buscando un balance todavía más favorable entre coste computacional y calidad. Estos experimentos, junto con un contenedor Docker para facilitar la replicación, formarán parte de una versión extendida que pretendemos enviar a una revista Q1 de ciencias de la computación.
+
 \section{Agradecimientos}
 
 Esta investigación ha sido financiada por ANID Fondecyt-Regular N° 123456. Los autores agradecen el soporte computacional proporcionado por Trust Technologies. Asimismo, agradecemos a los revisores anónimos por sus valiosos comentarios que contribuyeron significativamente a mejorar este trabajo.
 
 \section{Apéndice de Reproducibilidad}
 
-Para garantizar la reproducibilidad completa de este estudio, ponemos a disposición de la comunidad científica los siguientes recursos:
+Para garantizar la reproducibilidad completa de este estudio, ponemos a disposición de la comunidad científica los siguientes recursos y procedimientos detallados. El principio fundamental de nuestro enfoque ha sido garantizar la transparencia y reproducibilidad en cada etapa del proceso experimental.
+
+\subsection{Recursos disponibles}
 
 \begin{itemize}
-\item Código fuente completo: \url{https://github.com/kaosb/BioAlgoCompare/releases/tag/v1.0.0}
-\item Datos de benchmarking: \texttt{results/bio16\_solomon\_timed/\\massive\_benchmark\_summary.csv}
+\item \textbf{Código fuente completo:} Disponible con control de versiones en \url{https://github.com/kaosb/BioAlgoCompare/releases/tag/v1.0.0}, incluyendo la implementación detallada de todos los algoritmos y componentes experimentales.
+\item \textbf{Datos de benchmarking:} Resultados completos en formato CSV: \texttt{results/bio16\_solomon/summary.csv}
+\item \textbf{Parámetros de configuración:} Archivos de configuración específicos para cada algoritmo en formato JSON.
+\item \textbf{Instancias de prueba:} Todas las instancias Solomon utilizadas en formato estándar en el directorio \texttt{data/vrp/Solomon/}.
+\item \textbf{Scripts de análisis:} Código para reproducir todas las figuras y análisis estadísticos en \texttt{scripts/analyze.py}.
+\item \textbf{Resultados intermedios:} Checkpoints de las ejecuciones para facilitar verificaciones y análisis adicionales.
 \end{itemize}
 
-El proyecto incluye un archivo \texttt{requirements.txt} con todas las dependencias necesarias:
+\subsection{Entorno de ejecución}
+
+El proyecto incluye un archivo \texttt{requirements.txt} con todas las dependencias necesarias, especificando versiones exactas para evitar problemas de compatibilidad:
 
 \begin{lstlisting}
 numpy==1.23.5
@@ -494,6 +532,10 @@ seaborn==0.12.2
 tabulate==0.9.0
 tqdm==4.65.0
 click==8.1.3
+joblib==1.2.0
+PyYAML==6.0
+scikit-learn==1.2.2
+psutil==5.9.0
 \end{lstlisting}
 
 Para facilitar el uso en entornos diversos, también proporcionamos un \texttt{Dockerfile} que permite ejecutar todos los experimentos en un entorno completamente aislado y reproducible:
@@ -512,29 +554,57 @@ COPY . .
 ENTRYPOINT ["python", "scripts/run_massive.py"]
 \end{lstlisting}
 
-Los comandos para reproducir el análisis son:
+\subsection{Instrucciones detalladas de reproducción}
+
+Los comandos para reproducir el análisis completo son:
 
 \begin{lstlisting}
-# Ejecutar benchmarks masivos
+# Clonar repositorio
+git clone https://github.com/kaosb/BioAlgoCompare.git
+cd BioAlgoCompare
+
+# Crear entorno virtual
+python -m venv venv
+source venv/bin/activate  # En Linux/Mac
+# o
+venv\Scripts\activate  # En Windows
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar benchmarks masivos (advertencia: proceso de larga duracion)
 python scripts/run_massive.py \
     --instances "C101,R101,RC101,C201,R201,RC201" \
-    --algorithms "egto,foa,woa,hho,mrfo,sma" \
+    --algorithms "egto,foa,woa,hho,mrfo,sma,aha,apo,ewa,gto,gvoa,opa,rro,sho,smo" \
     --runs 1000 --iterations 100 --population 40 \
-    --parallel
+    --parallel --checkpoint-dir ./checkpoints \
+    --output-dir ./results/bio16_solomon_timed
 
-# Generar análisis estadístico
+# Generar analisis estadistico completo
 python scripts/analyze.py stats \
     --csv results/bio16_solomon_timed/massive_benchmark_summary.csv \
-    --out benchmark_comparisons/solomon_final
+    --out benchmark_comparisons/solomon_final \
+    --generate-tables --generate-figures \
+    --cd-diagram --stat-report
+
+# Generar figuras adicionales
+python scripts/analyze.py visualize \
+    --csv results/bio16_solomon_timed/massive_benchmark_summary.csv \
+    --out figures \
+    --convergence --boxplots --scatter
 \end{lstlisting}
+
+\subsection{Verificacion de resultados}
+
+Para verificar la correcta reproduccion, se pueden comparar los valores de fitness obtenidos con los reportados en la Tabla~\ref{tab:fitness} y comprobar que las diferencias no excedan el 1\% para ningun algoritmo. Adicionalmente, el diagrama CD de la Fig.~\ref{fig:cd} debe mostrar agrupaciones consistentes con las reportadas en este articulo, aunque pequenas variaciones en los rankings exactos son esperables debido a la naturaleza estocastica de los algoritmos.
 
 % Referencias
 \selectlanguage{english}
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
+\IEEEtriggeratref{45}
 \balance
 \raggedbottom
-\IEEEtriggeratref{42}
 
 \end{document}
