@@ -49,6 +49,7 @@ from utils.improved.advanced_visualization import (
     create_full_visualization_set,
     create_visual_report,
 )
+from utils.advanced_statistical_analysis import run_all as run_advanced_stats
 
 # Importar problema
 from problems.vrp import VRPProblem
@@ -797,6 +798,76 @@ def analyze_csv(csv_file, output_dir):
 
     return html_report
 
+
+# Stats command for advanced statistical analysis
+@cli.command()
+@click.option("--csv", required=True, help="Path to the CSV file with benchmark results")
+@click.option("--out", default=None, help="Output directory for results (default: same as CSV directory)")
+def stats(csv, out):
+    """
+    Perform advanced statistical analysis (Friedman, Nemenyi, A12) and generate visualizations.
+    """
+    # Check if the CSV file exists
+    if not os.path.exists(csv):
+        logger.error(f"CSV file not found: {csv}")
+        return
+
+    # Determine output directory (default is the same directory as the CSV file)
+    if out is None:
+        out = os.path.dirname(csv)
+
+    # Create output directory if it doesn't exist
+    os.makedirs(out, exist_ok=True)
+
+    logger.info(f"Performing advanced statistical analysis on {csv}")
+    logger.info(f"Results will be saved to {out}")
+
+    # Run the analysis
+    results = run_advanced_stats(csv, out)
+
+    if "error" in results:
+        logger.error(f"Error in statistical analysis: {results['error']}")
+        return
+
+    # Print summary to console
+    print("\n----- Statistical Analysis Summary -----")
+    print(f"Global p-value: {results['friedman_p']:.6f}")
+
+    if results['friedman_p'] < 0.05:
+        print("Result: Statistically significant differences between algorithms detected.")
+
+        # Get top 3 algorithms
+        algorithm_ranks = results['mean_ranks']
+        sorted_algos = sorted(algorithm_ranks.items(), key=lambda x: x[1])
+
+        print("\nTop 3 algorithms:")
+        for i, (algo, rank) in enumerate(sorted_algos[:3]):
+            print(f"{i+1}. {algo} (rank: {rank:.2f})")
+
+        # Get statistically equivalent algorithms
+        cd = results['critical_distance']
+        best_algo = sorted_algos[0][0]
+        best_rank = sorted_algos[0][1]
+
+        equivalent = [best_algo]
+        for algo, rank in sorted_algos[1:]:
+            if abs(rank - best_rank) <= cd:
+                equivalent.append(algo)
+
+        if len(equivalent) > 1:
+            print(f"\nAlgorithms statistically equivalent to the best ({best_algo}):")
+            for algo in equivalent[1:]:
+                print(f"- {algo}")
+        else:
+            print(f"\nThe best algorithm ({best_algo}) is significantly better than all others.")
+    else:
+        print("Result: No statistically significant differences between algorithms.")
+
+    print(f"\nFull report: {results['report']}")
+    print(f"CD diagram: {results['cd_diagram']}")
+    print("-----------------------------------------")
+
+    return results
 
 if __name__ == "__main__":
     cli()
