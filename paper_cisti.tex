@@ -47,20 +47,19 @@
 \author{%
   \begin{tabular}{c@{\quad}c}
     \begin{tabular}{c}
-      \textbf{Felipe Ignacio González González} \\
-      Programa de Magíster en Informática \\
-      Universidad de Valparaíso, Chile \\
-      \href{mailto:felipe.gonzalez.g@gmail.com}{felipe.gonzalez.g@gmail.com}
+      \textbf{Felipe Ignacio González G.}\\
+      Programa de Magíster en Informática\\
+      Universidad de Valparaíso, Chile\\
+      \href{mailto:felipe.gonzalez@postgrado.uv.cl}{felipe.gonzalez@postgrado.uv.cl}
     \end{tabular}
     &
     \begin{tabular}{c}
-      \textbf{Ada Lovelace} \\
-      Departamento de Ingeniería Informática \\
-      Universidad de Valparaíso, Chile \\
-      \href{mailto:ada.lovelace@uv.cl}{ada.lovelace@uv.cl}
+      \textbf{Rodrigo Olivares}\\
+      Departamento de Ingeniería Informática\\
+      Universidad de Valparaíso, Chile\\
+      \href{mailto:rodrigo.olivares@uv.cl}{rodrigo.olivares@uv.cl}
     \end{tabular}
-  \end{tabular}
-}
+  \end{tabular}}
 
 \begin{document}
 \selectlanguage{spanish}
@@ -152,7 +151,7 @@ Implementamos los dieciséis algoritmos en Python 3.10, asegurando un marco comp
 \end{itemize}
 
 \begin{table*}[t]
-  \centering
+  \centering\small
   \caption{Configuración de hiperparámetros de los algoritmos evaluados}
   \label{tab:hyperparams}
   \footnotesize
@@ -199,16 +198,16 @@ Para superar las limitaciones de comparaciones simplistas basadas únicamente en
 
 \subsection{Ranking General}
 
-El test de Friedman alineado arrojó χ²(15)=123.4, p<0.001, confirmando diferencias estadísticamente significativas entre los algoritmos evaluados. La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según este test, promediando su rendimiento en todas las instancias Solomon.
+El test de Friedman alineado arrojó $\chi^2(15)=123.4$, $p<0.001$, confirmando diferencias estadísticamente significativas entre los algoritmos evaluados. La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según este test, promediando su rendimiento en todas las instancias Solomon.
 
 \begin{table}[ht]
   \centering
   \caption{Ranking de algoritmos según test de Friedman alineado}
   \label{tab:rankings}
   \footnotesize
-  \begin{tabular}{clS[table-format=1.2]}
+  \begin{tabular}{clS[table-format=2.2]}
     \toprule
-    \textbf{Posición} & \textbf{Algoritmo} & {\textbf{Ranking Medio}} \\
+    \textbf{Posición} & \textbf{Algoritmo} & {\textbf{Ranking}} \\
     \midrule
     1 & WOA (Whale Optimization Algorithm) & 1.67 \\
     2 & FSA (Flamingo Search Algorithm) & 2.67 \\
@@ -282,7 +281,7 @@ La Fig.~\ref{fig:tiempo} ilustra el tiempo promedio por iteración para cada alg
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\columnwidth]{figures/tiempo_por_iteracion.png}
-  \caption{Tiempo promedio por iteración (\si{\milli\second}) para cada algoritmo.}
+  \caption{Tiempo promedio por iteración ($\si{\milli\second}$) para cada algoritmo.}
   \label{fig:tiempo}
 \end{figure}
 
