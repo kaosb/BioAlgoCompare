@@ -239,31 +239,38 @@ Para ilustrar el rendimiento de los algoritmos en distintos tipos de instancias,
   \caption{Fitness promedio ± IC95\% por instancia (5 mejores algoritmos)}
   \label{tab:fitness}
   \footnotesize
-  \setlength{\tabcolsep}{3.5pt}
-  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
-    \toprule
-    \textbf{Alg.} & {\textbf{C101}} & {\textbf{R101}} & {\textbf{RC101}} \\
-    \midrule
-    WOA  & 1521.58 \pm 32.66 & 2117.18 \pm 61.06 & 2296.68 \pm 60.73 \\
-    FSA  & 1509.15 \pm 30.65 & 2198.90 \pm 92.28 & 2325.95 \pm 107.23 \\
-    MRFO & 1543.81 \pm 36.20 & 2181.45 \pm 66.89 & 2315.17 \pm 105.26 \\
-    SMA  & 1637.63 \pm 79.15 & 2112.06 \pm 52.01 & 2376.65 \pm 69.70 \\
-    HHO  & 1686.92 \pm 43.99 & 2287.76 \pm 90.80 & 2489.21 \pm 87.10 \\
-    \bottomrule
-    \vspace{1pt}
-  \end{tabular}
+  \setlength{\tabcolsep}{3.2pt}
+  \begin{subtable}{\columnwidth}
+    \centering
+    \small
+    \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
+      \toprule
+      \textbf{Alg.} & {\textbf{C101}} & {\textbf{R101}} & {\textbf{RC101}} \\
+      \midrule
+      WOA  & 1521.58 \pm 32.66 & 2117.18 \pm 61.06 & 2296.68 \pm 60.73 \\
+      FSA  & 1509.15 \pm 30.65 & 2198.90 \pm 92.28 & 2325.95 \pm 107.23 \\
+      MRFO & 1543.81 \pm 36.20 & 2181.45 \pm 66.89 & 2315.17 \pm 105.26 \\
+      SMA  & 1637.63 \pm 79.15 & 2112.06 \pm 52.01 & 2376.65 \pm 69.70 \\
+      HHO  & 1686.92 \pm 43.99 & 2287.76 \pm 90.80 & 2489.21 \pm 87.10 \\
+      \bottomrule
+    \end{tabular}
+  \end{subtable}
   
-  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
-    \toprule
-    \textbf{Alg.} & {\textbf{C201}} & {\textbf{R201}} & {\textbf{RC201}} \\
-    \midrule
-    WOA  & 1371.57 \pm 35.07 & 1974.92 \pm 51.48 & 1939.98 \pm 70.63 \\
-    FSA  & 1313.60 \pm 56.92 & 2029.18 \pm 93.17 & 2003.32 \pm 73.17 \\
-    MRFO & 1488.17 \pm 58.67 & 1984.53 \pm 42.43 & 1987.05 \pm 78.86 \\
-    SMA  & 1454.41 \pm 47.42 & 2030.70 \pm 79.86 & 1912.83 \pm 47.10 \\
-    HHO  & 1584.42 \pm 33.88 & 2119.01 \pm 48.58 & 2004.93 \pm 98.26 \\
-    \bottomrule
-  \end{tabular}
+  \begin{subtable}{\columnwidth}
+    \centering
+    \small
+    \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
+      \toprule
+      \textbf{Alg.} & {\textbf{C201}} & {\textbf{R201}} & {\textbf{RC201}} \\
+      \midrule
+      WOA  & 1371.57 \pm 35.07 & 1974.92 \pm 51.48 & 1939.98 \pm 70.63 \\
+      FSA  & 1313.60 \pm 56.92 & 2029.18 \pm 93.17 & 2003.32 \pm 73.17 \\
+      MRFO & 1488.17 \pm 58.67 & 1984.53 \pm 42.43 & 1987.05 \pm 78.86 \\
+      SMA  & 1454.41 \pm 47.42 & 2030.70 \pm 79.86 & 1912.83 \pm 47.10 \\
+      HHO  & 1584.42 \pm 33.88 & 2119.01 \pm 48.58 & 2004.93 \pm 98.26 \\
+      \bottomrule
+    \end{tabular}
+  \end{subtable}
 \end{table}
 
 Los resultados muestran que WOA obtiene el mejor rendimiento en instancias R101, RC101 y R201, mientras que FSA destaca en C101, C201 y RC201. Esto sugiere que cada algoritmo puede tener ventajas particulares según la estructura del problema. Los intervalos de confianza del 95\% proporcionan una medida de la incertidumbre estadística, siendo notablemente más estrechos para HHO en ciertas instancias, lo que indica mayor consistencia.
@@ -275,11 +282,11 @@ La Fig.~\ref{fig:tiempo} ilustra el tiempo promedio por iteración para cada alg
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\columnwidth]{figures/tiempo_por_iteracion.png}
-  \caption{Tiempo promedio por iteración (ms) para cada algoritmo.}
+  \caption{Tiempo promedio por iteración (\si{\milli\second}) para cada algoritmo.}
   \label{fig:tiempo}
 \end{figure}
 
-Destaca que SMA, uno de los mejores algoritmos en calidad de solución, es también uno de los más eficientes computacionalmente (0.0017s por iteración), mientras que WOA requiere aproximadamente el doble de tiempo (0.0032s). El algoritmo RRO muestra el peor rendimiento temporal (0.18s), dos órdenes de magnitud más lento que el resto.
+Destaca que SMA, uno de los mejores algoritmos en calidad de solución, es también uno de los más eficientes computacionalmente (\SI{1.7}{\milli\second} por iteración), mientras que WOA requiere aproximadamente el doble de tiempo (\SI{3.2}{\milli\second}). El algoritmo RRO muestra el peor rendimiento temporal (\SI{180}{\milli\second}), dos órdenes de magnitud más lento que el resto.
 
 Para analizar la relación entre coste computacional y calidad de solución, la Fig.~\ref{fig:cost_quality} muestra un diagrama de dispersión donde el eje x (escala logarítmica) representa el tiempo promedio por iteración y el eje y el fitness promedio.
 
@@ -290,7 +297,7 @@ Para analizar la relación entre coste computacional y calidad de solución, la 
   \label{fig:cost_quality}
 \end{figure}
 
-Esta visualización confirma que SMA ofrece la mejor relación coste-calidad, situándose más cerca del origen (menor tiempo, menor fitness). RRO, a pesar de su rendimiento aceptable en fitness, resulta impracticable debido a su elevado coste computacional.
+Como se observa en la Fig.~\ref{fig:cost_quality}, existe una clara relación entre el coste computacional y la calidad de las soluciones obtenidas. Esta visualización confirma que SMA ofrece la mejor relación coste-calidad, situándose más cerca del origen (menor tiempo, menor fitness). RRO, a pesar de su rendimiento aceptable en fitness, resulta impracticable debido a su elevado coste computacional.
 
 \subsection{Análisis Estadístico}
 
@@ -345,11 +352,11 @@ Complementando la significancia estadística, calculamos los tamaños de efecto 
     \toprule
     & {WOA} & {MRFO} & {SMA} & {GTO} & {AHA} \\
     \midrule
-    WOA  & {0.5000} & {0.6111} & {0.5278} & {0.7222} & {1.0000} \\
-    MRFO & {0.3889} & {0.5000} & {0.5000} & {0.7222} & {1.0000} \\
-    SMA  & {0.4722} & {0.5000} & {0.5000} & {0.6944} & {1.0000} \\
-    GTO  & {0.2778} & {0.2778} & {0.3056} & {0.5000} & {1.0000} \\
-    AHA  & {0.0000} & {0.0000} & {0.0000} & {0.0000} & {0.5000} \\
+    WOA  & {0.5000} & {0.6111} & {0.5278} & {\textbf{0.7222}} & {\textbf{1.0000}} \\
+    MRFO & {0.3889} & {0.5000} & {0.5000} & {\textbf{0.7222}} & {\textbf{1.0000}} \\
+    SMA  & {0.4722} & {0.5000} & {0.5000} & {\textbf{0.6944}} & {\textbf{1.0000}} \\
+    GTO  & {\textbf{0.2778}} & {\textbf{0.2778}} & {\textbf{0.3056}} & {0.5000} & {\textbf{1.0000}} \\
+    AHA  & {\textbf{0.0000}} & {\textbf{0.0000}} & {\textbf{0.0000}} & {\textbf{0.0000}} & {0.5000} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -533,8 +540,8 @@ python scripts/analyze.py stats \
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
+\IEEEtriggeratref{42}
 \balance
 \raggedbottom
-\IEEEtriggeratref{42}
 
 \end{document}
