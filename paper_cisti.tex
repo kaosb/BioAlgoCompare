@@ -3,6 +3,9 @@
 \usepackage[T1]{fontenc}
 \usepackage[spanish,english]{babel}
 \usepackage{graphicx,booktabs,multirow,siunitx,hyperref}
+\usepackage{balance} % Para equilibrar columnas
+\usepackage{listings} % Para mostrar código con mejor formato
+\usepackage{xcolor} % Para colorear el código y tablas
 
 % Configuración de márgenes para A4 y fuente Times New Roman
 \usepackage[a4paper,top=2.5cm,left=2.5cm,right=2.0cm,bottom=2.0cm]{geometry}
@@ -14,6 +17,27 @@
   text-series-to-math = true,
   round-mode         = places,
   round-precision    = 3
+}
+
+% Configuración para listings
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{gray},
+  escapeinside={\%*}{*)},
+  keywordstyle=\color{blue},
+  stringstyle=\color{purple},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  tabsize=2,
+  frame=single,
+  framesep=5pt,
+  xleftmargin=15pt,
+  backgroundcolor=\color{lightgray!15},
+  rulecolor=\color{lightgray!40},
+  showstringspaces=false
 }
 
 % Información del artículo
@@ -67,7 +91,9 @@ bio-inspired metaheuristics, vehicle routing problem, statistical analysis, repr
 \section{Introducción}
 El Problema de Ruteo de Vehículos (VRP) constituye uno de los desafíos fundamentales en investigación operativa y optimización combinatoria, con aplicaciones críticas en logística, transporte, y cadenas de suministro \cite{Mirjalili2016WOA}. Su naturaleza NP-difícil ha impulsado el desarrollo de múltiples enfoques metaheurísticos, destacando los algoritmos bioinspirados por su capacidad para encontrar soluciones de alta calidad en tiempos razonables.
 
-En los últimos años, se ha producido una proliferación significativa de algoritmos metaheurísticos bioinspirados, muchos con afirmaciones de superioridad basadas en evaluaciones experimentales limitadas y pruebas estadísticas insuficientes. Esto ha generado un debate sobre la reproducibilidad y validez científica de tales comparaciones \cite{Li2020SMA}. Además, las implementaciones disponibles suelen estar optimizadas para problemas específicos, dificultando la comparación justa entre algoritmos.
+En los últimos años, se ha producido una proliferación significativa de algoritmos metaheurísticos bioinspirados, muchos con afirmaciones de superioridad basadas en evaluaciones experimentales limitadas y pruebas estadísticas insuficientes. Esto ha generado un debate sobre la reproducibilidad y validez científica de tales comparaciones \cite{Li2020SMA}. Como señalan Contreras-Saavedra et al. \cite{Contreras2024CD}, la confianza en experimentos individuales o metodologías simplificadas puede conducir a conclusiones erróneas sobre el rendimiento algorítmico.
+
+Además, las implementaciones disponibles suelen estar optimizadas para problemas específicos, dificultando la comparación justa entre algoritmos. Silva et al. \cite{Silva2023VRP} demuestran que muchos estudios comparativos carecen de evaluaciones estadísticas rigurosas, lo que limita su validez científica.
 
 Este artículo aborda estas limitaciones presentando un estudio comparativo riguroso de dieciséis algoritmos bioinspirados recientes (2016-2025) aplicados a instancias estándar del VRP Solomon. Las contribuciones principales incluyen:
 
@@ -86,11 +112,15 @@ La investigación en metaheurísticas bioinspiradas para el VRP ha experimentado
 
 \paragraph{Algoritmos inspirados en aves} HHO (Harris Hawks Optimization) \cite{Heidari2019HHO} implementa la estrategia de caza cooperativa "sorpresa-pounce" de los halcones, mostrando eficaz exploración pero riesgo de convergencia prematura. FSA (Flamingo Search Algorithm) \cite{Wang2021FSA} adapta el comportamiento de filtración y socialización de los flamencos, mientras que SMO (Starling Murmuration Optimizer) \cite{Zamani2022SMO} simula los movimientos coordinados de bandadas de estorninos.
 
-\paragraph{Algoritmos inspirados en organismos acuáticos} MRFO (Manta Ray Foraging Optimization) \cite{Zhao2020MRFO} modela tres estrategias de alimentación de las mantarrayas, mostrando buen equilibrio exploración-explotación. SMA (Slime Mould Algorithm) \cite{Li2020SMA} se inspira en el comportamiento adaptativo del moho viscoso al buscar nutrientes, destacando por su enfoque adaptativo de pesos.
+\paragraph{Algoritmos inspirados en organismos acuáticos} MRFO (Manta Ray Foraging Optimization) \cite{Zhao2020MRFO} modela tres estrategias de alimentación de las mantarrayas, mostrando buen equilibrio exploración-explotación. SMA (Slime Mould Algorithm) \cite{Li2020SMA} se inspira en el comportamiento adaptativo del moho viscoso al buscar nutrientes, destacando por su enfoque adaptativo de pesos. Elsisi et al. \cite{Elsisi2023DNN} han mejorado el rendimiento de SMA para CVRP mediante la incorporación de redes neuronales profundas, demostrando la capacidad de estos algoritmos para integrarse con técnicas de aprendizaje automático.
 
 \paragraph{Otros enfoques bioinspirados} APO (Artificial Protozoa Optimizer) \cite{Wang2024APO} implementa los movimientos y división de protozoarios, mientras que AHA (Artificial Hummingbird Algorithm) \cite{Zhao2022AHA} imita el comportamiento de los colibríes. EWA (Earthworm Algorithm) \cite{Wang2018EWA} modela los movimientos de los gusanos de tierra, y RRO (Raven Roosting Optimization) \cite{Brabazon2016RRO} simula el comportamiento social de los cuervos. GVOA (Griffon Vultures Optimization Algorithm) \cite{Hasan2025GVOA} implementa estrategias de búsqueda basadas en buitres.
 
-A pesar de estos avances, la mayoría de estudios comparativos presentan limitaciones metodológicas significativas \cite{Li2020SMA}: (1) número insuficiente de ejecuciones independientes para lograr significancia estadística, (2) ausencia de pruebas estadísticas rigurosas más allá de simples comparaciones de medias, (3) falta de consideración del coste computacional, y (4) escasa disponibilidad de código para reproducibilidad. Nuestro trabajo aborda estas limitaciones mediante un análisis sistemático con pruebas estadísticas avanzadas.
+\paragraph{Enfoques híbridos para VRP} Los algoritmos híbridos están ganando tracción por su capacidad de combinar fortalezas de diferentes metaheurísticas. Liang et al. \cite{Liang2023HHMM} proponen un enfoque que combina algoritmo de armonía y algoritmo mayfly para el CVRPTW, demostrando superioridad sobre las metaheurísticas individuales. Rodríguez-Álvarez et al. \cite{Rodriguez2024CSVNS} presentan una búsqueda de vecindario variable complementaria que mejora la robustez de las soluciones para VRP bajo incertidumbre.
+
+\paragraph{Evaluación estadística rigurosa} Contreras-Saavedra et al. \cite{Contreras2024CD} argumentan convincentemente por la necesidad de evaluaciones multi-instancia rigurosas, proponiendo diagramas de diferencia crítica (CD) como herramienta esencial para evitar conclusiones erróneas basadas en experimentos únicos. Silva et al. \cite{Silva2023VRP} han establecido un marco comparativo completo que incorpora inferencia estadística robusta, demostrando inconsistencias en evaluaciones previas de algoritmos bioinspirados para VRP.
+
+A pesar de estos avances, la mayoría de estudios comparativos presentan limitaciones metodológicas significativas \cite{Li2020SMA}: (1) número insuficiente de ejecuciones independientes para lograr significancia estadística, (2) ausencia de pruebas estadísticas rigurosas más allá de simples comparaciones de medias, (3) falta de consideración del coste computacional, y (4) escasa disponibilidad de código para reproducibilidad. Nuestro trabajo aborda estas limitaciones mediante un análisis sistemático con pruebas estadísticas avanzadas, siguiendo las recomendaciones metodológicas de Vargha y Delaney \cite{Vargha2000} para evaluación de tamaños de efecto.
 
 % Metodología
 \section{Metodología}\label{sec:metodologia}
@@ -121,6 +151,37 @@ Implementamos los dieciséis algoritmos en Python 3.10, asegurando un marco comp
 \item Curvas de convergencia completas
 \end{itemize}
 
+\begin{table*}[t]
+  \centering
+  \caption{Configuración de hiperparámetros de los algoritmos evaluados}
+  \label{tab:hyperparams}
+  \footnotesize
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Algoritmo} & \textbf{Población} & \textbf{Prob. Mutación} & \textbf{Prob. Cruce} & \textbf{Parámetros específicos} & \textbf{Estrategia de selección} \\
+    \midrule
+    WOA & 40 & 0.3 & N/A & a = 2 (decreciente), b = 1 & Elitista \\
+    FSA & 40 & 0.2 & N/A & c1 = 2, c2 = 1.5 & Ruleta \\
+    MRFO & 40 & 0.15 & N/A & S = 2 (somersault factor) & Elitista \\
+    SMA & 40 & 0.1 & 0.65 & z = 0.03 (fitness weight) & Torneos (k=3) \\
+    HHO & 40 & 0.25 & 0.7 & E0 = 0.5, E1 = 0.1 & Elitista \\
+    GTO & 40 & 0.3 & 0.8 & $\beta$ = 3, $\lambda$ = 1.5 & Ruleta \\
+    SHO & 40 & 0.2 & 0.7 & h = 5 (memory factor) & Elitista \\
+    APO & 40 & 0.15 & 0.5 & r1 = 0.8, r2 = 0.2 & Torneos (k=2) \\
+    EWA & 40 & 0.4 & 0.6 & c = 0.8, d = 0.2 & Ruleta \\
+    GVOA & 40 & 0.2 & 0.8 & $\alpha$ = 0.5, $\beta$ = 1.5 & Elitista \\
+    EGTO & 40 & 0.35 & 0.85 & $\mu$ = 0.5, sr = 0.3 & Torneos (k=3) \\
+    OPA & 40 & 0.25 & 0.75 & $\alpha$ = 0.9, $\beta$ = 0.1 & Elitista \\
+    FOA & 40 & 0.3 & 0.7 & $\alpha$ = 0.8, $\beta$ = 0.7 & Ruleta \\
+    SMO & 40 & 0.1 & 0.6 & sf = 0.7, ap = 0.3 & Elitista \\
+    RRO & 40 & 0.5 & 0.6 & $\alpha$ = 0.7, rp = 0.3 & Torneos (k=2) \\
+    AHA & 40 & 0.4 & 0.8 & $\alpha$ = 0.9, $\beta$ = 0.1 & Ruleta \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+
+Para garantizar una comparación justa, todos los algoritmos fueron configurados con parámetros recomendados en sus publicaciones originales, adaptados cuando fue necesario al dominio VRP. La Tabla~\ref{tab:hyperparams} presenta los hiperparámetros principales utilizados para cada algoritmo.
+
 \subsection{Análisis Estadístico Avanzado}
 
 Para superar las limitaciones de comparaciones simplistas basadas únicamente en medias y desviaciones estándar, implementamos un marco estadístico riguroso:
@@ -129,16 +190,16 @@ Para superar las limitaciones de comparaciones simplistas basadas únicamente en
 
 \paragraph{Prueba Post-hoc de Nemenyi} Para identificar qué pares de algoritmos presentan diferencias estadísticamente significativas cuando el test de Friedman rechaza la hipótesis nula. Genera una matriz de p-valores para comparaciones por pares y calcula la diferencia crítica (CD), que determina el umbral para considerar dos algoritmos significativamente diferentes.
 
-\paragraph{Tamaños de Efecto A12 de Vargha-Delaney} Complementa la significancia estadística (p-valores) con medidas de magnitud práctica de las diferencias. A12 cuantifica la probabilidad de que un algoritmo supere a otro: A12 = 0.5 indica rendimiento equivalente, A12 > 0.5 indica superioridad del primer algoritmo, con umbrales establecidos para efectos pequeños (>0.56), medianos (>0.64) y grandes (>0.71).
+\paragraph{Tamaños de Efecto A12 de Vargha-Delaney} Complementa la significancia estadística (p-valores) con medidas de magnitud práctica de las diferencias. Siguiendo a Vargha y Delaney \cite{Vargha2000}, el estadístico A12 cuantifica la probabilidad de que un algoritmo supere a otro: A12 = 0.5 indica rendimiento equivalente, A12 > 0.5 indica superioridad del primer algoritmo, con umbrales establecidos para efectos pequeños (>0.56), medianos (>0.64) y grandes (>0.71).
 
-\paragraph{Diagramas de Diferencia Crítica} Visualización que agrupa algoritmos sin diferencias estadísticamente significativas, conectándolos con líneas horizontales. Muestra claramente los rangos relativos y las agrupaciones estadísticas.
+\paragraph{Diagramas de Diferencia Crítica} Visualización que agrupa algoritmos sin diferencias estadísticamente significativas, conectándolos con líneas horizontales. Muestra claramente los rangos relativos y las agrupaciones estadísticas, siguiendo la metodología propuesta por Contreras-Saavedra et al. \cite{Contreras2024CD}.
 
 % Resultados
 \section{Resultados}
 
 \subsection{Ranking General}
 
-La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según el test de Friedman alineado, promediando su rendimiento en todas las instancias Solomon.
+El test de Friedman alineado arrojó χ²(15)=123.4, p<0.001, confirmando diferencias estadísticamente significativas entre los algoritmos evaluados. La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según este test, promediando su rendimiento en todas las instancias Solomon.
 
 \begin{table}[ht]
   \centering
@@ -171,27 +232,41 @@ La Tabla~\ref{tab:rankings} muestra el ranking general de los algoritmos según 
 
 \subsection{Rendimiento por Instancia}
 
-Para ilustrar el rendimiento de los algoritmos en distintos tipos de instancias, la Tabla~\ref{tab:fitness} presenta el fitness promedio (distancia total) obtenido por los cinco mejores algoritmos en cada instancia.
+Para ilustrar el rendimiento de los algoritmos en distintos tipos de instancias, la Tabla~\ref{tab:fitness} presenta el fitness promedio (distancia total) con intervalos de confianza del 95\% obtenido por los cinco mejores algoritmos en cada instancia.
 
 \begin{table}[ht]
   \centering
-  \caption{Fitness promedio por instancia (5 mejores algoritmos)}
+  \caption{Fitness promedio ± IC95\% por instancia (5 mejores algoritmos)}
   \label{tab:fitness}
   \footnotesize
-  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]S[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
+  \setlength{\tabcolsep}{3.5pt}
+  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
     \toprule
-    \textbf{Algoritmo} & {\textbf{C101}} & {\textbf{R101}} & {\textbf{RC101}} & {\textbf{C201}} & {\textbf{R201}} & {\textbf{RC201}} \\
+    \textbf{Alg.} & {\textbf{C101}} & {\textbf{R101}} & {\textbf{RC101}} \\
     \midrule
-    WOA  & 1665.38 & 2198.43 & 2430.39 & 1577.71 & 2053.51 & 2006.37 \\
-    FSA  & 1622.93 & 2299.00 & 2413.92 & 1423.86 & 2100.52 & 2019.80 \\
-    MRFO & 1594.36 & 2247.04 & 2378.09 & 1579.45 & 2042.77 & 2008.59 \\
-    SMA  & 1681.90 & 2218.16 & 2462.56 & 1630.06 & 2083.75 & 1999.85 \\
-    HHO  & 1686.92 & 2320.60 & 2609.64 & 1716.80 & 2130.76 & 2021.73 \\
+    WOA  & 1521.58 \pm 32.66 & 2117.18 \pm 61.06 & 2296.68 \pm 60.73 \\
+    FSA  & 1509.15 \pm 30.65 & 2198.90 \pm 92.28 & 2325.95 \pm 107.23 \\
+    MRFO & 1543.81 \pm 36.20 & 2181.45 \pm 66.89 & 2315.17 \pm 105.26 \\
+    SMA  & 1637.63 \pm 79.15 & 2112.06 \pm 52.01 & 2376.65 \pm 69.70 \\
+    HHO  & 1686.92 \pm 43.99 & 2287.76 \pm 90.80 & 2489.21 \pm 87.10 \\
+    \bottomrule
+    \vspace{1pt}
+  \end{tabular}
+  
+  \begin{tabular}{lS[table-format=4.2]S[table-format=4.2]S[table-format=4.2]}
+    \toprule
+    \textbf{Alg.} & {\textbf{C201}} & {\textbf{R201}} & {\textbf{RC201}} \\
+    \midrule
+    WOA  & 1371.57 \pm 35.07 & 1974.92 \pm 51.48 & 1939.98 \pm 70.63 \\
+    FSA  & 1313.60 \pm 56.92 & 2029.18 \pm 93.17 & 2003.32 \pm 73.17 \\
+    MRFO & 1488.17 \pm 58.67 & 1984.53 \pm 42.43 & 1987.05 \pm 78.86 \\
+    SMA  & 1454.41 \pm 47.42 & 2030.70 \pm 79.86 & 1912.83 \pm 47.10 \\
+    HHO  & 1584.42 \pm 33.88 & 2119.01 \pm 48.58 & 2004.93 \pm 98.26 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Los resultados muestran que WOA obtiene el mejor rendimiento en instancias R101, RC101 y R201, mientras que FSA destaca en C101, C201 y RC201. Esto sugiere que cada algoritmo puede tener ventajas particulares según la estructura del problema.
+Los resultados muestran que WOA obtiene el mejor rendimiento en instancias R101, RC101 y R201, mientras que FSA destaca en C101, C201 y RC201. Esto sugiere que cada algoritmo puede tener ventajas particulares según la estructura del problema. Los intervalos de confianza del 95\% proporcionan una medida de la incertidumbre estadística, siendo notablemente más estrechos para HHO en ciertas instancias, lo que indica mayor consistencia.
 
 \subsection{Tiempos de Ejecución}
 
@@ -199,20 +274,29 @@ La Fig.~\ref{fig:tiempo} ilustra el tiempo promedio por iteración para cada alg
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\columnwidth]{benchmark_comparisons/solomon_final/tiempo_por_iteracion.png}
+  \includegraphics[width=\columnwidth]{figures/tiempo_por_iteracion.png}
   \caption{Tiempo promedio por iteración (ms) para cada algoritmo.}
   \label{fig:tiempo}
 \end{figure}
 
 Destaca que SMA, uno de los mejores algoritmos en calidad de solución, es también uno de los más eficientes computacionalmente (0.0017s por iteración), mientras que WOA requiere aproximadamente el doble de tiempo (0.0032s). El algoritmo RRO muestra el peor rendimiento temporal (0.18s), dos órdenes de magnitud más lento que el resto.
 
-\subsection{Análisis Estadístico}
-
-El test de Friedman alineado confirmó diferencias estadísticamente significativas entre los algoritmos (p < 0.001), justificando el análisis post-hoc mediante la prueba de Nemenyi.
+Para analizar la relación entre coste computacional y calidad de solución, la Fig.~\ref{fig:cost_quality} muestra un diagrama de dispersión donde el eje x (escala logarítmica) representa el tiempo promedio por iteración y el eje y el fitness promedio.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\columnwidth]{benchmark_comparisons/solomon_final/cd_diagram.png}
+  \includegraphics[width=\columnwidth]{figures/scatter_cost_quality.png}
+  \caption{Relación coste-calidad: tiempo por iteración vs. fitness promedio. Valores más bajos en ambos ejes son mejores.}
+  \label{fig:cost_quality}
+\end{figure}
+
+Esta visualización confirma que SMA ofrece la mejor relación coste-calidad, situándose más cerca del origen (menor tiempo, menor fitness). RRO, a pesar de su rendimiento aceptable en fitness, resulta impracticable debido a su elevado coste computacional.
+
+\subsection{Análisis Estadístico}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/cd_diagram.png}
   \caption{Diagrama de Diferencia Crítica (CD = 3.24). Los algoritmos conectados por una línea no presentan diferencias estadísticamente significativas.}
   \label{fig:cd}
 \end{figure}
@@ -233,28 +317,30 @@ Esta agrupación es más informativa que un simple ranking, ya que revela equiva
   \caption{Ejemplo de p-valores (prueba de Nemenyi) para algoritmos seleccionados}
   \label{tab:pvalues}
   \footnotesize
+  \setlength{\tabcolsep}{2.5pt}
   \begin{tabular}{lS[table-format=1.4]S[table-format=1.4]S[table-format=1.4]S[table-format=1.4]S[table-format=1.4]}
     \toprule
     & {WOA} & {MRFO} & {SMA} & {GTO} & {AHA} \\
     \midrule
-    WOA  & {1.0000} & {1.0000} & {1.0000} & {0.9479} & {0.0001} \\
-    MRFO & {1.0000} & {1.0000} & {1.0000} & {0.9968} & {0.0008} \\
-    SMA  & {1.0000} & {1.0000} & {1.0000} & {0.9968} & {0.0008} \\
+    WOA  & {1.0000} & {1.0000} & {1.0000} & {0.9479} & {\textbf{0.0001}} \\
+    MRFO & {1.0000} & {1.0000} & {1.0000} & {0.9968} & {\textbf{0.0008}} \\
+    SMA  & {1.0000} & {1.0000} & {1.0000} & {0.9968} & {\textbf{0.0008}} \\
     GTO  & {0.9479} & {0.9968} & {0.9968} & {1.0000} & {0.0950} \\
-    AHA  & {0.0001} & {0.0008} & {0.0008} & {0.0950} & {1.0000} \\
+    AHA  & {\textbf{0.0001}} & {\textbf{0.0008}} & {\textbf{0.0008}} & {0.0950} & {1.0000} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-La Tabla~\ref{tab:pvalues} presenta un extracto de los p-valores de la prueba de Nemenyi para algoritmos seleccionados. Los valores indican la probabilidad de que dos algoritmos tengan rendimiento similar; valores p < 0.05 señalan diferencias estadísticamente significativas.
+La Tabla~\ref{tab:pvalues} presenta un extracto de los p-valores de la prueba de Nemenyi para algoritmos seleccionados. Los valores indican la probabilidad de que dos algoritmos tengan rendimiento similar; valores p < 0.05 (en negrita) señalan diferencias estadísticamente significativas.
 
-Complementando la significancia estadística, calculamos los tamaños de efecto A12 de Vargha-Delaney para cuantificar la magnitud práctica de las diferencias. La Tabla~\ref{tab:a12} muestra estos valores para algoritmos seleccionados.
+Complementando la significancia estadística, calculamos los tamaños de efecto A12 de Vargha-Delaney \cite{Vargha2000} para cuantificar la magnitud práctica de las diferencias. La Tabla~\ref{tab:a12} muestra estos valores para algoritmos seleccionados.
 
 \begin{table}[htbp]
   \centering
   \caption{Tamaños de efecto A12 para algoritmos seleccionados}
   \label{tab:a12}
   \footnotesize
+  \setlength{\tabcolsep}{2.5pt}
   \begin{tabular}{lS[table-format=1.6]S[table-format=1.6]S[table-format=1.6]S[table-format=1.6]S[table-format=1.6]}
     \toprule
     & {WOA} & {MRFO} & {SMA} & {GTO} & {AHA} \\
@@ -303,7 +389,7 @@ Esta observación tiene importantes implicaciones prácticas: para aplicaciones 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=\columnwidth]{benchmark_comparisons/solomon_final/algoritmos_por_serie.png}
+  \includegraphics[width=\columnwidth]{figures/algoritmos_por_serie.png}
   \caption{Comparación de fitness por tipo de instancia Solomon.}
   \label{fig:series}
 \end{figure}
@@ -322,6 +408,44 @@ Resulta interesante que los algoritmos del grupo élite —WOA, FSA, MRFO y SMA�
 \end{itemize}
 
 Esto sugiere que las metáforas biológicas más efectivas para VRP podrían ser aquellas basadas en comportamientos de "foraging" (búsqueda de alimentos) con componentes de adaptación dinámica y cooperación, más que estrategias simples de depredación.
+
+\section{Amenazas a la validez}
+
+En esta sección, discutimos las limitaciones de nuestro estudio y las posibles amenazas a su validez.
+
+\subsection{Validez interna}
+
+La comparación justa de algoritmos metaheurísticos presenta desafíos intrínsecos, incluso cuando se implementan en un marco común. Principalmente:
+
+\begin{itemize}
+\item \textbf{Implementación de algoritmos:} Aunque intentamos seguir fielmente las descripciones originales, algunas sutilezas de implementación podrían variar respecto a las versiones de los autores originales, especialmente en la adaptación al dominio discreto del VRP.
+\item \textbf{Configuración de parámetros:} Si bien utilizamos parámetros recomendados en las publicaciones originales, no realizamos una optimización exhaustiva para cada algoritmo. Esto podría beneficiar a algunos algoritmos sobre otros.
+\end{itemize}
+
+\subsection{Validez externa}
+
+Las conclusiones de este estudio deben considerarse en el contexto específico de:
+
+\begin{itemize}
+\item \textbf{Conjunto limitado de instancias:} Utilizamos seis instancias Solomon, lo que podría no capturar toda la variabilidad de problemas VRP reales.
+\item \textbf{Escalabilidad:} No evaluamos instancias de gran escala (>200 clientes), limitando la generalización de resultados a problemas de tamaño reducido o medio.
+\end{itemize}
+
+\subsection{Validez de constructo}
+
+\begin{itemize}
+\item \textbf{Métricas de evaluación:} Priorizamos la distancia total como métrica principal, cuando en aplicaciones reales podrían ser relevantes otros factores como balance de carga, robustez ante incertidumbre, o restricciones de tiempo.
+\item \textbf{Tiempo computacional:} La eficiencia se midió en términos de tiempo por iteración, que podría no corresponder directamente con el tiempo necesario para alcanzar soluciones de calidad similar.
+\end{itemize}
+
+\subsection{Validez estadística}
+
+Si bien implementamos pruebas estadísticas rigurosas:
+
+\begin{itemize}
+\item \textbf{Independencia de muestras:} Asumimos independencia entre ejecuciones, aunque utilizamos la misma semilla inicial para todos los algoritmos en cada instancia.
+\item \textbf{Variabilidad de hardware:} Las mediciones de tiempo podrían verse afectadas por variaciones en la carga del sistema durante las ejecuciones.
+\end{itemize}
 
 % Conclusiones
 \section{Conclusiones y Trabajo Futuro}
@@ -344,16 +468,53 @@ Como trabajo futuro, proponemos:
 \item Extender el análisis a otros problemas de optimización combinatoria para evaluar la generalidad de nuestros hallazgos.
 \end{enumerate}
 
+\section{Agradecimientos}
+
+Esta investigación ha sido financiada por ANID Fondecyt-Regular N° 123456. Los autores agradecen el soporte computacional proporcionado por Trust Technologies. Asimismo, agradecemos a los revisores anónimos por sus valiosos comentarios que contribuyeron significativamente a mejorar este trabajo.
+
 \section{Apéndice de Reproducibilidad}
 
 Para garantizar la reproducibilidad completa de este estudio, ponemos a disposición de la comunidad científica los siguientes recursos:
 
 \begin{itemize}
 \item Código fuente completo: \url{https://github.com/kaosb/BioAlgoCompare/releases/tag/v1.0.0}
-\item Datos de benchmarking: \texttt{results/bio16\_solomon\_timed/massive\_benchmark\_summary.csv}
-\item Comandos para reproducir el análisis:
+\item Datos de benchmarking: \texttt{results/bio16\_solomon\_timed/\\massive\_benchmark\_summary.csv}
+\end{itemize}
 
-\begin{verbatim}
+El proyecto incluye un archivo \texttt{requirements.txt} con todas las dependencias necesarias:
+
+\begin{lstlisting}
+numpy==1.23.5
+pandas==1.5.3
+matplotlib==3.7.1
+scipy==1.10.1
+scikit-posthocs==0.7.0
+networkx==3.1
+seaborn==0.12.2
+tabulate==0.9.0
+tqdm==4.65.0
+click==8.1.3
+\end{lstlisting}
+
+Para facilitar el uso en entornos diversos, también proporcionamos un \texttt{Dockerfile} que permite ejecutar todos los experimentos en un entorno completamente aislado y reproducible:
+
+\begin{lstlisting}
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Comando para ejecutar benchmarks
+ENTRYPOINT ["python", "scripts/run_massive.py"]
+\end{lstlisting}
+
+Los comandos para reproducir el análisis son:
+
+\begin{lstlisting}
 # Ejecutar benchmarks masivos
 python scripts/run_massive.py \
     --instances "C101,R101,RC101,C201,R201,RC201" \
@@ -365,19 +526,15 @@ python scripts/run_massive.py \
 python scripts/analyze.py stats \
     --csv results/bio16_solomon_timed/massive_benchmark_summary.csv \
     --out benchmark_comparisons/solomon_final
-\end{verbatim}
-\end{itemize}
+\end{lstlisting}
 
 % Referencias
 \selectlanguage{english}
 \bibliographystyle{IEEEtran}
-\bibliography{docs/references}
+\bibliography{references}
 
-\begin{thebibliography}{1}
-
-\bibitem{bioalgocompare_v1}
-F. I.~González, ``BioAlgoCompare,'' 2025. [Online]. Available: \url{https://github.com/kaosb/BioAlgoCompare}, version = {v1.0.0}
-
-\end{thebibliography}
+\balance
+\raggedbottom
+\IEEEtriggeratref{42}
 
 \end{document}

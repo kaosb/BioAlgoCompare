@@ -99,3 +99,6 @@ paper.pdf
 *.fls
 *.pdf
 
+
+# LaTeX scatter figure
+figures/scatter_cost_quality.png
