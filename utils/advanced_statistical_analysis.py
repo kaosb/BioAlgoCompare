@@ -374,15 +374,19 @@ def run_all(csv_path, out_dir):
       • Aligned Friedman (global p-value)
       • Post-hoc Nemenyi (p-values matrix)
       • Vargha-Delaney A12 (pairwise)
-    
+
     Generate:
       – cd_diagram.png  (Critical Difference diagram for α=0.05)
       – stats_report.md (Markdown table with p-values and effect sizes)
-    
+
     Args:
-        csv_path: Path to CSV file with benchmark results
+        csv_path: Path to CSV file with benchmark results.
+                 The CSV must contain columns:
+                 - "Algorithm" (required): Algorithm name
+                 - "Instance" (required): Instance name
+                 - Either "Best" or "Best Fitness" (required): Performance metric
         out_dir: Directory to save the results
-        
+
     Returns:
         Dictionary with results and file paths
     """
@@ -392,21 +396,32 @@ def run_all(csv_path, out_dir):
     # Load data
     try:
         df = pd.read_csv(csv_path)
-        
+
         # Check if required columns exist
-        required_columns = ['Algorithm', 'Instance', 'Best Fitness']
+        required_columns = ['Algorithm', 'Instance']
         missing_columns = [col for col in required_columns if col not in df.columns]
-        
+
         if missing_columns:
             logger.error(f"Missing required columns: {missing_columns}")
             return {
                 "error": f"Missing required columns: {missing_columns}",
                 "required": required_columns
             }
-        
+
+        # Detect performance column
+        score_col = next(
+            (c for c in df.columns if c.lower() in {"best", "best fitness"}),
+            None,
+        )
+        if score_col is None:
+            logger.error("No se encontró columna de desempeño ('Best' o 'Best Fitness')")
+            return {
+                "error": "No se encontró columna de desempeño ('Best' o 'Best Fitness')"
+            }
+
         # Prepare data in the expected format
-        data = df[['Algorithm', 'Instance', 'Best Fitness']].copy()
-        data.rename(columns={'Best Fitness': 'Value'}, inplace=True)
+        data = df[['Algorithm', 'Instance', score_col]].copy()
+        data.rename(columns={score_col: 'Value'}, inplace=True)
         
         # Step 1: Run Aligned Friedman test
         friedman_result = aligned_friedman_test(data)
