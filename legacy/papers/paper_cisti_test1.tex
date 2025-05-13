@@ -1,0 +1,34 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,english]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs,multirow}
+\usepackage{siunitx}
+
+\sisetup{
+  reset-text-series = false,
+  text-series-to-math = true,
+  round-mode         = places,
+  round-precision    = 3,
+  output-decimal-marker = {,},
+  group-digits = integer,
+  group-minimum-digits = 4,
+  group-separator = {\,}
+}
+
+\begin{document}
+\selectlanguage{spanish}
+\title{Documento Test 1}
+\author{Test Author}
+\maketitle
+
+\begin{abstract}
+Prueba con siunitx.
+\end{abstract}
+
+\section{Introducción}
+Probando valores numéricos: \SI{16}{\giga\byte}, \SI{1.7}{\milli\second}.
+
+\end{document}
+EOF < /dev/null
