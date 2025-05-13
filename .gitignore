@@ -84,3 +84,7 @@ backup/
 **/backup/
 algorithms/backup/.coverage*
 data/vrp/Solomon/converted/
+
+# temp LaTeX
+*.save
+paper.pdf
