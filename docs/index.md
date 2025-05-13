@@ -21,6 +21,10 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 - [Reproducibilidad y Rigor Científico](scientific/reproducibility.md) - Garantías de reproducibilidad y rigor en experimentos
 - [Análisis Estadístico](scientific/statistical_analysis.md) - Metodología estadística detallada
+  - Test de Friedman alineado
+  - Test post-hoc de Nemenyi
+  - Tamaños de efecto A12 de Vargha-Delaney
+  - Diagramas de Diferencia Crítica (CD)
 
 ### Algoritmos Implementados
 

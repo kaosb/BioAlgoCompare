@@ -307,6 +307,40 @@ El proyecto ha sido auditado y mejorado para seguir buenas prácticas de desarro
 - Generación de reportes de calidad publicación académica (HTML interactivo), con rankings, tablas de comparación y conclusiones.
 - Código legible y modular para facilitar validación por pares y reutilización.
 
+## 🔍 Reproducir resultados
+
+Para replicar los experimentos y análisis principales, sigue estos pasos:
+
+### Ejecutar benchmarks masivos (1000 ejecuciones)
+
+```bash
+python scripts/run_massive.py \
+    --instances "C101,R101,RC101" \
+    --algorithms "egto,foa,woa,hho,mrfo,sma" \
+    --runs 1000 \
+    --iterations 100 \
+    --population 40 \
+    --parallel
+```
+
+### Analizar resultados de benchmarking
+
+```bash
+python scripts/analyze.py analyze \
+    --input results/massive_benchmark_summary.csv \
+    --output benchmark_comparisons/solomon_final
+```
+
+### Generar análisis estadístico avanzado
+
+```bash
+python scripts/analyze.py stats \
+    --csv results/bio16_solomon_timed/massive_benchmark_summary.csv \
+    --out benchmark_comparisons/solomon_final
+```
+
+Genera stats_report.md y cd_diagram.png dentro de la carpeta destino.
+
 ## 📊 Conclusiones de Análisis Masivos
 
 Después de realizar benchmarks masivos con 1000 ejecuciones por algoritmo sobre las instancias de referencia, se pueden destacar las siguientes conclusiones:
