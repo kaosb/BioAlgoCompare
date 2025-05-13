@@ -19,6 +19,7 @@ setup(
         "scikit-posthocs>=0.7.0",
         "jinja2>=3.0.0",
         "scikit-learn>=1.0.0",
+        "tabulate>=0.9.0",
     ],
     entry_points={
         "console_scripts": [
