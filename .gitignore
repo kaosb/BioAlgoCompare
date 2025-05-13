@@ -97,7 +97,20 @@ paper.pdf
 *.blg
 *.fdb_latexmk
 *.fls
-*.pdf
+*.synctex.gz
+*.synctex(busy)
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*.synctex.gz(busy)
+# Keep specific PDFs
+/*.pdf
+!docs/papers/cisti_v1/*.pdf
 
 
 # LaTeX scatter figure
