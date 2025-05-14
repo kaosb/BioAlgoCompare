@@ -122,4 +122,6 @@ texput.*
 # Archivos temporales y de sistema
 .DS_Store
 ._.DS_Store
-*.coverage*
+*.coverage*analyze.log
+benchmark.log
+massive_benchmark.log
