@@ -113,15 +113,13 @@ paper.pdf
 *.bak
 texput.*
 *~
-# Keep specific PDFs
-/*.pdf
-!docs/papers/cisti_v1/*.pdf
-!docs/papers/cisti_v2/*.pdf
 
-# LaTeX scatter figure
-figures/scatter_cost_quality.png
+# PDFs de compilación (ignora todos salvo versiones finales)
+*.pdf
+!docs/papers/cisti_v1/main.pdf
+!docs/papers/cisti_v2/main.pdf
 
-# System files
+# Archivos temporales y de sistema
 .DS_Store
 ._.DS_Store
-.coverage*
+*.coverage*
