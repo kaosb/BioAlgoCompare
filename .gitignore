@@ -99,6 +99,7 @@ paper.pdf
 *.fls
 *.synctex.gz
 *.synctex(busy)
+*.synctex.gz(busy)
 *.toc
 *.lof
 *.lot
@@ -107,7 +108,11 @@ paper.pdf
 *.vrb
 *.bcf
 *.run.xml
-*.synctex.gz(busy)
+*_fixed.*
+*_minimal.*
+*.bak
+texput.*
+*~
 # Keep specific PDFs
 /*.pdf
 !docs/papers/cisti_v1/*.pdf
@@ -115,3 +120,8 @@ paper.pdf
 
 # LaTeX scatter figure
 figures/scatter_cost_quality.png
+
+# System files
+.DS_Store
+._.DS_Store
+.coverage*
