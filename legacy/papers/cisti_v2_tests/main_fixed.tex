@@ -1,0 +1,156 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\hyphenpenalty=5000
+\tolerance=1000
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,english]{babel}
+\usepackage{graphicx,booktabs,multirow,siunitx}
+\usepackage[protrusion=true,expansion=true,final]{microtype}
+\usepackage{hyperref}
+\usepackage{balance} % Para equilibrar columnas
+\usepackage{flushend} % Alternativa para balance
+\usepackage{listings} % Para mostrar código con mejor formato
+\usepackage{xcolor} % Para colorear el código y tablas
+\usepackage{textcomp} % For special characters
+
+% Configuración de márgenes para A4 y fuente Times New Roman
+\usepackage[a4paper,top=2.5cm,left=2.5cm,right=2.0cm,bottom=2.0cm,showframe=false]{geometry}
+\renewcommand{\rmdefault}{ptm} % Times New Roman
+
+% Configuración de tablas numéricas
+\sisetup{
+  reset-text-series = false,
+  text-series-to-math = true,
+  round-mode         = places,
+  round-precision    = 3,
+  detect-weight = true,
+  detect-family = true,
+  detect-mode = true,
+  mode = text,
+  per-mode = symbol,
+  range-phrase = --,
+  range-units = single,
+  separate-uncertainty = true,
+  number-unit-product = \,,
+  output-decimal-marker = {,},
+  group-digits = integer,
+  group-minimum-digits = 4,
+  group-separator = {\,}
+}
+
+% Configuración para listings
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\definecolor{mediumgray}{rgb}{0.85,0.85,0.85}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{gray},
+  escapeinside={\%*}{*)},
+  keywordstyle=\color{blue},
+  stringstyle=\color{purple},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  tabsize=2,
+  frame=single,
+  framesep=5pt,
+  xleftmargin=15pt,
+  backgroundcolor=\color{lightgray},
+  rulecolor=\color{mediumgray},
+  showstringspaces=false
+}
+
+% Información del artículo
+\title{Evaluación de algoritmos bioinspirados recientes para el Vehicle Routing Problem
+\\ \textit{Evaluation of Recent Bio-inspired Algorithms for the Vehicle Routing Problem}}
+
+\author{%
+  \begin{tabular}{c}
+    \textbf{Felipe Ignacio González G.}\\
+    Programa de Magíster en Informática\\
+    Universidad de Valparaíso, Chile\\
+    \href{mailto:felipe.gonzalezggo@postgrado.uv.cl}{felipe.gonzalezggo@postgrado.uv.cl}
+  \end{tabular}}
+
+\begin{document}
+\selectlanguage{spanish}
+\maketitle
+
+% Resumen en español
+\begin{abstract}
+Se presentó un estudio comparativo riguroso de algoritmos metaheurísticos bioinspirados aplicados al Problema de Ruteo de Vehículos (VRP) sobre instancias Solomon. El análisis incluye dieciséis algoritmos recientes (2016-2025) —como WOA, MRFO, FSA y SMA— evaluados mediante benchmarking masivo con 1.000 ejecuciones por algoritmo. Se implementaron pruebas estadísticas avanzadas: test de Friedman alineado, prueba post-hoc de Nemenyi y medición del tamaño del efecto mediante A12 de Vargha-Delaney, complementadas con diagramas de diferencia crítica (CD). Los resultados establecen cuatro niveles de rendimiento estadísticamente significativos, destacando WOA como superior, seguido por FSA, MRFO y SMA, sin diferencias significativas entre estos cuatro. El análisis coste-calidad revela que SMA ofrece el mejor equilibrio, reduciendo el tiempo computacional en un 47 % frente a WOA, manteniendo calidad equivalente. Se proporciona un conjunto completo de herramientas de reproducibilidad científica, incluyendo código, datos y entorno de experimentación.
+\end{abstract}
+
+\begin{IEEEkeywords}
+metaheurísticas bioinspiradas, vehicle routing problem, análisis estadístico, reproducibilidad, diagramas de diferencia crítica
+\end{IEEEkeywords}
+
+% Abstract en inglés
+\selectlanguage{english}
+\begin{abstract}
+This paper presents a rigorous comparative study of bio-inspired metaheuristic algorithms applied to the Vehicle Routing Problem (VRP) on Solomon instances. The analysis includes sixteen recent algorithms (2016-2025)—such as WOA, MRFO, FSA, and SMA—evaluated through massive benchmarking with 1,000 runs per algorithm. Advanced statistical tests were implemented: aligned Friedman test, Nemenyi post-hoc test, and effect size measurement using Vargha-Delaney's A12, complemented with critical difference (CD) diagrams. The results establish four statistically significant performance levels, highlighting WOA as superior, followed by FSA, MRFO, and SMA, with no significant differences among these four. The cost-quality analysis reveals that SMA offers the best balance, reducing computational time by 47 % compared with WOA, with statistically equivalent solution quality. A complete set of scientific reproducibility tools is provided, including code, data, and experimental environment.
+\end{abstract}
+
+\begin{IEEEkeywords}
+bio-inspired metaheuristics, vehicle routing problem, statistical analysis, reproducibility, critical difference diagrams
+\end{IEEEkeywords}
+
+\selectlanguage{spanish}
+
+% Introducción
+\section{Introducción}\vspace{-0.2cm}
+El Problema de Ruteo de Vehículos (VRP) constituye uno de los desafíos fundamentales en investigación operativa y optimización combinatoria, con aplicaciones críticas en logística, transporte, y cadenas de suministro \cite{Mirjalili2016WOA}. Su naturaleza NP-difícil ha impulsado el desarrollo de múltiples enfoques metaheurísticos, destacando los algoritmos bioinspirados por su capacidad para encontrar soluciones de alta calidad en tiempos razonables.
+
+En los últimos años, se ha producido una proliferación significativa de algoritmos metaheurísticos bioinspirados, muchos con afirmaciones de superioridad basadas en evaluaciones experimentales limitadas y pruebas estadísticas insuficientes. Esto ha generado un debate sobre la reproducibilidad y validez científica de tales comparaciones \cite{Li2020SMA}. Como señalan Contreras-Saavedra et al. \cite{Contreras2024CD}, la confianza en experimentos individuales o metodologías simplificadas puede conducir a conclusiones erróneas sobre el rendimiento algorítmico.
+
+Además, las implementaciones disponibles suelen estar optimizadas para problemas específicos, dificultando la comparación justa entre algoritmos. Silva et al. \cite{Silva2023VRP} demostraron que muchos estudios comparativos carecen de evaluaciones estadísticas rigurosas, lo que limita su validez científica.
+
+Este artículo aborda estas limitaciones presentando un estudio comparativo riguroso de dieciséis algoritmos bioinspirados recientes (2016-2025) aplicados a instancias estándar del VRP Solomon. Las contribuciones principales incluyen:
+
+\begin{enumerate}
+\item La implementación y evaluación sistemática de algoritmos bioinspirados en un marco común para el VRP.
+\item Un enfoque estadístico robusto que supera las limitaciones de estudios previos, incorporando test de Friedman alineado, prueba post-hoc de Nemenyi y medición de tamaños de efecto A12.
+\item Análisis coste-calidad que evalúa no solo la calidad de las soluciones sino también la eficiencia computacional.
+\item Un marco experimental completamente reproducible, con código, datos y herramientas estadísticas disponibles.
+\end{enumerate}
+
+% Estado del arte
+\section{Trabajos relacionados}\vspace{-0.2cm}
+La investigación en metaheurísticas bioinspiradas para el VRP ha experimentado un crecimiento significativo, destacando varios desarrollos recientes:
+
+\paragraph{Algoritmos inspirados en comportamiento de mamíferos} WOA (Whale Optimization Algorithm) \cite{Mirjalili2016WOA} ha demostrado rendimiento competitivo en VRP, adaptando el comportamiento de alimentación de ballenas jorobadas mediante operadores específicos para permutaciones. SHO (Spotted Hyena Optimizer) \cite{Mirjalili2017SHO} aprovecha las estrategias de caza cooperativa de las hienas, mientras que FOA (Fossa Optimization Algorithm) \cite{Hamadneh2024FOA} adapta las tácticas de caza territorial de estos predadores de Madagascar. GTO (Gorilla Troops Optimization) \cite{Abdollahzadeh2021GTO} y su versión mejorada EGTO \cite{Hassan2024EGTO} modelan la estructura social jerárquica de los gorilas.
+
+\paragraph{Algoritmos inspirados en aves} HHO (Harris Hawks Optimization) \cite{Heidari2019HHO} implementa la estrategia de caza cooperativa "sorpresa-pounce" de los halcones, mostrando eficaz exploración pero riesgo de convergencia prematura. FSA (Flamingo Search Algorithm) \cite{Wang2021FSA} adapta el comportamiento de filtración y socialización de los flamencos, mientras que SMO (Starling Murmuration Optimizer) \cite{Zamani2022SMO} simula los movimientos coordinados de bandadas de estorninos.
+
+\paragraph{Algoritmos inspirados en organismos acuáticos} MRFO (Manta Ray Foraging Optimization) \cite{Zhao2020MRFO} modela tres estrategias de alimentación de las mantarrayas, mostrando buen equilibrio exploración-explotación. SMA (Slime Mould Algorithm) \cite{Li2020SMA} se inspira en el comportamiento adaptativo del moho viscoso al buscar nutrientes, destacando por su enfoque adaptativo de pesos. Elsisi et al. \cite{Elsisi2023DNN} han mejorado el rendimiento de SMA para CVRP mediante la incorporación de redes neuronales profundas, demostrando la capacidad de estos algoritmos para integrarse con técnicas de aprendizaje automático.
+
+\paragraph{Otros enfoques bioinspirados} APO (Artificial Protozoa Optimizer) \cite{Wang2024APO} implementa los movimientos y división de protozoarios, mientras que AHA (Artificial Hummingbird Algorithm) \cite{Zhao2022AHA} imita el comportamiento de los colibríes. EWA (Earthworm Algorithm) \cite{Wang2018EWA} modela los movimientos de los gusanos de tierra, y RRO (Raven Roosting Optimization) \cite{Brabazon2016RRO} simula el comportamiento social de los cuervos. GVOA (Griffon Vultures Optimization Algorithm) \cite{Hasan2025GVOA} implementa estrategias de búsqueda basadas en buitres.
+
+% Conclusiones
+\section{Conclusiones}\vspace{-0.2cm}
+
+Este estudio presentó una evaluación comparativa rigurosa de dieciséis algoritmos metaheurísticos bioinspirados aplicados al problema VRP. Las principales conclusiones son:
+
+\begin{enumerate}
+\item El análisis estadístico avanzado establece cuatro grupos de rendimiento estadísticamente diferenciados, con WOA, FSA, MRFO y SMA formando el grupo de élite sin diferencias significativas entre ellos.
+\item SMA ofrece el mejor equilibrio calidad/coste, requiriendo aproximadamente la mitad del tiempo computacional que WOA con calidad de solución equivalente.
+\item Los algoritmos mostraron comportamiento diferenciado según el tipo de instancia, sugiriendo potencial para estrategias de selección adaptativa.
+\item El análisis de tamaños de efecto A12 complementa la significancia estadística, cuantificando la magnitud práctica de las diferencias entre algoritmos.
+\end{enumerate}
+
+Como trabajo futuro, proponemos:
+
+\begin{enumerate}
+\item Evaluar el rendimiento en instancias de mayor tamaño (Homberger, 200-400 clientes) para analizar la escalabilidad de los algoritmos.
+\item Implementar un análisis de sensibilidad para examinar el impacto de parámetros críticos (población, iteraciones) en la calidad de solución y tiempo de ejecución.
+\item Desarrollar algoritmos híbridos que combinen las estrategias más efectivas identificadas en este estudio.
+\item Extender el análisis a otros problemas de optimización combinatoria para evaluar la generalidad de nuestros hallazgos.
+\end{enumerate}
+
+\selectlanguage{english}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
