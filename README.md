@@ -182,6 +182,10 @@ BioAlgoCompare/
 ├── data/
 │   └── vrp/                   # Instancias VRP (formato CVRPLIB)
 ├── docs/                      # Documentación adicional
+│   ├── algorithms/            # Documentación de algoritmos
+│   ├── papers/                # Papers académicos
+│   │   ├── cisti_v1/          # Paper principal para CISTI
+│   └── technical/             # Documentación técnica
 ├── problems/
 │   └── vrp.py                 # Implementación del problema VRP
 ├── results/                   # Resultados de experimentos
@@ -389,6 +393,13 @@ La documentación completa del proyecto está disponible en el directorio `docs/
 - **[Requisitos algorítmicos](docs/development/algorithmic_requirements.md)** - Requisitos para implementación de algoritmos
 
 Para más detalles, consulta el [índice de documentación](docs/index.md).
+
+### Publicaciones Académicas
+
+En el directorio `docs/papers/` se encuentran los artículos académicos relacionados con este proyecto:
+
+- **[Paper CISTI v1](docs/papers/cisti_v1/main.pdf)** - Evaluación comparativa de algoritmos bioinspirados recientes para el problema VRP (formato extarticle)
+- **[Paper CISTI v2](docs/papers/cisti_v2/main.pdf)** - El mismo estudio en formato IEEE Conference (IEEEtran)
 
 ## 📄 Licencia
 
