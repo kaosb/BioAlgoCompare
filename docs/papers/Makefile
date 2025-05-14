@@ -1,7 +1,7 @@
 # LaTeX compilation Makefile para papers CISTI
 # ==========================================
 #
-# Este Makefile compila el paper en formato IEEE Conference (IEEEtran).
+# Este Makefile compila el paper en formato extarticle (versión completa).
 #
 # Uso:
 #   make -C docs/papers cisti      - Compila el paper usando LuaLaTeX (recomendado)
@@ -17,14 +17,14 @@
 
 .PHONY: cisti clean
 
-# Compilar el paper principal en formato IEEE
+# Compilar el paper principal en formato extarticle (versión completa)
 cisti:
 	@echo "Compilando paper CISTI v2 con LuaLaTeX..."
-	latexmk -lualatex -pdf cisti_v2/main.tex
+	cd cisti_v2 && latexmk -lualatex -pdf main.tex
 	@echo "Compilación terminada. El PDF está disponible en docs/papers/cisti_v2/main.pdf"
 
 # Limpiar archivos temporales
 clean:
 	@echo "Limpiando archivos temporales de LaTeX..."
-	latexmk -C cisti_v2/main.tex
+	cd cisti_v2 && latexmk -C main.tex
 	@echo "Limpieza completada"
