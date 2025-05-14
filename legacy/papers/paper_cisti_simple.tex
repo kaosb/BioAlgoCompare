@@ -1,0 +1,109 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\hyphenpenalty=5000
+\tolerance=1000
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,english]{babel}
+\usepackage{graphicx,booktabs,multirow,siunitx}
+\usepackage[protrusion=true,expansion=true,final]{microtype}
+\usepackage{hyperref}
+\usepackage{flushend} % Para equilibrar columnas
+\usepackage{listings} % Para mostrar código con mejor formato
+\usepackage{xcolor} % Para colorear el código y tablas
+
+% Configuración de márgenes para A4 y fuente Times New Roman
+\usepackage[a4paper,top=2.5cm,left=2.5cm,right=2.0cm,bottom=2.0cm,showframe=false]{geometry}
+\renewcommand{\rmdefault}{ptm} % Times New Roman
+
+% Configuración de tablas numéricas
+\sisetup{
+  reset-text-series = false,
+  text-series-to-math = true,
+  round-mode         = places,
+  round-precision    = 3,
+  detect-weight = true,
+  detect-family = true,
+  detect-mode = true,
+  mode = text,
+  per-mode = symbol,
+  range-phrase = --,
+  range-units = single,
+  separate-uncertainty = true,
+  number-unit-product = \,,
+  output-decimal-marker = {,},
+  group-digits = integer,
+  group-minimum-digits = 4,
+  group-separator = {\,}
+}
+
+% Configuración para listings
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{gray},
+  escapeinside={\%*}{*)},
+  keywordstyle=\color{blue},
+  stringstyle=\color{purple},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  tabsize=2,
+  frame=single,
+  framesep=5pt,
+  xleftmargin=15pt,
+  backgroundcolor=\color{lightgray\!15},
+  rulecolor=\color{lightgray\!40},
+  showstringspaces=false
+}
+
+% Configuración para evitar problemas con caracteres especiales en español
+\DeclareUnicodeCharacter{00AD}{-}
+\DeclareUnicodeCharacter{00F3}{ó}
+\DeclareUnicodeCharacter{00E1}{á}
+\DeclareUnicodeCharacter{00ED}{í}
+\DeclareUnicodeCharacter{00E9}{é}
+\DeclareUnicodeCharacter{00FA}{ú}
+\DeclareUnicodeCharacter{00F1}{ñ}
+
+% Información del artículo
+\title{Documento Simplificado de Prueba}
+
+\author{%
+  \begin{tabular}{c}
+    \textbf{Felipe Ignacio González G.}\\
+    Programa de Magíster en Informática\\
+    Universidad de Valparaíso, Chile\\
+    \href{mailto:felipe.gonzalezggo@postgrado.uv.cl}{felipe.gonzalezggo@postgrado.uv.cl}
+  \end{tabular}}
+
+\begin{document}
+\selectlanguage{spanish}
+\maketitle
+
+% Resumen en español
+\begin{abstract}
+Documento de prueba simplificado para identificar problemas de compilación.
+\end{abstract}
+
+\begin{IEEEkeywords}
+prueba, test, compilación
+\end{IEEEkeywords}
+
+\selectlanguage{english}
+\begin{abstract}
+Simplified test document to identify compilation issues.
+\end{abstract}
+
+\begin{IEEEkeywords}
+test, compilation
+\end{IEEEkeywords}
+
+\selectlanguage{spanish}
+
+\section{Introducción}\vspace{-0.2cm}
+Este es un documento de prueba simplificado.
+
+\flushend
+\end{document}
+EOF < /dev/null

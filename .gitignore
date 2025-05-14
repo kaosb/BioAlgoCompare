@@ -97,8 +97,33 @@ paper.pdf
 *.blg
 *.fdb_latexmk
 *.fls
+*.synctex.gz
+*.synctex(busy)
+*.synctex.gz(busy)
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*_fixed.*
+*_minimal.*
+*.bak
+texput.*
+*~
+
+# PDFs de compilación (ignora todos salvo versiones finales)
 *.pdf
+!docs/papers/cisti_v1/main.pdf
+!docs/papers/cisti_v2/main.pdf
 
-
-# LaTeX scatter figure
-figures/scatter_cost_quality.png
+# Archivos temporales y de sistema
+.DS_Store
+._.DS_Store
+*.coverage*analyze.log
+benchmark.log
+massive_benchmark.log
+docs/papers/cisti_v1/figures/
+docs/papers/cisti_v1/references.bib

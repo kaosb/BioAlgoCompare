@@ -182,6 +182,10 @@ BioAlgoCompare/
 ├── data/
 │   └── vrp/                   # Instancias VRP (formato CVRPLIB)
 ├── docs/                      # Documentación adicional
+│   ├── algorithms/            # Documentación de algoritmos
+│   ├── papers/                # Papers académicos
+│   │   ├── cisti_v1/          # Paper principal para CISTI
+│   └── technical/             # Documentación técnica
 ├── problems/
 │   └── vrp.py                 # Implementación del problema VRP
 ├── results/                   # Resultados de experimentos
@@ -283,6 +287,37 @@ Los resultados se almacenan en el directorio `results/` con la siguiente estruct
 - Subcomandos específicos para diferentes tareas
 - Opciones flexibles para diferentes casos de uso
 - Instalable como comando de consola `bioalgo`
+
+### 6. Compilación del Paper Científico
+
+Este proyecto incluye dos versiones del paper científico para la conferencia CISTI 2025:
+
+- **Version 1 (cisti_v1)**: Formato IEEE Conference (IEEEtran)
+- **Version 2 (cisti_v2)**: Formato extendido (extarticle) con contenido completo
+
+Para compilar los papers:
+
+```bash
+# Compilar la versión 2 (extarticle - contenido completo)
+make -C docs/papers cisti_v2
+
+# Compilar la versión 1 (IEEEtran - formato conferencia)
+make -C docs/papers cisti_v1
+
+# Compilar ambas versiones
+make -C docs/papers all
+
+# Limpiar archivos temporales de LaTeX
+make -C docs/papers clean
+```
+
+El comando `make -C docs/papers cisti` es un alias para `cisti_v2` (versión actual).
+
+Los PDFs resultantes se generan en:
+- `docs/papers/cisti_v1/main.pdf` (versión IEEE)
+- `docs/papers/cisti_v2/main.pdf` (versión extendida)
+
+Este proceso requiere una instalación de LaTeX que incluya el paquete `latexmk` y `lualatex`.
 
 ## ✅ Buenas Prácticas y Auditoría
 
@@ -389,6 +424,13 @@ La documentación completa del proyecto está disponible en el directorio `docs/
 - **[Requisitos algorítmicos](docs/development/algorithmic_requirements.md)** - Requisitos para implementación de algoritmos
 
 Para más detalles, consulta el [índice de documentación](docs/index.md).
+
+### Publicaciones Académicas
+
+En el directorio `docs/papers/` se encuentran los artículos académicos relacionados con este proyecto:
+
+- **[Paper CISTI v1](docs/papers/cisti_v1/main.pdf)** - Evaluación comparativa de algoritmos bioinspirados recientes para el problema VRP (formato IEEE Conference - IEEEtran)
+- **[Paper CISTI v2](docs/papers/cisti_v2/main.pdf)** - Versión extendida del mismo estudio con contenido completo (formato extarticle)
 
 ## 📄 Licencia
 
