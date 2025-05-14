@@ -125,3 +125,5 @@ texput.*
 *.coverage*analyze.log
 benchmark.log
 massive_benchmark.log
+docs/papers/cisti_v1/figures/
+docs/papers/cisti_v1/references.bib
