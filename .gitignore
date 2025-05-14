@@ -122,8 +122,7 @@ texput.*
 # Archivos temporales y de sistema
 .DS_Store
 ._.DS_Store
-*.coverage*analyze.log
+*.coverage*
+analyze.log
 benchmark.log
 massive_benchmark.log
-docs/papers/cisti_v1/figures/
-docs/papers/cisti_v1/references.bib
