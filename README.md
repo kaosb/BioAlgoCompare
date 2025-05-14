@@ -288,6 +288,22 @@ Los resultados se almacenan en el directorio `results/` con la siguiente estruct
 - Opciones flexibles para diferentes casos de uso
 - Instalable como comando de consola `bioalgo`
 
+### 6. Compilación del Paper Científico
+
+Este proyecto incluye un paper científico en formato IEEE Conference (IEEEtran) para la conferencia CISTI 2025.
+
+Para compilar el paper:
+
+```bash
+# Compilar el paper usando LuaLaTeX
+make -C docs/papers cisti
+
+# Limpiar archivos temporales de LaTeX
+make -C docs/papers clean
+```
+
+El PDF resultante se generará en `docs/papers/cisti_v2/main.pdf`. Este proceso requiere una instalación de LaTeX que incluya el paquete `latexmk` y `lualatex`.
+
 ## ✅ Buenas Prácticas y Auditoría
 
 El proyecto ha sido auditado y mejorado para seguir buenas prácticas de desarrollo de software científico:
