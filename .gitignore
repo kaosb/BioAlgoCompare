@@ -111,7 +111,7 @@ paper.pdf
 # Keep specific PDFs
 /*.pdf
 !docs/papers/cisti_v1/*.pdf
-
+!docs/papers/cisti_v2/*.pdf
 
 # LaTeX scatter figure
 figures/scatter_cost_quality.png
