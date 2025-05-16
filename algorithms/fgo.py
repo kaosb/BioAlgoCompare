@@ -143,7 +143,7 @@ class FGO(MetaheuristicAlgorithm):
         MPr = int(
             random.random() * self.population_size * (1 - MPb / self.population_size)
         )
-        self.population_size - MPo - MPr
+        MPt = self.population_size - MPo - MPr
 
         self.population.sort(key=lambda x: x.fitness())
 
@@ -160,7 +160,7 @@ class FGO(MetaheuristicAlgorithm):
             )
 
         # Migración final: MPt peores
-        for i in range(MPo + MPr, self.population_size):
+        for i in range(MPo + MPr, MPo + MPr + MPt):
             self.population[i].move(
                 self.population[0], iteration, self.max_iterations, mode="migrate"
             )
