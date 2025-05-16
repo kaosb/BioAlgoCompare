@@ -53,7 +53,7 @@ Siga estos pasos para una instalación estándar:
 4. **Verificar la instalación**:
    ```bash
    # Ejecutar una prueba simple
-   python run.py --algorithm ewa --instance P-n16-k8 --iterations 10 --no-visualize
+   python scripts/run.py --algorithm ewa --instance P-n16-k8 --iterations 10 --no-visualize
    ```
 
 ## Instalación en Modo Desarrollo

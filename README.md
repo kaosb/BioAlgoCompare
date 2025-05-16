@@ -22,17 +22,24 @@ Comparar el rendimiento de algoritmos metaheurísticos bioinspirados recientes s
 
 | Acrónimo | Nombre Completo | Año | Inspiración Biológica |
 |----------|-----------------|------|----------------------|
-| SHO      | Spotted Hyena Optimizer | 2024 | Estrategias de caza cooperativa de las hienas |
+| AHA      | Artificial Hummingbird Algorithm | 2022 | Comportamiento de vuelo y forrajeo de colibríes |
 | APO      | Artificial Protozoa Optimizer | 2024 | Comportamiento de movimiento y división de protozoarios |
 | EGTO     | Enhanced Gorilla Troops Optimization | 2024 | Comportamiento social de gorilas con componentes de PSO |
-| FSA      | Flamingo Search Algorithm | 2025 | Comportamiento social y de filtración de los flamencos |
-| FOA      | Fossa Optimization Algorithm | 2024 | Estrategias de caza y territorialidad de las fosasas |
-| WOA      | Whale Optimization Algorithm | 2016 | Estrategia de alimentación de ballenas jorobadas |
-| HHO      | Harris Hawks Optimization | 2019 | Comportamiento de caza cooperativa de halcones |
-| MRFO     | Manta Ray Foraging Optimization | 2020 | Técnicas de alimentación de mantarrayas |
-| SMA      | Slime Mould Algorithm | 2020 | Comportamiento del moho viscoso buscando alimento |
-| GTO      | Gorilla Troops Optimization | 2021 | Jerarquía y comportamiento social de gorilas |
 | EWA      | Earthworm Algorithm | 2018 | Movimientos de los gusanos de tierra |
+| FGO      | Flamingo Optimization Algorithm | 2025 | Comportamiento grupal de los flamencos |
+| FOA      | Fossa Optimization Algorithm | 2024 | Estrategias de caza y territorialidad de las fosasas |
+| FSA      | Flamingo Search Algorithm | 2021 | Patrón de búsqueda de alimento de los flamencos |
+| GTO      | Gorilla Troops Optimization | 2021 | Jerarquía y comportamiento social de gorilas |
+| GVOA     | Griffon Vultures Optimization Algorithm | 2025 | Comportamiento de vuelo termal de buitres leonados |
+| HHO      | Harris Hawks Optimization | 2019 | Comportamiento de caza cooperativa de halcones |
+| HOA      | Hyena Optimization Algorithm | 2017 | Estrategias de caza cooperativa de hienas |
+| MRFO     | Manta Ray Foraging Optimization | 2020 | Técnicas de alimentación de mantarrayas |
+| OPA      | Orca Predator Algorithm | 2021 | Estrategias de caza cooperativa de orcas |
+| RRO      | Raven Roosting Optimization | 2016 | Comportamiento de dormidero de cuervos |
+| SHO      | Spotted Hyena Optimizer | 2017 | Caza cooperativa de hienas moteadas |
+| SMA      | Slime Mould Algorithm | 2020 | Comportamiento del moho viscoso buscando alimento |
+| SMO      | Starling Murmuration Optimizer | 2022 | Murmullos y comportamiento emergente de estorninos |
+| WOA      | Whale Optimization Algorithm | 2016 | Estrategia de alimentación de ballenas jorobadas |
 
 ## 🛠️ Requisitos e Instalación
 
@@ -213,24 +220,14 @@ BioAlgoCompare/
 #### Prueba de rendimiento con instancia grande:
 
 ```bash
-python run.py --algorithm egto --instance E-n51-k5 --iterations 300 --population 50
+python scripts/run.py --algorithm egto --instance E-n51-k5 --iterations 300 --population 50
 ```
 
 ## 📊 Resultados y Análisis
 
-Los resultados se almacenan en el directorio `results/` con la siguiente estructura:
+Los resultados se almacenan en el directorio `results/`. En esta versión del repositorio se incluye un ejemplo de resumen en:
 
-### Ejecuciones Normales
-- `results/benchmarks/{instancia}_{timestamp}.csv`: Resultados detallados de cada ejecución
-- `results/benchmarks/{instancia}_{timestamp}_summary.csv`: Resumen estadístico por algoritmo
-- `results/visualizations/{algoritmo}_{instancia}_solution.png`: Visualización de la mejor solución encontrada
-- `results/visualizations/{algoritmo}_{instancia}_convergence.png`: Curva de convergencia del algoritmo
-
-### Benchmarks Masivos (1000 ejecuciones)
-- `results/benchmarks/massive_{timestamp}/benchmark_state.json.gz`: Estado completo del benchmark con checkpoints
-- `results/benchmarks/massive_{timestamp}/massive_benchmark_summary.csv`: Resumen estadístico del benchmark
-- `results/analysis/massive_{timestamp}/massive_benchmark_report.html`: Informe HTML interactivo
-- `results/analysis/statistical_analysis_{timestamp}/`: Análisis estadístico avanzado con visualizaciones
+- `results/summary.csv`: Resumen de ejecuciones de ejemplo.
 
 ## 🧠 Metodología
 
