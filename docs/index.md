@@ -7,8 +7,8 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 ### Documentación Principal
 
 - [README del proyecto](../README.md) - Visión general del proyecto
-- [Análisis de Iteraciones](/ANALISIS_ITERACIONES.md) - Impacto del número de iteraciones
-- [Conclusiones de Optimización](/CONCLUSIONES_OPTIMIZACION.md) - Conclusiones generales
+- [Análisis de Iteraciones](analysis/iteration_impact.md) - Impacto del número de iteraciones
+- [Conclusiones de Optimización](analysis/conclusions.md) - Conclusiones generales
 
 ### Guías de Usuario
 
