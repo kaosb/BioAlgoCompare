@@ -68,17 +68,6 @@ class Orca(Individual):
             self.personal_best_fitness = other.personal_best_fitness
             return None
 
-    def is_better_than(self, other):
-        """Compare if this orca has better fitness than another.
-        
-        Args:
-            other: Another Orca individual to compare with
-            
-        Returns:
-            bool: True if this orca has lower fitness (better for minimization)
-        """
-        return self.fitness() < other.fitness()
-
     def move(self, population, iteration, max_iterations):
         """Not used in OPA - update() method is used instead.
         
@@ -105,7 +94,7 @@ class Orca(Individual):
         Returns:
             bool: True if all routes satisfy capacity and other constraints
         """
-        return self.problem.routes_are_feasible(self.position)
+        return bool(self.problem.routes_are_feasible(self.position))
 
     # --- util operators --------------------------------------------------
     def _random_swap(self, routes):
@@ -222,15 +211,10 @@ class OPA(MetaheuristicAlgorithm):
     """
 
     def __init__(self, problem, population_size=40, max_iterations=1000, seed=None):
-        self.problem = problem
-        self.population_size = population_size
-        self.max_iterations = max_iterations
-        self.seed = seed
+        super().__init__(problem, population_size, max_iterations, seed)
         self.current_iter = 0
         self.population = []
         self.best_solution = None
-        self.start_time = 0
-        self.end_time = 0
         self.convergence_curve = []
 
     def initialize_population(self) -> None:
