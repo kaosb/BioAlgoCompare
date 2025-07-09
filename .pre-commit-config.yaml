@@ -6,6 +6,24 @@ repos:
       args: [--fix]
     # ruff-format disabled
 
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.8.0
+  hooks:
+    - id: mypy
+      name: "🔍 MyPy - Type Checking (Optional)"
+      args: [--config-file=mypy.ini]
+      # No additional_dependencies to avoid types-all issue
+      files: ^(algorithms|problems|utils)/.*\.py$
+      exclude: ^(scripts|tests|legacy)/
+      # Make it optional - just warn but don't fail
+      pass_filenames: true
+      always_run: false
+      # Don't fail the commit on type errors
+      fail_fast: false
+      verbose: true
+      # This makes it a warning only
+      stages: [manual]
+
 - repo: local
   hooks:
     - id: dummy-hook
