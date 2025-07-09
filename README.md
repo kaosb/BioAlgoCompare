@@ -408,7 +408,7 @@ Desarrollado como parte de una investigación académica para el Magíster en In
 La documentación completa del proyecto está disponible en el directorio `docs/`:
 
 - **[Guía de instalación](docs/guides/installation.md)** - Instrucciones detalladas de instalación
-- **[Guía de inicio rápido](docs/guides/getting_started.md)** - Cómo empezar a usar el proyecto
+- **[Referencia de Comandos](docs/COMMAND_REFERENCE.md)** - Guía completa de comandos y uso
 - **[Visión general de algoritmos](docs/algorithms/overview.md)** - Descripción de todos los algoritmos implementados
 - **[Pseudocódigo de algoritmos](docs/algorithms/pseudocode.md)** - Pseudocódigo detallado de cada algoritmo
 - **[Documentación de algoritmos individuales](docs/algorithms/individual/)** - Análisis detallado de cada algoritmo
