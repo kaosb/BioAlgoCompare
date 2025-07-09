@@ -1,3 +1,32 @@
+"""Manta Ray Foraging Optimization (MRFO).
+
+This module implements the Manta Ray Foraging Optimization algorithm,
+inspired by the foraging behaviors of manta rays.
+
+The algorithm simulates three foraging behaviors:
+1. Chain foraging: Manta rays line up head-to-tail
+2. Cyclone foraging: Manta rays create a spiral pattern
+3. Somersault foraging: Manta rays perform backward somersaults
+
+Reference:
+    Zhao, W., Zhang, Z., & Wang, L. (2020).
+    Manta ray foraging optimization: An effective bio-inspired optimizer.
+    Engineering Applications of Artificial Intelligence, 87, 103300.
+    DOI: 10.1016/j.engappai.2019.103300
+
+Example:
+    >>> from algorithms.mrfo import MRFO
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run MRFO
+    >>> algo = MRFO(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

@@ -1,3 +1,33 @@
+"""Harris Hawks Optimization (HHO).
+
+This module implements the Harris Hawks Optimization algorithm, inspired by
+the cooperative hunting behavior of Harris hawks in nature.
+
+The algorithm simulates the surprise pounce hunting strategy:
+1. Exploration phase: Hawks perch randomly and search for prey
+2. Transition from exploration to exploitation based on prey energy
+3. Exploitation phase: Different attacking strategies based on prey escape energy
+4. Soft and hard besiege with progressive rapid dives
+
+Reference:
+    Heidari, A. A., Mirjalili, S., Faris, H., Aljarah, I., Mafarja, M., & Chen, H. (2019).
+    Harris hawks optimization: Algorithm and applications.
+    Future Generation Computer Systems, 97, 849-872.
+    DOI: 10.1016/j.future.2019.02.028
+
+Example:
+    >>> from algorithms.hho import HHO
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run HHO
+    >>> algo = HHO(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

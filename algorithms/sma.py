@@ -1,3 +1,33 @@
+"""Slime Mould Algorithm (SMA).
+
+This module implements the Slime Mould Algorithm, inspired by the
+oscillation behavior and morphological changes of slime mould in nature.
+
+The algorithm simulates:
+1. Approach food: Slime mould approaches food sources using bio-oscillator
+2. Wrap food: Slime mould wraps around food with venous structure
+3. Oscillation frequency changes based on food quality
+4. Adaptive weights for exploring different regions
+
+Reference:
+    Li, S., Chen, H., Wang, M., Heidari, A. A., & Mirjalili, S. (2020).
+    Slime mould algorithm: A new method for stochastic optimization.
+    Future Generation Computer Systems, 111, 300-323.
+    DOI: 10.1016/j.future.2020.03.055
+
+Example:
+    >>> from algorithms.sma import SMA
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run SMA
+    >>> algo = SMA(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

@@ -11,6 +11,20 @@ from algorithms.base import Individual, MetaheuristicAlgorithm
 
 
 class Vulture(Individual):
+    """Individual griffon vulture in the GVOA algorithm.
+    
+    Represents a griffon vulture with its position and foraging behaviors.
+    Vultures exhibit different foraging strategies based on their satiation rate.
+    
+    Attributes:
+        problem: The optimization problem instance
+        dimension: Number of decision variables
+        position: Current position in the search space
+        personal_best_position: Best position found by this vulture
+        _fitness: Cached fitness value
+        personal_best_fitness: Best fitness value found
+    """
+    
     def __init__(self, problem):
         """
         Inicializa un buitre con una posición aleatoria.
