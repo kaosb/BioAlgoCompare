@@ -57,6 +57,7 @@ class MetaheuristicAlgorithm(ABC):
         self.problem = problem
         self.population_size = population_size
         self.max_iterations = max_iterations
+        self.seed = seed
         self.population = []
         self.best_solution = None
         self.start_time = 0
@@ -107,3 +108,20 @@ class MetaheuristicAlgorithm(ABC):
             "execution_time": self.get_execution_time(),
             "convergence_curve": self.get_convergence_curve(),
         }
+    
+    def run(self, iterations: int = None) -> "Individual":
+        """
+        Run the algorithm for a specified number of iterations.
+        
+        This is an alias for execute() that allows specifying iterations
+        and matches the interface expected by tests and documentation.
+        
+        Args:
+            iterations: Number of iterations to run. If None, uses max_iterations.
+            
+        Returns:
+            The best solution found
+        """
+        if iterations is not None:
+            self.max_iterations = iterations
+        return self.execute()
