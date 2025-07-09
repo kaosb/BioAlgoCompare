@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
 
 # C extensions
 *.so
@@ -56,6 +58,10 @@ analyze.log
 .coverage.*
 coverage.xml
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+htmlcov/
 
 # Resultados masivos y temporales
 results/massive_*/checkpoints/
@@ -73,6 +79,10 @@ results/**/*
 
 # Temporary files
 *.tmp
+*.backup_*
+*.save
+*.orig
+*.rej
 
 # Archivos Claude
 .claude/
