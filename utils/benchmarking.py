@@ -319,8 +319,8 @@ def run_benchmark(
                 benchmark_result = BenchmarkResult(algo_name, instance_name, runs)
 
                 for _ in range(runs):
-                    fitness, time, convergence = parallel_results[task_index]
-                    benchmark_result.add_run(fitness, time, convergence)
+                    fitness, exec_time, convergence = parallel_results[task_index]
+                    benchmark_result.add_run(fitness, exec_time, convergence)
                     task_index += 1
 
                 benchmark_result.compute_metrics()
