@@ -15,7 +15,7 @@ better balance between exploration and exploitation.
 
 Reference:
     Abdollahzadeh, B., Soleimanian Gharehchopogh, F., & Mirjalili, S. (2021).
-    Artificial gorilla troops optimizer: A new nature-inspired metaheuristic 
+    Artificial gorilla troops optimizer: A new nature-inspired metaheuristic
     algorithm for global optimization problems.
     International Journal of Intelligent Systems, 36(10), 5887-5958.
     DOI: 10.1002/int.22535
@@ -23,11 +23,11 @@ Reference:
 Example:
     >>> from algorithms.egto import EGTO
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run EGTO
     >>> egto = EGTO(problem, population_size=30)
     >>> egto.initialize_population()
@@ -143,7 +143,6 @@ class EGTO(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)

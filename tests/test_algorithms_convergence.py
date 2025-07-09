@@ -14,8 +14,8 @@ SOLOMON_INSTANCES = ["R101.vrp", "C101.vrp", "RC101.vrp"]
 # Valores óptimos conocidos para cada instancia (para calcular gap)
 KNOWN_OPTIMA = {
     "R101.vrp": 1650,  # Valor aproximado para test
-    "C101.vrp": 830,   # Valor aproximado para test
-    "RC101.vrp": 1680, # Valor aproximado para test
+    "C101.vrp": 830,  # Valor aproximado para test
+    "RC101.vrp": 1680,  # Valor aproximado para test
 }
 
 # Lista de algoritmos a probar para convergencia
@@ -23,6 +23,7 @@ CONVERGENCE_ALGORITHMS = [
     "hho",  # Harris Hawks Optimization
     "hoa",  # Hyena Optimization Algorithm
 ]
+
 
 def load_algorithm(algorithm_name):
     """Carga dinámicamente un algoritmo por su nombre."""
@@ -36,6 +37,7 @@ def load_algorithm(algorithm_name):
     except (ImportError, AttributeError) as e:
         pytest.skip(f"No se pudo cargar el algoritmo {algorithm_name}: {str(e)}")
         return None
+
 
 def evaluate_routes(routes, problem):
     """Evalúa si una solución de rutas es válida y retorna su distancia."""
@@ -54,6 +56,7 @@ def evaluate_routes(routes, problem):
             total_distance += problem.distance_matrix[route[i], route[i + 1]]
 
     return all_clients == required_clients, total_distance
+
 
 @pytest.mark.parametrize("algorithm_name", CONVERGENCE_ALGORITHMS)
 @pytest.mark.parametrize("instance_name", SOLOMON_INSTANCES)
@@ -93,7 +96,9 @@ def test_algorithm_convergence(algorithm_name, instance_name):
         pytest.fail(f"El algoritmo {algorithm_name} falló en {instance_name}: {str(e)}")
 
     # Verificar que hay una solución
-    assert best_solution is not None, f"El algoritmo {algorithm_name} no generó solución"
+    assert (
+        best_solution is not None
+    ), f"El algoritmo {algorithm_name} no generó solución"
 
     # Obtener rutas
     if hasattr(best_solution, "position"):
@@ -110,14 +115,16 @@ def test_algorithm_convergence(algorithm_name, instance_name):
 
     # Calcular la distancia total
     all_covered, total_distance = evaluate_routes(routes, problem)
-    
+
     # Verificar que todos los clientes estén cubiertos
-    assert all_covered, f"El algoritmo {algorithm_name} no cubrió todos los clientes en {instance_name}"
+    assert (
+        all_covered
+    ), f"El algoritmo {algorithm_name} no cubrió todos los clientes en {instance_name}"
 
     # Calcular el gap respecto al óptimo conocido
     optimal_distance = KNOWN_OPTIMA.get(instance_name, float("inf"))
     gap = (total_distance - optimal_distance) / optimal_distance
-    
+
     # Verificar que el gap sea menor o igual al 50%
     assert gap <= 0.50, (
         f"El algoritmo {algorithm_name} en {instance_name} obtuvo un gap de {gap:.2%}, "
@@ -126,8 +133,10 @@ def test_algorithm_convergence(algorithm_name, instance_name):
 
     # Verificar que la curva de convergencia existe y muestra mejora
     convergence = algorithm.get_convergence_curve()
-    assert len(convergence) > 0, f"La curva de convergencia para {algorithm_name} está vacía"
-    
+    assert (
+        len(convergence) > 0
+    ), f"La curva de convergencia para {algorithm_name} está vacía"
+
     # Verificar que hay una tendencia de mejora en la convergencia
     if len(convergence) > 1:
         # La curva de convergencia debe mostrar alguna mejora (último valor mejor que el primero)

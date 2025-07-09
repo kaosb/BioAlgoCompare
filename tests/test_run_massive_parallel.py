@@ -46,7 +46,9 @@ def test_run_massive_non_parallel():
             # Usar el separador de ruta correcto según el sistema operativo
             separator = os.pathsep
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            env["PYTHONPATH"] = project_root + (separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else "")
+            env["PYTHONPATH"] = project_root + (
+                separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else ""
+            )
 
             # Ejecutar el script con el entorno modificado
             subprocess.run(
@@ -126,11 +128,17 @@ def test_run_massive_parallel():
             # Usar el separador de ruta correcto según el sistema operativo
             separator = os.pathsep
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            env["PYTHONPATH"] = project_root + (separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else "")
+            env["PYTHONPATH"] = project_root + (
+                separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else ""
+            )
 
             # Ejecutar el script con el entorno modificado
             process = subprocess.run(
-                cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
+                cmd,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=env,
             )
 
             stdout = process.stdout.decode()

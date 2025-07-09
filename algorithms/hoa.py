@@ -20,11 +20,11 @@ Reference:
 Example:
     >>> from algorithms.hoa import HOA
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run HOA
     >>> algo = HOA(problem, population_size=30)
     >>> algo.initialize_population()
@@ -142,7 +142,6 @@ class HOA(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)
@@ -158,8 +157,12 @@ class HOA(MetaheuristicAlgorithm):
 
         # Asignar líderes (manejar caso de población pequeña)
         self.alpha = self.population[0]
-        self.beta = self.population[1] if len(self.population) > 1 else self.population[0]
-        self.delta = self.population[2] if len(self.population) > 2 else self.population[0]
+        self.beta = (
+            self.population[1] if len(self.population) > 1 else self.population[0]
+        )
+        self.delta = (
+            self.population[2] if len(self.population) > 2 else self.population[0]
+        )
 
         # Guardar la mejor solución
         self.best_solution = Hyena(self.problem)
@@ -183,8 +186,12 @@ class HOA(MetaheuristicAlgorithm):
 
         # Actualizar líderes (manejar caso de población pequeña)
         self.alpha = self.population[0]
-        self.beta = self.population[1] if len(self.population) > 1 else self.population[0]
-        self.delta = self.population[2] if len(self.population) > 2 else self.population[0]
+        self.beta = (
+            self.population[1] if len(self.population) > 1 else self.population[0]
+        )
+        self.delta = (
+            self.population[2] if len(self.population) > 2 else self.population[0]
+        )
 
         # Actualizar la mejor solución si es necesario
         if self.alpha.is_better_than(self.best_solution):

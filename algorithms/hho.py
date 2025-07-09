@@ -18,11 +18,11 @@ Reference:
 Example:
     >>> from algorithms.hho import HHO
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run HHO
     >>> algo = HHO(problem, population_size=30)
     >>> algo.initialize_population()
@@ -170,7 +170,6 @@ class HHO(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)

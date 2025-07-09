@@ -209,7 +209,7 @@ python scripts/analyze.py run --algorithm opa \
 
 ### Population Size
 - **Small instances (<30 nodes)**: 20-30 individuals
-- **Medium instances (30-100 nodes)**: 30-50 individuals  
+- **Medium instances (30-100 nodes)**: 30-50 individuals
 - **Large instances (>100 nodes)**: 50-100 individuals
 
 ### Iteration Count

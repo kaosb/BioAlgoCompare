@@ -179,7 +179,6 @@ class RRO(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)

@@ -33,7 +33,7 @@ The algorithm models fossa behaviors including:
 3. Prey tracking and ambush tactics
 4. Adaptive hunting based on prey availability""",
         "reference": """    Halim, Z., & Yousaf, M. N. (2024).
-    Fossa Optimization Algorithm: A novel metaheuristic based on 
+    Fossa Optimization Algorithm: A novel metaheuristic based on
     the hunting patterns of Cryptoprocta ferox.
     Swarm and Evolutionary Computation, 78, 101234.
     DOI: 10.1016/j.swevo.2024.101234""",
@@ -187,12 +187,12 @@ def add_module_docstring(filepath, info):
     """Add module docstring to an algorithm file."""
     with open(filepath, 'r') as f:
         content = f.read()
-    
+
     # Check if file already has a module docstring
     if content.strip().startswith('"""'):
         print(f"Skipping {filepath} - already has module docstring")
         return
-    
+
     # Create the docstring
     docstring = f'''"""{info["name"]}.
 
@@ -204,31 +204,31 @@ Reference:
 Example:
     >>> from algorithms.{os.path.basename(filepath).replace(".py", "")} import {os.path.basename(filepath).replace(".py", "").upper()}
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run {os.path.basename(filepath).replace(".py", "").upper()}
     >>> algo = {os.path.basename(filepath).replace(".py", "").upper()}(problem, population_size=30)
     >>> algo.initialize_population()
     >>> best_solution = algo.run(iterations=100)
 """
 '''
-    
+
     # Add docstring before imports
     new_content = docstring + content
-    
+
     with open(filepath, 'w') as f:
         f.write(new_content)
-    
+
     print(f"Added module docstring to {filepath}")
 
 
 def main():
     """Main function to add docstrings to all algorithm files."""
     algorithms_dir = "/Users/kaosb/optimizacion/algorithms"
-    
+
     for filename, info in ALGORITHM_INFO.items():
         filepath = os.path.join(algorithms_dir, filename)
         if os.path.exists(filepath):

@@ -11,7 +11,7 @@
 #                                   - Genera el archivo docs/papers/cisti_v1/main.pdf
 #
 #   make -C docs/papers cisti      - Alias para cisti_v2 (versión actual)
-# 
+#
 #   make -C docs/papers all        - Compila ambas versiones del paper
 #
 #   make -C docs/papers clean      - Elimina todos los archivos auxiliares de la compilación

@@ -408,16 +408,16 @@ Para ilustrar cómo combinar los resultados de un benchmark riguroso, considerem
 *   **Resultados Estadísticos**: Test de Friedman (p < 0.01) indica diferencias significativas. Pruebas post-hoc de Nemenyi y análisis de tamaño del efecto A12.
 
 ```
-Resultado: El test de Friedman indica diferencias estadísticamente significativas entre los algoritmos (p < 0.001). 
-Las pruebas post-hoc de Nemenyi muestran que el Algoritmo A supera significativamente a los Algoritmos C y D (p_adj < 0.01), 
-con un tamaño de efecto grande (A12 = 0.85 y 0.91, respectivamente). El Algoritmo B no 
-presenta diferencias significativas con el Algoritmo A (p_adj = 0.14), pero sí supera a los Algoritmos C y D 
+Resultado: El test de Friedman indica diferencias estadísticamente significativas entre los algoritmos (p < 0.001).
+Las pruebas post-hoc de Nemenyi muestran que el Algoritmo A supera significativamente a los Algoritmos C y D (p_adj < 0.01),
+con un tamaño de efecto grande (A12 = 0.85 y 0.91, respectivamente). El Algoritmo B no
+presenta diferencias significativas con el Algoritmo A (p_adj = 0.14), pero sí supera a los Algoritmos C y D
 (p_adj < 0.05, A12 = 0.68 y 0.75).
 
-Conclusión: El Algoritmo A y el Algoritmo B forman un grupo de algoritmos con el mejor desempeño en las instancias evaluadas, 
-siendo estadísticamente indistinguibles entre sí en este benchmark particular. Ambos algoritmos superan significativamente 
+Conclusión: El Algoritmo A y el Algoritmo B forman un grupo de algoritmos con el mejor desempeño en las instancias evaluadas,
+siendo estadísticamente indistinguibles entre sí en este benchmark particular. Ambos algoritmos superan significativamente
 en rendimiento a los Algoritmos C y D, con diferencias que se consideran de magnitud práctica relevante.
-Se recomienda utilizar el Algoritmo A o B para aplicaciones que requieran alta calidad de solución en estas instancias. 
+Se recomienda utilizar el Algoritmo A o B para aplicaciones que requieran alta calidad de solución en estas instancias.
 Para una selección final entre A y B, se podrían considerar otras métricas como tiempo de ejecución o robustez en un conjunto más amplio de instancias.
 ```
 

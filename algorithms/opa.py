@@ -20,11 +20,11 @@ Reference:
 Example:
     >>> from algorithms.opa import OPA
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run OPA
     >>> algo = OPA(problem, population_size=30)
     >>> algo.initialize_population()
@@ -50,11 +50,11 @@ class Orca(Individual):
 
     def copy(self, other=None):
         """Copy method that follows the base class interface.
-        
+
         Args:
             other: If provided, copy attributes from other to self.
                    If None, return a deep copy of self.
-        
+
         Returns:
             Orca: A new Orca instance if other is None, otherwise None
         """
@@ -70,7 +70,7 @@ class Orca(Individual):
 
     def move(self, population, iteration, max_iterations):
         """Not used in OPA - update() method is used instead.
-        
+
         This method is required by the base class but OPA uses a different
         update mechanism that works directly with route representations.
         """
@@ -79,7 +79,7 @@ class Orca(Individual):
 
     def fitness(self):
         """Calculate and return the fitness value using direct route evaluation.
-        
+
         Returns:
             float: The fitness value (total cost) of the current route configuration
         """
@@ -90,7 +90,7 @@ class Orca(Individual):
 
     def is_feasible(self):
         """Check if the orca's route configuration is feasible.
-        
+
         Returns:
             bool: True if all routes satisfy capacity and other constraints
         """

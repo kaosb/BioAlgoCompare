@@ -148,7 +148,7 @@ Notablemente:
 
 ## Análisis Extendido para EWA
 
-- **Instancias de prueba:** 
+- **Instancias de prueba:**
   - E-n22-k4 (22 nodos, 4 vehículos)
   - P-n16-k8 (16 nodos, 8 vehículos)
 - **Algoritmo analizado en profundidad:** EWA (Earthworm Algorithm)
@@ -157,7 +157,7 @@ Notablemente:
   - Tamaños de población: 30, 50
   - Ejecuciones por configuración: 5 (para 10-1000 iter), 3 (para 10000 iter)
   - Múltiples semillas para robustez estadística
-- **Valores óptimos conocidos:** 
+- **Valores óptimos conocidos:**
   - E-n22-k4: 375.28
   - P-n16-k8: 450.00
 

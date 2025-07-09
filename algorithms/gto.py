@@ -20,11 +20,11 @@ Reference:
 Example:
     >>> from algorithms.gto import GTO
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run GTO
     >>> algo = GTO(problem, population_size=30)
     >>> algo.initialize_population()
@@ -70,11 +70,11 @@ class Gorilla(Individual):
         self, best_gorilla, C, L, W, beta, p, iteration, max_iter, population=None
     ):
         """Update the gorilla's position based on GTO behaviors.
-        
+
         Implements five main behaviors: migration to unknown places, moving
         towards other gorillas, following the silverback, competition for
         females, and migration to known locations.
-        
+
         Args:
             best_gorilla: Position of the silverback (best solution)
             C: Parameter C for exploration/exploitation balance
@@ -169,7 +169,6 @@ class GTO(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)

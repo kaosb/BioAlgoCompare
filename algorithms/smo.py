@@ -12,10 +12,10 @@ from algorithms.base import Individual, MetaheuristicAlgorithm
 
 class Starling(Individual):
     """Individual starling in the SMO algorithm.
-    
+
     Represents a starling with its position and murmuration behaviors.
     Starlings exhibit collective motion patterns and adaptive flocking.
-    
+
     Attributes:
         problem: The optimization problem instance
         position: Current position in the search space
@@ -23,7 +23,7 @@ class Starling(Individual):
         _fitness: Cached fitness value
         personal_best_fitness: Best fitness value found
     """
-    
+
     def __init__(self, problem):
         """
         Inicializa un estornino para el algoritmo SMO.
@@ -43,7 +43,6 @@ class Starling(Individual):
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
-
 
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""

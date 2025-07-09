@@ -50,13 +50,13 @@ Seguimos el modelo GitFlow para gestionar las contribuciones. Para más detalles
    ```bash
    # Para nuevas funcionalidades
    git checkout -b feature/nombre-descriptivo
-   
+
    # Para correcciones
    git checkout -b fix/nombre-descriptivo
-   
+
    # Para documentación
    git checkout -b docs/nombre-descriptivo
-   
+
    # Para refactorización
    git checkout -b refactor/nombre-descriptivo
    ```
@@ -116,21 +116,21 @@ Utilizamos el formato NumPy para docstrings:
 def funcion_ejemplo(parametro1, parametro2):
     """
     Breve descripción de la función.
-    
+
     Descripción más detallada si es necesario.
-    
+
     Parameters
     ----------
     parametro1 : tipo
         Descripción del parámetro1
     parametro2 : tipo
         Descripción del parámetro2
-    
+
     Returns
     -------
     tipo
         Descripción del valor de retorno
-    
+
     Examples
     --------
     >>> funcion_ejemplo(1, 2)
@@ -157,15 +157,15 @@ Para añadir un nuevo algoritmo metaheurístico:
 2. **Subclase de MetaheuristicAlgorithm**:
    ```python
    from algorithms.base import MetaheuristicAlgorithm, Solution
-   
+
    class NuevoAlgoritmo(MetaheuristicAlgorithm):
        def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
            super().__init__(problem, population_size, max_iterations, seed)
            # Parámetros específicos del algoritmo
-           
+
        def initialize(self):
            # Implementación de la inicialización
-           
+
        def execute(self):
            # Implementación del algoritmo
            return best_solution
@@ -174,7 +174,7 @@ Para añadir un nuevo algoritmo metaheurístico:
    - Añadir importación en `run.py`
    - Añadir a la lista de algoritmos disponibles
    - Crear documentación en `docs/algorithms/individual/nuevo_algoritmo.md`
-   
+
 4. **Añadir tests** para el nuevo algoritmo en `tests/test_nuevo_algoritmo.py`
 
 5. **Documentar el algoritmo**:

@@ -43,19 +43,19 @@ Para t = 1 hasta T:
   fitness_norm = normalizar(fitness)  # Normalizar entre [0, 1]
   Para cada moho i:
     peso[i] = fitness_norm[i]
-  
+
   # Actualizar parámetro de volatilidad
   z = z_inicial - t * (z_inicial/T)
-  
+
   Para cada moho (excepto el mejor):
     # Calcular probabilidad de aproximación
     p = tanh(|fitness(moho) - fitness(mejor)|)
-    
+
     # Calcular factores de oscilación
     a = atanh(-(t/T) + 1)
     vb = aleatorio en [-a, a]
     vc = aleatorio en [-1, 1] * (1 - t/T)
-    
+
     # Determinar comportamiento
     Si aleatorio < z:  # Comportamiento aleatorio
       posición = aleatorio en [0, 1]
@@ -67,10 +67,10 @@ Para t = 1 hasta T:
           posición[i] = mejor_posición[i] + vb[i] * peso[i] * (X_A[i] - X_B[i])
         Sino:  # Oscilación/alejamiento
           posición[i] = vc[i] * posición[i]
-    
+
     Clip posición a límites [0,1]
     Actualizar mejor solución si es necesario
-  
+
   Actualizar curva de convergencia
 Retornar mejor solución
 ```

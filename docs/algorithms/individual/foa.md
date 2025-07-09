@@ -55,11 +55,11 @@ Para t = 1 hasta T:
           rango_j = upper_bound[j] - lower_bound[j]
           xj_nueva = posición_actual[j] + (1 - 2*r_ij) * (rango_j / t)
         Aplicar restricciones de límites [0,1]
-      
+
       # Actualizar si hay mejora
       Si fitness(nueva_posición) ≤ fitness(posición_actual):
         Actualizar posición y fitness
-  
+
   Ordenar población por fitness
   Actualizar mejor solución global
   Registrar convergencia

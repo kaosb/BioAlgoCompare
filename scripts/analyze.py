@@ -747,7 +747,7 @@ def analyze_csv(csv_file, output_dir):
                 <p><strong>Fecha:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
                 <p><strong>Algoritmos analizados:</strong> {', '.join(algorithms)}</p>
             </div>
-            
+
             <h2>Resultados Estadísticos</h2>
             <table>
                 <tr>
@@ -776,18 +776,18 @@ def analyze_csv(csv_file, output_dir):
         f.write(
             f"""
             </table>
-            
+
             <h2>Visualizaciones</h2>
-            
+
             <h3>Fitness Promedio por Algoritmo</h3>
             <img src="{os.path.basename(bar_plot)}" alt="Fitness promedio">
-            
+
             <h3>Tiempo de Ejecución por Algoritmo</h3>
             <img src="{os.path.basename(time_plot)}" alt="Tiempo de ejecución">
-            
+
             <h3>Distribución de Fitness</h3>
             <img src="{os.path.basename(box_plot)}" alt="Distribución de fitness">
-            
+
         </body>
         </html>
         """

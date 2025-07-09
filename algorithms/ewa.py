@@ -12,7 +12,7 @@ use sexual reproduction and worse ones use asexual reproduction.
 
 Reference:
     Wang, G. G., Deb, S., & Coelho, L. D. S. (2018).
-    Earthworm optimisation algorithm: a bio-inspired metaheuristic algorithm 
+    Earthworm optimisation algorithm: a bio-inspired metaheuristic algorithm
     for global optimisation problems.
     International Journal of Bio-Inspired Computation, 12(1), 1-22.
     DOI: 10.1504/IJBIC.2018.093328
@@ -20,11 +20,11 @@ Reference:
 Example:
     >>> from algorithms.ewa import EWA
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run EWA
     >>> ewa = EWA(problem, population_size=30)
     >>> ewa.initialize_population()
@@ -139,7 +139,6 @@ class EWA(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)
@@ -154,7 +153,7 @@ class EWA(MetaheuristicAlgorithm):
         for i in range(1, self.population_size):
             if self.population[i].is_better_than(self.best_solution):
                 self.best_solution = self.population[i]
-        
+
         # Initialize convergence curve with initial best fitness
         self.convergence_curve = [self.best_solution.fitness()]
 

@@ -11,18 +11,18 @@ The algorithm simulates three main behaviors of protozoa:
 Reference:
     Wang, Z., Ding, H., Li, B., Bao, L., & Yang, Z. (2020).
     Artificial Protozoa Optimizer (APO): A novel bio-inspired metaheuristic algorithm
-    for engineering optimization. 
+    for engineering optimization.
     Knowledge-Based Systems, 191, 105239.
     DOI: 10.1016/j.knosys.2019.105239
 
 Example:
     >>> from algorithms.apo import APO
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run APO
     >>> apo = APO(problem, population_size=30)
     >>> apo.initialize_population()
@@ -36,10 +36,10 @@ from .base import Individual, MetaheuristicAlgorithm
 
 class Protozoa(Individual):
     """Individual protozoa organism in the APO algorithm.
-    
+
     Each protozoa represents a potential solution to the optimization problem.
     Protozoa can exhibit dormancy, reproduction, and foraging behaviors.
-    
+
     Attributes:
         problem: The optimization problem instance
         dimension: Number of decision variables
@@ -48,7 +48,7 @@ class Protozoa(Individual):
         upper_bounds: Upper bounds for each dimension
         _fitness: Cached fitness value
     """
-    
+
     def __init__(self, problem):
         self.problem = problem
         self.dimension = problem.get_dimension()
@@ -60,9 +60,9 @@ class Protozoa(Individual):
 
     def fitness(self):
         """Calculate and return the fitness value of this protozoa.
-        
+
         The fitness is cached to avoid redundant evaluations.
-        
+
         Returns:
             float: The fitness value (lower is better for minimization)
         """
@@ -78,12 +78,12 @@ class Protozoa(Individual):
 
     def move(self, population, iteration, max_iterations, pf_max=0.1, npairs=1):
         """Update the position of this protozoa based on APO behaviors.
-        
+
         Implements three main behaviors:
         1. Dormancy: Random repositioning when conditions are unfavorable
         2. Reproduction: Creating variations through genetic-like operations
         3. Foraging: Movement towards better solutions
-        
+
         Args:
             population: List of all protozoa in the population
             iteration: Current iteration number
@@ -167,7 +167,7 @@ class Protozoa(Individual):
 
     def copy(self, other):
         """Copy the attributes from another protozoa.
-        
+
         Args:
             other: Another Protozoa instance to copy from
         """
@@ -178,13 +178,13 @@ class Protozoa(Individual):
 
 class APO(MetaheuristicAlgorithm):
     """Artificial Protozoa Optimizer (APO) algorithm implementation.
-    
+
     A bio-inspired optimization algorithm that simulates the behavior of
     protozoa organisms, including dormancy, reproduction, and foraging.
-    
+
     The algorithm maintains a population of protozoa that evolve through
     iterations using biological-inspired operators.
-    
+
     Args:
         problem: The optimization problem to solve
         population_size: Number of protozoa in the population (default: 30)
@@ -200,7 +200,6 @@ class APO(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)

@@ -42,11 +42,11 @@ Inicializar población de halcones con posiciones aleatorias
 Identificar mejor halcón (presa objetivo)
 Para t = 1 hasta T:
   Calcular vector medio Xm de la población
-  
+
   Para cada halcón (excepto el mejor):
     Calcular E0 = aleatorio en [-1, 1]
     Calcular E = 2 * E0 * (1 - t/T)
-    
+
     # Fase de exploración
     Si |E| >= 1:
       Si q >= 0.5:
@@ -54,30 +54,30 @@ Para t = 1 hasta T:
         posición = X_rand - r1 * |X_rand - 2*r2*posición_actual|
       Sino:
         posición = (posición_presa - Xm) - r3 * (LB + r4*(UB - LB))
-    
+
     # Fase de explotación
     Sino:
       r = aleatorio en [0, 1]
       Si r >= 0.5 y |E| >= 0.5:  # Asedio suave
         posición = posición_presa - E * |posición_presa - posición|
-      
+
       Sino Si r >= 0.5 y |E| < 0.5:  # Asedio duro
         posición = posición_presa - E * |posición_presa - posición| / |E|
-      
+
       Sino Si r < 0.5 y |E| >= 0.5:  # Asedio suave con zambullidas
         J = 2 * (1 - aleatorio())
         Y = posición_presa - E * |J * posición_presa - posición|
         Z = Y + aleatorio * levy_flight()
         posición = mejor_entre(Y, Z)
-      
+
       Sino:  # Asedio duro con zambullidas
         Y = posición_presa - E * |posición_presa - posición|
         Z = Y + aleatorio * levy_flight()
         posición = mejor_entre(Y, Z)
-    
+
     Clip posición a límites [0,1]
     Actualizar mejor solución si es necesario
-  
+
   Actualizar curva de convergencia
 Retornar mejor solución
 ```

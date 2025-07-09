@@ -46,7 +46,9 @@ def test_avg_iter_time_capture():
         # Usar el separador de ruta correcto según el sistema operativo
         separator = os.pathsep
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        env["PYTHONPATH"] = project_root + (separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else "")
+        env["PYTHONPATH"] = project_root + (
+            separator + env.get("PYTHONPATH", "") if env.get("PYTHONPATH") else ""
+        )
 
         # Ejecutar el script con el entorno modificado
         process = subprocess.run(
@@ -54,7 +56,9 @@ def test_avg_iter_time_capture():
         )
 
         # Verificar que el proceso terminó correctamente
-        assert process.returncode == 0, f"Error al ejecutar run_massive.py: {process.stderr.decode()}"
+        assert (
+            process.returncode == 0
+        ), f"Error al ejecutar run_massive.py: {process.stderr.decode()}"
 
         # Verificar que se creó el CSV de resultados
         csv_path = Path(tmp_dir) / "massive_benchmark_summary.csv"
@@ -62,10 +66,14 @@ def test_avg_iter_time_capture():
 
         # Leer el CSV y verificar que contiene la columna avg_iter_time
         df = pd.read_csv(csv_path)
-        assert "avg_iter_time" in df.columns, "El CSV no contiene la columna 'avg_iter_time'"
+        assert (
+            "avg_iter_time" in df.columns
+        ), "El CSV no contiene la columna 'avg_iter_time'"
 
         # Verificar que el valor de avg_iter_time es mayor que cero
-        assert df["avg_iter_time"].iloc[0] > 0, "El valor de avg_iter_time no es positivo"
+        assert (
+            df["avg_iter_time"].iloc[0] > 0
+        ), "El valor de avg_iter_time no es positivo"
 
         # Verificar que el manifest.json contiene el tiempo promedio global por iteración
         manifest_path = Path(tmp_dir) / "manifest.json"
@@ -74,8 +82,12 @@ def test_avg_iter_time_capture():
         with open(manifest_path, "r") as f:
             manifest = json.load(f)
 
-        assert "avg_iter_time_overall" in manifest, "El manifest.json no contiene 'avg_iter_time_overall'"
-        assert manifest["avg_iter_time_overall"] > 0, "El valor de avg_iter_time_overall no es positivo"
+        assert (
+            "avg_iter_time_overall" in manifest
+        ), "El manifest.json no contiene 'avg_iter_time_overall'"
+        assert (
+            manifest["avg_iter_time_overall"] > 0
+        ), "El valor de avg_iter_time_overall no es positivo"
 
 
 if __name__ == "__main__":

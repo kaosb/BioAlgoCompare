@@ -25,10 +25,10 @@ Available algorithms:
 Example usage:
     >>> from algorithms import EWA
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> algorithm = EWA(problem, population_size=30)
     >>> algorithm.initialize_population()
     >>> best_solution = algorithm.run(iterations=100)
@@ -59,60 +59,94 @@ from .woa import WOA, Whale
 
 # Create algorithm registry for easy access
 ALGORITHMS = {
-    'aha': AHA,
-    'apo': APO,
-    'egto': EGTO,
-    'ewa': EWA,
-    'fgo': FGO,
-    'foa': FOA,
-    'fsa': FSA,
-    'gto': GTO,
-    'gvoa': GVOA,
-    'hho': HHO,
-    'hoa': HOA,
-    'mrfo': MRFO,
-    'opa': OPA,
-    'rro': RRO,
-    'sho': SHO,
-    'sma': SMA,
-    'smo': SMO,
-    'woa': WOA,
+    "aha": AHA,
+    "apo": APO,
+    "egto": EGTO,
+    "ewa": EWA,
+    "fgo": FGO,
+    "foa": FOA,
+    "fsa": FSA,
+    "gto": GTO,
+    "gvoa": GVOA,
+    "hho": HHO,
+    "hoa": HOA,
+    "mrfo": MRFO,
+    "opa": OPA,
+    "rro": RRO,
+    "sho": SHO,
+    "sma": SMA,
+    "smo": SMO,
+    "woa": WOA,
 }
 
 # Aliases for convenience
-ALGORITHMS['hyena'] = SHO  # Spotted Hyena Optimizer
-ALGORITHMS['flamingo'] = FSA  # Default to FSA for flamingo
+ALGORITHMS["hyena"] = SHO  # Spotted Hyena Optimizer
+ALGORITHMS["flamingo"] = FSA  # Default to FSA for flamingo
+
 
 def get_algorithm(name):
     """Get an algorithm class by name.
-    
+
     Args:
         name: Algorithm name (case-insensitive)
-        
+
     Returns:
         Algorithm class
-        
+
     Raises:
         ValueError: If algorithm name is not found
     """
     name_lower = name.lower()
     if name_lower not in ALGORITHMS:
-        available = ', '.join(sorted(ALGORITHMS.keys()))
+        available = ", ".join(sorted(ALGORITHMS.keys()))
         raise ValueError(f"Algorithm '{name}' not found. Available: {available}")
     return ALGORITHMS[name_lower]
+
 
 # Export all classes and utilities
 __all__ = [
     # Base classes
-    'Individual',
-    'MetaheuristicAlgorithm',
+    "Individual",
+    "MetaheuristicAlgorithm",
     # Algorithms
-    'AHA', 'APO', 'EGTO', 'EWA', 'FGO', 'FOA', 'FSA', 'GTO', 'GVOA',
-    'HHO', 'HOA', 'MRFO', 'OPA', 'RRO', 'SHO', 'SMA', 'SMO', 'WOA',
+    "AHA",
+    "APO",
+    "EGTO",
+    "EWA",
+    "FGO",
+    "FOA",
+    "FSA",
+    "GTO",
+    "GVOA",
+    "HHO",
+    "HOA",
+    "MRFO",
+    "OPA",
+    "RRO",
+    "SHO",
+    "SMA",
+    "SMO",
+    "WOA",
     # Individual classes
-    'Hummingbird', 'Protozoa', 'EnhancedGorilla', 'Earthworm', 'FlamingoFGO',
-    'Fossa', 'FlamingoFSA', 'Gorilla', 'Vulture', 'Hawk', 'HyenaHOA',
-    'MantaRay', 'Orca', 'Raven', 'HyenaSHO', 'SlimeMould', 'Starling', 'Whale',
+    "Hummingbird",
+    "Protozoa",
+    "EnhancedGorilla",
+    "Earthworm",
+    "FlamingoFGO",
+    "Fossa",
+    "FlamingoFSA",
+    "Gorilla",
+    "Vulture",
+    "Hawk",
+    "HyenaHOA",
+    "MantaRay",
+    "Orca",
+    "Raven",
+    "HyenaSHO",
+    "SlimeMould",
+    "Starling",
+    "Whale",
     # Utilities
-    'ALGORITHMS', 'get_algorithm',
+    "ALGORITHMS",
+    "get_algorithm",
 ]

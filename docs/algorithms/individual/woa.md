@@ -40,16 +40,16 @@ Inicializar población de ballenas con posiciones aleatorias
 Encontrar mejor ballena
 Para t = 1 hasta T:
   Calcular a = 2 - t*(2/T)  # Decrece linealmente de 2 a 0
-  
+
   Para cada ballena (excepto la mejor):
     # Seleccionar estrategia
     p = aleatorio en [0, 1]
-    
+
     Si p < 0.5:  # Estrategia de encercamiento/búsqueda
       r1, r2 = aleatorios en [0, 1]
       A = 2*a*r1 - a
       C = 2*r2
-      
+
       Si |A| < 1:  # Encercamiento (explotación)
         Para cada dimensión i:
           D = |C*mejor_posición[i] - posición[i]|
@@ -59,16 +59,16 @@ Para t = 1 hasta T:
         Para cada dimensión i:
           D = |C*X_rand[i] - posición[i]|
           posición[i] = X_rand[i] - A*D
-    
+
     Sino:  # Estrategia de espiral (bubble-net)
       Para cada dimensión i:
         D = |mejor_posición[i] - posición[i]|
         l = aleatorio en [-1, 1]
         posición[i] = D*exp(a2*l)*cos(2π*l) + mejor_posición[i]
-    
+
     Clip posición a límites [0,1]
     Actualizar mejor solución si es necesario
-  
+
   Actualizar curva de convergencia
 Retornar mejor solución
 ```

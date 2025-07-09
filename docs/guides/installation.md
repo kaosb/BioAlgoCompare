@@ -36,11 +36,11 @@ Siga estos pasos para una instalación estándar:
    ```bash
    # Usando venv (integrado en Python 3.3+)
    python -m venv venv
-   
+
    # Activar el entorno virtual
    # En Linux/macOS:
    source venv/bin/activate
-   
+
    # En Windows:
    venv\Scripts\activate
    ```

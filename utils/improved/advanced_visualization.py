@@ -694,7 +694,7 @@ def create_visual_report(figures, output_file=None):
             <a href="#heatmap">Heatmaps</a>
             <a href="#radar">Radar</a>
         </div>
-        
+
         <div class="content">
             <h1>Informe Visual de Análisis</h1>
             <p>Generado el: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>

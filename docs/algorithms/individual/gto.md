@@ -43,7 +43,7 @@ Para t = 1 hasta T:
   Calcular C = F * (1 - t/T)  # Coeficiente de exploración/explotación
   Generar l = aleatorio en [-1, 1]
   Calcular L = C * l
-  
+
   Para cada gorila (excepto el silverback):
     # Fase de exploración
     Si rand < p:
@@ -57,7 +57,7 @@ Para t = 1 hasta T:
       # Migración a lugar conocido
       H = aleatorio en [-C, C] * posición
       posición = aleatorio(espacio) + L * H
-    
+
     # Transición a explotación si C < W
     Si C < W:
       Si rand < 0.5:
@@ -70,16 +70,16 @@ Para t = 1 hasta T:
         E = aleatorio normal o uniforme
         A = beta * E
         posición = posición_silverback - Q * (posición_silverback - posición) * A
-    
+
     # Comportamiento social adicional
     Si rand < factor_social:
       Seleccionar otro gorila aleatoriamente
       Para cada dimensión con probabilidad 0.3:
         Realizar aprendizaje social estocástico
-    
+
     Clip posición a límites [0,1]
     Actualizar mejor solución si es necesario
-  
+
   Actualizar curva de convergencia
 Retornar mejor solución
 ```

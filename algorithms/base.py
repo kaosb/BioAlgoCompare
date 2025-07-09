@@ -11,10 +11,10 @@ class Individual(ABC):
     def is_better_than(self, other: "Individual") -> bool:
         """
         Compara si este individuo es mejor que otro.
-        
+
         Esta implementación base asume minimización. Las subclases pueden
         sobrescribir si necesitan comportamiento diferente.
-        
+
         Returns:
             bool: True si este individuo es mejor que el otro
         """
@@ -64,12 +64,16 @@ class MetaheuristicAlgorithm(ABC):
         """
         # Validación de parámetros
         if population_size < 1:
-            raise ValueError(f"population_size debe ser >= 1, recibido: {population_size}")
+            raise ValueError(
+                f"population_size debe ser >= 1, recibido: {population_size}"
+            )
         if max_iterations < 1:
-            raise ValueError(f"max_iterations debe ser >= 1, recibido: {max_iterations}")
-        if not hasattr(problem, 'evaluate'):
+            raise ValueError(
+                f"max_iterations debe ser >= 1, recibido: {max_iterations}"
+            )
+        if not hasattr(problem, "evaluate"):
             raise ValueError("problem debe tener método evaluate()")
-            
+
         self.problem = problem
         self.population_size = population_size
         self.max_iterations = max_iterations
@@ -124,28 +128,28 @@ class MetaheuristicAlgorithm(ABC):
             "execution_time": self.get_execution_time(),
             "convergence_curve": self.get_convergence_curve(),
         }
-    
+
     def run(self, iterations: int = None) -> "Individual":
         """
         Run the algorithm for a specified number of iterations.
-        
+
         This is an alias for execute() that allows specifying iterations
         and matches the interface expected by tests and documentation.
-        
+
         Args:
             iterations: Number of iterations to run. If None, uses max_iterations.
-            
+
         Returns:
             The best solution found
         """
         if iterations is not None:
             self.max_iterations = iterations
         return self.execute()
-    
+
     def get_best_solution(self) -> "Individual":
         """
         Retorna la mejor solución encontrada por el algoritmo.
-        
+
         Returns:
             La mejor solución (Individual) encontrada, o None si no se ha ejecutado
         """

@@ -45,41 +45,47 @@ class VRPProblem:
         metadata = {}
         for line in lines:
             if line.startswith("NAME"):
-                metadata['name'] = line.split(":")[1].strip()
+                metadata["name"] = line.split(":")[1].strip()
             elif line.startswith("TYPE"):
-                metadata['type'] = line.split(":")[1].strip()
+                metadata["type"] = line.split(":")[1].strip()
             elif line.startswith("DIMENSION"):
-                metadata['dimension'] = int(line.split(":")[1].strip())
+                metadata["dimension"] = int(line.split(":")[1].strip())
             elif line.startswith("CAPACITY"):
-                metadata['capacity'] = int(line.split(":")[1].strip())
+                metadata["capacity"] = int(line.split(":")[1].strip())
         return metadata
-    
+
     def _parse_node_coordinates(self, lines):
         """Parse node coordinates section."""
         coordinates = []
         in_coord_section = False
-        
+
         for line in lines:
             if line == "NODE_COORD_SECTION":
                 in_coord_section = True
             elif line == "DEMAND_SECTION":
                 in_coord_section = False
-            elif in_coord_section and line and not line.startswith(("EDGE_WEIGHT_TYPE", "EOF")):
+            elif (
+                in_coord_section
+                and line
+                and not line.startswith(("EDGE_WEIGHT_TYPE", "EOF"))
+            ):
                 parts = line.split()
                 if len(parts) >= 3:
-                    coordinates.append({
-                        'id': int(parts[0]),
-                        'x': float(parts[1]),
-                        'y': float(parts[2])
-                    })
-        
+                    coordinates.append(
+                        {
+                            "id": int(parts[0]),
+                            "x": float(parts[1]),
+                            "y": float(parts[2]),
+                        }
+                    )
+
         return coordinates
-    
+
     def _parse_demands(self, lines):
         """Parse demand section."""
         demands = {}
         in_demand_section = False
-        
+
         for line in lines:
             if line == "DEMAND_SECTION":
                 in_demand_section = True
@@ -89,89 +95,95 @@ class VRPProblem:
                 parts = line.split()
                 if len(parts) >= 2:
                     demands[int(parts[0])] = int(parts[1])
-        
+
         return demands
-    
+
     def _validate_instance_data(self, metadata, coordinates, demands):
         """Validate parsed instance data."""
-        if 'dimension' not in metadata:
+        if "dimension" not in metadata:
             raise ValueError("DIMENSION not found in instance file")
-        
-        if 'capacity' not in metadata:
+
+        if "capacity" not in metadata:
             raise ValueError("CAPACITY not found in instance file")
-        
-        if len(coordinates) != metadata['dimension']:
-            raise ValueError(f"Expected {metadata['dimension']} nodes, found {len(coordinates)}")
-        
-        if len(demands) != metadata['dimension']:
-            raise ValueError(f"Expected {metadata['dimension']} demands, found {len(demands)}")
-        
+
+        if len(coordinates) != metadata["dimension"]:
+            raise ValueError(
+                f"Expected {metadata['dimension']} nodes, found {len(coordinates)}"
+            )
+
+        if len(demands) != metadata["dimension"]:
+            raise ValueError(
+                f"Expected {metadata['dimension']} demands, found {len(demands)}"
+            )
+
         return True
-    
+
     def _build_instance_data(self, metadata, coordinates, demands):
         """Build instance data structures."""
         # Sort coordinates by node ID
-        coordinates.sort(key=lambda x: x['id'])
-        
+        coordinates.sort(key=lambda x: x["id"])
+
         # Build arrays
-        nodes = [(c['x'], c['y']) for c in coordinates]
-        demand_array = [demands.get(i, 0) for i in range(1, metadata['dimension'] + 1)]
-        
+        nodes = [(c["x"], c["y"]) for c in coordinates]
+        demand_array = [demands.get(i, 0) for i in range(1, metadata["dimension"] + 1)]
+
         return {
-            'nodes': nodes,
-            'demands': demand_array,
-            'capacity': metadata['capacity'],
-            'dimension': metadata['dimension']
+            "nodes": nodes,
+            "demands": demand_array,
+            "capacity": metadata["capacity"],
+            "dimension": metadata["dimension"],
         }
-    
 
     def load_instance(self, instance_name: str = None) -> None:
         """
         Carga una instancia de VRP desde el archivo.
-        
+
         Args:
             instance_name: Nombre de la instancia (e.g., 'P-n16-k8'). Si se proporciona,
                           busca el archivo en el directorio data/
-        
+
         Versión refactorizada que reduce la complejidad de 16 a menos de 10.
         """
         # If instance_name is provided, build the path
         if instance_name:
             self.instance_path = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                "data", "vrp", f"{instance_name}.vrp"
+                "data",
+                "vrp",
+                f"{instance_name}.vrp",
             )
-        
+
         # Read file
         with open(self.instance_path, "r") as f:
             content = f.read()
-        
+
         # Split into lines and clean
         lines = [line.strip() for line in content.split("\n") if line.strip()]
-        
+
         # Parse sections
         metadata = self._parse_instance_metadata(lines)
         coordinates = self._parse_node_coordinates(lines)
         demands = self._parse_demands(lines)
-        
+
         # Validate data
         self._validate_instance_data(metadata, coordinates, demands)
-        
+
         # Build instance data
         instance_data = self._build_instance_data(metadata, coordinates, demands)
-        
+
         # Update class attributes
-        self.nodes = instance_data['nodes']
-        self.demands = instance_data['demands']
-        self.capacity = instance_data['capacity']
-        self.dimension = instance_data['dimension']
-        
+        self.nodes = instance_data["nodes"]
+        self.demands = instance_data["demands"]
+        self.capacity = instance_data["capacity"]
+        self.dimension = instance_data["dimension"]
+
         # Extract instance name
-        self.name = metadata.get('name', os.path.basename(self.instance_path).split(".")[0])
-        
+        self.name = metadata.get(
+            "name", os.path.basename(self.instance_path).split(".")[0]
+        )
+
         # Compute distance matrix after loading
         self.compute_distance_matrix()
-
 
     def compute_distance_matrix(self) -> None:
         """Calcula la matriz de distancias entre todos los nodos."""
@@ -181,12 +193,12 @@ class VRPProblem:
         try:
             # Intenta usar scipy.spatial.distance.cdist si está disponible
             from scipy.spatial import distance
-            
+
             # Extraer coordenadas x e y para todos los nodos
             coords = np.array(self.nodes)
-            
+
             # Calcular matriz de distancias euclidiana
-            self.distance_matrix = distance.cdist(coords, coords, metric='euclidean')
+            self.distance_matrix = distance.cdist(coords, coords, metric="euclidean")
         except ImportError:
             # Fallback al método de doble bucle
             for i in range(n):
@@ -292,14 +304,14 @@ class VRPProblem:
         """
         total_distance: float = 0.0
         penalty: float = 0.0
-        
+
         # Obtener detalles de penalización pero ignorar lista de errores
         total_distance, penalties_dict, _ = self.evaluate_routes_detailed(routes)
-        
+
         # Sumar todas las penalizaciones
         for penalty_value in penalties_dict.values():
             penalty += penalty_value
-        
+
         return total_distance + penalty
 
     def evaluate_routes_detailed(
@@ -320,7 +332,7 @@ class VRPProblem:
         penalties: Dict[str, float] = {
             "capacity": 0.0,
             "missing": 0.0,
-            "duplicate": 0.0
+            "duplicate": 0.0,
         }
         error_messages: List[str] = []
 
@@ -368,7 +380,7 @@ class VRPProblem:
         # Verificar duplicados
         node_counts = Counter(all_nodes)
         duplicates = {node: count for node, count in node_counts.items() if count > 1}
-        
+
         if duplicates:
             penalty = sum(count - 1 for count in duplicates.values()) * PENALTY_MISSING
             penalties["duplicate"] += penalty
@@ -386,7 +398,7 @@ class VRPProblem:
             routes: Lista de rutas (cada ruta es una lista de índices de nodos)
 
         Returns:
-            tuple: (es_factible, mensajes_error) 
+            tuple: (es_factible, mensajes_error)
                    - es_factible: True si las rutas son factibles, False en caso contrario
                    - mensajes_error: Lista de mensajes describiendo los errores encontrados
         """
@@ -424,7 +436,7 @@ class VRPProblem:
         # Verificar duplicados (un nodo no debe aparecer en múltiples rutas)
         node_counts = Counter(all_nodes)
         duplicates = {node: count for node, count in node_counts.items() if count > 1}
-        
+
         if duplicates:
             is_feasible = False
             error_messages.append(f"Nodos duplicados: {duplicates}")

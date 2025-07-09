@@ -22,31 +22,35 @@ def test_get_algorithms_mapping():
     """Verifica que se pueda importar y mapear los algoritmos correctamente."""
     from algorithms.sho import SHO
     from algorithms.opa import OPA
-    
+
     algorithms = {
-        'sho': SHO,
-        'opa': OPA,
+        "sho": SHO,
+        "opa": OPA,
     }
-    
+
     # Verificar que los algoritmos se importen y sean clases
     for algo_name, algo_class in algorithms.items():
         assert algo_class.__name__ == algo_name.upper()
-        
+
         # Verificar que tienen los métodos necesarios
-        assert hasattr(algo_class, 'execute')
-        assert hasattr(algo_class, 'initialize_population')
-        assert hasattr(algo_class, 'update_population')
+        assert hasattr(algo_class, "execute")
+        assert hasattr(algo_class, "initialize_population")
+        assert hasattr(algo_class, "update_population")
 
 
-@pytest.mark.skip(reason="Este test solo verifica la existencia de la CLI, no la ejecuta")
+@pytest.mark.skip(
+    reason="Este test solo verifica la existencia de la CLI, no la ejecuta"
+)
 def test_cli_integration():
     """Verifica la integración básica de la CLI sin ejecutar el algoritmo completo."""
     from click.testing import CliRunner
-    
+
     runner = CliRunner()
-    with patch('scripts.run.VRPProblem'):
-        with patch('scripts.run.SHO.execute', return_value=None):
+    with patch("scripts.run.VRPProblem"):
+        with patch("scripts.run.SHO.execute", return_value=None):
             # Solo verificamos que la CLI se inicie sin errores
             with pytest.raises(SystemExit):
-                result = runner.invoke(main, ['--algorithm', 'sho', '--instance', 'test'])
+                result = runner.invoke(
+                    main, ["--algorithm", "sho", "--instance", "test"]
+                )
                 assert result.exit_code == 0

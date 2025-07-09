@@ -11,21 +11,21 @@ class MetaheuristicAlgorithm(ABC):
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         # Inicialización común
         ...
-    
+
     @abstractmethod
     def initialize_population(self):
         # Cada algoritmo debe implementar su propio método de inicialización
         pass
-    
+
     @abstractmethod
     def update_population(self):
         # Cada algoritmo debe implementar su propio método de actualización
         pass
-    
+
     def execute(self):
         # Ejecución común
         ...
-    
+
     def get_convergence_curve(self):
         # Retorna la curva de convergencia
         ...
@@ -98,20 +98,20 @@ Todos los algoritmos deben incluir al final de su método `update_population()` 
 def update_population(self):
     # Implementación del algoritmo
     # ...
-    
+
     # Actualizar cada individuo
     for i in range(self.population_size):
         # No mover el mejor individuo
         if self.population[i] is not self.best_solution:
             # Actualizar según el algoritmo
             # ...
-            
+
             # Actualizar mejor solución si es necesario
             if self.population[i].is_better_than(self.best_solution):
                 individual_copy = Individual(self.problem)
                 individual_copy.copy(self.population[i])
                 self.best_solution = individual_copy
-    
+
     # IMPORTANTE: Registrar el mejor fitness en la curva de convergencia
     self.convergence_curve.append(self.best_solution.fitness())
 ```

@@ -594,43 +594,42 @@ def plot_performance_radar(benchmark_results, instance_name, metrics=None, title
     return plt
 
 
-
 class BenchmarkReportBuilder:
     """Build benchmark reports with proper separation of concerns."""
-    
+
     def __init__(self, benchmark_results):
         """Initialize with benchmark results."""
         self.results = benchmark_results
         self.instances = self._group_by_instance()
-        
+
     def create_report(self, filename=None):
         """Create the benchmark report."""
         filename = self._prepare_filename(filename)
-        
+
         # Create summary
         summary_df = self._create_summary_dataframe()
-        
+
         # Generate visualizations
         figures_dir = self._prepare_figures_directory(filename)
         visualizations = self._generate_all_visualizations(figures_dir)
-        
+
         # Build HTML
         html_content = self._build_html_report(summary_df, visualizations)
-        
+
         # Save report
         self._save_report(filename, html_content)
-        
+
         return filename
-        
+
     def _prepare_filename(self, filename):
         """Prepare output filename."""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"results/benchmark_report_{timestamp}.html"
-        
+
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         return filename
-        
+
     def _group_by_instance(self):
         """Group results by instance name."""
         instances = {}
@@ -639,108 +638,106 @@ class BenchmarkReportBuilder:
                 instances[result.instance_name] = []
             instances[result.instance_name].append(result)
         return instances
-        
+
     def _create_summary_dataframe(self):
         """Create summary DataFrame from results."""
         summary_data = []
-        
+
         for instance_name, results in self.instances.items():
             for result in results:
-                summary_data.append({
-                    "Instance": result.instance_name,
-                    "Algorithm": result.algorithm_name,
-                    "Best": f"{result.best_fitness:.2f}",
-                    "Mean": f"{result.mean_fitness:.2f} ± {result.std_fitness:.2f}",
-                    "Time (s)": f"{result.mean_time:.2f} ± {result.std_time:.2f}",
-                    "Gap (%)": f"{result.gap_to_optimal:.2f}"
-                    if result.gap_to_optimal is not None
-                    else "N/A",
-                    "Success (%)": f"{result.success_rate:.2f}"
-                    if result.success_rate is not None
-                    else "N/A",
-                })
-        
+                summary_data.append(
+                    {
+                        "Instance": result.instance_name,
+                        "Algorithm": result.algorithm_name,
+                        "Best": f"{result.best_fitness:.2f}",
+                        "Mean": f"{result.mean_fitness:.2f} ± {result.std_fitness:.2f}",
+                        "Time (s)": f"{result.mean_time:.2f} ± {result.std_time:.2f}",
+                        "Gap (%)": f"{result.gap_to_optimal:.2f}"
+                        if result.gap_to_optimal is not None
+                        else "N/A",
+                        "Success (%)": f"{result.success_rate:.2f}"
+                        if result.success_rate is not None
+                        else "N/A",
+                    }
+                )
+
         return pd.DataFrame(summary_data)
-        
+
     def _prepare_figures_directory(self, filename):
         """Prepare directory for figures."""
         figures_dir = os.path.join(os.path.dirname(filename), "figures")
         os.makedirs(figures_dir, exist_ok=True)
         return figures_dir
-        
+
     def _generate_all_visualizations(self, figures_dir):
         """Generate all visualizations for the report."""
         visualizations = {}
-        
+
         for instance_name, results in self.instances.items():
             instance_results = [
                 r for r in self.results if r.instance_name == instance_name
             ]
-            
+
             visualizations[instance_name] = self._generate_instance_visualizations(
                 instance_name, instance_results, figures_dir
             )
-            
+
         return visualizations
-        
+
     def _generate_instance_visualizations(self, instance_name, results, figures_dir):
         """Generate visualizations for a single instance."""
         viz = {}
-        
+
         # Solution quality
-        viz['quality'] = self._save_plot(
-            plot_solution_quality(results),
-            figures_dir,
-            f"{instance_name}_quality.png"
+        viz["quality"] = self._save_plot(
+            plot_solution_quality(results), figures_dir, f"{instance_name}_quality.png"
         )
-        
+
         # Execution time
-        viz['time'] = self._save_plot(
-            plot_execution_time(results),
-            figures_dir,
-            f"{instance_name}_time.png"
+        viz["time"] = self._save_plot(
+            plot_execution_time(results), figures_dir, f"{instance_name}_time.png"
         )
-        
+
         # Convergence
-        viz['convergence'] = self._save_plot(
+        viz["convergence"] = self._save_plot(
             plot_convergence_comparison(results),
             figures_dir,
-            f"{instance_name}_convergence.png"
+            f"{instance_name}_convergence.png",
         )
-        
+
         # Performance radar
         plt_radar = plot_performance_radar(results, instance_name)
         if plt_radar:
-            viz['radar'] = self._save_plot(
-                plt_radar,
-                figures_dir,
-                f"{instance_name}_radar.png"
+            viz["radar"] = self._save_plot(
+                plt_radar, figures_dir, f"{instance_name}_radar.png"
             )
-        
+
         return viz
-        
+
     def _save_plot(self, plt_obj, figures_dir, filename):
         """Save a plot and return the filename."""
         path = os.path.join(figures_dir, filename)
         plt_obj.savefig(path)
         plt_obj.close()
         return filename
-        
+
     def _build_html_report(self, summary_df, visualizations):
         """Build the HTML report content."""
         html = self._get_html_header()
         html += self._get_summary_section(summary_df)
-        
+
         # Add instance sections
         for instance_name in self.instances:
-            html += self._get_instance_section(instance_name, visualizations.get(instance_name, {}))
-        
+            html += self._get_instance_section(
+                instance_name, visualizations.get(instance_name, {})
+            )
+
         # Add statistical analysis
         html += self._get_statistical_analysis_section()
-        
+
         html += "</body>\n</html>"
         return html
-        
+
     def _get_html_header(self):
         """Get HTML header with CSS."""
         css = self._get_css_styles()
@@ -756,7 +753,7 @@ class BenchmarkReportBuilder:
     <h1>Benchmark Report</h1>
     <p>Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
 """
-        
+
     def _get_css_styles(self):
         """Get CSS styles for the report."""
         return """body {
@@ -803,7 +800,7 @@ tr:nth-child(even) {
     font-weight: bold;
     color: #e74c3c;
 }"""
-        
+
     def _get_summary_section(self, summary_df):
         """Get HTML for summary section."""
         return f"""
@@ -812,7 +809,7 @@ tr:nth-child(even) {
         {summary_df.to_html(index=False)}
     </div>
 """
-        
+
     def _get_instance_section(self, instance_name, visualizations):
         """Get HTML for instance section."""
         html = f"""
@@ -820,87 +817,87 @@ tr:nth-child(even) {
         <h2>Instance: {instance_name}</h2>
         <p>Optimal value: {OPTIMAL_VALUES.get(instance_name, 'Unknown')}</p>
 """
-        
+
         # Add visualizations
-        if 'quality' in visualizations:
+        if "quality" in visualizations:
             html += f"""
         <div class="figure">
             <img src="figures/{visualizations['quality']}" alt="Solution Quality">
             <div class="caption">Figure: Solution quality comparison for {instance_name}</div>
         </div>
 """
-        
-        if 'time' in visualizations:
+
+        if "time" in visualizations:
             html += f"""
         <div class="figure">
             <img src="figures/{visualizations['time']}" alt="Execution Time">
             <div class="caption">Figure: Execution time comparison for {instance_name}</div>
         </div>
 """
-        
-        if 'convergence' in visualizations:
+
+        if "convergence" in visualizations:
             html += f"""
         <div class="figure">
             <img src="figures/{visualizations['convergence']}" alt="Convergence Curves">
             <div class="caption">Figure: Convergence curve comparison for {instance_name}</div>
         </div>
 """
-        
-        if 'radar' in visualizations:
+
+        if "radar" in visualizations:
             html += f"""
         <div class="figure">
             <img src="figures/{visualizations['radar']}" alt="Performance Radar">
             <div class="caption">Figure: Performance radar chart for {instance_name}</div>
         </div>
 """
-        
+
         html += "    </div>"
         return html
-        
+
     def _get_statistical_analysis_section(self):
         """Get HTML for statistical analysis section."""
         if len(self.results) == 0:
             return ""
-            
+
         html = """
     <div class="section">
         <h2>Statistical Analysis</h2>
 """
-        
+
         # Perform statistical tests for each instance
         for instance_name, results in self.instances.items():
             if len(results) >= 2:
                 html += self._perform_statistical_tests(instance_name, results)
-        
+
         html += "    </div>"
         return html
-        
+
     def _perform_statistical_tests(self, instance_name, results):
         """Perform statistical tests for an instance."""
         html = f"<h3>Statistical tests for {instance_name}</h3>"
-        
+
         # Prepare data
         algorithm_names = [r.algorithm_name for r in results]
         samples = [r.fitness_values for r in results]
-        
+
         # Ensure equal sample sizes
         min_samples = min(len(s) for s in samples)
         samples = [s[:min_samples] for s in samples]
-        
+
         if min_samples >= 5 and len(samples) >= 2:
             # Friedman test
             friedman_html = self._perform_friedman_test(samples, algorithm_names)
             if friedman_html:
                 html += friedman_html
-        
+
         return html
-        
+
     def _perform_friedman_test(self, samples, algorithm_names):
         """Perform Friedman test and return HTML."""
         try:
             friedman_samples = [list(s) for s in samples]
             statistic, p_value = friedmanchisquare(*friedman_samples)
-            
+
             html = f"""<p>Friedman Test</p>
 <table>
     <tr><th>Statistic</th><th>p-value</th><th>Interpretation</th></tr>
@@ -911,23 +908,23 @@ tr:nth-child(even) {
     </tr>
 </table>
 """
-            
+
             # Post-hoc tests if significant
             if p_value < 0.05 and len(samples) > 2:
                 html += self._perform_posthoc_tests(samples, algorithm_names)
-            
+
             return html
-            
+
         except Exception as e:
             return f"<p>Error performing Friedman test: {str(e)}</p>"
-        
+
     def _perform_posthoc_tests(self, samples, algorithm_names):
         """Perform post-hoc tests."""
         html = "<p>Post-hoc Wilcoxon Signed-Rank Tests</p>"
         html += """<table>
     <tr><th>Algorithm A</th><th>Algorithm B</th><th>p-value</th><th>Interpretation</th></tr>
 """
-        
+
         for i in range(len(samples)):
             for j in range(i + 1, len(samples)):
                 try:
@@ -941,22 +938,20 @@ tr:nth-child(even) {
 """
                 except Exception:
                     pass
-        
+
         html += "</table>"
         return html
-        
+
     def _save_report(self, filename, html_content):
         """Save the HTML report."""
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(html_content)
-
-
 
 
 def create_benchmark_report(benchmark_results, filename=None):
     """
     Crea un informe detallado de los resultados del benchmark.
-    
+
     Versión refactorizada que utiliza BenchmarkReportBuilder para reducir
     la complejidad ciclomática de 17 a menos de 10.
 
@@ -966,4 +961,3 @@ def create_benchmark_report(benchmark_results, filename=None):
     """
     builder = BenchmarkReportBuilder(benchmark_results)
     return builder.create_report(filename)
-

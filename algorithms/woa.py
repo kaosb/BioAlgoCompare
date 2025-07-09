@@ -17,11 +17,11 @@ Reference:
 Example:
     >>> from algorithms.woa import WOA
     >>> from problems.vrp import VRPProblem
-    >>> 
+    >>>
     >>> # Load a VRP instance
     >>> problem = VRPProblem()
     >>> problem.load_instance('P-n16-k8')
-    >>> 
+    >>>
     >>> # Initialize and run WOA
     >>> algo = WOA(problem, population_size=30)
     >>> algo.initialize_population()
@@ -143,7 +143,6 @@ class WOA(MetaheuristicAlgorithm):
         # Set random seed if provided
 
         if self.seed is not None:
-
             random.seed(self.seed)
 
             np.random.seed(self.seed)
@@ -158,7 +157,7 @@ class WOA(MetaheuristicAlgorithm):
         for i in range(1, self.population_size):
             if self.population[i].is_better_than(self.best_solution):
                 self.best_solution = self.population[i]
-        
+
         # Initialize convergence curve with initial best fitness
         self.convergence_curve = [self.best_solution.fitness()]
 

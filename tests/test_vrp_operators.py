@@ -1,6 +1,11 @@
 import pytest
 import numpy as np
-from utils.vrp_operators import VRPOperators, calculate_route_distance, check_route_capacity, split_vrp
+from utils.vrp_operators import (
+    VRPOperators,
+    calculate_route_distance,
+    check_route_capacity,
+    split_vrp,
+)
 from problems.vrp import VRPProblem
 import os
 
@@ -72,9 +77,11 @@ def test_check_route_capacity(vrp_problem, sample_route):
     expected_feasibility = route_load <= vrp_problem.capacity
 
     assert is_feasible == expected_feasibility
-    
+
     # Probar la función global también
-    global_feasible = check_route_capacity(sample_route, vrp_problem.demands, vrp_problem.capacity)
+    global_feasible = check_route_capacity(
+        sample_route, vrp_problem.demands, vrp_problem.capacity
+    )
     assert global_feasible == expected_feasibility
 
 
@@ -118,30 +125,30 @@ def test_split_vrp(vrp_problem):
     """Test que el algoritmo Split para VRP funciona correctamente."""
     # Crear una permutación simple de clientes
     permutation = [1, 2, 3, 4, 5]
-    
+
     # Ejecutar Split
     routes, total_cost = split_vrp(permutation, vrp_problem)
-    
+
     # Verificar que se devuelven rutas
     assert isinstance(routes, list)
     assert len(routes) > 0
-    
+
     # Verificar que cada ruta comienza y termina en el depósito
     for route in routes:
         assert route[0] == vrp_problem.depot_index
         assert route[-1] == vrp_problem.depot_index
-        
+
     # Verificar que todos los clientes están incluidos en las rutas
     clients_in_routes = []
     for route in routes:
         clients_in_routes.extend(route[1:-1])  # Excluir depósito al inicio y fin
-    
+
     clients_in_routes.sort()
     assert clients_in_routes == permutation
-    
+
     # Verificar que el costo total es un valor positivo
     assert total_cost > 0
-    
+
     # Verificar que todas las rutas respetan la capacidad
     for route in routes:
         load = sum(vrp_problem.demands[node] for node in route[1:-1])

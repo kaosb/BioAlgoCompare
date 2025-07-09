@@ -65,7 +65,7 @@ Basado en el comportamiento observado, los algoritmos se pueden categorizar en 4
 - FGO mejora rápidamente al inicio, pero luego la calidad se deteriora
 
 #### Patrón 3: Inicio Lento, Mejora Tardía
-**Algoritmos**: SMA, APO 
+**Algoritmos**: SMA, APO
 - SMA muestra mejora modesta inicial pero aceleración notable en etapas avanzadas
 - APO sigue patrón similar, con la mayor parte de mejora en etapas tardías
 

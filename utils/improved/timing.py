@@ -100,22 +100,22 @@ def get_iteration_times() -> List[Dict[str, Any]]:
 def instrument_run_algorithm_task(original_task_function: Callable) -> Callable:
     """
     Instrumenta la función de ejecución de algoritmos para medir tiempos por iteración.
-    
+
     Args:
         original_task_function: La función original _run_algorithm_task
-        
+
     Returns:
         Una función instrumentada que registra los tiempos de ejecución
     """
     global _original_function, _is_active
-    
+
     # Guardar referencia a la función original
     _original_function = original_task_function
-    
+
     # Inicializar sistema de medición si no está activo
     if not _is_active:
         initialize_timing()
-    
+
     def instrumented_run_algorithm_task(args: Tuple):
         """
         Versión instrumentada que mide tiempos por iteración.
@@ -132,16 +132,16 @@ def instrument_run_algorithm_task(original_task_function: Callable) -> Callable:
             seed,
             checkpoint_dir,
         ) = args
-        
+
         # Establecer semilla específica para este proceso
         if seed is not None:
             np.random.seed(seed + run_id)
-        
+
         # Medir tiempo de ejecución
         start_time = time.time()
         result = _original_function(args)
         total_time = time.time() - start_time
-        
+
         # Registrar tiempo para todas las ejecuciones (quitada la restricción de las 5 primeras)
         if "error" not in result:
             # Calcular tiempo promedio por iteración
@@ -156,9 +156,9 @@ def instrument_run_algorithm_task(original_task_function: Callable) -> Callable:
                 total_time=total_time,
                 iterations=iterations
             )
-        
+
         return result
-    
+
     return instrumented_run_algorithm_task
 
 def finalize_timing():

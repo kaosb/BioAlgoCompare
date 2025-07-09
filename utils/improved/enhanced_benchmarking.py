@@ -913,11 +913,11 @@ def create_enhanced_report(
             <a href="#convergence">Convergencia</a>
             <a href="#statistics">Estadísticas</a>
         </div>
-        
+
         <div class="content">
             <h1>Informe Avanzado de Benchmark</h1>
             <p>Generado el: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-            
+
             <div class="section" id="summary">
                 <h2>Resumen de Resultados</h2>
                 {summary_df.to_html(index=False, classes="table")}
