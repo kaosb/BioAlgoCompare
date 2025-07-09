@@ -481,7 +481,7 @@ tar -czf benchmark_complete_results.tar.gz \
 
 ## Recursos Adicionales
 
-- [Guía de Uso Completa](usage.md)
+- [Referencia de Comandos](../COMMAND_REFERENCE.md)
 - [Referencia Técnica de Scripts](../technical/scripts_reference.md)
 - [Documentación de Algoritmos](../algorithms/overview.md)
 - [Análisis Comparativo](../analysis/comparison.md)

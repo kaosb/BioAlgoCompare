@@ -12,9 +12,8 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 ### Guías de Usuario
 
-- [Inicio Rápido](guides/getting_started.md) - Primeros pasos con BioAlgoCompare
+- [Referencia de Comandos](COMMAND_REFERENCE.md) - Guía completa de comandos y uso
 - [Instalación](guides/installation.md) - Instrucciones detalladas de instalación
-- [Uso General](guides/usage.md) - Guía completa de uso del sistema
 - [Benchmarking](guides/benchmarking.md) - Instrucciones para ejecutar y analizar benchmarks
 
 ### Documentación Científica
@@ -61,7 +60,6 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Flujo de Trabajo Git](development/git_workflow.md) - Guía del flujo de trabajo con Git
 - [Contribución](development/contribution.md) - Cómo contribuir al proyecto
 - [Requisitos Algorítmicos](development/algorithmic_requirements.md) - Requisitos para implementación de algoritmos
-- [Plan de Consolidación](development/consolidation_plan_revised.md) - Plan para la consolidación del proyecto
 
 ### Documentación Técnica
 

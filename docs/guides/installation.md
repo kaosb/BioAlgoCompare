@@ -122,8 +122,8 @@ BioAlgoCompare/
 
 Una vez completada la instalación, consulte:
 
-- [Guía de Inicio Rápido](getting_started.md) para comenzar a usar BioAlgoCompare
-- [Guía de Uso](usage.md) para instrucciones detalladas sobre cómo usar el sistema
+- [Referencia de Comandos](../COMMAND_REFERENCE.md) para instrucciones completas de uso
+- [Guía de Benchmarking](benchmarking.md) para ejecutar experimentos rigurosos
 
 ## Referencias Adicionales
 
