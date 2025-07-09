@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import math
+import os
 from typing import List, Tuple, Dict, Set, Union, Optional, Any, cast
 from collections import Counter
 
@@ -37,59 +38,124 @@ class VRPProblem:
         self.load_instance()
         self.compute_distance_matrix()
 
-    def load_instance(self) -> None:
-        """Carga la instancia desde el archivo."""
-        with open(self.instance_path, "r") as f:
-            lines = f.readlines()
-
-        # Parsear encabezado
+    def _parse_instance_metadata(self, lines):
+        """Parse instance metadata from file lines."""
+        metadata = {}
         for line in lines:
-            line = line.strip()
             if line.startswith("NAME"):
-                self.name = line.split(":")[1].strip()
+                metadata['name'] = line.split(":")[1].strip()
+            elif line.startswith("TYPE"):
+                metadata['type'] = line.split(":")[1].strip()
             elif line.startswith("DIMENSION"):
-                self.dimension = int(line.split(":")[1].strip())
+                metadata['dimension'] = int(line.split(":")[1].strip())
             elif line.startswith("CAPACITY"):
-                self.capacity = int(line.split(":")[1].strip())
-            elif line.startswith("NODE_COORD_SECTION"):
-                break
-
-        # Parsear coordenadas de nodos
-        node_section = False
-        demand_section = False
-
+                metadata['capacity'] = int(line.split(":")[1].strip())
+        return metadata
+    
+    def _parse_node_coordinates(self, lines):
+        """Parse node coordinates section."""
+        coordinates = []
+        in_coord_section = False
+        
         for line in lines:
-            line = line.strip()
-
             if line == "NODE_COORD_SECTION":
-                node_section = True
-                continue
+                in_coord_section = True
             elif line == "DEMAND_SECTION":
-                node_section = False
-                demand_section = True
-                continue
-            elif line == "DEPOT_SECTION":
-                demand_section = False
-                continue
-            elif line == "EOF":
-                break
-
-            if node_section:
+                in_coord_section = False
+            elif in_coord_section and line and not line.startswith(("EDGE_WEIGHT_TYPE", "EOF")):
                 parts = line.split()
                 if len(parts) >= 3:
-                    node_id = int(parts[0]) - 1  # Convertir a índice base 0
-                    x = float(parts[1])
-                    y = float(parts[2])
-                    self.nodes.append((x, y))
-
-            if demand_section:
+                    coordinates.append({
+                        'id': int(parts[0]),
+                        'x': float(parts[1]),
+                        'y': float(parts[2])
+                    })
+        
+        return coordinates
+    
+    def _parse_demands(self, lines):
+        """Parse demand section."""
+        demands = {}
+        in_demand_section = False
+        
+        for line in lines:
+            if line == "DEMAND_SECTION":
+                in_demand_section = True
+            elif line in ["DEPOT_SECTION", "EOF"]:
+                in_demand_section = False
+            elif in_demand_section and line:
                 parts = line.split()
                 if len(parts) >= 2:
-                    node_id = int(parts[0]) - 1  # Convertir a índice base 0
-                    demand = int(parts[1])
-                    self.demands.append(demand)
-                    if demand == 0:
-                        self.depot_index = node_id
+                    demands[int(parts[0])] = int(parts[1])
+        
+        return demands
+    
+    def _validate_instance_data(self, metadata, coordinates, demands):
+        """Validate parsed instance data."""
+        if 'dimension' not in metadata:
+            raise ValueError("DIMENSION not found in instance file")
+        
+        if 'capacity' not in metadata:
+            raise ValueError("CAPACITY not found in instance file")
+        
+        if len(coordinates) != metadata['dimension']:
+            raise ValueError(f"Expected {metadata['dimension']} nodes, found {len(coordinates)}")
+        
+        if len(demands) != metadata['dimension']:
+            raise ValueError(f"Expected {metadata['dimension']} demands, found {len(demands)}")
+        
+        return True
+    
+    def _build_instance_data(self, metadata, coordinates, demands):
+        """Build instance data structures."""
+        # Sort coordinates by node ID
+        coordinates.sort(key=lambda x: x['id'])
+        
+        # Build arrays
+        nodes = [(c['x'], c['y']) for c in coordinates]
+        demand_array = [demands.get(i, 0) for i in range(1, metadata['dimension'] + 1)]
+        
+        return {
+            'nodes': nodes,
+            'demands': demand_array,
+            'capacity': metadata['capacity'],
+            'dimension': metadata['dimension']
+        }
+    
+
+    def load_instance(self) -> None:
+        """
+        Carga una instancia de VRP desde el archivo.
+        
+        Versión refactorizada que reduce la complejidad de 16 a menos de 10.
+        """
+        # Read file
+        with open(self.instance_path, "r") as f:
+            content = f.read()
+        
+        # Split into lines and clean
+        lines = [line.strip() for line in content.split("\n") if line.strip()]
+        
+        # Parse sections
+        metadata = self._parse_instance_metadata(lines)
+        coordinates = self._parse_node_coordinates(lines)
+        demands = self._parse_demands(lines)
+        
+        # Validate data
+        self._validate_instance_data(metadata, coordinates, demands)
+        
+        # Build instance data
+        instance_data = self._build_instance_data(metadata, coordinates, demands)
+        
+        # Update class attributes
+        self.nodes = instance_data['nodes']
+        self.demands = instance_data['demands']
+        self.capacity = instance_data['capacity']
+        self.dimension = instance_data['dimension']
+        
+        # Extract instance name
+        self.name = metadata.get('name', os.path.basename(self.instance_path).split(".")[0])
+
 
     def compute_distance_matrix(self) -> None:
         """Calcula la matriz de distancias entre todos los nodos."""
