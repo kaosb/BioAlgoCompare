@@ -3,8 +3,7 @@ Optimization problems module.
 Contains various optimization problem implementations.
 """
 
-# Legacy imports for backward compatibility
-from .vrp import VRPProblem
+from .vrp_v2 import VRPProblemV2
 
 # New problem hierarchy
 from .base import (
@@ -31,17 +30,11 @@ from .discrete.base import (
 )
 from .discrete.routing.tsp import TSPProblem
 
-# Adapters
-from .adapters import (
-    ContinuousAdapter,
-    DiscreteAdapter,
-    ConstraintHandler,
-    MultiObjectiveAdapter
-)
+from .main_adapters import ContinuousAdapter, DiscreteAdapter, ConstraintHandler, MultiObjectiveAdapter
+from .adapters.discrete_problem_adapter import DiscreteProblemAdapter
 
 __all__ = [
-    # Legacy
-    'VRPProblem',
+    'VRPProblemV2',
     
     # Base classes
     'AbstractProblem',

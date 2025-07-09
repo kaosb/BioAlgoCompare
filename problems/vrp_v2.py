@@ -177,6 +177,76 @@ class VRPProblemV2(AbstractProblem[List[List[int]]]):
 
         return routes
 
+    def encode_continuous(self, continuous_solution: np.ndarray) -> List[List[int]]:
+        """
+        Encodes a continuous solution (permutation keys) into discrete VRP routes.
+        This uses a greedy approach to build routes from the permutation.
+
+        Args:
+            continuous_solution: A 1D numpy array of continuous values (e.g., from an algorithm).
+
+        Returns:
+            A list of lists, where each inner list is a route.
+        """
+        if len(continuous_solution) != self.dimension:
+            raise ValueError(f"Continuous solution dimension mismatch. Expected {self.dimension}, got {len(continuous_solution)}")
+
+        # Get customer indices sorted by their continuous values
+        # Exclude depot (node 0) from permutation
+        customer_indices = np.argsort(continuous_solution) + 1 # +1 to convert 0-indexed permutation to 1-indexed customer IDs
+        
+        # Build routes greedily
+        routes: List[List[int]] = []
+        current_route: List[int] = [self.depot_index]
+        current_load = 0
+
+        for customer_id in customer_indices:
+            # Convert customer_id back to 0-indexed node for demands
+            node_idx = customer_id 
+            
+            if current_load + self.demands[node_idx] > self.capacity:
+                # Close current route and start a new one
+                current_route.append(self.depot_index)
+                routes.append(current_route)
+                current_route = [self.depot_index, node_idx]
+                current_load = self.demands[node_idx]
+            else:
+                # Add customer to current route
+                current_route.append(node_idx)
+                current_load += self.demands[node_idx]
+
+        # Close the last route
+        if len(current_route) > 1:
+            current_route.append(self.depot_index)
+            routes.append(current_route)
+
+        return routes
+
+    def decode_to_continuous(self, routes: List[List[int]]) -> np.ndarray:
+        """
+        Decodes discrete VRP routes back into a continuous solution (permutation keys).
+        This is a simplified reverse of encode_continuous.
+
+        Args:
+            routes: A list of lists, where each inner list is a route.
+
+        Returns:
+            A 1D numpy array of continuous values.
+        """
+        # Create a mapping from customer ID to its position in the permutation
+        customer_order = []
+        for route in routes:
+            for node_idx in route[1:-1]:  # Exclude depots
+                customer_order.append(node_idx)
+        
+        # Create a continuous array based on the order
+        continuous_solution = np.zeros(self.dimension) # self.dimension is number of customers
+        for i, customer_id in enumerate(customer_order):
+            # Assign a value based on order. +1 to convert 0-indexed customer_id to 1-indexed for permutation
+            continuous_solution[customer_id - 1] = i / self.dimension + (0.5 / self.dimension)
+
+        return continuous_solution
+
     def repair(self, solution: List[List[int]]) -> List[List[int]]:
         """
         Repairs an infeasible solution to make it feasible.

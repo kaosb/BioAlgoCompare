@@ -246,9 +246,9 @@ class TSPProblem(PermutationProblem):
         """
         with open(filename, 'w') as f:
             f.write(f"NAME : {self.name} Solution\n")
-            f.write(f"TYPE : TOUR\n")
+            f.write("TYPE : TOUR\n")
             f.write(f"DIMENSION : {self.n_cities}\n")
-            f.write(f"TOUR_SECTION\n")
+            f.write("TOUR_SECTION\n")
             for city in tour:
                 f.write(f"{city + 1}\n")  # TSPLIB uses 1-based indexing
             f.write("-1\nEOF\n")
