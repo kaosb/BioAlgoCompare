@@ -47,7 +47,7 @@ from .foa import FOA, Fossa
 from .fsa import FSA, Flamingo as FlamingoFSA
 from .gto import GTO, Gorilla
 from .gvoa import GVOA, Vulture
-from .hho import HHO, HarrisHawk
+from .hho import HHO, Hawk
 from .hoa import HOA, Hyena as HyenaHOA
 from .mrfo import MRFO, MantaRay
 from .opa import OPA, Orca
@@ -111,7 +111,7 @@ __all__ = [
     'HHO', 'HOA', 'MRFO', 'OPA', 'RRO', 'SHO', 'SMA', 'SMO', 'WOA',
     # Individual classes
     'Hummingbird', 'Protozoa', 'EnhancedGorilla', 'Earthworm', 'FlamingoFGO',
-    'Fossa', 'FlamingoFSA', 'Gorilla', 'Vulture', 'HarrisHawk', 'HyenaHOA',
+    'Fossa', 'FlamingoFSA', 'Gorilla', 'Vulture', 'Hawk', 'HyenaHOA',
     'MantaRay', 'Orca', 'Raven', 'HyenaSHO', 'SlimeMould', 'Starling', 'Whale',
     # Utilities
     'ALGORITHMS', 'get_algorithm',

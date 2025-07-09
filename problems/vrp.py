@@ -14,12 +14,12 @@ PENALTY_MISSING = PENALTY_FACTOR * 10  # Penalización por nodos faltantes (mayo
 class VRPProblem:
     """Clase para representar y evaluar problemas de VRP (Vehicle Routing Problem)."""
 
-    def __init__(self, instance_path: str) -> None:
+    def __init__(self, instance_path: str = None) -> None:
         """
-        Inicializa el problema VRP desde un archivo de instancia.
+        Inicializa el problema VRP.
 
         Args:
-            instance_path: Ruta al archivo de instancia VRP
+            instance_path: Ruta al archivo de instancia VRP (opcional)
         """
         self.instance_path: str = instance_path
         self.name: Optional[str] = None
@@ -35,8 +35,10 @@ class VRPProblem:
             PENALTY_FACTOR  # Factor de penalización para rutas no factibles
         )
 
-        self.load_instance()
-        self.compute_distance_matrix()
+        # Only load instance if path is provided
+        if self.instance_path:
+            self.load_instance()
+            self.compute_distance_matrix()
 
     def _parse_instance_metadata(self, lines):
         """Parse instance metadata from file lines."""
@@ -123,12 +125,23 @@ class VRPProblem:
         }
     
 
-    def load_instance(self) -> None:
+    def load_instance(self, instance_name: str = None) -> None:
         """
         Carga una instancia de VRP desde el archivo.
         
+        Args:
+            instance_name: Nombre de la instancia (e.g., 'P-n16-k8'). Si se proporciona,
+                          busca el archivo en el directorio data/
+        
         Versión refactorizada que reduce la complejidad de 16 a menos de 10.
         """
+        # If instance_name is provided, build the path
+        if instance_name:
+            self.instance_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "data", "vrp", f"{instance_name}.vrp"
+            )
+        
         # Read file
         with open(self.instance_path, "r") as f:
             content = f.read()
@@ -155,6 +168,9 @@ class VRPProblem:
         
         # Extract instance name
         self.name = metadata.get('name', os.path.basename(self.instance_path).split(".")[0])
+        
+        # Compute distance matrix after loading
+        self.compute_distance_matrix()
 
 
     def compute_distance_matrix(self) -> None:
