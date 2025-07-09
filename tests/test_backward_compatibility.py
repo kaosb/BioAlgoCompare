@@ -4,7 +4,7 @@ Test backward compatibility with existing code.
 
 import pytest
 import numpy as np
-from problems import VRPProblem, ContinuousAdapter
+from problems import VRPProblemV2 as VRPProblem, ContinuousAdapter
 from algorithms.woa_v2 import WOAV2
 import tempfile
 import os

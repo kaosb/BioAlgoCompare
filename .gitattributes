@@ -1,0 +1,23 @@
+# Mark generated files
+docs/api/* linguist-generated=true
+
+# Mark vendored files
+legacy/* linguist-vendored=true
+
+# Mark documentation files
+*.md linguist-documentation=true
+docs/* linguist-documentation=true
+
+# Ensure consistent line endings
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.pdf binary
+*.pickle binary
+*.pkl binary

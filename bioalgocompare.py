@@ -13,7 +13,20 @@ Interfaz de línea de comandos principal que integra todas las funcionalidades:
 import click
 import sys
 import os
+import re
 from pathlib import Path
+import glob
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+from scripts.core.run import main as run_main
+from scripts.benchmark import BenchmarkRunner
+from scripts.utilities.manage_datasets import DatasetManager, extract_data_from_solomon, convert_to_vrp_format
+from scripts.utilities.migrate_algorithm import AlgorithmMigrator
+from scripts.utilities.inventory import scan_repository, detect_data_usage, generate_inventory_report
+from scripts.algorithms_v2 import ALGORITHMS_V2
 
 # Añadir el directorio del proyecto al path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -95,8 +108,6 @@ def run(algorithm, instance, population, iterations, runs, seed,
     # Modo massive con checkpoint
     bioalgocompare run gto P-n16-k8.vrp --mode massive --checkpoint-interval 100
     """
-    from scripts.core.run import main as run_main
-    
     # Preparar argumentos para el script run
     args = [
         '--mode', mode,
@@ -155,14 +166,16 @@ def run(algorithm, instance, population, iterations, runs, seed,
 @cli.command()
 @click.option('--algorithms', '-a', required=True, 
               help='Algoritmos a ejecutar (separados por coma)')
-@click.option('--instances', '-i', required=True,
-              help='Instancias VRP (separadas por coma)')
+@click.option('--instances', '-i', default=None,
+              help='Instancias VRP (separadas por coma). Si no se especifica, se usarán todas las instancias Solomon de la serie especificada.')
 @click.option('--population', '-p', default=30, help='Tamaño de población')
 @click.option('--iterations', '-n', default=100, help='Número de iteraciones')
 @click.option('--runs', '-r', default=30, help='Número de ejecuciones por algoritmo')
 @click.option('--parallel/--no-parallel', default=True, help='Ejecución paralela')
+@click.option('--series', type=click.Choice(["101", "201", "all"]),
+              default="all", help="Serie de instancias Solomon a utilizar (101, 201, o all). Solo aplica si no se especifican instancias manualmente.")
 @click.option('--output-dir', '-o', default='results', help='Directorio de salida')
-def benchmark(algorithms, instances, population, iterations, runs, parallel, output_dir):
+def benchmark(algorithms, instances, population, iterations, runs, parallel, series, output_dir):
     """
     Ejecuta un benchmark completo con múltiples algoritmos e instancias.
     
@@ -174,21 +187,23 @@ def benchmark(algorithms, instances, population, iterations, runs, parallel, out
     
     \b
     # Benchmark con parámetros personalizados
-    bioalgocompare benchmark -a woa,sma,gto,mrfo -i P-n16-k8,P-n19-k2,P-n20-k2 \\
+    bioalgocompare benchmark -a woa,sma,gto,mrfo -i P-n16-k8,P-n19-k2,P-n20-k2 \
         -p 50 -n 200 -r 50
-    """
-    from scripts.benchmark import BenchmarkRunner
     
+    \b
+    # Benchmark de todas las instancias Solomon 101
+    bioalgocompare benchmark -a woa,sma --series 101
+    """
     # Parsear algoritmos e instancias
     algo_list = [a.strip() for a in algorithms.split(',')]
-    instance_list = [i.strip() for i in instances.split(',')]
+    instance_list = [i.strip() for i in instances.split(',')] if instances else []
     
     # Crear runner
     runner = BenchmarkRunner(result_base_dir=output_dir)
     
-    click.echo(f"🚀 Iniciando benchmark")
+    click.echo("🚀 Iniciando benchmark")
     click.echo(f"📊 Algoritmos: {', '.join(algo_list)}")
-    click.echo(f"📁 Instancias: {', '.join(instance_list)}")
+    click.echo(f"📁 Instancias: {', '.join(instance_list) if instance_list else series}")
     click.echo(f"🔢 Configuración: {population} individuos, {iterations} iteraciones, {runs} runs")
     
     # Ejecutar benchmark
@@ -199,10 +214,11 @@ def benchmark(algorithms, instances, population, iterations, runs, parallel, out
             runs=runs,
             iterations=iterations,
             population=population,
-            parallel=parallel
+            parallel=parallel,
+            series=series
         )
         
-        click.echo(f"\n✅ Benchmark completado")
+        click.echo("\n✅ Benchmark completado")
         click.echo(f"📁 Resultados guardados en: {result_dir}")
         
     except Exception as e:
@@ -210,88 +226,171 @@ def benchmark(algorithms, instances, population, iterations, runs, parallel, out
         sys.exit(1)
 
 
+def load_benchmark_results(results_dir):
+    """Carga los resultados del benchmark desde un directorio"""
+    summary_path = Path(results_dir) / "massive_benchmark_summary.csv"
+    
+    if not summary_path.exists():
+        click.echo(f"Error: No se encontró el archivo de resumen en {summary_path}", err=True)
+        return None
+    
+    try:
+        df = pd.read_csv(summary_path)
+        return df
+    except Exception as e:
+        click.echo(f"Error al cargar el archivo CSV: {e}", err=True)
+        return None
+
+def create_comparison_charts(df, output_dir="benchmark_comparisons"):
+    """Crea gráficos comparativos entre algoritmos y series de Solomon"""
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True, parents=True)
+    
+    click.echo(f"Generando gráficos comparativos en {output_dir}")
+    
+    # Extraer series (100 o 200) de las instancias
+    df["Series"] = df["Instance"].apply(lambda x: "100" if x.endswith("101") else "200")
+    df["Type"] = df["Instance"].apply(lambda x: x[0])  # C, R, RC
+    
+    # 1. Comparación de algoritmos por serie
+    plt.figure(figsize=(12, 8))
+    sns.boxplot(x="Algorithm", y="Best", hue="Series", data=df)
+    plt.title("Comparación de algoritmos por serie")
+    plt.xlabel("Algoritmo")
+    plt.ylabel("Mejor fitness (distancia)")
+    plt.xticks(rotation=45)
+    plt.legend(title="Series")
+    plt.tight_layout()
+    plt.savefig(output_path / "algoritmos_por_serie.png", dpi=300)
+    plt.close()
+    
+    # 2. Comparación de algoritmos por tipo de instancia
+    plt.figure(figsize=(12, 8))
+    sns.boxplot(x="Algorithm", y="Best", hue="Type", data=df)
+    plt.title("Comparación de algoritmos por tipo de instancia")
+    plt.xlabel("Algoritmo")
+    plt.ylabel("Mejor fitness (distancia)")
+    plt.xticks(rotation=45)
+    plt.legend(title="Tipo")
+    plt.tight_layout()
+    plt.savefig(output_path / "algoritmos_por_tipo.png", dpi=300)
+    plt.close()
+    
+    # 3. Tiempo de ejecución por algoritmo
+    plt.figure(figsize=(12, 8))
+    sns.boxplot(x="Algorithm", y="Time", data=df)
+    plt.title("Tiempo de ejecución por algoritmo")
+    plt.xlabel("Algoritmo")
+    plt.ylabel("Tiempo (segundos)")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(output_path / "tiempo_por_algoritmo.png", dpi=300)
+    plt.close()
+    
+    # 4. Variabilidad por algoritmo (desviación estándar)
+    plt.figure(figsize=(12, 8))
+    sns.boxplot(x="Algorithm", y="Std", data=df)
+    plt.title("Variabilidad por algoritmo")
+    plt.xlabel("Algoritmo")
+    plt.ylabel("Desviación estándar")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(output_path / "variabilidad_por_algoritmo.png", dpi=300)
+    plt.close()
+    
+    # 5. Si hay datos de tiempo promedio por iteración
+    if "avg_iter_time" in df.columns:
+        plt.figure(figsize=(12, 8))
+        sns.boxplot(x="Algorithm", y="avg_iter_time", data=df)
+        plt.title("Tiempo promedio por iteración")
+        plt.xlabel("Algoritmo")
+        plt.ylabel("Tiempo por iteración (segundos)")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig(output_path / "tiempo_por_iteracion.png", dpi=300)
+        plt.close()
+    
+    # 6. Ranking de algoritmos por instancia
+    # Crear un ranking de algoritmos para cada instancia
+    rankings = []
+    for instance in df["Instance"].unique():
+        instance_df = df[df["Instance"] == instance].copy()
+        instance_df["Rank"] = instance_df["Best"].rank()
+        rankings.append(instance_df)
+    
+    rankings_df = pd.concat(rankings)
+    
+    plt.figure(figsize=(12, 8))
+    sns.boxplot(x="Algorithm", y="Rank", data=rankings_df)
+    plt.title("Ranking de algoritmos por instancia")
+    plt.xlabel("Algoritmo")
+    plt.ylabel("Ranking (1 = mejor)")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(output_path / "ranking_algoritmos.png", dpi=300)
+    plt.close()
+    
+    # 7. Tabla resumen
+    summary_table = df.groupby("Algorithm")["Best", "Mean", "Std", "Time"].mean().reset_index()
+    summary_table = summary_table.sort_values("Best")
+    
+    # Guardar tabla como CSV
+    summary_table.to_csv(output_path / "resumen_algoritmos.csv", index=False)
+    
+    # También crear una versión visual de la tabla
+    fig, ax = plt.figure(figsize=(10, len(summary_table)*0.5)), plt.gca()
+    ax.axis('tight')
+    ax.axis('off')
+    table = ax.table(cellText=summary_table.round(2).values, 
+                    colLabels=summary_table.columns, 
+                    loc='center')
+    plt.title("Resumen de rendimiento por algoritmo")
+    plt.tight_layout()
+    plt.savefig(output_path / "tabla_resumen.png", dpi=300)
+    plt.close()
+    
+    click.echo(f"Análisis completado. Gráficos guardados en {output_dir}")
+    return output_path
+
 @cli.command()
-@click.argument('results_file', type=click.Path(exists=True))
-@click.option('--format', type=click.Choice(['summary', 'detailed', 'statistical']), 
-              default='summary', help='Formato de análisis')
-@click.option('--compare/--no-compare', default=False, 
-              help='Comparar múltiples algoritmos')
-@click.option('--plot/--no-plot', default=True, help='Generar gráficos')
-@click.option('--output', '-o', help='Archivo de salida para el reporte')
-def analyze(results_file, format, compare, plot, output):
+@click.argument('results_dir', type=click.Path(exists=True))
+@click.option('--output-dir', '-o', default="benchmark_comparisons", help='Directorio para guardar análisis')
+def analyze(results_dir, output_dir):
     """
-    Analiza resultados de experimentos.
+    Analiza resultados de benchmarks en instancias Solomon.
     
     \b
-    RESULTS_FILE: Archivo JSON con resultados de experimento
+    RESULTS_DIR: Directorio con resultados del benchmark (ej: results/massive_benchmark_YYYYMMDD_HHMMSS)
     
     Ejemplos:
     
     \b
     # Análisis básico
-    bioalgocompare analyze results/experiment_20240101.json
+    bioalgocompare analyze results/massive_benchmark_20240101_120000
     
     \b
-    # Análisis detallado con comparación
-    bioalgocompare analyze results/benchmark_20240101.json --format detailed --compare
-    
-    \b
-    # Análisis estadístico sin gráficos
-    bioalgocompare analyze results/massive_run.json --format statistical --no-plot
+    # Análisis y guardar en directorio específico
+    bioalgocompare analyze results/massive_benchmark_20240101_120000 -o my_analysis_plots
     """
-    from scripts.core.analyze import main as analyze_main
-    import json
+    click.echo(f"📊 Analizando resultados en: {results_dir}")
     
-    click.echo(f"📊 Analizando: {results_file}")
+    # Cargar resultados
+    df = load_benchmark_results(results_dir)
+    if df is None:
+        return
     
-    # Cargar datos
-    with open(results_file, 'r') as f:
-        data = json.load(f)
+    click.echo(f"📈 Cargados datos de {len(df)} filas con {len(df['Algorithm'].unique())} algoritmos")
     
-    # Determinar tipo de análisis
-    if 'results' in data:
-        # Es un archivo de resultados múltiples
-        results = data['results']
-        stats = data.get('stats', {})
-    else:
-        # Es un archivo simple
-        results = [data]
-        stats = {}
+    # Crear gráficos
+    output_path = create_comparison_charts(df, output_dir)
     
-    click.echo(f"📈 Encontrados {len(results)} resultados")
+    # Mostrar un resumen
+    click.echo("\nResumen de resultados:")
+    algo_summary = df.groupby("Algorithm")["Best"].agg(["min", "mean", "std"]).reset_index()
+    algo_summary.columns = ["Algoritmo", "Mejor", "Promedio", "Desv. Std."]
+    click.echo(algo_summary.to_string(index=False))
     
-    # Realizar análisis según formato
-    if format == 'summary':
-        # Mostrar resumen básico
-        if stats:
-            click.echo("\n📊 Estadísticas Generales:")
-            click.echo(f"  Algoritmo: {stats.get('algorithm', 'N/A')}")
-            click.echo(f"  Instancia: {stats.get('instance', 'N/A')}")
-            click.echo(f"  Mejor fitness: {stats.get('best_fitness', 'N/A'):.4f}")
-            click.echo(f"  Media ± Std: {stats.get('mean_fitness', 'N/A'):.4f} ± {stats.get('std_fitness', 'N/A'):.4f}")
-            click.echo(f"  Mediana: {stats.get('median_fitness', 'N/A'):.4f}")
-        
-    elif format == 'detailed':
-        # Análisis detallado
-        click.echo("\n📊 Análisis Detallado:")
-        # TODO: Implementar análisis detallado
-        click.echo("  (Función en desarrollo)")
-        
-    elif format == 'statistical':
-        # Análisis estadístico completo
-        click.echo("\n📊 Análisis Estadístico:")
-        # TODO: Implementar análisis estadístico
-        click.echo("  (Función en desarrollo)")
-    
-    if plot:
-        click.echo("\n📈 Generando gráficos...")
-        # TODO: Generar gráficos
-        click.echo("  (Función en desarrollo)")
-    
-    if output:
-        click.echo(f"\n💾 Guardando reporte en: {output}")
-        # TODO: Guardar reporte
-    
+    click.echo(f"\nAnálisis completo disponible en: {output_path}")
     click.echo("\n✅ Análisis completado")
 
 
@@ -299,6 +398,8 @@ def analyze(results_file, format, compare, plot, output):
 def datasets():
     """Gestiona los datasets VRP."""
     pass
+
+
 
 
 @datasets.command()
@@ -309,42 +410,9 @@ def check():
     Ejemplo:
     bioalgocompare datasets check
     """
-    from scripts.utilities.manage_datasets import check_datasets_availability
-    
-    click.echo("🔍 Verificando datasets...")
-    
-    # Directorio de datos
-    data_dir = Path("data/vrp")
-    
-    if not data_dir.exists():
-        click.echo(f"❌ No existe el directorio: {data_dir}", err=True)
-        return
-    
-    # Contar archivos VRP
-    vrp_files = list(data_dir.glob("**/*.vrp"))
-    
-    click.echo(f"\n📁 Directorio de datos: {data_dir}")
-    click.echo(f"📊 Archivos VRP encontrados: {len(vrp_files)}")
-    
-    # Listar algunos archivos
-    if vrp_files:
-        click.echo("\n📋 Primeros 10 archivos:")
-        for i, file in enumerate(vrp_files[:10]):
-            click.echo(f"  {i+1}. {file.name}")
-        
-        if len(vrp_files) > 10:
-            click.echo(f"  ... y {len(vrp_files) - 10} más")
-    
-    # Verificar subdirectorios comunes
-    subdirs = ['Solomon', 'Augerat', 'Christofides']
-    click.echo("\n📂 Subdirectorios:")
-    for subdir in subdirs:
-        path = data_dir / subdir
-        if path.exists():
-            count = len(list(path.glob("*.vrp")))
-            click.echo(f"  ✅ {subdir}: {count} archivos")
-        else:
-            click.echo(f"  ❌ {subdir}: no encontrado")
+    manager = DatasetManager()
+    manager.check_datasets()
+    manager.generate_report()
 
 
 @datasets.command()
@@ -356,9 +424,63 @@ def download():
     Ejemplo:
     bioalgocompare datasets download
     """
-    click.echo("📥 Descarga de datasets")
-    click.echo("⚠️  Esta función está en desarrollo")
-    # TODO: Implementar descarga de datasets
+    manager = DatasetManager()
+    manager.download_missing_datasets()
+
+
+@datasets.command()
+@click.argument('files', nargs=-1, type=click.Path(exists=True))
+@click.option('--output-dir', '-o', default=None, help='Directorio de salida (por defecto, sobrescribe los originales)')
+def convert(files, output_dir):
+    """
+    Convierte archivos Solomon 101 al formato requerido por VRPProblem.
+    
+    \b
+    FILES: Archivos o patrones a convertir (ej: data/vrp/Solomon/*.txt)
+    
+    Ejemplos:
+    
+    \b
+    # Convertir un solo archivo
+    bioalgocompare datasets convert data/vrp/Solomon/C101.txt
+    
+    \b
+    # Convertir múltiples archivos usando un patrón
+    bioalgocompare datasets convert "data/vrp/Solomon/*.txt" -o data/vrp/converted
+    """
+    all_files = []
+    for pattern in files:
+        matched = glob.glob(pattern)
+        if matched:
+            all_files.extend(matched)
+        else:
+            click.echo(f"Advertencia: No se encontraron archivos para '{pattern}'", err=True)
+    
+    if not all_files:
+        click.echo("Error: No se encontraron archivos para procesar", err=True)
+        sys.exit(1)
+    
+    for file_path in all_files:
+        try:
+            click.echo(f"Procesando: {file_path}")
+            data = extract_data_from_solomon(file_path)
+            
+            # Determinar ruta de salida
+            if output_dir:
+                output_dir_path = Path(output_dir)
+                output_dir_path.mkdir(exist_ok=True, parents=True)
+                output_path = output_dir_path / Path(file_path).name
+            else:
+                output_path = Path(file_path)
+            
+            # Convertir y guardar
+            convert_to_vrp_format(data, output_path)
+            click.echo(f"  Convertido exitosamente: {output_path}")
+        
+        except Exception as e:
+            click.echo(f"  Error al procesar {file_path}: {str(e)}", err=True)
+    
+    click.echo("Conversión completada.")
 
 
 @cli.group()
@@ -367,11 +489,15 @@ def migrate():
     pass
 
 
+
+
 @migrate.command()
 @click.argument('algorithm')
 @click.option('--output', '-o', help='Archivo de salida')
 @click.option('--force', is_flag=True, help='Sobrescribir si existe')
-def algorithm(algorithm, output, force):
+@click.option('--list-algos', is_flag=True, help='Listar algoritmos disponibles para migrar')
+@click.option('--all', is_flag=True, help='Migrar todos los algoritmos pendientes')
+def algorithm(algorithm, output, force, list_algos, all):
     """
     Migra un algoritmo de v1 a v2.
     
@@ -381,22 +507,54 @@ def algorithm(algorithm, output, force):
     Ejemplo:
     bioalgocompare migrate algorithm my_algorithm --output algorithms/my_algorithm_v2.py
     """
-    from scripts.utilities.migrate_algorithm import main as migrate_main
+    migrated = ['sho', 'hho', 'foa'] # This list should ideally be dynamic or from a config
     
-    # Si no se especifica output, usar nombre por defecto
-    if not output:
-        output = f"algorithms/{algorithm}_v2.py"
+    # Buscar todos los algoritmos
+    algo_dir = Path('algorithms')
+    all_algos = []
     
-    # Verificar si ya existe
-    if Path(output).exists() and not force:
-        click.echo(f"❌ El archivo {output} ya existe. Usa --force para sobrescribir.", err=True)
+    for file in algo_dir.glob('*.py'):
+        if (not file.name.startswith('_') and 
+            not file.name.endswith('_v2.py') and
+            file.name not in ['base.py', 'base_v2.py', 'factories.py', '__init__.py']):
+            algo_name = file.stem
+            if algo_name not in migrated:
+                all_algos.append(algo_name)
+    
+    all_algos.sort()
+    
+    if list_algos:
+        click.echo("\n📋 Algoritmos disponibles para migrar:")
+        for algo in all_algos:
+            click.echo(f"  - {algo}")
+        click.echo(f"\n✅ Ya migrados: {', '.join(migrated)}")
         return
     
-    click.echo(f"🔄 Migrando {algorithm} a v2...")
-    click.echo(f"📁 Salida: {output}")
+    if all:
+        click.echo(f"\n🚀 Migrando {len(all_algos)} algoritmos...")
+        success = 0
+        for algo in all_algos:
+            migrator = AlgorithmMigrator(algo)
+            if migrator.migrate():
+                success += 1
+            click.echo("")
+        
+        click.echo(f"\n✨ Migración completa: {success}/{len(all_algos)} exitosos")
+        return
     
-    # TODO: Ejecutar migración
-    click.echo("⚠️  Esta función está en desarrollo")
+    if not algorithm:
+        click.echo("❌ Debe especificar un algoritmo o usar --list-algos o --all para ver opciones")
+        return
+    
+    if algorithm in migrated:
+        click.echo(f"ℹ️  {algorithm} ya está migrado")
+        return
+    
+    migrator = AlgorithmMigrator(algorithm)
+    if migrator.migrate():
+        click.echo("\n✨ Migración completada. Revisa los TODOs en los archivos generados.")
+    else:
+        click.echo("\n❌ Error en la migración")
 
 
 @cli.command()
@@ -407,8 +565,6 @@ def info():
     Ejemplo:
     bioalgocompare info
     """
-    from scripts.algorithms_v2 import ALGORITHMS_V2
-    
     click.echo("🧬 BioAlgoCompare v2.0")
     click.echo("=" * 50)
     click.echo("\n📚 Framework para algoritmos bio-inspirados en VRP")
@@ -454,9 +610,15 @@ def info():
     click.echo("  bioalgocompare COMANDO --help")
 
 
+
+
+
+
+
+
 @cli.command()
 @click.option('--detailed', is_flag=True, help='Inventario detallado')
-def inventory():
+def inventory(detailed):
     """
     Genera inventario del repositorio.
     
@@ -470,15 +632,25 @@ def inventory():
     # Inventario detallado
     bioalgocompare inventory --detailed
     """
-    from scripts.utilities.inventory import main as inventory_main
-    
-    click.echo("📋 Generando inventario del repositorio...")
-    
-    # TODO: Ejecutar inventario
-    click.echo("⚠️  Esta función está en desarrollo")
-    
-    if detailed:
-        click.echo("  (Modo detallado activado)")
+    repo_root = os.path.dirname(os.path.abspath(__file__))
+    click.echo(f"📋 Generando inventario del repositorio en: {repo_root}")
+
+    files_info, imports_map, module_list = scan_repository(repo_root)
+    data_usages = detect_data_usage(files_info)
+
+    # Generar reporte en Markdown
+    report = generate_inventory_report(
+        files_info, imports_map, module_list, data_usages
+    )
+
+    # Guardar reporte
+    report_path = os.path.join(repo_root, "docs", "technical", "inventory_report.md")
+    Path(report_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write(report)
+
+    click.echo(f"Reporte de inventario generado en: {report_path}")
+    click.echo("\n✅ Inventario completado")
 
 
 @cli.command()

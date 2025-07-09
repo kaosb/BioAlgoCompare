@@ -6,7 +6,7 @@ import os
 import pandas as pd
 import numpy as np
 import pytest
-from utils.advanced_statistical_analysis import run_all as run_stats
+from utils.statistics import run_all as run_stats
 
 def test_statistical_analysis_smoke(tmp_path):
     """
@@ -95,7 +95,7 @@ def test_commandline_integration():
     # Since the @click.command decorator transforms the function signature,
     # we need to check the existence of the command in the CLI
 
-    from scripts.analyze import cli
+    from scripts.core.analyze import cli
 
     # Check that the "stats" command exists in the CLI
     commands = [cmd.name for cmd in cli.commands.values()]

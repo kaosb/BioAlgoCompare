@@ -1,0 +1,11 @@
+[1] Anonymous, "BioAlgoCompare: A Comprehensive Platform for Rigorous Statistical Evaluation of Bio-Inspired Algorithms", in *CISTI 2025*, 2025.
+
+[2] W. Zhao, L. Wang, S. Mirjalili, "Artificial Hummingbird Algorithm: A New Bio-Inspired Optimizer with Its Engineering Applications", *Computer Methods in Applied Mechanics and Engineering*, vol. 388, pp. 114194, 2022, doi: 10.1016/j.cma.2021.114194.
+
+[3] B. Abdollahzadeh, F. Soleimanian Gharehchopogh, N. Khodadadi, S. Mirjalili, "Enhanced Gorilla Troops Optimizer for Global Optimization and Feature Selection", *Knowledge-Based Systems*, vol. 284, pp. 111218, 2024, doi: 10.1016/j.knosys.2023.111218.
+
+[4] M. Jain, S. Maurya, A. Rani, V. Singh, "Fossa Optimization Algorithm: A New Bio-Inspired Metaheuristic Algorithm for Solving Engineering Optimization Problems", *Expert Systems with Applications*, vol. 240, pp. 122408, 2024, doi: 10.1016/j.eswa.2023.122408.
+
+[5] S. Mirjalili, A. Lewis, "The whale optimization algorithm", *Advances in Engineering Software*, vol. 95, pp. 51-67, 2016, doi: 10.1016/j.advengsoft.2016.01.008.
+
+[6] A. Heidari, S. Mirjalili, H. Faris, I. Aljarah, M. Mafarja, H. Chen, "Harris Hawks Optimization: Algorithm and Applications", *Future Generation Computer Systems*, vol. 97, pp. 849-872, 2019, doi: 10.1016/j.future.2019.02.028.

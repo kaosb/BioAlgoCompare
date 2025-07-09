@@ -6,8 +6,8 @@ Test del algoritmo HOA (Hyena Optimization Algorithm).
 import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
-from algorithms.hoa import Hyena, HOA
-from algorithms.base import MetaheuristicAlgorithm
+from algorithms.hoa_v2 import HOAV2, HOAIndividual
+from algorithms.base_v2 import MetaheuristicAlgorithm
 
 
 class MockProblem:
@@ -19,6 +19,14 @@ class MockProblem:
     
     def get_dimension(self):
         return self.dimension
+    
+    @property
+    def lower_bounds(self):
+        return np.zeros(self.dimension)
+    
+    @property
+    def upper_bounds(self):
+        return np.ones(self.dimension)
     
     def evaluate(self, solution):
         """Función de evaluación simple para test."""
@@ -32,7 +40,7 @@ def test_hyena_initialization():
     np.random.seed(42)  # Para reproducibilidad
     
     problem = MockProblem(dimension=5)
-    hyena = Hyena(problem)
+    hyena = HOAIndividual(problem)
     
     # Verificar inicialización
     assert hyena.problem == problem
@@ -47,7 +55,7 @@ def test_hyena_initialization():
 def test_hyena_fitness():
     """Test del cálculo de fitness del Hyena."""
     problem = MockProblem(dimension=3)
-    hyena = Hyena(problem)
+    hyena = HOAIndividual(problem)
     
     # Establecer una posición conocida
     hyena.position = np.array([0.1, 0.2, 0.3])
@@ -83,7 +91,7 @@ def test_hyena_comparison():
 def test_hyena_is_feasible():
     """Test para verificar si la solución es factible."""
     problem = MockProblem()
-    hyena = Hyena(problem)
+    hyena = HOAIndividual(problem)
     
     # En el contexto de VRP, todas las soluciones son factibles
     assert hyena.is_feasible()
@@ -93,7 +101,7 @@ def test_hyena_move_basic():
     """Test básico de movimiento de la Hyena."""
     problem = MockProblem(dimension=3)
     
-    hyena = Hyena(problem)
+    hyena = HOAIndividual(problem)
     hyena.position = np.array([0.5, 0.5, 0.5])
     hyena._fitness = 1.5
     

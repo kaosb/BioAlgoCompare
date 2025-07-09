@@ -14,18 +14,17 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from algorithms.base_v2 import MetaheuristicAlgorithm, AbstractProblem
-from algorithms.sho_v2 import SHO_V2, VRPProblemAdapter
-from problems.vrp import VRPProblem
+from algorithms.sho_v2 import SHOV2, VRPProblemAdapter
+from problems.vrp_v2 import VRPProblemV2
 from utils.random_state import (
     RandomStateManager, get_global_random_manager, 
     set_global_seed, generate_algorithm_seeds
 )
 
 # Import existing algorithms for testing
-from algorithms.sho import SHO
-from algorithms.foa import FOA
-from algorithms.egto import EGTO
-from algorithms.woa import WOA
+from algorithms.foa_v2 import FOAV2
+from algorithms.egto_v2 import EGTOV2
+from algorithms.woa_v2 import WOAV2
 
 
 class TestRandomStateManager:
@@ -185,12 +184,12 @@ class TestAlgorithmReproducibility:
             assert comparison['identical_convergence'], f"{algo_class.__name__} convergence not reproducible"
     
     def test_sho_v2_reproducibility(self, simple_vrp_problem):
-        """Test improved SHO_V2 algorithm reproducibility."""
+        """Test improved SHOV2 algorithm reproducibility."""
         problem_adapter = VRPProblemAdapter(simple_vrp_problem)
         
         results = []
         for _ in range(3):  # Run 3 times to be extra sure
-            algo = SHO_V2(
+            algo = SHOV2(
                 problem_adapter,
                 population_size=15,
                 max_iterations=25,

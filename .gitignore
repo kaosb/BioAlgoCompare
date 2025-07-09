@@ -48,6 +48,17 @@ logs/*.log
 *.log
 benchmark.log
 massive_benchmark.log
+analyze.log
+
+# Backup and temporary files
+*.backup_*
+*.pre_migration_*
+*.pyc.backup
+*.tmp
+*.temp
+*~
+.*.swp
+.*.swo
 analyze_massive.log
 analyze.log
 
@@ -126,3 +137,14 @@ texput.*
 analyze.log
 benchmark.log
 massive_benchmark.log
+
+# Legacy code (for reference only)
+/legacy/
+# Note: We track legacy files in git but exclude them from active development
+
+# Temporary and experimental directories
+/temp/
+/experimental/
+
+# Results and exports directories 
+/exports/

@@ -1,0 +1,176 @@
+version: '3.8'
+
+services:
+  # Development environment
+  bioalgo-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: bioalgocompare:dev
+    container_name: bioalgo-dev
+    volumes:
+      # Mount code for live editing
+      - .:/workspace
+      # Persist home directory
+      - dev-home:/home/developer
+      # Persist pip cache
+      - pip-cache:/home/developer/.cache/pip
+      # Persist jupyter config
+      - jupyter-data:/home/developer/.jupyter
+    environment:
+      # Python settings
+      - PYTHONPATH=/workspace
+      - PYTHONUNBUFFERED=1
+      # Jupyter settings
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=bioalgo2024
+      # Development settings
+      - BIOALGO_ENV=development
+      - BIOALGO_LOG_LEVEL=DEBUG
+    ports:
+      # Jupyter
+      - "8888:8888"
+      # Additional services
+      - "8889:8889"
+    working_dir: /workspace
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    networks:
+      - bioalgo-network
+
+  # Jupyter notebook server
+  bioalgo-jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: bioalgocompare:dev
+    container_name: bioalgo-jupyter
+    volumes:
+      - .:/workspace
+      - jupyter-data:/home/developer/.jupyter
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=bioalgo2024
+    ports:
+      - "8888:8888"
+    working_dir: /workspace
+    command: >
+      jupyter lab 
+      --ip=0.0.0.0 
+      --port=8888 
+      --no-browser 
+      --allow-root 
+      --NotebookApp.token='bioalgo2024'
+    networks:
+      - bioalgo-network
+
+  # Testing environment
+  bioalgo-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: testing
+    image: bioalgocompare:test
+    container_name: bioalgo-test
+    volumes:
+      - .:/workspace
+      - test-results:/workspace/test-results
+    environment:
+      - PYTHONPATH=/workspace
+      - PYTEST_CACHE_DIR=/workspace/.pytest_cache
+    working_dir: /workspace
+    command: >
+      pytest -v 
+      --cov=algorithms 
+      --cov=problems 
+      --cov=utils 
+      --cov-report=html:/workspace/test-results/coverage
+      --cov-report=xml:/workspace/test-results/coverage.xml
+      --junit-xml=/workspace/test-results/junit.xml
+    networks:
+      - bioalgo-network
+
+  # Quality checks environment
+  bioalgo-quality:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: bioalgocompare:dev
+    container_name: bioalgo-quality
+    volumes:
+      - .:/workspace
+      - quality-reports:/workspace/quality-reports
+    environment:
+      - PYTHONPATH=/workspace
+    working_dir: /workspace
+    command: python scripts/quality/quality_gates.py --report /workspace/quality-reports/report.json
+    networks:
+      - bioalgo-network
+
+  # Documentation server
+  bioalgo-docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: bioalgocompare:dev
+    container_name: bioalgo-docs
+    volumes:
+      - .:/workspace
+      - docs-build:/workspace/docs/_build
+    ports:
+      - "8080:8080"
+    working_dir: /workspace/docs
+    command: >
+      bash -c "
+      pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints &&
+      make html &&
+      python -m http.server 8080 --directory _build/html
+      "
+    networks:
+      - bioalgo-network
+
+  # Database for results (optional)
+  bioalgo-db:
+    image: postgres:15-alpine
+    container_name: bioalgo-db
+    environment:
+      - POSTGRES_USER=bioalgo
+      - POSTGRES_PASSWORD=bioalgo2024
+      - POSTGRES_DB=bioalgo_results
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - bioalgo-network
+
+  # Redis for caching (optional)
+  bioalgo-redis:
+    image: redis:7-alpine
+    container_name: bioalgo-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - bioalgo-network
+
+volumes:
+  dev-home:
+  pip-cache:
+  jupyter-data:
+  test-results:
+  quality-reports:
+  docs-build:
+  postgres-data:
+  redis-data:
+
+networks:
+  bioalgo-network:
+    driver: bridge

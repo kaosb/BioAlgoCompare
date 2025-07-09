@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from problems.vrp import VRPProblem, PENALTY_CAP, PENALTY_MISSING
+from problems.vrp_v2 import VRPProblemV2, PENALTY_CAP, PENALTY_MISSING
 import os
 
 # Ruta al directorio de datos de prueba

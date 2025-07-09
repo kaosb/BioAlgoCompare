@@ -6,7 +6,7 @@ import pytest
 import os
 import tempfile
 from algorithms.validators import ValidationError
-from problems.vrp import VRPProblem
+from problems.vrp_v2 import VRPProblemV2
 
 # Crear problema de prueba
 @pytest.fixture

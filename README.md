@@ -72,43 +72,79 @@ pip install -e .
 
 ## 🚀 Uso
 
-La plataforma ofrece un comando unificado `bioalgo` con diferentes subcomandos para distintas tareas:
+BioAlgoCompare v2.0 ofrece una CLI unificada y reorganizada con comandos especializados:
 
-### Ejecución Básica
+### Interfaz de Línea de Comandos Unificada
 
 ```bash
-# Usando el script principal
-python scripts/analyze.py run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+# Comando principal
+python scripts/cli/main.py --help
 
-# O usando el comando instalado
-bioalgo run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+# O usando el comando instalado (si está disponible)
+bioalgo --help
 ```
 
-### Benchmarking y Análisis
+### Ejecución de Algoritmos
 
 ```bash
-# Ejecutar un benchmark con múltiples algoritmos e instancias
-bioalgo benchmark --run-benchmark --instances "E-n22-k4,P-n16-k8" --algorithms "hoa,foa,egto" --parallel
+# Ejecución básica
+python scripts/cli/main.py run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+
+# Múltiples ejecuciones con metadatos
+python scripts/cli/main.py run --algorithm hoa --instance A-n32-k5 --runs 30 --metadata --monitor
+
+# Guardar resultados en formato específico
+python scripts/cli/main.py run --algorithm hoa --instance A-n32-k5 --save --format json
+```
+
+### Benchmarking Comparativo
+
+```bash
+# Benchmark básico con múltiples algoritmos
+python scripts/cli/main.py benchmark run --algorithms hoa,foa,egto --instances E-n22-k4,P-n16-k8 --runs 30
+
+# Usando conjuntos predefinidos de instancias
+python scripts/cli/main.py benchmark run --algorithms hoa,foa --instances-set small --runs 30 --parallel
 
 # Analizar resultados existentes
-bioalgo benchmark --input results/benchmark_20250508_123456.json
+python scripts/cli/main.py benchmark analyze --input results/benchmark_results.json
+
+# Comparar diferentes benchmarks
+python scripts/cli/main.py benchmark compare --inputs results/bench1.json,results/bench2.json
 ```
 
 ### Benchmarking Masivo (1000+ ejecuciones)
 
 ```bash
-# Ejecutar un benchmark masivo con 1000 ejecuciones por algoritmo
-bioalgo massive --runs 1000 --algorithm hoa --algorithm egto --instances E-n22-k4 --parallel
+# Benchmark masivo con checkpointing automático
+python scripts/cli/main.py massive --algorithms hoa,egto --instances E-n22-k4 --runs 1000 --parallel
 
-# Con checkpoint y recuperación automática
-bioalgo massive --runs 1000 --algorithm all --instances E-n22-k4 --parallel --resume
+# Reanudar desde checkpoint
+python scripts/cli/main.py massive --algorithms hoa,egto --instances E-n22-k4 --runs 1000 --resume
+
+# Con monitoreo de recursos
+python scripts/cli/main.py massive --algorithms hoa --instances E-n22-k4 --runs 1000 --monitor --metadata
 ```
 
-### Análisis de archivos CSV
+### Análisis Estadístico
 
 ```bash
-# Analizar un archivo CSV de resultados
-bioalgo analyze-csv results/benchmark_results.csv
+# Análisis estadístico completo
+python scripts/cli/main.py analyze --input results/ --tests friedman,kruskal --effect-size
+
+# Generar reportes en diferentes formatos
+python scripts/cli/main.py analyze --input results/ --format html --plot
+python scripts/cli/main.py analyze --input results/ --format json --output analysis/
+```
+
+### Dashboard en Tiempo Real
+
+```bash
+# Lanzar dashboard de monitoreo
+python scripts/cli/main.py dashboard --port 8050 --host 0.0.0.0
+
+# Con modo debug
+python scripts/cli/main.py dashboard --debug
 ```
 
 ## 📋 Opciones de Línea de Comandos
@@ -186,6 +222,11 @@ BioAlgoCompare/
 │   └── sma.py                 # Slime Mould Algorithm
 │   └── gto.py                 # Gorilla Troops Optimization
 │   └── ewa.py                 # Earthworm Algorithm
+│   └── mixins/                # Sistema de mixins reutilizables
+│       ├── vrp_operators.py   # Operadores VRP (crossover, mutation, local search)
+│       ├── selection_operators.py # Estrategias de selección
+│       ├── initialization_operators.py # Métodos de inicialización
+│       └── convergence_operators.py # Control de convergencia
 ├── data/
 │   └── vrp/                   # Instancias VRP (formato CVRPLIB)
 ├── docs/                      # Documentación adicional
@@ -208,6 +249,8 @@ BioAlgoCompare/
 │   ├── vrp_operators.py       # Operadores específicos para VRP
 │   ├── operators.py           # Operadores genéticos y utilidades
 │   ├── visualization.py       # Visualización básica
+│   ├── result_schema.py       # Esquema estandarizado de resultados
+│   ├── results_database.py    # Base de datos SQLite para resultados
 │   └── improved/              # Módulos mejorados
 │       ├── enhanced_benchmarking.py # Benchmarking con checkpoints
 │       ├── advanced_visualization.py # Visualizaciones avanzadas 
@@ -243,6 +286,10 @@ Los resultados se almacenan en el directorio `results/`. En esta versión del re
 - **Interfaz Común**: Todos los algoritmos implementan una interfaz común para facilitar la comparación.
 - **Paralelización**: Ejecución paralela eficiente con gestión de procesos.
 - **Reproducibilidad**: Control de semillas aleatorias para garantizar resultados reproducibles.
+- **Registro de Experimentos**: Sistema completo de tracking para trazabilidad científica (ver [docs/EXPERIMENT_TRACKING.md](docs/EXPERIMENT_TRACKING.md)).
+- **Esquema Estandarizado de Resultados**: Formato unificado y profesional para todos los resultados experimentales con exportación a múltiples formatos (JSON, CSV, LaTeX, HTML) (ver [docs/RESULT_SCHEMA.md](docs/RESULT_SCHEMA.md)).
+- **Base de Datos SQLite**: Almacenamiento persistente de resultados con búsquedas eficientes, análisis estadístico integrado y exportación masiva.
+- **Sistema de Mixins**: Arquitectura modular de operadores reutilizables para facilitar el desarrollo de nuevos algoritmos (ver [docs/ALGORITHM_MIXINS.md](docs/ALGORITHM_MIXINS.md)).
 - **Checkpoint y Recuperación**: Capacidad de interrumpir y reanudar benchmarks masivos.
 - **Visualización Avanzada**: Herramientas científicas para visualizar distribuciones e intervalos de confianza.
 - **CLI Profesional**: Interfaces de línea de comandos robustas para todos los componentes configurables mediante `click`.
@@ -285,7 +332,28 @@ Los resultados se almacenan en el directorio `results/`. En esta versión del re
 - Opciones flexibles para diferentes casos de uso
 - Instalable como comando de consola `bioalgo`
 
-### 6. Compilación del Paper Científico
+### 6. Sistema de Mixins para Algoritmos (`algorithms/mixins/`)
+
+El sistema de mixins proporciona componentes reutilizables para crear algoritmos más eficientes:
+
+- **VRP Operators**: Crossover (OX, PMX), mutación (swap, insertion, inversion, scramble), búsqueda local (2-opt, Or-opt)
+- **Selection Operators**: Tournament, roulette wheel, rank-based, elitism
+- **Initialization Operators**: Random, nearest neighbor, Clarke-Wright savings, sweep algorithm
+- **Convergence Operators**: Tracking, adaptive parameters, stagnation detection, restart strategies
+
+Permite crear algoritmos mejorados combinando múltiples mixins:
+
+```python
+class EnhancedAlgorithm(
+    VRPCrossoverMixin,
+    TournamentSelectionMixin,
+    ConvergenceTrackingMixin,
+    BaseAlgorithm
+):
+    # Hereda todas las funcionalidades de los mixins
+```
+
+### 7. Compilación del Paper Científico
 
 Este proyecto incluye dos versiones del paper científico para la conferencia CISTI 2025:
 

@@ -53,6 +53,8 @@ setup(
     entry_points={
         "console_scripts": [
             "bioalgocompare=bioalgocompare:cli",
+            "bioalgo=scripts.cli.analyze:main",
+            "bioalgo-plugins=scripts.tools.manage_plugins:main",
         ],
     },
     include_package_data=True,

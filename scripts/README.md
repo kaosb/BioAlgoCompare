@@ -1,87 +1,89 @@
-# Scripts de BioAlgoCompare
+# Scripts Directory
 
-Estructura reorganizada de scripts para mayor claridad y mantenibilidad.
+This directory contains all executable scripts and CLI tools for the BioAlgoCompare project.
 
-## Estructura
+## Directory Structure
 
 ```
 scripts/
-├── core/                  # Scripts principales
-│   ├── run.py            # Runner unificado para algoritmos
-│   └── analyze.py        # Análisis unificado de resultados
-├── utilities/            # Utilidades auxiliares
-│   ├── manage_datasets.py    # Gestión de datasets
-│   ├── inventory.py          # Análisis del repositorio
-│   └── migrate_algorithm.py  # Migración de algoritmos v1 a v2
-├── deprecated/           # Scripts obsoletos (referencia histórica)
-│   └── README.md
-└── benchmark.py          # Script principal de benchmarking
+├── cli/                 # Main CLI commands
+│   ├── __init__.py
+│   ├── analyze.py      # Unified CLI interface (main entry point)
+│   ├── run.py          # Single algorithm run command
+│   ├── benchmark.py    # Benchmarking command
+│   ├── run_with_schema.py    # Run with result schema
+│   └── run_with_tracker.py   # Run with experiment tracking
+├── tools/              # Supporting tools
+│   ├── __init__.py
+│   ├── clean.py        # Cleanup utilities
+│   ├── inventory.py    # Project inventory tool
+│   ├── manage_datasets.py    # Dataset management
+│   ├── migrate_algorithm.py  # Algorithm migration helper
+│   ├── manage_plugins.py     # Plugin management tool
+│   └── run_dashboard.py      # Dashboard launcher
+├── examples/           # Example scripts
+│   └── (various example scripts)
+├── config/             # Configuration files
+│   └── (configuration modules)
+├── db/                 # Database utilities
+│   └── (database modules)
+└── deprecated/         # Deprecated scripts (for reference only)
 ```
 
-## Scripts Principales
+## Main Entry Points
 
-### `core/run.py`
-Script unificado para ejecutar algoritmos bio-inspirados con tres modos:
+### 1. CLI Interface (`cli/analyze.py`)
+The main unified CLI interface accessible via `bioalgo` command:
 
-- **standard**: Ejecución normal con número específico de runs
-- **massive**: Benchmark masivo (1000 runs) con sistema de checkpoints
-- **experiment**: Ejecución con semillas específicas
-
-Ejemplos:
 ```bash
-# Modo standard
-python scripts/core/run.py --mode standard -a woa -i P-n16-k8.vrp -r 30
+# Run a single algorithm
+bioalgo run --algorithm hoa --instance E-n22-k4 --iterations 100
 
-# Modo massive con checkpoint
-python scripts/core/run.py --mode massive -a sma -i P-n16-k8.vrp --checkpoint-interval 100
+# Run benchmark
+bioalgo benchmark --algorithms "hoa,egto,foa" --instances "E-n22-k4,P-n16-k8"
 
-# Modo experiment con semillas específicas
-python scripts/core/run.py --mode experiment -a opa -i P-n16-k8.vrp --experiment-seeds "42,123,456"
+# Run massive benchmark
+bioalgo massive --runs 1000 --algorithm hoa --instances E-n22-k4
 ```
 
-### `core/analyze.py`
-Análisis unificado que combina múltiples herramientas de análisis:
-- Análisis estadístico completo
-- Generación de gráficos
-- Comparación de algoritmos
-- Análisis de significancia estadística
+### 2. Plugin Management (`tools/manage_plugins.py`)
+Manage algorithm plugins:
 
-### `benchmark.py`
-Script mejorado para ejecutar benchmarks completos:
-- Ejecuta múltiples algoritmos en múltiples instancias
-- Manejo robusto de errores
-- Generación automática de reportes
+```bash
+# List available plugins
+bioalgo-plugins list
 
-## Utilidades
+# Install a plugin
+bioalgo-plugins install path/to/plugin.py
 
-### `utilities/manage_datasets.py`
-- Verifica disponibilidad de datasets
-- Descarga datasets faltantes
-- Crea enlaces simbólicos
+# Get plugin info
+bioalgo-plugins info my_algorithm
+```
 
-### `utilities/inventory.py`
-- Analiza la estructura del repositorio
-- Identifica archivos no utilizados
-- Genera reporte de dependencias
+### 3. Dashboard (`tools/run_dashboard.py`)
+Launch the real-time monitoring dashboard:
 
-### `utilities/migrate_algorithm.py`
-- Migración semi-automática de algoritmos v1 a v2
-- Genera estructura base y tests
+```bash
+python scripts/tools/run_dashboard.py
+```
 
-## Migración desde Scripts Antiguos
+## Development Notes
 
-Si usabas los scripts antiguos, aquí está la equivalencia:
+- All new CLI commands should be added to the `cli/` directory
+- Supporting tools and utilities go in `tools/`
+- Example scripts for users go in `examples/`
+- Do not add new scripts to `deprecated/`
 
-| Script Antiguo | Nuevo Script | Modo/Opción |
-|---|---|---|
-| `run.py` | `core/run.py` | `--mode standard` |
-| `run_massive.py` | `core/run.py` | `--mode massive` |
-| `run_opa_experiment.py` | `core/run.py` | `--mode experiment` |
-| `ejecutar_benchmark.py` | `benchmark.py` | - |
-| `analyze.py` | `core/analyze.py` | - |
+## Import Structure
 
-## Notas
+When importing from scripts in other parts of the project:
 
-- Todos los scripts ahora usan por defecto las versiones v2 de los algoritmos
-- Los resultados se guardan en directorios organizados: `results/`, `plots/`, `checkpoints/`
-- Los scripts deprecated se mantienen solo como referencia histórica
+```python
+# For CLI commands
+from scripts.cli.analyze import main
+from scripts.cli.run import run_algorithm
+
+# For tools
+from scripts.tools.clean import cleanup_results
+from scripts.tools.inventory import generate_inventory
+```
