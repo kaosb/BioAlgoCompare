@@ -268,8 +268,10 @@ def _run_algorithm_task(args):
         # Guardar checkpoint individual si se especifica directorio
         if checkpoint_dir:
             # Guardar resultado en formato pickle para checkpoint
+            # Sanitizar el nombre de instancia para evitar problemas con rutas
+            safe_instance_name = instance_name.replace("/", "_")
             checkpoint_file = os.path.join(
-                checkpoint_dir, f"{algo_class.__name__}_{instance_name}_run{run_id}.pkl"
+                checkpoint_dir, f"{algo_class.__name__}_{safe_instance_name}_run{run_id}.pkl"
             )
             with open(checkpoint_file, "wb") as f:
                 pickle.dump(result, f)
@@ -280,7 +282,7 @@ def _run_algorithm_task(args):
             os.makedirs(algo_dir, exist_ok=True)
 
             # Crear CSV con los datos de esta corrida
-            csv_file = os.path.join(algo_dir, f"{instance_name}_seed{run_seed}.csv")
+            csv_file = os.path.join(algo_dir, f"{safe_instance_name}_seed{run_seed}.csv")
 
             # Crear DataFrame con la curva de convergencia
             convergence_df = pd.DataFrame(
