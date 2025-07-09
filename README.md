@@ -6,7 +6,7 @@ Este proyecto forma parte de una investigación académica para la **Jornada Chi
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-68%25-yellowgreen)]()
+[![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)]()
 
 ## 📌 Objetivo
 
@@ -20,26 +20,28 @@ Comparar el rendimiento de algoritmos metaheurísticos bioinspirados recientes s
 
 ## 🧪 Algoritmos Implementados
 
+El proyecto implementa **17 algoritmos metaheurísticos bioinspirados únicos**:
+
 | Acrónimo | Nombre Completo | Año | Inspiración Biológica |
 |----------|-----------------|------|----------------------|
 | AHA      | Artificial Hummingbird Algorithm | 2022 | Comportamiento de vuelo y forrajeo de colibríes |
 | APO      | Artificial Protozoa Optimizer | 2024 | Comportamiento de movimiento y división de protozoarios |
 | EGTO     | Enhanced Gorilla Troops Optimization | 2024 | Comportamiento social de gorilas con componentes de PSO |
 | EWA      | Earthworm Algorithm | 2018 | Movimientos de los gusanos de tierra |
-| FGO      | Flamingo Optimization Algorithm | 2025 | Comportamiento grupal de los flamencos |
 | FOA      | Fossa Optimization Algorithm | 2024 | Estrategias de caza y territorialidad de las fosasas |
-| FSA      | Flamingo Search Algorithm | 2021 | Patrón de búsqueda de alimento de los flamencos |
+| FSA/FGO* | Flamingo Search Algorithm | 2021 | Patrón de búsqueda de alimento de los flamencos |
 | GTO      | Gorilla Troops Optimization | 2021 | Jerarquía y comportamiento social de gorilas |
 | GVOA     | Griffon Vultures Optimization Algorithm | 2025 | Comportamiento de vuelo termal de buitres leonados |
 | HHO      | Harris Hawks Optimization | 2019 | Comportamiento de caza cooperativa de halcones |
-| HOA      | Hyena Optimization Algorithm | 2017 | Estrategias de caza cooperativa de hienas |
 | MRFO     | Manta Ray Foraging Optimization | 2020 | Técnicas de alimentación de mantarrayas |
 | OPA      | Orca Predator Algorithm | 2021 | Estrategias de caza cooperativa de orcas |
 | RRO      | Raven Roosting Optimization | 2016 | Comportamiento de dormidero de cuervos |
-| SHO      | Spotted Hyena Optimizer | 2017 | Caza cooperativa de hienas moteadas |
+| SHO/HOA* | Spotted Hyena Optimizer | 2017 | Caza cooperativa de hienas moteadas |
 | SMA      | Slime Mould Algorithm | 2020 | Comportamiento del moho viscoso buscando alimento |
 | SMO      | Starling Murmuration Optimizer | 2022 | Murmullos y comportamiento emergente de estorninos |
 | WOA      | Whale Optimization Algorithm | 2016 | Estrategia de alimentación de ballenas jorobadas |
+
+*Nota: HOA es un alias para SHO (Spotted Hyena Optimizer) y FGO es un alias para FSA (Flamingo Search Algorithm) en la implementación.
 
 ## 🛠️ Requisitos e Instalación
 
@@ -72,43 +74,117 @@ pip install -e .
 
 ## 🚀 Uso
 
-La plataforma ofrece un comando unificado `bioalgo` con diferentes subcomandos para distintas tareas:
+La plataforma ofrece diferentes formas de ejecutar los algoritmos y análisis:
 
 ### Ejecución Básica
 
 ```bash
 # Usando el script principal
-python scripts/analyze.py run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+python scripts/analyze.py run --algorithm sho --instance A-n32-k5 --iterations 100 --population 30
 
-# O usando el comando instalado
-bioalgo run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+# Después de instalar en modo desarrollo (pip install -e .)
+bioalgo run --algorithm sho --instance A-n32-k5 --iterations 100 --population 30
 ```
+
+**Nota**: El comando `bioalgo` solo está disponible después de instalar el proyecto en modo desarrollo con `pip install -e .`
 
 ### Benchmarking y Análisis
 
 ```bash
 # Ejecutar un benchmark con múltiples algoritmos e instancias
-bioalgo benchmark --run-benchmark --instances "E-n22-k4,P-n16-k8" --algorithms "hoa,foa,egto" --parallel
+python scripts/analyze.py benchmark --run-benchmark --instances "E-n22-k4,P-n16-k8" --algorithms "sho,foa,egto" --parallel
 
 # Analizar resultados existentes
-bioalgo benchmark --input results/benchmark_20250508_123456.json
+python scripts/analyze.py benchmark --input results/benchmark_20250508_123456.json
 ```
 
 ### Benchmarking Masivo (1000+ ejecuciones)
 
 ```bash
 # Ejecutar un benchmark masivo con 1000 ejecuciones por algoritmo
-bioalgo massive --runs 1000 --algorithm hoa --algorithm egto --instances E-n22-k4 --parallel
+python scripts/analyze.py massive --runs 1000 --algorithm sho --algorithm egto --instances E-n22-k4 --parallel --output-dir results/exp_massive_jan2025
 
 # Con checkpoint y recuperación automática
-bioalgo massive --runs 1000 --algorithm all --instances E-n22-k4 --parallel --resume
+python scripts/analyze.py massive --runs 1000 --algorithm all --instances E-n22-k4 --parallel --resume --output-dir results/exp_massive_complete
 ```
 
-### Análisis de archivos CSV
+### Análisis Completo de Resultados
 
 ```bash
-# Analizar un archivo CSV de resultados
-bioalgo analyze-csv results/benchmark_results.csv
+# Análisis estadístico completo sobre resultados de benchmark
+# Los resultados se guardan en una subcarpeta 'analysis' dentro del directorio de datos
+python scripts/analyze_v2.py stats \
+    --csv results/exp_massive_jan2025/massive_benchmark_summary.csv \
+    --out results/exp_massive_jan2025/analysis \
+    --extended-tests
+
+# Análisis de tamaños de efecto
+python scripts/analyze_v2.py effect-size \
+    --csv results/exp_massive_jan2025/massive_benchmark_summary.csv \
+    --out results/exp_massive_jan2025/analysis
+
+# Análisis visual y comparativo (usando analyze.py)
+python scripts/analyze.py analyze \
+    --input results/exp_massive_jan2025/massive_benchmark_summary.csv \
+    --output results/exp_massive_jan2025/analysis
+```
+
+### Ejemplo de Flujo de Trabajo Completo
+
+```bash
+# 1. Crear experimento con nombre descriptivo
+EXPERIMENT_NAME="exp_vrp_comparison_jan2025"
+OUTPUT_DIR="results/${EXPERIMENT_NAME}"
+
+# 2. Ejecutar benchmark
+python scripts/analyze.py benchmark \
+    --run-benchmark \
+    --instances "E-n22-k4,P-n16-k8,A-n32-k5" \
+    --algorithms "egto,foa,sho,ewa,hho" \
+    --runs 100 \
+    --iterations 200 \
+    --population 40 \
+    --parallel \
+    --output-dir "${OUTPUT_DIR}"
+
+# 3. Convertir JSON a CSV si es necesario
+python scripts/analyze.py convert \
+    --json "${OUTPUT_DIR}/benchmark_results.json" \
+    --csv "${OUTPUT_DIR}/benchmark_results.csv"
+
+# 4. Análisis estadístico completo con módulo v2 (CD corregido)
+python scripts/analyze_v2.py stats \
+    --csv "${OUTPUT_DIR}/benchmark_results.csv" \
+    --out "${OUTPUT_DIR}/statistical_analysis" \
+    --extended-tests
+
+# 5. Análisis de tamaños de efecto
+python scripts/analyze_v2.py effect-size \
+    --csv "${OUTPUT_DIR}/benchmark_results.csv" \
+    --out "${OUTPUT_DIR}/statistical_analysis"
+
+# 6. Generar visualizaciones y reportes
+python scripts/analyze.py analyze \
+    --input "${OUTPUT_DIR}/benchmark_results.csv" \
+    --output "${OUTPUT_DIR}/visualizations"
+```
+
+Esto creará la siguiente estructura organizada:
+```
+results/
+└── exp_vrp_comparison_jan2025/
+    ├── benchmark_results.json          # Datos crudos del benchmark
+    ├── benchmark_results.csv           # Datos en formato CSV
+    ├── statistical_analysis/           # Análisis estadístico completo
+    │   ├── stats_report.md            # Reporte de tests estadísticos
+    │   ├── friedman_results.csv       # Resultados test de Friedman
+    │   ├── nemenyi_results.csv        # Resultados test de Nemenyi
+    │   ├── effect_sizes.csv           # Tamaños de efecto A12 y Cliff's δ
+    │   └── cd_diagram.png             # Diagrama de diferencia crítica
+    └── visualizations/                 # Gráficos y visualizaciones
+        ├── boxplot_comparison.png      # Comparación de distribuciones
+        ├── convergence_curves.png      # Curvas de convergencia
+        └── heatmap_performance.png     # Mapa de calor de rendimiento
 ```
 
 ## 📋 Opciones de Línea de Comandos
@@ -201,19 +277,33 @@ BioAlgoCompare/
 │   └── visualizations/        # Visualizaciones generadas
 ├── scripts/                   # Scripts ejecutables
 │   ├── analyze.py             # Script unificado de análisis
+│   ├── analyze_v2.py          # Script de análisis estadístico v2 (CD corregido)
+│   ├── demo_benchmark.py      # Script de demostración
+│   ├── run_massive.py         # Script para benchmarks masivos
 │   └── legacy/                # Scripts antiguos (referencia)
+├── tests/                     # Tests unitarios e integración
+│   ├── unit/                  # Tests unitarios
+│   └── integration/           # Tests de integración
 ├── utils/
 │   ├── benchmarking.py        # Sistema de benchmarking
-│   ├── statistical_analysis.py # Análisis estadístico
+│   ├── statistical_analysis.py # Análisis estadístico básico
+│   ├── advanced_statistical_analysis.py # Análisis estadístico avanzado
+│   ├── advanced_statistical_analysis_v2.py # Análisis v2 con CD corregido
+│   ├── stats_effects.py       # Cálculo de tamaños de efecto
 │   ├── vrp_operators.py       # Operadores específicos para VRP
 │   ├── operators.py           # Operadores genéticos y utilidades
 │   ├── visualization.py       # Visualización básica
 │   └── improved/              # Módulos mejorados
 │       ├── enhanced_benchmarking.py # Benchmarking con checkpoints
+│       ├── enhanced_benchmarking_v2.py # Benchmarking v2 mejorado
 │       ├── advanced_visualization.py # Visualizaciones avanzadas
 │       └── enhanced_statistics.py # Estadísticas rigurosas
+├── examples/                  # Ejemplos de uso
+│   └── statistical_analysis_v2/ # Ejemplos del módulo v2
 ├── setup.py                   # Configuración de instalación
 ├── requirements.txt           # Dependencias del proyecto
+├── CLAUDE.md                  # Guía para Claude Code
+├── SPRINT_SUMMARY.md          # Resumen del Sprint Estadístico v2
 └── README.md                  # Este archivo
 ```
 
@@ -263,13 +353,27 @@ Los resultados se almacenan en el directorio `results/`. En esta versión del re
 - Operadores de mutación específicos para VRP
 - Visualización de mejoras de rutas
 
-### 3. Análisis Estadístico (`utils/statistical_analysis.py`)
+### 3. Análisis Estadístico
 
+El proyecto incluye dos módulos de análisis estadístico:
+
+#### `utils/statistical_analysis.py` (Módulo original)
 - Test de Friedman para comparaciones múltiples
 - Pruebas post-hoc (Nemenyi, Wilcoxon)
-- Cálculo de tamaño del efecto (Cliff's Delta, Vargha-Delaney)
+- Cálculo básico de tamaño del efecto
 - Diagramas de diferencia crítica
-- Informes estadísticos detallados
+- Informes estadísticos
+
+#### `utils/advanced_statistical_analysis_v2.py` (Módulo v2 - RECOMENDADO)
+- **Fórmula corregida de Critical Distance**: `q_α/√2 * sqrt(k(k+1)/(6n))`
+- **Tamaños de efecto mejorados**:
+  - Vargha-Delaney A12 (probabilidad de superioridad)
+  - Cliff's delta con interpretación (negligible, small, medium, large)
+- **Test de Quade**: Alternativa ponderada al test de Friedman
+- **Tracking de versiones de software**: Para reproducibilidad completa
+- **Reportes extendidos**: Incluye todos los tests y métricas en formato markdown
+
+Se accede mediante `scripts/analyze_v2.py` con comandos `stats` y `effect-size`.
 
 ### 4. Paralelización
 
@@ -343,32 +447,45 @@ El proyecto ha sido auditado y mejorado para seguir buenas prácticas de desarro
 
 Para replicar los experimentos y análisis principales, sigue estos pasos:
 
-### Ejecutar benchmarks masivos (1000 ejecuciones)
+### Ejecutar benchmarks masivos con instancias Solomon
+
+Para usar instancias Solomon (que están en un subdirectorio), especifica la ruta completa:
 
 ```bash
+# Opción 1: Usando run_massive.py con instancias Solomon
 python scripts/run_massive.py \
-    --instances "C101,R101,RC101" \
+    --instances "Solomon/converted/C101,Solomon/converted/R101,Solomon/converted/RC101" \
     --algorithms "egto,foa,woa,hho,mrfo,sma" \
     --runs 1000 \
     --iterations 100 \
     --population 40 \
     --parallel
+
+# Opción 2: Usando analyze.py massive con instancias estándar
+python scripts/analyze.py massive \
+    --instances "E-n22-k4,P-n16-k8,A-n32-k5,B-n31-k5,E-n51-k5" \
+    --algorithm egto --algorithm foa --algorithm sho \
+    --runs 1000 \
+    --iterations 200 \
+    --population 50 \
+    --parallel \
+    --output-dir results/exp_massive_cvrplib
 ```
 
-### Analizar resultados de benchmarking
+### Analizar resultados de benchmarking masivo
 
 ```bash
-python scripts/analyze.py analyze \
-    --input results/massive_benchmark_summary.csv \
-    --output benchmark_comparisons/solomon_final
-```
+# Para resultados de Solomon
+python scripts/analyze_v2.py stats \
+    --csv results/massive_benchmark_summary.csv \
+    --out results/solomon_analysis \
+    --extended-tests
 
-### Generar análisis estadístico avanzado
-
-```bash
-python scripts/analyze.py stats \
-    --csv results/bio16_solomon_timed/massive_benchmark_summary.csv \
-    --out benchmark_comparisons/solomon_final
+# Para resultados de CVRPLIB estándar
+python scripts/analyze_v2.py stats \
+    --csv results/exp_massive_cvrplib/massive_benchmark_summary.csv \
+    --out results/exp_massive_cvrplib/analysis \
+    --extended-tests
 ```
 
 Genera stats_report.md y cd_diagram.png dentro de la carpeta destino.
