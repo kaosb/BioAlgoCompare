@@ -11,6 +11,20 @@ from algorithms.base import Individual, MetaheuristicAlgorithm
 
 
 class Hummingbird(Individual):
+    """Individual hummingbird in the AHA algorithm.
+    
+    Represents a hummingbird with its position, memory table, and foraging behaviors.
+    Hummingbirds exhibit three flight skills and two modes of foraging.
+    
+    Attributes:
+        position: Current position in the search space
+        personal_best_position: Best position found by this hummingbird
+        bounds: Search space boundaries
+        dimension: Number of dimensions in the problem
+        memory_table: Set of visited food sources to avoid revisiting
+        _fitness: Cached fitness value
+    """
+    
     def __init__(self, position: np.ndarray, bounds: List[Tuple[float, float]]):
         self.position = np.array(position, dtype=float)
         self.personal_best_position = self.position.copy()
@@ -152,6 +166,26 @@ class Hummingbird(Individual):
 
 
 class AHA(MetaheuristicAlgorithm):
+    """Artificial Hummingbird Algorithm (AHA) implementation.
+    
+    A bio-inspired metaheuristic that simulates the intelligent foraging behavior
+    and flight skills of hummingbirds. The algorithm incorporates three flight
+    skills (diagonal, omnidirectional, and axial) and two foraging modes
+    (guided and territorial).
+    
+    Args:
+        problem: The optimization problem to solve
+        population_size: Number of hummingbirds in the population (default: 30)
+        max_iterations: Maximum number of iterations (default: 100)
+        seed: Random seed for reproducibility (default: None)
+        
+    Attributes:
+        population: List of Hummingbird individuals
+        memory_table: Global memory of visited food sources
+        best_solution: Best solution found so far
+        convergence_curve: Fitness values over iterations
+    """
+    
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         super().__init__(problem, population_size, max_iterations, seed)
         self.population: List[Hummingbird] = []

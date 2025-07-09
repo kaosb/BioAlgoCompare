@@ -11,6 +11,19 @@ from algorithms.base import Individual, MetaheuristicAlgorithm
 
 
 class Starling(Individual):
+    """Individual starling in the SMO algorithm.
+    
+    Represents a starling with its position and murmuration behaviors.
+    Starlings exhibit collective motion patterns and adaptive flocking.
+    
+    Attributes:
+        problem: The optimization problem instance
+        position: Current position in the search space
+        personal_best_position: Best position found by this starling
+        _fitness: Cached fitness value
+        personal_best_fitness: Best fitness value found
+    """
+    
     def __init__(self, problem):
         """
         Inicializa un estornino para el algoritmo SMO.

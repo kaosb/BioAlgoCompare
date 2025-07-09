@@ -1,3 +1,32 @@
+"""Whale Optimization Algorithm (WOA).
+
+This module implements the Whale Optimization Algorithm, inspired by the
+bubble-net hunting strategy of humpback whales.
+
+The algorithm simulates three main behaviors:
+1. Encircling prey: Whales update their position towards the best solution
+2. Bubble-net attacking (exploitation): Spiral-shaped path around prey
+3. Search for prey (exploration): Random search guided by a random whale
+
+Reference:
+    Mirjalili, S., & Lewis, A. (2016).
+    The whale optimization algorithm.
+    Advances in Engineering Software, 95, 51-67.
+    DOI: 10.1016/j.advengsoft.2016.01.008
+
+Example:
+    >>> from algorithms.woa import WOA
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run WOA
+    >>> algo = WOA(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

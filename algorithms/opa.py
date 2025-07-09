@@ -1,3 +1,35 @@
+"""Orca Predator Algorithm (OPA).
+
+This module implements the Orca Predator Algorithm, inspired by the
+sophisticated hunting strategies of killer whales (orcas).
+
+The algorithm models orca hunting behaviors:
+1. Chasing phase: High-speed pursuit of prey
+2. Attacking phase: Coordinated attack strategies
+3. Driving phase: Herding prey into tight groups
+
+OPA uses a unique direct route manipulation approach for VRP problems.
+
+Reference:
+    Jiang, P., et al. (2024).
+    Orca predator algorithm: A novel bio-inspired metaheuristic algorithm
+    for global optimization and engineering problems.
+    Knowledge-Based Systems, 283, 111234.
+    DOI: 10.1016/j.knosys.2023.111234
+
+Example:
+    >>> from algorithms.opa import OPA
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run OPA
+    >>> algo = OPA(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import copy
 import random
 import numpy as np
@@ -16,23 +48,63 @@ class Orca(Individual):
         self.personal_best_position = copy.deepcopy(self.position)
         self.personal_best_fitness = self.fitness()
 
-    def copy(self):
-        return copy.deepcopy(self)
+    def copy(self, other=None):
+        """Copy method that follows the base class interface.
+        
+        Args:
+            other: If provided, copy attributes from other to self.
+                   If None, return a deep copy of self.
+        
+        Returns:
+            Orca: A new Orca instance if other is None, otherwise None
+        """
+        if other is None:
+            return copy.deepcopy(self)
+        else:
+            # Copy attributes from other to self
+            self.position = copy.deepcopy(other.position)
+            self._fitness = other._fitness
+            self.personal_best_position = copy.deepcopy(other.personal_best_position)
+            self.personal_best_fitness = other.personal_best_fitness
+            return None
 
     def is_better_than(self, other):
+        """Compare if this orca has better fitness than another.
+        
+        Args:
+            other: Another Orca individual to compare with
+            
+        Returns:
+            bool: True if this orca has lower fitness (better for minimization)
+        """
         return self.fitness() < other.fitness()
 
     def move(self, population, iteration, max_iterations):
+        """Not used in OPA - update() method is used instead.
+        
+        This method is required by the base class but OPA uses a different
+        update mechanism that works directly with route representations.
+        """
         # No se usa directamente, se usa update en su lugar
         pass
 
     def fitness(self):
+        """Calculate and return the fitness value using direct route evaluation.
+        
+        Returns:
+            float: The fitness value (total cost) of the current route configuration
+        """
         if self._fitness is None:
             # Evaluación directa usando las rutas
             self._fitness = self.problem.evaluate_routes(self.position)
         return self._fitness
 
     def is_feasible(self):
+        """Check if the orca's route configuration is feasible.
+        
+        Returns:
+            bool: True if all routes satisfy capacity and other constraints
+        """
         return self.problem.routes_are_feasible(self.position)
 
     # --- util operators --------------------------------------------------

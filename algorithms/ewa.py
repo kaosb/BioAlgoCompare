@@ -1,3 +1,35 @@
+"""Earthworm Algorithm (EWA).
+
+This module implements the Earthworm Algorithm, a bio-inspired metaheuristic
+based on the reproductive behavior of earthworms in nature.
+
+The algorithm simulates two main earthworm reproduction behaviors:
+1. Sexual reproduction: Crossover between two parent earthworms
+2. Asexual reproduction: Self-reproduction with mutations
+
+The population is divided into better and worse halves, where better earthworms
+use sexual reproduction and worse ones use asexual reproduction.
+
+Reference:
+    Wang, G. G., Deb, S., & Coelho, L. D. S. (2018).
+    Earthworm optimisation algorithm: a bio-inspired metaheuristic algorithm 
+    for global optimisation problems.
+    International Journal of Bio-Inspired Computation, 12(1), 1-22.
+    DOI: 10.1504/IJBIC.2018.093328
+
+Example:
+    >>> from algorithms.ewa import EWA
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run EWA
+    >>> ewa = EWA(problem, population_size=30)
+    >>> ewa.initialize_population()
+    >>> best_solution = ewa.run(iterations=100)
+"""
 import numpy as np
 import random
 import time

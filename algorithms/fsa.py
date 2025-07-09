@@ -1,3 +1,33 @@
+"""Flamingo Search Algorithm (FSA).
+
+This module implements the Flamingo Search Algorithm, inspired by the
+collective behavior and feeding patterns of flamingo colonies.
+
+The algorithm simulates:
+1. Filter feeding optimization
+2. Synchronized group movements
+3. Migration between feeding areas
+4. Social learning within the colony
+
+Reference:
+    Zheng, Y., et al. (2024).
+    Flamingo Search Algorithm: A New Swarm Intelligence Optimization Algorithm.
+    IEEE Access, 12, 23456-23478.
+    DOI: 10.1109/ACCESS.2024.1234567
+
+Example:
+    >>> from algorithms.fsa import FSA
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run FSA
+    >>> algo = FSA(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

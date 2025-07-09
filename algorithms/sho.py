@@ -1,3 +1,36 @@
+"""Spotted Hyena Optimizer (SHO).
+
+This module implements the Spotted Hyena Optimizer, inspired by the
+social hierarchy and collaborative hunting behavior of spotted hyenas.
+
+The algorithm models four main phases:
+1. Searching and tracking prey
+2. Encircling prey
+3. Hunting with pack coordination
+4. Attacking prey
+
+SHO emphasizes the social hierarchy where the best solutions guide the search.
+
+Reference:
+    Dhiman, G., & Kumar, V. (2017).
+    Spotted hyena optimizer: A novel bio-inspired based metaheuristic
+    technique for engineering applications.
+    Advances in Engineering Software, 114, 48-70.
+    DOI: 10.1016/j.advengsoft.2017.05.014
+
+Example:
+    >>> from algorithms.sho import SHO
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run SHO
+    >>> algo = SHO(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

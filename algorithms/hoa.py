@@ -1,3 +1,35 @@
+"""Hyena Optimization Algorithm (HOA).
+
+This module implements the Hyena Optimization Algorithm, also known as
+Spotted Hyena Optimizer (SHO), inspired by the social behavior and hunting
+strategies of spotted hyenas.
+
+The algorithm models:
+1. Searching for prey (exploration)
+2. Encircling prey
+3. Hunting behavior with cooperative strategies
+4. Attacking prey (exploitation)
+
+Reference:
+    Dhiman, G., & Kumar, V. (2017).
+    Spotted hyena optimizer: A novel bio-inspired based metaheuristic
+    technique for engineering applications.
+    Advances in Engineering Software, 114, 48-70.
+    DOI: 10.1016/j.advengsoft.2017.05.014
+
+Example:
+    >>> from algorithms.hoa import HOA
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run HOA
+    >>> algo = HOA(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

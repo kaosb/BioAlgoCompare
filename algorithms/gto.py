@@ -1,3 +1,35 @@
+"""Gorilla Troops Optimizer (GTO).
+
+This module implements the Gorilla Troops Optimizer, a nature-inspired
+metaheuristic algorithm that simulates the social behavior of gorilla troops.
+
+The algorithm models five main behaviors:
+1. Migration to unknown places (exploration)
+2. Moving towards other gorillas (exploitation)
+3. Following the silverback (leader)
+4. Competition for adult females
+5. Migration to known locations
+
+Reference:
+    Abdollahzadeh, B., Gharehchopogh, F. S., & Mirjalili, S. (2021).
+    Artificial gorilla troops optimizer: A new nature-inspired metaheuristic
+    algorithm for global optimization problems.
+    International Journal of Intelligent Systems, 36(10), 5887-5958.
+    DOI: 10.1002/int.22535
+
+Example:
+    >>> from algorithms.gto import GTO
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run GTO
+    >>> algo = GTO(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math
@@ -41,6 +73,23 @@ class Gorilla(Individual):
     def move(
         self, best_gorilla, C, L, W, beta, p, iteration, max_iter, population=None
     ):
+        """Update the gorilla's position based on GTO behaviors.
+        
+        Implements five main behaviors: migration to unknown places, moving
+        towards other gorillas, following the silverback, competition for
+        females, and migration to known locations.
+        
+        Args:
+            best_gorilla: Position of the silverback (best solution)
+            C: Parameter C for exploration/exploitation balance
+            L: Parameter L for step size control
+            W: Threshold W for transition between exploration and exploitation
+            beta: Parameter beta for competition behavior
+            p: Probability parameter for exploration
+            iteration: Current iteration number
+            max_iter: Maximum number of iterations
+            population: List of all gorillas (optional)
+        """
         dim = self.dimension
         # --- Operadores de exploración (Ecuación 1) ---
         if random.random() < p:

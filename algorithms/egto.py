@@ -1,3 +1,38 @@
+"""Enhanced Gorilla Troops Optimizer (EGTO).
+
+This module implements the Enhanced Gorilla Troops Optimizer algorithm,
+an improved version of the original GTO algorithm that simulates the social
+intelligence and behaviors of gorilla troops in nature.
+
+The algorithm models several gorilla behaviors:
+1. Migration to different areas (exploration)
+2. Moving towards the silverback (exploitation)
+3. Following other gorillas in the troop
+4. Competing for adult females
+
+The enhanced version includes improvements like adaptive parameters and
+better balance between exploration and exploitation.
+
+Reference:
+    Abdollahzadeh, B., Soleimanian Gharehchopogh, F., & Mirjalili, S. (2021).
+    Artificial gorilla troops optimizer: A new nature-inspired metaheuristic 
+    algorithm for global optimization problems.
+    International Journal of Intelligent Systems, 36(10), 5887-5958.
+    DOI: 10.1002/int.22535
+
+Example:
+    >>> from algorithms.egto import EGTO
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run EGTO
+    >>> egto = EGTO(problem, population_size=30)
+    >>> egto.initialize_population()
+    >>> best_solution = egto.run(iterations=100)
+"""
 import numpy as np
 import random
 import math

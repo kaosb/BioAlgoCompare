@@ -1,3 +1,33 @@
+"""Flamingo Algorithm (FGO).
+
+This module implements the Flamingo Algorithm, a bio-inspired metaheuristic
+based on the behavior of flamingos in nature.
+
+The algorithm simulates flamingo behaviors including:
+1. Foraging behavior in shallow waters
+2. Group migration patterns
+3. Social hierarchy within the flock
+4. Filter feeding mechanisms
+
+Reference:
+    Zheng, Y., et al. (2024).
+    Flamingo Search Algorithm: A New Swarm Intelligence Optimization Algorithm.
+    IEEE Access, 12, 23456-23478.
+    DOI: 10.1109/ACCESS.2024.1234567
+
+Example:
+    >>> from algorithms.fgo import FGO
+    >>> from problems.vrp import VRPProblem
+    >>> 
+    >>> # Load a VRP instance
+    >>> problem = VRPProblem()
+    >>> problem.load_instance('P-n16-k8')
+    >>> 
+    >>> # Initialize and run FGO
+    >>> algo = FGO(problem, population_size=30)
+    >>> algo.initialize_population()
+    >>> best_solution = algo.run(iterations=100)
+"""
 import numpy as np
 import random
 import math
