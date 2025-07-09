@@ -1,35 +1,53 @@
+# Pre-commit configuration for BioAlgoCompare
+# Runs Ruff linter and PyTest before commits
+
 repos:
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.5
-  hooks:
-    - id: ruff
-      args: [--fix]
-    # ruff-format disabled
+  # Ruff - Fast Python linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.11
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      # Run the formatter
+      - id: ruff-format
 
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.8.0
-  hooks:
-    - id: mypy
-      name: "🔍 MyPy - Type Checking (Optional)"
-      args: [--config-file=mypy.ini]
-      # No additional_dependencies to avoid types-all issue
-      files: ^(algorithms|problems|utils)/.*\.py$
-      exclude: ^(scripts|tests|legacy)/
-      # Make it optional - just warn but don't fail
-      pass_filenames: true
-      always_run: false
-      # Don't fail the commit on type errors
-      fail_fast: false
-      verbose: true
-      # This makes it a warning only
-      stages: [manual]
+  # Local hooks for tests
+  - repo: local
+    hooks:
+      # Run pytest on changed test files
+      - id: pytest-check
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: false
+        stages: [commit]
+        # Only run if test files or source files changed
+        files: ^(tests/.*\.py|utils/.*\.py|algorithms/.*\.py|problems/.*\.py)$
+        # Run with coverage for affected modules
+        args: [
+          "--cov=algorithms",
+          "--cov=problems",
+          "--cov=utils",
+          "--cov-report=term-missing",
+          # "--cov-fail-under=85",  # Temporarily disabled for initial commit
+          "-v"
+        ]
 
-- repo: local
-  hooks:
-    - id: dummy-hook
-      name: dummy-hook-for-structure
-      entry: echo "No hooks running"
-      language: system
-      pass_filenames: false
-      always_run: false
-    # pytest-fast disabled
+  # Check for large files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+
+# Configuration
+default_stages: [commit]
+fail_fast: false
+default_install_hook_types: [pre-commit, commit-msg]

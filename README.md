@@ -210,7 +210,7 @@ BioAlgoCompare/
 │   ├── visualization.py       # Visualización básica
 │   └── improved/              # Módulos mejorados
 │       ├── enhanced_benchmarking.py # Benchmarking con checkpoints
-│       ├── advanced_visualization.py # Visualizaciones avanzadas 
+│       ├── advanced_visualization.py # Visualizaciones avanzadas
 │       └── enhanced_statistics.py # Estadísticas rigurosas
 ├── setup.py                   # Configuración de instalación
 ├── requirements.txt           # Dependencias del proyecto
@@ -409,6 +409,7 @@ La documentación completa del proyecto está disponible en el directorio `docs/
 
 - **[Guía de instalación](docs/guides/installation.md)** - Instrucciones detalladas de instalación
 - **[Referencia de Comandos](docs/COMMAND_REFERENCE.md)** - Guía completa de comandos y uso
+- **[Metodología Estadística v2](docs/STATISTICS.md)** - Análisis estadístico riguroso con CD corregido, tests no paramétricos y tamaños de efecto
 - **[Visión general de algoritmos](docs/algorithms/overview.md)** - Descripción de todos los algoritmos implementados
 - **[Pseudocódigo de algoritmos](docs/algorithms/pseudocode.md)** - Pseudocódigo detallado de cada algoritmo
 - **[Documentación de algoritmos individuales](docs/algorithms/individual/)** - Análisis detallado de cada algoritmo
@@ -421,6 +422,12 @@ La documentación completa del proyecto está disponible en el directorio `docs/
 - **[Requisitos algorítmicos](docs/development/algorithmic_requirements.md)** - Requisitos para implementación de algoritmos
 
 Para más detalles, consulta el [índice de documentación](docs/index.md).
+
+### Ejemplos
+
+El directorio `examples/` contiene ejemplos prácticos de uso:
+
+- **[Análisis Estadístico v2](examples/statistical_analysis_v2/)** - Ejemplos del módulo estadístico corregido con CD=4.695
 
 ### Publicaciones Académicas
 
