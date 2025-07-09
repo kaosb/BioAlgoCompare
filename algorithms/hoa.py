@@ -57,10 +57,6 @@ class Hyena(Individual):
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
-    def is_better_than(self, other):
-        """Compara si este individuo es mejor que otro."""
-        return self.fitness() < other.fitness()
-
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
         return (
@@ -143,6 +139,14 @@ class HOA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de hienas."""
+        # Set random seed if provided
+
+        if self.seed is not None:
+
+            random.seed(self.seed)
+
+            np.random.seed(self.seed)
+
         self.population = []
 
         for _ in range(self.population_size):
@@ -152,10 +156,10 @@ class HOA(MetaheuristicAlgorithm):
         # Ordenar la población por fitness
         self.population.sort(key=lambda x: x.fitness())
 
-        # Asignar líderes
+        # Asignar líderes (manejar caso de población pequeña)
         self.alpha = self.population[0]
-        self.beta = self.population[1]
-        self.delta = self.population[2]
+        self.beta = self.population[1] if len(self.population) > 1 else self.population[0]
+        self.delta = self.population[2] if len(self.population) > 2 else self.population[0]
 
         # Guardar la mejor solución
         self.best_solution = Hyena(self.problem)
@@ -177,10 +181,10 @@ class HOA(MetaheuristicAlgorithm):
         # Ordenar la población por fitness
         self.population.sort(key=lambda x: x.fitness())
 
-        # Actualizar líderes
+        # Actualizar líderes (manejar caso de población pequeña)
         self.alpha = self.population[0]
-        self.beta = self.population[1]
-        self.delta = self.population[2]
+        self.beta = self.population[1] if len(self.population) > 1 else self.population[0]
+        self.delta = self.population[2] if len(self.population) > 2 else self.population[0]
 
         # Actualizar la mejor solución si es necesario
         if self.alpha.is_better_than(self.best_solution):

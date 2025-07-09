@@ -57,10 +57,6 @@ class MantaRay(Individual):
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
-    def is_better_than(self, other):
-        """Compara si este individuo es mejor que otro."""
-        return self.fitness() < other.fitness()
-
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
         return (
@@ -149,10 +145,19 @@ class MRFO(MetaheuristicAlgorithm):
             seed: Semilla para reproducibilidad
         """
         super().__init__(problem, population_size, max_iterations, seed)
+        self.convergence_curve = []
         self.spiral_factor = 2.0  # Factor para el comportamiento en espiral
 
     def initialize_population(self):
         """Inicializa la población de mantarrayas."""
+        # Set random seed if provided
+
+        if self.seed is not None:
+
+            random.seed(self.seed)
+
+            np.random.seed(self.seed)
+
         self.population = []
         for _ in range(self.population_size):
             ray = MantaRay(self.problem)
@@ -163,6 +168,9 @@ class MRFO(MetaheuristicAlgorithm):
         for i in range(1, self.population_size):
             if self.population[i].is_better_than(self.best_solution):
                 self.best_solution = self.population[i]
+        
+        # Initialize convergence curve with initial best fitness
+        self.convergence_curve = [self.best_solution.fitness()]
 
     def update_population(self):
         """Actualiza la población en cada iteración."""

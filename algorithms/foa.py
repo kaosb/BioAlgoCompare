@@ -72,10 +72,6 @@ class Fossa(Individual):
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
-    def is_better_than(self, other):
-        """Compara si este individuo es mejor que otro."""
-        return self.fitness() < other.fitness()
-
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
         return (
@@ -153,6 +149,14 @@ class FOA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         self.population = [Fossa(self.problem) for _ in range(self.population_size)]
+        # Set random seed if provided
+
+        if self.seed is not None:
+
+            random.seed(self.seed)
+
+            np.random.seed(self.seed)
+
         self.population.sort(key=lambda x: x.fitness())
         self.best_solution = Fossa(self.problem)
         self.best_solution.copy(self.population[0])

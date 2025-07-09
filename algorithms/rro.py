@@ -5,6 +5,7 @@ DOI: 10.1007/s00500-014-1520-5
 """
 
 import numpy as np
+import random
 from .base import Individual, MetaheuristicAlgorithm
 
 
@@ -44,10 +45,6 @@ class Raven(Individual):
                 self.personal_best_position
             )
         return self._personal_best_fitness
-
-    def is_better_than(self, other):
-        """Compara si este individuo es mejor que otro."""
-        return self.fitness() < other.fitness()
 
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
@@ -179,6 +176,14 @@ class RRO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de cuervos."""
+        # Set random seed if provided
+
+        if self.seed is not None:
+
+            random.seed(self.seed)
+
+            np.random.seed(self.seed)
+
         self.population = []
         for _ in range(self.population_size):
             raven = Raven(self.problem)

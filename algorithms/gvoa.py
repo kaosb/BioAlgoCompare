@@ -47,13 +47,9 @@ class Vulture(Individual):
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
-    def is_better_than(self, other):
-        """Compara si este individuo es mejor que otro."""
-        return self.fitness() < other.fitness()
-
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
-        return self.problem.is_valid(self.position)
+        return bool(self.problem.is_valid(self.position))
 
     def copy(self):
         """Crea una copia del buitre actual."""
