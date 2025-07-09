@@ -3,9 +3,12 @@ Operadores genéricos para algoritmos metaheurísticos.
 Incluye operadores de cruce, mutación, selección, reparación, etc.
 """
 import numpy as np
+from typing import Any
+import numpy.typing as npt
 
 
-def sbx_crossover(parent1, parent2, probability=0.9, distribution_index=15):
+def sbx_crossover(parent1: npt.NDArray[np.float64], parent2: npt.NDArray[np.float64], 
+                  probability: float = 0.9, distribution_index: float = 15) -> npt.NDArray[np.float64]:
     """
     Cruce binario simulado (SBX).
     
@@ -50,7 +53,8 @@ def sbx_crossover(parent1, parent2, probability=0.9, distribution_index=15):
     return child
 
 
-def polynomial_mutation(solution, probability=0.1, distribution_index=20):
+def polynomial_mutation(solution: npt.NDArray[np.float64], probability: float = 0.1, 
+                       distribution_index: float = 20) -> npt.NDArray[np.float64]:
     """
     Mutación polinomial.
     
@@ -93,7 +97,8 @@ def polynomial_mutation(solution, probability=0.1, distribution_index=20):
     return mutated
 
 
-def repair_bounds(solution, lb=0.0, ub=1.0):
+def repair_bounds(solution: npt.NDArray[np.float64], lb: float = 0.0, 
+                 ub: float = 1.0) -> npt.NDArray[np.float64]:
     """
     Repara una solución para mantenerla dentro de los límites.
     

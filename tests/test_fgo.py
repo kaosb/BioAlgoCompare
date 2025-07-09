@@ -6,8 +6,8 @@ Test del algoritmo FGO (Flamingo Optimization Algorithm).
 import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
-from algorithms.fgo import Flamingo, FGO
-from algorithms.base import MetaheuristicAlgorithm
+from algorithms.fgo_v2 import FGOV2, FlamingoV2
+from algorithms.base_v2 import MetaheuristicAlgorithm
 
 
 class MockProblem:
@@ -19,6 +19,14 @@ class MockProblem:
     
     def get_dimension(self):
         return self.dimension
+    
+    @property
+    def lower_bounds(self):
+        return np.zeros(self.dimension)
+    
+    @property
+    def upper_bounds(self):
+        return np.ones(self.dimension)
     
     def evaluate(self, solution):
         """Función de evaluación simple para test."""
@@ -32,7 +40,7 @@ def test_flamingo_initialization():
     np.random.seed(42)  # Para reproducibilidad
     
     problem = MockProblem(dimension=5)
-    flamingo = Flamingo(problem)
+    flamingo = FlamingoV2(problem)
     
     # Verificar inicialización
     assert flamingo.problem == problem
@@ -49,7 +57,7 @@ def test_flamingo_initialization():
 def test_flamingo_fitness():
     """Test del cálculo de fitness del Flamingo."""
     problem = MockProblem(dimension=3)
-    flamingo = Flamingo(problem)
+    flamingo = FlamingoV2(problem)
     
     # Establecer una posición conocida
     flamingo.position = np.array([0.1, 0.2, 0.3])
@@ -79,10 +87,10 @@ def test_flamingo_comparison():
     """Test de comparación entre Flamingos."""
     problem = MockProblem()
     
-    flamingo1 = Flamingo(problem)
+    flamingo1 = FlamingoV2(problem)
     flamingo1._fitness = 10
     
-    flamingo2 = Flamingo(problem)
+    flamingo2 = FlamingoV2(problem)
     flamingo2._fitness = 20
     
     # Verificar comparación
@@ -93,7 +101,7 @@ def test_flamingo_comparison():
 def test_flamingo_is_feasible():
     """Test para verificar si la solución es factible."""
     problem = MockProblem()
-    flamingo = Flamingo(problem)
+    flamingo = FlamingoV2(problem)
     
     # En el contexto de VRP, todas las soluciones son factibles
     assert flamingo.is_feasible()
@@ -104,7 +112,7 @@ def test_flamingo_move_forage():
     np.random.seed(42)
     problem = MockProblem(dimension=3)
     
-    flamingo = Flamingo(problem)
+    flamingo = FlamingoV2(problem)
     flamingo.position = np.array([0.1, 0.2, 0.3])
     flamingo._fitness = 0.6
     
@@ -129,7 +137,7 @@ def test_flamingo_move_migrate():
     np.random.seed(42)
     problem = MockProblem(dimension=3)
     
-    flamingo = Flamingo(problem)
+    flamingo = FlamingoV2(problem)
     flamingo.position = np.array([0.1, 0.2, 0.3])
     flamingo._fitness = 0.6
     
@@ -151,13 +159,13 @@ def test_flamingo_copy():
     """Test de la función de copia de Flamingo."""
     problem = MockProblem()
     
-    flamingo1 = Flamingo(problem)
+    flamingo1 = FlamingoV2(problem)
     flamingo1.position = np.array([0.1, 0.2, 0.3])
     flamingo1._fitness = 0.6
     flamingo1.personal_best_position = np.array([0.1, 0.2, 0.3])
     flamingo1.personal_best_fitness = 0.6
     
-    flamingo2 = Flamingo(problem)
+    flamingo2 = FlamingoV2(problem)
     flamingo2.copy(flamingo1)
     
     # Verificar que se han copiado los valores

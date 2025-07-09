@@ -2,7 +2,7 @@ import pytest
 import os
 import sys
 from click.testing import CliRunner
-from scripts.run import main
+from scripts.cli.run import main
 import tempfile
 from unittest.mock import patch, MagicMock
 
@@ -65,7 +65,7 @@ def test_cli_basic_run(runner):
 
         # Verificar que la invocación del comando funciona
         # pero interrumpirlo tan pronto como intente cargar el problema
-        with patch("scripts.run.VRPProblem", side_effect=SystemExit(0)):
+        with patch("scripts.cli.run.VRPProblem", side_effect=SystemExit(0)):
             _ = runner.invoke(
                 main,
                 [

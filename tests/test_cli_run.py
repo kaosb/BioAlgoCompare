@@ -10,7 +10,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # ruff: noqa: E402
-from scripts.run import main
+from scripts.cli.run import main
 
 
 def test_main_function_import():
@@ -20,17 +20,17 @@ def test_main_function_import():
 
 def test_get_algorithms_mapping():
     """Verifica que se pueda importar y mapear los algoritmos correctamente."""
-    from algorithms.sho import SHO
-    from algorithms.opa import OPA
+    from algorithms.sho_v2 import SHOV2
+    from algorithms.opa_v2 import OPAV2
     
     algorithms = {
-        'sho': SHO,
-        'opa': OPA,
+        'sho': SHOV2,
+        'opa': OPAV2,
     }
     
     # Verificar que los algoritmos se importen y sean clases
     for algo_name, algo_class in algorithms.items():
-        assert algo_class.__name__ == algo_name.upper()
+        assert algo_class.__name__ in ['SHOV2', 'OPAV2']
         
         # Verificar que tienen los métodos necesarios
         assert hasattr(algo_class, 'execute')
@@ -44,8 +44,8 @@ def test_cli_integration():
     from click.testing import CliRunner
     
     runner = CliRunner()
-    with patch('scripts.run.VRPProblem'):
-        with patch('scripts.run.SHO.execute', return_value=None):
+    with patch('scripts.cli.run.VRPProblem'):
+        with patch('scripts.cli.run.SHO.execute', return_value=None):
             # Solo verificamos que la CLI se inicie sin errores
             with pytest.raises(SystemExit):
                 result = runner.invoke(main, ['--algorithm', 'sho', '--instance', 'test'])

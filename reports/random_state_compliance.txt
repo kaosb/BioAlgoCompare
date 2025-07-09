@@ -1,0 +1,17 @@
+Random State Management Compliance Report
+==================================================
+
+Total algorithms analyzed: 1
+Compliant: 0 (0.0%)
+Non-compliant: 1 (100.0%)
+
+Non-compliant Algorithms:
+------------------------------
+
+base_v2.py:
+  Line 177: Direct numpy seed setting
+    Code: np.random.seed(seed)
+  Line 176: Direct Python random seed setting
+    Code: random.seed(seed)
+  Line 177: Direct Python random seed setting
+    Code: np.random.seed(seed)

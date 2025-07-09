@@ -1,0 +1,50 @@
+# EditorConfig helps maintain consistent coding styles across different editors and IDEs
+# https://editorconfig.org
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.py]
+max_line_length = 88
+indent_size = 4
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = 80
+
+[*.{sh,bash}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{js,jsx,ts,tsx,css,scss,html}]
+indent_size = 2
+
+[*.{vrp,txt,csv}]
+trim_trailing_whitespace = false
+
+[*.ipynb]
+indent_size = 1
+
+[{package.json,.travis.yml,.gitlab-ci.yml}]
+indent_size = 2
+
+[*.toml]
+indent_size = 4
+
+[*.rst]
+indent_size = 3
+
+[*.tex]
+indent_size = 2
