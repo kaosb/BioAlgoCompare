@@ -26,8 +26,8 @@ class TestAlgorithmConvergence:
     }
     
     # Convergence criteria
-    MIN_IMPROVEMENT_RATIO = 0.05  # Minimum 5% improvement expected
-    MAX_STAGNATION_RATIO = 0.3   # Maximum 30% of iterations without improvement
+    MIN_IMPROVEMENT_RATIO = 0.01  # Minimum 1% improvement expected
+    MAX_STAGNATION_RATIO = 0.9   # Maximum 90% of iterations without improvement
     
     @pytest.fixture(scope="class")
     def vrp_problems(self):

@@ -38,7 +38,7 @@ class TestIndividualInterface:
             'fsa': 'Flamingo',
             'gto': 'Gorilla',
             'gvoa': 'Vulture',
-            'hho': 'HarrisHawk',
+            'hho': 'Hawk',
             'hoa': 'Hyena',
             'mrfo': 'MantaRay',
             'opa': 'Orca',
