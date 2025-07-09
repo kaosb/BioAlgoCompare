@@ -1,0 +1,135 @@
+{
+  "version": "1.0.0",
+  "description": "BioAlgoCompare code standards configuration",
+  
+  "style": {
+    "max_line_length": 88,
+    "indent_size": 4,
+    "quote_style": "single",
+    "docstring_style": "google",
+    "import_order": ["stdlib", "third-party", "local"]
+  },
+  
+  "naming": {
+    "class_pattern": "^[A-Z][a-zA-Z0-9]*$",
+    "function_pattern": "^[a-z_][a-z0-9_]*$",
+    "constant_pattern": "^[A-Z][A-Z0-9_]*$",
+    "algorithm_pattern": "^[A-Z]{2,6}$",
+    "private_pattern": "^_[a-z_][a-z0-9_]*$"
+  },
+  
+  "complexity": {
+    "max_function_complexity": 15,
+    "max_file_lines": 1000,
+    "max_function_lines": 100,
+    "max_parameters": 7,
+    "max_nested_blocks": 4
+  },
+  
+  "documentation": {
+    "require_module_docstring": true,
+    "require_class_docstring": true,
+    "require_function_docstring": true,
+    "require_parameter_description": true,
+    "require_return_description": true,
+    "required_sections": ["Args", "Returns"],
+    "optional_sections": ["Raises", "Example", "Note", "References"]
+  },
+  
+  "algorithms": {
+    "required_base_class": "MetaheuristicAlgorithm",
+    "required_methods": [
+      "__init__",
+      "_create_individual",
+      "initialize_population",
+      "run"
+    ],
+    "required_docstring_sections": [
+      "Based on",
+      "Parameters",
+      "Attributes"
+    ],
+    "require_paper_reference": true,
+    "require_mathematical_formulation": true
+  },
+  
+  "testing": {
+    "min_coverage": 80,
+    "require_doctest": false,
+    "test_file_pattern": "test_*.py",
+    "fixture_pattern": "*_fixture",
+    "parametrize_limit": 10
+  },
+  
+  "security": {
+    "banned_functions": [
+      "eval",
+      "exec",
+      "__import__",
+      "compile",
+      "input"
+    ],
+    "require_input_validation": true,
+    "max_file_size_mb": 10,
+    "allowed_file_extensions": [".py", ".json", ".yaml", ".toml", ".md", ".txt", ".csv"]
+  },
+  
+  "performance": {
+    "prefer_numpy_operations": true,
+    "require_vectorization": true,
+    "warn_nested_loops": true,
+    "profile_threshold_ms": 1000
+  },
+  
+  "type_checking": {
+    "require_type_hints": true,
+    "allow_any": false,
+    "allow_untyped_defs": false,
+    "strict_optional": true,
+    "warn_return_any": true
+  },
+  
+  "enforcement": {
+    "pre_commit": {
+      "enabled": true,
+      "fail_fast": false,
+      "auto_fix": true
+    },
+    "ci_cd": {
+      "enabled": true,
+      "block_on_failure": true,
+      "required_checks": [
+        "style",
+        "complexity",
+        "documentation",
+        "type_checking",
+        "security",
+        "tests"
+      ]
+    },
+    "exceptions": {
+      "allow_noqa": true,
+      "require_justification": true,
+      "max_suppressions_per_file": 5
+    }
+  },
+  
+  "tools": {
+    "ruff": {
+      "enabled": true,
+      "config_file": "pyproject.toml"
+    },
+    "mypy": {
+      "enabled": true,
+      "config_file": "pyproject.toml"
+    },
+    "bandit": {
+      "enabled": true,
+      "config_file": ".bandit"
+    },
+    "coverage": {
+      "enabled": true,
+      "config_file": ".coveragerc"
+    }
+  }
+}
