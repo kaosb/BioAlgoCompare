@@ -41,7 +41,7 @@ class TestModuleImports:
         """Test importing Individual classes."""
         from algorithms import (
             Hummingbird, Protozoa, EnhancedGorilla, Earthworm,
-            Fossa, Gorilla, Vulture, HarrisHawk,
+            Fossa, Gorilla, Vulture, Hawk,
             MantaRay, Orca, Raven, SlimeMould, Starling, Whale
         )
         
@@ -50,7 +50,7 @@ class TestModuleImports:
         
         individuals = [
             Hummingbird, Protozoa, EnhancedGorilla, Earthworm,
-            Fossa, Gorilla, Vulture, HarrisHawk,
+            Fossa, Gorilla, Vulture, Hawk,
             MantaRay, Orca, Raven, SlimeMould, Starling, Whale,
             FlamingoFGO, FlamingoFSA, HyenaHOA, HyenaSHO
         ]
