@@ -171,8 +171,8 @@ class TestModuleImports:
         assert create_benchmark_report is not None
         
         # Test visualization
-        from utils.visualization import plot_routes, plot_convergence
-        assert plot_routes is not None
+        from utils.visualization import plot_vrp_solution, plot_convergence
+        assert plot_vrp_solution is not None
         assert plot_convergence is not None
     
     def test_circular_imports(self):
