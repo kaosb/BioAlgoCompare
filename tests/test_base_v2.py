@@ -13,8 +13,8 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from algorithms.base_v2 import Individual, MetaheuristicAlgorithm, MoveContext, AbstractProblem
-from algorithms.sho_v2 import SHO_V2, SpottedHyena, VRPProblemAdapter
-from problems.vrp import VRPProblem
+from algorithms.sho_v2 import SHOV2, SpottedHyena, VRPProblemAdapter
+from problems.vrp_v2 import VRPProblemV2
 
 
 class SimpleTestProblem(AbstractProblem):
@@ -206,13 +206,13 @@ class TestSHOV2:
     """Test the migrated SHO algorithm."""
     
     def test_with_vrp_adapter(self):
-        """Test SHO_V2 with VRP problem adapter."""
+        """Test SHOV2 with VRP problem adapter."""
         # Load VRP problem
         vrp = VRPProblem("data/vrp/P-n16-k8.vrp")
         problem = VRPProblemAdapter(vrp)
         
         # Run algorithm
-        algo = SHO_V2(problem, population_size=10, max_iterations=10, seed=42)
+        algo = SHOV2(problem, population_size=10, max_iterations=10, seed=42)
         result = algo.execute()
         
         assert result is not None
@@ -222,7 +222,7 @@ class TestSHOV2:
     def test_leaders_update(self):
         """Test that alpha, beta, delta are properly updated."""
         problem = SimpleTestProblem(5)
-        algo = SHO_V2(problem, population_size=10, max_iterations=5, seed=42)
+        algo = SHOV2(problem, population_size=10, max_iterations=5, seed=42)
         
         algo.initialize_population()
         
@@ -242,13 +242,13 @@ class TestSHOV2:
         assert algo.beta.fitness() <= algo.delta.fitness()
     
     def test_reproducibility_sho(self):
-        """Test SHO_V2 reproducibility."""
+        """Test SHOV2 reproducibility."""
         problem = SimpleTestProblem(10)
         
         # Run twice with same seed
         results = []
         for _ in range(2):
-            algo = SHO_V2(problem, population_size=15, max_iterations=20, seed=12345)
+            algo = SHOV2(problem, population_size=15, max_iterations=20, seed=12345)
             result = algo.execute()
             results.append({
                 'fitness': result.fitness(),

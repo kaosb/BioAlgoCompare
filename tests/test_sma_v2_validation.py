@@ -5,7 +5,7 @@ Test de validación de parámetros para SMA v2.
 import pytest
 from algorithms.sma_v2 import SMAV2
 from algorithms.validators import ValidationError
-from problems.vrp import VRPProblem
+from problems.vrp_v2 import VRPProblemV2
 
 
 class TestSMAV2Validation:
