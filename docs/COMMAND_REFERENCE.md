@@ -156,10 +156,46 @@ python scripts/run_massive.py \
 
 ## 📈 Análisis Estadístico
 
-### Análisis Estadístico Completo
+### Análisis Estadístico v2 (Recomendado) 🆕
+
+El módulo v2 incluye correcciones importantes y nuevas métricas:
 
 ```bash
-# Análisis avanzado con tests de Friedman y Nemenyi
+# Análisis completo con CD corregido y tamaños de efecto
+python scripts/analyze_v2.py stats \
+    --csv results/massive_benchmark_summary.csv \
+    --out results/statistical_analysis_v2
+
+# Con tests extendidos (incluye Quade test)
+python scripts/analyze_v2.py stats \
+    --csv results/benchmark_results.csv \
+    --out results/analysis \
+    --extended-tests
+
+# Solo tamaños de efecto vs mejor algoritmo
+python scripts/analyze_v2.py effect-size \
+    --csv results/benchmark_results.csv \
+    --out results/effects \
+    --vs-best
+
+# Tamaños de efecto por pares
+python scripts/analyze_v2.py effect-size \
+    --csv results/benchmark_results.csv \
+    --out results/effects \
+    --pairwise
+```
+
+**Características del v2:**
+- ✅ Critical Distance (CD) corregido: usa q_α/√2
+- ✅ Vargha-Delaney A12 y Cliff's delta
+- ✅ Test de Quade como alternativa a Friedman
+- ✅ Tracking de versiones de software
+- ✅ Diagramas CD mejorados
+
+### Análisis Estadístico v1 (Legacy)
+
+```bash
+# Análisis original con tests de Friedman y Nemenyi
 python scripts/analyze.py stats \
     --csv results/massive_benchmark_summary.csv \
     --out results/statistical_analysis
@@ -346,7 +382,7 @@ git push origin feature/nueva-mejora
 
 ### Para Mejores Resultados
 
-1. **Población**: 
+1. **Población**:
    - Instancias pequeñas (≤30 nodos): 30-40
    - Instancias medianas (30-50 nodos): 40-50
    - Instancias grandes (>50 nodos): 50-100

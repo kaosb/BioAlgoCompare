@@ -19,7 +19,12 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 ### Documentación Científica
 
 - [Reproducibilidad y Rigor Científico](scientific/reproducibility.md) - Garantías de reproducibilidad y rigor en experimentos
-- [Análisis Estadístico](scientific/statistical_analysis.md) - Metodología estadística detallada
+- [Metodología Estadística v2](STATISTICS.md) - **NUEVO** 🆕 Análisis estadístico con correcciones y mejoras
+  - Critical Distance (CD) corregido con q_α/√2
+  - Vargha-Delaney A12 y Cliff's delta
+  - Test de Quade como alternativa
+  - Ejemplos prácticos incluidos
+- [Análisis Estadístico v1](scientific/statistical_analysis.md) - Metodología estadística original
   - Test de Friedman alineado
   - Test post-hoc de Nemenyi
   - Tamaños de efecto A12 de Vargha-Delaney
@@ -84,4 +89,4 @@ El proyecto forma parte de una investigación académica para la Jornada Chilena
 
 ---
 
-*Última actualización: 10 de mayo de 2025*
+*Última actualización: 9 de julio de 2025*
