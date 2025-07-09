@@ -163,19 +163,22 @@ def quade_test(data: pd.DataFrame, alpha: float = 0.05) -> Dict:
     S_j = weighted_ranks.sum(axis=0)
 
     # Step 6: Calculate Quade statistic
-    # Calculate A and B components
-    A = (S_j**2).sum()
-    B = (weighted_ranks**2).sum().sum()
+    # Calculate sum of squares
+    grand_mean = S_j.mean()
+    SS_A = n * ((S_j - grand_mean) ** 2).sum()  # Between algorithms sum of squares
+
+    # Total sum of squares
+    all_weighted = weighted_ranks.values.flatten()
+    SS_T = ((all_weighted - all_weighted.mean()) ** 2).sum()
+
+    # Error sum of squares
+    SS_E = SS_T - SS_A
+
+    if SS_E == 0:
+        return {"quade_p": 1.0, "error": "Zero error sum of squares in Quade test"}
 
     # Quade F-statistic
-    numerator = (n - 1) * A - B
-    denominator = B - (1 / n) * (weighted_ranks.sum().sum() ** 2)
-
-    if denominator == 0:
-        return {"quade_p": 1.0, "error": "Zero denominator in Quade test"}
-
-    # Correct Quade F-statistic formula
-    F_Q = ((n - 1) * numerator) / denominator
+    F_Q = (SS_A / (k - 1)) / (SS_E / ((k - 1) * (n - 1)))
 
     # Calculate p-value using F-distribution
     df1 = k - 1
