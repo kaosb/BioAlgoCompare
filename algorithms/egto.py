@@ -63,10 +63,6 @@ class EnhancedGorilla(Individual):
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
-    def is_better_than(self, other):
-        """Compara si este individuo es mejor que otro."""
-        return self.fitness() < other.fitness()
-
     def is_feasible(self):
         """Verifica si el individuo representa una solución factible."""
         return (
@@ -144,6 +140,14 @@ class EGTO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de gorilas."""
+        # Set random seed if provided
+
+        if self.seed is not None:
+
+            random.seed(self.seed)
+
+            np.random.seed(self.seed)
+
         self.population = []
 
         for _ in range(self.population_size):

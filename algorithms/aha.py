@@ -5,6 +5,7 @@ DOI: 10.1016/j.cma.2021.114194
 """
 
 import numpy as np
+import random
 from typing import List, Tuple
 from copy import deepcopy
 from algorithms.base import Individual, MetaheuristicAlgorithm
@@ -41,7 +42,7 @@ class Hummingbird(Individual):
 
     def is_better_than(self, other):
         """Compare if this individual is better than other."""
-        return self._fitness < other._fitness
+        return bool(self._fitness < other._fitness)
 
     def is_feasible(self):
         """Check if the individual represents a feasible solution."""
@@ -194,6 +195,10 @@ class AHA(MetaheuristicAlgorithm):
         self.convergence_curve = []
 
     def initialize_population(self):
+        # Set random seed if provided
+        if self.seed is not None:
+            np.random.seed(self.seed)
+            
         self.population = []
         # Para el problema VRP, usamos el dominio [0,1] por cada dimensión
         dim = self.problem.get_dimension()
