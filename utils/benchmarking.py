@@ -50,6 +50,7 @@ class BenchmarkResult:
         self.fitness_values = []
         self.execution_times = []
         self.convergence_curves = []
+        self.solutions = []
 
         # Métricas derivadas
         self.best_fitness = None

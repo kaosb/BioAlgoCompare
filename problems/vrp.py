@@ -352,6 +352,14 @@ class VRPProblem:
     def get_dimension(self) -> int:
         """Retorna la dimensión del problema (número de nodos)."""
         return self.dimension - 1  # Excluir el depósito
+    
+    def get_lower_bounds(self) -> np.ndarray:
+        """Retorna los límites inferiores del espacio de búsqueda."""
+        return np.zeros(self.get_dimension())
+    
+    def get_upper_bounds(self) -> np.ndarray:
+        """Retorna los límites superiores del espacio de búsqueda."""
+        return np.ones(self.get_dimension())
 
     def random_solution(self) -> np.ndarray:
         """

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick-HO: Propuesta de Tesis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: #333;
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .slide {
+            background: white;
+            width: 90vw;
+            max-width: 1200px;
+            height: 85vh;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px;
+            display: none;
+            position: relative;
+            overflow: auto;
+        }
+        
+        .slide.active {
+            display: block;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .slide h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        .slide h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            margin-top: 30px;
+        }
+        
+        .slide h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24, #ff9ff3);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #a8edea, #fed6e3, #d299c2);
+            color: #2c3e50;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.4);
+            font-weight: bold;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .methodology-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .method-step {
+            background: linear-gradient(135deg, #00cec9, #55a3ff, #fd79a8);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            margin: 5px;
+            min-width: 150px;
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.4);
+            font-weight: 600;
+        }
+        
+        .arrow {
+            font-size: 1.5em;
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .timeline-item {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #2c3e50;
+        }
+        
+        .timeline-month {
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 1.1em;
+        }
+        
+        .benefits-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .benefit-item {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #00cec9;
+            box-shadow: 0 8px 25px rgba(0, 206, 201, 0.15);
+            color: #2c3e50;
+        }
+        
+        .benefit-item h3 {
+            color: #00cec9;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-btn:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .slide-counter {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #34495e;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .algorithm-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .algo-card {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .algo-card.highlight {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .research-gap {
+            background: linear-gradient(135deg, #fd79a8, #fdcb6e, #ff7675);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(253, 121, 168, 0.3);
+        }
+        
+        .innovation-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .innovation-item {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .innovation-item h3 {
+            color: #ffeaa7 !important;
+            font-size: 1.3em !important;
+            font-weight: bold !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .innovation-item p {
+            color: #ffffff !important;
+            font-size: 1.1em !important;
+            line-height: 1.4 !important;
+            font-weight: 500 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active">
+            <div class="slide-counter">1 / 10</div>
+            <h1>Quick-HO</h1>
+            <div class="highlight-box">
+                Optimización Bioinspirada con Aprendizaje Adaptativo para Enrutamiento Dinámico en Quick Commerce
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <h2>Primera Aplicación del Hippopotamus Optimization Algorithm</h2>
+                <p style="font-size: 1.2em; margin: 20px 0;">
+                    <strong>Tesista:</strong> Felipe González<br>
+                    <strong>Director:</strong> Rodrigo Olivares<br>
+                    <strong>Programa:</strong> Magíster en Informática Aplicada<br>
+                    <strong>Universidad de Valparaíso</strong>
+                </p>
+            </div>
+            
+            <div style="text-align: center; font-size: 1.1em; color: #7f8c8d;">
+                Propuesta de Tesis de Magíster • Junio 2025
+            </div>
+        </div>
+
+        <!-- Slide 2: El Problema -->
+        <div class="slide">
+            <div class="slide-counter">2 / 10</div>
+            <h1>El Desafío del Quick Commerce</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">$5.5B</span>
+                    Mercado India 2024 [11]
+                    <br><small>Proyección $95B global 2030</small>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">10-30</span>
+                    Minutos entrega [2]
+                    <br><small>vs. 2-3 días e-commerce tradicional</small>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">40%</span>
+                    Costos logísticos [10]
+                    <br><small>vs. 15% comercio tradicional</small>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">300+</span>
+                    Dark stores LatAm
+                    <br><small>Rappi, Getir, Zepto</small>
+                </div>
+            </div>
+            
+            <h2>Características Únicas del Quick Commerce <span style="font-size: 0.8em; color: #666;">[3]</span></h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <h3>⏰ Ventanas Ultra-Estrechas</h3>
+                    <p>Entregas en máximo 30 minutos requieren optimización en tiempo real <span style="font-size: 0.8em; color: #666;">[2]</span></p>
+                </div>
+                <div class="benefit-item">
+                    <h3>📱 Demanda Dinámica</h3>
+                    <p>Órdenes llegan continuamente durante la operación</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>⚖️ Objetivos Conflictivos</h3>
+                    <p>Balancear eficiencia, costos y condiciones laborales justas <span style="font-size: 0.8em; color: #666;">[4]</span></p>
+                </div>
+            </div>
+            
+            <div class="research-gap">
+                <h3>💡 Oportunidad de Investigación</h3>
+                <p>Los algoritmos tradicionales de VRP no son adecuados para la naturaleza dinámica y multiobjetivo del quick commerce</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Brecha de Investigación -->
+        <div class="slide">
+            <div class="slide-counter">3 / 10</div>
+            <h1>Brecha de Investigación Identificada</h1>
+            
+            <h2>Estado del Arte en Algoritmos Bioinspirados <span style="font-size: 0.8em; color: #666;">[5]</span></h2>
+            <div class="algorithm-comparison">
+                <div class="algo-card">
+                    <h3>Genetic Algorithm</h3>
+                    <p>Ampliamente usado en VRP</p>
+                </div>
+                <div class="algo-card">
+                    <h3>Particle Swarm</h3>
+                    <p>Aplicado en routing</p>
+                </div>
+                <div class="algo-card">
+                    <h3>Ant Colony</h3>
+                    <p>Clásico para VRP</p>
+                </div>
+                <div class="algo-card highlight">
+                    <h3>Hippopotamus Algorithm</h3>
+                    <p><strong>NUNCA aplicado al VRP</strong> <span style="font-size: 0.8em; color: white; opacity: 0.9;">[1]</span></p>
+                    <p style="font-size: 0.8em; margin-top: 5px;"><em>Líder en CEC 2024 functions</em></p>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3>🦛 Hippopotamus Optimization Algorithm (HO)</h3>
+                <p><strong>Propuesto en 2024 • Primer lugar en 115 de 161 funciones CEC</strong> <span style="font-size: 0.9em; opacity: 0.8;">[1]</span></p>
+                <p style="font-size: 0.95em; margin-top: 10px;">
+                    <em>CEC = Congress on Evolutionary Computation benchmark functions<br>
+                    Incluye: optimización unimodal, multimodal, híbrida y composición</em>
+                </p>
+            </div>
+            
+            <h2>¿Por qué HO es Prometedor para Quick Commerce?</h2>
+            <div class="innovation-points">
+                <div class="innovation-item">
+                    <h3 style="color: #f1c40f; margin-bottom: 15px;">Defensa Grupal</h3>
+                    <p style="font-size: 1.1em; line-height: 1.4;">Modela colaboración → Balanceo de carga entre repartidores</p>
+                </div>
+                <div class="innovation-item">
+                    <h3 style="color: #f1c40f; margin-bottom: 15px;">Evasión de Depredadores</h3>
+                    <p style="font-size: 1.1em; line-height: 1.4;">Escape rápido → Re-routing ante congestión urbana</p>
+                </div>
+                <div class="innovation-item">
+                    <h3 style="color: #f1c40f; margin-bottom: 15px;">Actualización Adaptativa</h3>
+                    <p style="font-size: 1.1em; line-height: 1.4;">Movimiento dinámico → Reasignación en tiempo real</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Propuesta Quick-HO -->
+        <div class="slide">
+            <div class="slide-counter">4 / 10</div>
+            <h1>Propuesta: Quick-HO</h1>
+            
+            <div class="highlight-box">
+                Primera adaptación del Hippopotamus Optimization Algorithm + Imitation Learning para Quick Commerce
+            </div>
+            
+            <h2>Innovaciones Principales</h2>
+            <div class="innovation-points">
+                <div class="innovation-item">
+                    <h3>🔄 Operadores Discretos</h3>
+                    <p>Adaptación de HO continuo a rutas discretas de vehículos</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>🎯 Optimización Multiobjetivo</h3>
+                    <p>Tiempo de entrega + Equilibrio laboral + Eficiencia operacional</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>🧠 Imitation Learning</h3>
+                    <p>Ajuste dinámico de parámetros α, β, γ del algoritmo <span style="font-size: 0.8em; opacity: 0.8;">[9]</span></p>
+                    <p style="font-size: 0.9em; margin-top: 8px;"><em>Aprende de demos expertas para optimizar exploración/explotación</em></p>
+                </div>
+                <div class="innovation-item">
+                    <h3>⚡ Enrutamiento Dinámico</h3>
+                    <p>Re-optimización en tiempo real con llegada continua de órdenes</p>
+                </div>
+            </div>
+            
+            <h2>Fases del Algoritmo Adaptadas</h2>
+            <div class="methodology-flow">
+                <div class="method-step">
+                    <h3>Fase 1</h3>
+                    <p>Actualización de Posición → Reasignación dinámica</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="method-step">
+                    <h3>Fase 2</h3>
+                    <p>Defensa Grupal → Balanceo colaborativo</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="method-step">
+                    <h3>Fase 3</h3>
+                    <p>Evasión → Re-routing proactivo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Metodología -->
+        <div class="slide">
+            <div class="slide-counter">5 / 10</div>
+            <h1>Metodología de Investigación</h1>
+            
+            <h2>Enfoque Experimental</h2>
+            <div class="methodology-flow">
+                <div class="method-step">
+                    <h3>Desarrollo</h3>
+                    <p>Implementar Quick-HO discreto</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="method-step">
+                    <h3>Integración</h3>
+                    <p>Módulo Imitation Learning</p>
+                </div>
+                <div class="arrow">→</div>
+                <div class="method-step">
+                    <h3>Evaluación</h3>
+                    <p>Comparación experimental</p>
+                </div>
+            </div>
+            
+            <h2>Componentes del Sistema</h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <h3>🎯 Simulador Dinámico</h3>
+                    <p><strong>Instancias de prueba:</strong> Solomon benchmark (50-100 clientes), instancias urbanas realistas de Santiago y Valparaíso</p>
+                    <p><strong>Características:</strong> 3-5 dark stores, demanda Poisson, ventanas 10-30min</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>🧮 Motor de Optimización</h3>
+                    <p><strong>Quick-HO:</strong> Tres fases adaptadas con operadores discretos (2-opt, swap, relocate)</p>
+                    <p><strong>Población:</strong> 50 soluciones, 1000 iteraciones máximo</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>🤖 Módulo de Aprendizaje</h3>
+                    <p><strong>Imitation Learning:</strong> Red neuronal para predecir α, β, γ óptimos</p>
+                    <p><strong>Entrenamiento:</strong> 500+ demos de configuraciones expertas</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>📊 Sistema de Evaluación</h3>
+                    <p><strong>Métricas:</strong> Hipervolumen, IGD, tiempo ejecución, calidad soluciones</p>
+                    <p><strong>Comparación:</strong> 30 ejecuciones independientes, tests estadísticos</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Comparación y Baselines -->
+        <div class="slide">
+            <div class="slide-counter">6 / 10</div>
+            <h1>Estrategia de Evaluación</h1>
+            
+            <h2>Algoritmos de Comparación <span style="font-size: 0.8em; color: #666;">[5, 6, 8]</span></h2>
+            <div class="algorithm-comparison">
+                <div class="algo-card">
+                    <h3>PSO</h3>
+                    <p>Particle Swarm Optimization adaptado</p>
+                </div>
+                <div class="algo-card">
+                    <h3>GA</h3>
+                    <p>Genetic Algorithm tradicional</p>
+                </div>
+                <div class="algo-card">
+                    <h3>Heurísticas</h3>
+                    <p>Métodos industriales estándar</p>
+                </div>
+                <div class="algo-card highlight">
+                    <h3>Quick-HO</h3>
+                    <p>Nuestra propuesta</p>
+                </div>
+            </div>
+            
+            <h2>Métricas de Evaluación</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">⏱️</span>
+                    <br><strong>Tiempo de Entrega</strong>
+                    <br><small>% entregas ≤30 min</small>
+                    <br><small>Tiempo promedio (min)</small>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">⚖️</span>
+                    <br><strong>Equilibrio de Carga</strong>
+                    <br><small>Coef. variación carga</small>
+                    <br><small>Desv. std. trabajos/repartidor</small>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">📏</span>
+                    <br><strong>Eficiencia Operacional</strong>
+                    <br><small>Distancia total (km)</small>
+                    <br><small>Costo operacional ($)</small>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">💻</span>
+                    <br><strong>Rendimiento Algoritmo</strong>
+                    <br><small>Tiempo CPU (seg)</small>
+                    <br><small>Iteraciones convergencia</small>
+                </div>
+            </div>
+            
+            <div class="research-gap">
+                <h3>🎯 Hipótesis</h3>
+                <p>Quick-HO superará significativamente a algoritmos bioinspirados tradicionales en cumplimiento de ventanas temporales ultra-estrechas y equilibrio de carga laboral</p>
+            </div>
+        </div>
+
+        <!-- Slide 7: Plan de Trabajo -->
+        <div class="slide">
+            <div class="slide-counter">7 / 10</div>
+            <h1>Plan de Trabajo y Timeline</h1>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-month">Meses 1-2</div>
+                    <h3>Desarrollo de Quick-HO</h3>
+                    <p><strong>Entregables:</strong> Implementación operadores discretos (2-opt, swap), validación en instancias Solomon RC101-RC108</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-month">Mes 3</div>
+                    <h3>Simulador Dinámico</h3>
+                    <p><strong>Entregables:</strong> Entorno de quick commerce con 3 dark stores Santiago, patrones demanda Poisson λ=5-15 órdenes/hora</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-month">Mes 4</div>
+                    <h3>Imitation Learning</h3>
+                    <p><strong>Entregables:</strong> Red neuronal PyTorch, dataset 500+ demos, integración α,β,γ dinámicos</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-month">Mes 5</div>
+                    <h3>Experimentación</h3>
+                    <p><strong>Entregables:</strong> 30 ejecuciones x 10 instancias, comparación vs GA-PSO-TabuSearch, análisis estadístico</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-month">Mes 6</div>
+                    <h3>Análisis y Publicación</h3>
+                    <p><strong>Entregables:</strong> Tesis final, artículo CLEI 2025, código GitHub, presentación defensa</p>
+                </div>
+            </div>
+            
+            <h2>Entregables Principales</h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <h3>📝 Tesis de Magíster</h3>
+                    <p>Documento completo con resultados experimentales y análisis teórico</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>🔬 Artículo Científico</h3>
+                    <p>Publicación en CLEI 2025 o SCCC 2025</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>💻 Código Open Source</h3>
+                    <p>Implementación reproducible disponible públicamente</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Impacto Esperado -->
+        <div class="slide">
+            <div class="slide-counter">8 / 10</div>
+            <h1>Impacto y Contribuciones</h1>
+            
+            <h2>Contribuciones Científicas</h2>
+            <div class="innovation-points">
+                <div class="innovation-item">
+                    <h3>🥇 Primera Aplicación</h3>
+                    <p>HO nunca antes aplicado al dominio VRP</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>🔄 Metodología Híbrida</h3>
+                    <p>Combinación innovadora bioinspirados + ML</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>📊 Enfoque Multiobjetivo</h3>
+                    <p>Optimización simultánea de objetivos conflictivos</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>⚡ Adaptación Dinámica</h3>
+                    <p>Solución para enrutamiento en tiempo real</p>
+                </div>
+            </div>
+            
+            <h2>Impacto Industrial</h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <h3>💰 Reducción de Costos</h3>
+                    <p>Optimización puede reducir significativamente los costos logísticos (actualmente 40% de ingresos)</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>⚖️ Condiciones Laborales</h3>
+                    <p>Equilibrio de carga mejora condiciones de trabajo de repartidores</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>🌱 Sostenibilidad</h3>
+                    <p>Menor distancia recorrida reduce impacto ambiental urbano</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>📈 Escalabilidad</h3>
+                    <p>Solución aplicable a múltiples mercados de quick commerce</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Viabilidad y Recursos -->
+        <div class="slide">
+            <div class="slide-counter">9 / 10</div>
+            <h1>Viabilidad del Proyecto</h1>
+            
+            <h2>Recursos Disponibles</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">🔬</span>
+                    <br>Experiencia del Director
+                    <br><small>Rodrigo Olivares</small>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">💻</span>
+                    <br>Recursos Computacionales
+                    <br><small>Universidad de Valparaíso</small>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">📚</span>
+                    <br>Literatura Especializada
+                    <br><small>12+ referencias clave</small>
+                </div>
+                <div class="stat-card">
+                    <span style="font-size: 1.5em;">🛠️</span>
+                    <br>Herramientas Open Source
+                    <br><small>Python, OR-Tools, PyTorch</small>
+                </div>
+            </div>
+            
+            <h2>Factores de Éxito</h2>
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <h3>✅ Alcance Definido</h3>
+                    <p>Objetivos específicos y medibles apropiados para 6 meses</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>✅ Tecnología Accesible</h3>
+                    <p>Implementación factible con herramientas estándar</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>✅ Gap Identificado</h3>
+                    <p>Oportunidad clara en la literatura científica</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>✅ Relevancia Práctica</h3>
+                    <p>Problema real con impacto industrial medible</p>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3>🎯 Probabilidad de Éxito: Alta</h3>
+                <p>Combinación de novedad técnica, viabilidad práctica y recursos disponibles</p>
+            </div>
+        </div>
+
+        <!-- Slide 10: Conclusión y Preguntas -->
+        <div class="slide">
+            <div class="slide-counter">10 / 10</div>
+            <h1>Conclusión</h1>
+            
+            <div class="highlight-box">
+                <h2>Quick-HO: Investigación Innovadora con Impacto Real</h2>
+            </div>
+            
+            <h2>¿Por qué Aprobar esta Propuesta?</h2>
+            <div class="innovation-points">
+                <div class="innovation-item">
+                    <h3>🎯 Novedad Científica</h3>
+                    <p>Primera aplicación de HO al VRP + integración con ML</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>💼 Relevancia Industrial</h3>
+                    <p>Solución a problema real de $5.5B+ mercado</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>📊 Factibilidad</h3>
+                    <p>Plan de trabajo realista con recursos disponibles</p>
+                </div>
+                <div class="innovation-item">
+                    <h3>📈 Potencial de Publicación</h3>
+                    <p>Contribución significativa para CLEI/SCCC 2025</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <h2 style="color: #2c3e50;">¿Preguntas o Comentarios?</h2>
+                <p style="font-size: 1.2em; color: #7f8c8d;">
+                    <strong>Felipe González</strong><br>
+                    Candidato a Magíster en Informática Aplicada<br>
+                    Universidad de Valparaíso
+                </p>
+            </div>
+            
+            <div class="research-gap">
+                <h3>🚀 Próximo Paso</h3>
+                <p>Aprobación para iniciar desarrollo e investigación</p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 30px; font-size: 0.85em; color: #2c3e50;">
+                <h4 style="margin-bottom: 10px; color: #2980b9;">Referencias Principales:</h4>
+                <p style="line-height: 1.3; margin: 0;">
+                    [1] Amiri et al., "Hippopotamus optimization algorithm," Scientific Reports, 2024<br>
+                    [2] Voccia et al., "Same-day delivery problem," Transportation Science, 2019<br>
+                    [5] Potvin, "Evolutionary algorithms for vehicle routing," INFORMS Journal, 2009<br>
+                    [9] Barros-Everett et al., "Parameter Prediction for Metaheuristics," Applied Sciences, 2023<br>
+                    [10] Chen et al., "Peeking beneath the hood of Uber," Internet Measurement Conf., 2015<br>
+                    [11] RedSeer Strategy Consultants, "Quick Commerce in India," Market Report, 2024
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            if (direction === 1 && currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            } else if (direction === -1 && currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
