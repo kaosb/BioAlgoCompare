@@ -12,6 +12,7 @@ import logging
 import multiprocessing as mp
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any, Optional, Callable, Tuple, List
 
 # Configurar logging
 logger = logging.getLogger("iteration_timer")
@@ -20,7 +21,7 @@ logger = logging.getLogger("iteration_timer")
 _manager = None
 _shared_data = None
 
-def initialize_shared_data():
+def initialize_shared_data() -> Optional[Dict[str, Any]]:
     """Inicializa estructuras de datos compartidas para todos los procesos"""
     global _manager, _shared_data
     
@@ -34,7 +35,7 @@ def initialize_shared_data():
     
     return _shared_data
 
-def get_shared_data():
+def get_shared_data() -> Optional[Dict[str, Any]]:
     """Obtiene acceso a las estructuras de datos compartidas"""
     global _manager, _shared_data
     
@@ -44,7 +45,7 @@ def get_shared_data():
         
     return _shared_data
 
-def record_iteration_time(algorithm, instance, run_id, total_time, iterations):
+def record_iteration_time(algorithm: str, instance: str, run_id: int, total_time: float, iterations: int) -> None:
     """
     Registra tiempo por iteración en la estructura de datos compartida.
     
@@ -79,7 +80,7 @@ def record_iteration_time(algorithm, instance, run_id, total_time, iterations):
     with shared['lock']:
         shared['iteration_times'].append(time_entry)
 
-def wrap_algorithm_task(original_func):
+def wrap_algorithm_task(original_func: Callable) -> Callable:
     """
     Decorador para envolver la función de ejecución y medir tiempos por iteración.
     
@@ -89,7 +90,7 @@ def wrap_algorithm_task(original_func):
     Returns:
         Función envuelta que mide tiempos
     """
-    def wrapped_func(args):
+    def wrapped_func(args: Tuple) -> Tuple[str, str, int, float, List[float], Any]:
         """Envuelve la función original para medir tiempos por iteración"""
         (
             algo_class,
@@ -121,7 +122,7 @@ def wrap_algorithm_task(original_func):
     
     return wrapped_func
 
-def get_recorded_times():
+def get_recorded_times() -> Dict[str, Any]:
     """
     Obtiene los tiempos por iteración registrados.
     
@@ -138,7 +139,7 @@ def get_recorded_times():
     with shared['lock']:
         return list(shared['iteration_times'])
 
-def calculate_avg_iteration_times():
+def calculate_avg_iteration_times() -> Dict[str, float]:
     """
     Calcula tiempos promedio por iteración agrupados por algoritmo e instancia.
     
@@ -170,7 +171,7 @@ def calculate_avg_iteration_times():
     
     return avg_summary
 
-def update_csv_with_iteration_times(csv_path):
+def update_csv_with_iteration_times(csv_path: str) -> bool:
     """
     Actualiza un archivo CSV con los tiempos promedio por iteración.
     
@@ -210,7 +211,7 @@ def update_csv_with_iteration_times(csv_path):
         logger.error(f"Error al actualizar CSV con tiempos por iteración: {str(e)}")
         return False
 
-def update_manifest_with_iteration_times(manifest_path):
+def update_manifest_with_iteration_times(manifest_path: str) -> bool:
     """
     Actualiza un archivo manifest.json con los tiempos promedio por iteración.
     
@@ -246,7 +247,7 @@ def update_manifest_with_iteration_times(manifest_path):
         logger.error(f"Error al actualizar manifest con tiempos por iteración: {str(e)}")
         return False
 
-def patch_algorithm_task():
+def patch_algorithm_task() -> Optional[Callable]:
     """
     Aplica el monkey patch a la función _run_algorithm_task en enhanced_benchmarking.
     Esta función debe llamarse desde el proceso principal antes de iniciar procesos hijos.
@@ -270,7 +271,7 @@ def patch_algorithm_task():
 
     return original_func
 
-def restore_algorithm_task(original_func):
+def restore_algorithm_task(original_func: Callable) -> None:
     """
     Restaura la función original _run_algorithm_task.
 

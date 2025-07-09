@@ -8,7 +8,7 @@ import time
 import multiprocessing as mp
 import numpy as np
 import logging
-from typing import Dict, List, Any, Callable, Tuple
+from typing import Dict, List, Any, Callable, Tuple, Optional
 
 # Configuración de logging
 logger = logging.getLogger("timing")
@@ -22,7 +22,7 @@ _is_active = False
 # Nueva lista compartida para tiempos usando Manager
 SHARED_TIMES = None
 
-def initialize_timing():
+def initialize_timing() -> None:
     """Inicializa las estructuras de datos compartidas para medición de tiempos."""
     global _manager, _iteration_times, _time_lock, _is_active, SHARED_TIMES
 
@@ -116,7 +116,7 @@ def instrument_run_algorithm_task(original_task_function: Callable) -> Callable:
     if not _is_active:
         initialize_timing()
     
-    def instrumented_run_algorithm_task(args: Tuple):
+    def instrumented_run_algorithm_task(args: Tuple) -> Tuple[str, str, int, float, List[float], Any]:
         """
         Versión instrumentada que mide tiempos por iteración.
         Compatible con multiprocessing.
@@ -161,7 +161,7 @@ def instrument_run_algorithm_task(original_task_function: Callable) -> Callable:
     
     return instrumented_run_algorithm_task
 
-def finalize_timing():
+def finalize_timing() -> Dict[str, float]:
     """
     Finaliza la medición de tiempos y devuelve el tiempo promedio global por iteración.
     Además, escribe este valor en el manifest.json.
@@ -226,7 +226,7 @@ def finalize_timing():
 
     return avg_iter_time_overall
 
-def cleanup_timing():
+def cleanup_timing() -> None:
     """Limpia y restaura el estado original después de la medición."""
     global _manager, _iteration_times, _time_lock, _is_active, _original_function, SHARED_TIMES
 
@@ -250,7 +250,7 @@ def cleanup_timing():
     # Devolver el tiempo promedio
     return avg_iter_time
 
-def calculate_avg_summary():
+def calculate_avg_summary() -> Dict[str, float]:
     """
     Calcula un resumen de tiempos promedio por algoritmo e instancia.
 

@@ -38,7 +38,7 @@ ALGORITHM_COLORS = {
 }
 
 
-def set_publication_style():
+def set_publication_style() -> None:
     """Configura el estilo de matplotlib para publicaciones científicas"""
     plt.style.use("seaborn-whitegrid")
     plt.rcParams["figure.figsize"] = (10, 6)
@@ -253,7 +253,7 @@ def create_convergence_plot(
     return figures
 
 
-def create_cd_diagram(ranks, names, cd=None, output_file=None):
+def create_cd_diagram(ranks: Dict[str, float], names: List[str], cd: Optional[float] = None, output_file: Optional[str] = None) -> Optional[str]:
     """
     Crea un diagrama de diferencia crítica (CD) para visualizar los rankings de algoritmos.
 
@@ -336,7 +336,7 @@ def create_cd_diagram(ranks, names, cd=None, output_file=None):
     return output_file
 
 
-def create_heatmap(data, row_var, col_var, value_var, title=None, output_file=None):
+def create_heatmap(data: pd.DataFrame, row_var: str, col_var: str, value_var: str, title: Optional[str] = None, output_file: Optional[str] = None) -> Optional[str]:
     """
     Crea un mapa de calor para visualizar la relación entre dos variables.
 
@@ -388,7 +388,7 @@ def create_heatmap(data, row_var, col_var, value_var, title=None, output_file=No
     return output_file
 
 
-def create_radar_chart(data, categories, group_var, value_var, output_file=None):
+def create_radar_chart(data: pd.DataFrame, categories: List[str], group_var: str, value_var: str, output_file: Optional[str] = None) -> Optional[str]:
     """
     Crea un gráfico de radar para comparar algoritmos en múltiples dimensiones.
 
@@ -461,7 +461,7 @@ def create_radar_chart(data, categories, group_var, value_var, output_file=None)
     return output_file
 
 
-def create_full_visualization_set(results, data_df, output_dir=None):
+def create_full_visualization_set(results: List[Any], data_df: pd.DataFrame, output_dir: Optional[str] = None) -> Dict[str, List[str]]:
     """
     Crea un conjunto completo de visualizaciones para el análisis de algoritmos.
 
@@ -616,7 +616,7 @@ def create_full_visualization_set(results, data_df, output_dir=None):
 
 
 # Función auxiliar para crear informe HTML con todas las visualizaciones
-def create_visual_report(figures, output_file=None):
+def create_visual_report(figures: Dict[str, List[str]], output_file: Optional[str] = None) -> Optional[str]:
     """
     Crea un informe HTML con todas las visualizaciones generadas.
 
