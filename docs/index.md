@@ -81,7 +81,7 @@ Los resultados de todas las ejecuciones experimentales se encuentran en el direc
 
 BioAlgoCompare es una plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
 
-El proyecto forma parte de una investigación académica para la Jornada Chilena de Computación 2025, cuyo objetivo es evaluar y comparar algoritmos bioinspirados recientes aplicados al Vehicle Routing Problem (VRP).
+El proyecto evalúa y compara algoritmos bioinspirados recientes aplicados al Vehicle Routing Problem (VRP), siguiendo las mejores prácticas de investigación reproducible en inteligencia computacional.
 
 ## Referencias
 

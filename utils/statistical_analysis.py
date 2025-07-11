@@ -9,7 +9,7 @@ This module consolidates all statistical analysis functionality, including:
 - Software version tracking for reproducibility
 
 The implementation follows rigorous scientific standards for algorithm comparison
-as required for the CISTI 2025 paper.
+following best practices in computational intelligence research.
 """
 
 import numpy as np

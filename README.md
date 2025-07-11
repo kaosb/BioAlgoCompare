@@ -3,7 +3,6 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Algorithms](https://img.shields.io/badge/algorithms-16-orange)](algorithms/)
-[![Conference](https://img.shields.io/badge/CISTI-2025-red)](docs/papers/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
 
@@ -337,17 +336,11 @@ Ver [Guía de Contribución](docs/development/contribution.md) para más detalle
 - 🚧 Integración con más problemas de optimización
 - 🚧 Interfaz web para visualización
 
-## 🎓 Contexto Académico
+## 📝 Documentación de Investigación
 
-Este proyecto es parte de una investigación para la **Jornada Chilena de Computación 2025** (CISTI 2025), evaluando algoritmos bioinspirados recientes aplicados al VRP.
-
-**Institución**: Universidad de Valparaíso
-**Programa**: Magíster en Informática Aplicada
-
-## 📝 Publicaciones
-
-- [Paper CISTI v1](docs/papers/cisti_v1/) - Formato IEEE Conference
-- [Paper CISTI v2](docs/papers/cisti_v2/) - Versión extendida
+- [Paper IEEE Format](docs/papers/paper_ieee/) - Formato IEEE estándar
+- [Paper Extended](docs/papers/paper_extended/) - Versión extendida del análisis
+- [Paper Current](docs/papers/paper_current/) - Versión actual en desarrollo
 
 ## 📄 Licencia
 

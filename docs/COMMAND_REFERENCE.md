@@ -352,13 +352,19 @@ ruff format .
 ### Generación de Documentación
 
 ```bash
-# Compilar papers académicos
+# Compile all research papers
 make -C docs/papers all
 
-# Solo paper CISTI v2
-make -C docs/papers cisti_v2
+# Compile IEEE format paper only
+make -C docs/papers paper_ieee
 
-# Limpiar archivos LaTeX temporales
+# Compile extended paper only
+make -C docs/papers paper_extended
+
+# Compile current paper only
+make -C docs/papers paper_current
+
+# Clean LaTeX temporary files
 make -C docs/papers clean
 ```
 

@@ -72,5 +72,5 @@ pytest --cov=algorithms --cov=problems --cov=utils --cov=scripts
 
 ## Next Steps
 1. Run massive benchmarks with the corrected analysis
-2. Generate publication-ready results for CISTI 2025
+2. Generate publication-ready results
 3. Update main documentation to reference v2 module
