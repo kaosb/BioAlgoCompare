@@ -1,0 +1,89 @@
+diff --git a/algorithms/ho.py b/algorithms/ho.py
+index 72d9fd5..369188b 100644
+--- a/algorithms/ho.py
++++ b/algorithms/ho.py
+@@ -23,6 +23,7 @@ Ecuaciones principales:
+
+ import numpy as np
+ import math
++import os
+ from typing import List, Tuple, Optional
+ from algorithms.base import Individual, MetaheuristicAlgorithm
+ from scipy.spatial.distance import cdist
+@@ -127,6 +128,8 @@ class HO(MetaheuristicAlgorithm):
+         population_size: int = 30,
+         max_iterations: int = 100,
+         seed: int = None,
++        use_il: bool = False,
++        il_model_path: str = None,
+     ):
+         """
+         Inicializa el algoritmo HO.
+@@ -136,6 +139,8 @@ class HO(MetaheuristicAlgorithm):
+             population_size: Tamaño de la población
+             max_iterations: Número máximo de iteraciones
+             seed: Semilla para reproducibilidad
++            use_il: Si usar Imitation Learning para parámetros dinámicos
++            il_model_path: Ruta al modelo IL entrenado
+         """
+         super().__init__(problem, population_size, max_iterations, seed)
+
+@@ -156,6 +161,23 @@ class HO(MetaheuristicAlgorithm):
+         # Para QC-DVRP multiobjetivo
+         self.use_multiobjective = hasattr(problem, "evaluate_multi")
+         self.pareto_front = []
++
++        # Imitation Learning
++        self.use_il = use_il
++        self.il_model = None
++        if use_il:
++            try:
++                from utils.imitation_learning import HOImitationLearning
++                self.il_model = HOImitationLearning()
++                if il_model_path and os.path.exists(il_model_path):
++                    self.il_model.load(il_model_path)
++                    print(f"Modelo IL cargado desde {il_model_path}")
++                else:
++                    print("Advertencia: IL habilitado pero sin modelo entrenado")
++                    self.use_il = False
++            except ImportError:
++                print("Advertencia: No se pudo importar módulo IL")
++                self.use_il = False
+
+     def initialize_population(self) -> None:
+         """Inicializa la población de hipopótamos."""
+@@ -181,14 +203,29 @@ class HO(MetaheuristicAlgorithm):
+         1. Fase de posición (Position phase)
+         2. Fase de defensa (Defense phase)
+         3. Fase de evasión (Predation phase)
++
++        Si IL está habilitado, usa el modelo para predecir parámetros óptimos.
+         """
+         iteration = len(self.convergence_curve)
+-
+-        # Actualizar parámetros adaptativos
+         progress = iteration / self.max_iterations
+-        alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
+-        beta = self.beta_max - (self.beta_max - self.beta_min) * progress
+-        gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
++
++        # Si IL está habilitado, usar modelo para predecir parámetros
++        if self.use_il and self.il_model is not None:
++            try:
++                from utils.imitation_learning import create_state_from_problem
++                state = create_state_from_problem(self.problem, self, iteration, self.max_iterations)
++                alpha, beta, gamma = self.il_model.predict(state)
++            except Exception as e:
++                # Fallback a parámetros adaptativos estándar
++                print(f"Advertencia IL: {e}")
++                alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
++                beta = self.beta_max - (self.beta_max - self.beta_min) * progress
++                gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
++        else:
++            # Actualizar parámetros adaptativos estándar
++            alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
++            beta = self.beta_max - (self.beta_max - self.beta_min) * progress
++            gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
+
+         # Determinar fase basada en progreso y fitness
+         avg_fitness = np.mean([h.fitness() for h in self.population])
