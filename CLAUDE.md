@@ -149,7 +149,7 @@ The VRP problem uses ordinal encoding:
 - Statistical significance: p < 0.05
 
 ## Language Note
-While code is in English, some documentation and comments may be in Spanish as this is an academic project for a Chilean conference (CISTI 2025). Maintain consistency within each file.
+While code is in English, some documentation and comments may be in Spanish as this is an academic research project. Maintain consistency within each file.
 
 ## Recent Refactoring (Sprint Estadístico v2)
 
