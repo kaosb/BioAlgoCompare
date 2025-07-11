@@ -36,63 +36,30 @@ logging.basicConfig(
 logger = logging.getLogger("analyze")
 
 # Importar utilidades
-from utils.benchmarking import BenchmarkResult, OPTIMAL_VALUES, create_benchmark_report
-from utils.benchmarking import run_benchmark as benchmark_function
-from utils.statistical_analysis import StatisticalAnalysis
-from utils.vrp_operators import VRPOperators
-from utils.improved.enhanced_benchmarking import (
-    run_complete_analysis,
+from utils.benchmarking import (
+    BenchmarkResult,
+    OPTIMAL_VALUES,
+    create_benchmark_report,
+    run_benchmark as benchmark_function,
     run_massive_benchmark,
+    create_summary_dataframe
 )
-from utils.improved.enhanced_statistics import EnhancedStatisticalAnalysis
-from utils.improved.advanced_visualization import (
-    create_full_visualization_set,
-    create_visual_report,
+from utils.statistical_analysis import (
+    AdvancedStatisticalAnalysis,
+    perform_statistical_analysis,
+    generate_cd_diagram
 )
-from utils.advanced_statistical_analysis import run_all as run_advanced_stats
+from utils.vrp_operators import VRPOperators
+from utils.visualization import plot_convergence
+from utils.algorithm_factory import (
+    ALGORITHMS,
+    create_algorithm,
+    list_algorithms,
+    get_algorithm_info
+)
 
 # Importar problema
 from problems.vrp import VRPProblem
-
-# Importar algoritmos
-from algorithms.sho import SHO  # Previously HOA
-from algorithms.apo import APO
-from algorithms.egto import EGTO
-from algorithms.fsa import FSA  # Previously FGO
-from algorithms.foa import FOA
-from algorithms.woa import WOA
-from algorithms.hho import HHO
-from algorithms.mrfo import MRFO
-from algorithms.sma import SMA
-from algorithms.gto import GTO
-from algorithms.ewa import EWA
-from algorithms.aha import AHA
-from algorithms.rro import RRO
-from algorithms.gvoa import GVOA
-from algorithms.smo import SMO
-from algorithms.opa import OPA
-
-# Todos los algoritmos disponibles
-ALGORITHMS = {
-    "hoa": SHO,  # Previously HOA
-    "sho": SHO,
-    "apo": APO,
-    "egto": EGTO,
-    "fgo": FSA,  # Previously FGO
-    "fsa": FSA,
-    "foa": FOA,
-    "woa": WOA,
-    "hho": HHO,
-    "mrfo": MRFO,
-    "sma": SMA,
-    "gto": GTO,
-    "ewa": EWA,
-    "aha": AHA,
-    "rro": RRO,
-    "gvoa": GVOA,
-    "smo": SMO,
-    "opa": OPA,
-}
 
 
 # Comando principal
@@ -127,21 +94,74 @@ def run(
     algorithm, instance, iterations, population, runs, seed, visualize, save, parallel
 ):
     """Ejecuta algoritmos de optimización para resolver problemas VRP."""
-    # Importar el módulo para ejecución
-    from scripts.run import main as run_main
+    # Cargar problema
+    instance_path = f"data/vrp/{instance}.vrp"
+    if not os.path.exists(instance_path):
+        logger.error(f"Instance file not found: {instance_path}")
+        return
 
-    # Ejecutar con los parámetros proporcionados
-    run_main(
-        algorithm,
-        instance,
-        iterations,
-        population,
-        runs,
-        seed,
-        visualize,
-        save,
-        parallel,
-    )
+    problem = VRPProblem(instance_path)
+    logger.info(f"Problem loaded: {instance} with {problem.dimension - 1} customers")
+
+    # Ejecutar benchmark
+    if algorithm == "all":
+        algorithms = list(ALGORITHMS.keys())
+        if 'hoa' in algorithms:
+            algorithms.remove('hoa')  # Skip alias
+        if 'fgo' in algorithms:
+            algorithms.remove('fgo')  # Skip alias
+    else:
+        algorithms = [algorithm]
+
+    results = []
+    for algo_name in algorithms:
+        logger.info(f"Running {algo_name.upper()} algorithm...")
+
+        try:
+            algo_info = get_algorithm_info(algo_name)
+            algo_class = algo_info['class']
+
+            # Run benchmark
+            benchmark_results = benchmark_function(
+                algorithms={algo_name: algo_class},
+                problem_instances=[instance],
+                runs=runs,
+                iterations=iterations,
+                population=population,
+                seed=seed,
+                parallel=parallel
+            )
+
+            results.extend(benchmark_results)
+
+            # Show results
+            for result in benchmark_results:
+                logger.info(f"Run completed - Best cost: {result.best_fitness:.2f}")
+
+        except Exception as e:
+            logger.error(f"Error running {algo_name}: {e}")
+
+    # Save results
+    if save and results:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = f"results/run_{timestamp}"
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Save as JSON
+        json_file = os.path.join(output_dir, "results.json")
+        with open(json_file, "w") as f:
+            json.dump([r.to_dict() for r in results], f, indent=2)
+
+        # Save as CSV
+        csv_file = os.path.join(output_dir, "results.csv")
+        df = create_summary_dataframe(results)
+        df.to_csv(csv_file, index=False)
+
+        logger.info(f"Results saved to {output_dir}")
+
+    # Visualize
+    if visualize and results:
+        plot_convergence(results)
 
 
 # Comando para análisis de resultados
@@ -229,7 +249,7 @@ def benchmark(
             algo_list = algorithms.split(",")
 
         # Preparar diccionario de algoritmos
-        algo_dict = {algo: ALGORITHMS[algo] for algo in algo_list if algo in ALGORITHMS}
+        algo_dict = {algo: ALGORITHMS[algo][0] for algo in algo_list if algo in ALGORITHMS}
 
         # Ejecutar benchmark
         logger.info(
@@ -449,52 +469,28 @@ def benchmark(
         except Exception as e:
             logger.error(f"Error al generar el informe descriptivo: {str(e)}")
     else:
-        # Generar informes estadísticos completos
+        # Preparar datos para análisis estadístico
         try:
-            if len(benchmark_results) >= 2 and all(
-                len(result.fitness_values) >= 5 for result in benchmark_results
-            ):
-                try:
-                    # Llamar al análisis estadístico con manejo de errores para cada métrica
-                    valid_metrics = []
-                    for metric in metrics:
-                        try:
-                            # Verificar que hay datos para esta métrica
-                            data_df = StatisticalAnalysis.prepare_data_for_statistics(
-                                benchmark_results, metric=metric
-                            )
-                            if len(data_df) > 0:
-                                valid_metrics.append(metric)
-                            else:
-                                logger.warning(
-                                    f"⚠️ No hay datos suficientes para la métrica {metric}"
-                                )
-                        except Exception as metric_error:
-                            logger.error(
-                                f"⚠️ Error al preparar datos para la métrica {metric}: {str(metric_error)}"
-                            )
+            # Create DataFrame from benchmark results
+            df = create_summary_dataframe(benchmark_results)
 
-                    if valid_metrics:
-                        (
-                            StatisticalAnalysis.run_comprehensive_statistical_analysis(
-                                benchmark_results,
-                                metrics=valid_metrics,
-                                output_dir=output_dir,
-                            )
-                        )
-                        logger.info(
-                            f"Análisis estadístico completo. Informes guardados en {output_dir}"
-                        )
-                    else:
-                        raise ValueError(
-                            "No se pudieron procesar las métricas disponibles"
-                        )
-                except Exception as analysis_error:
-                    logger.error(
-                        f"⚠️ Error durante el análisis estadístico: {str(analysis_error)}"
-                    )
-                    # Continuar con el informe básico en caso de error
-                    raise analysis_error
+            if len(df) >= 10:  # Need enough data for meaningful statistics
+                # Perform statistical analysis
+                stats_results = perform_statistical_analysis(
+                    df,
+                    output_dir=output_dir,
+                    alpha=0.05,
+                    extended_tests=True
+                )
+
+                logger.info(f"Análisis estadístico completo. Informes guardados en {output_dir}")
+
+                # Also generate the HTML benchmark report
+                report_path = create_benchmark_report(
+                    benchmark_results,
+                    os.path.join(output_dir, "benchmark_report.html")
+                )
+                logger.info(f"Informe de benchmark guardado en {report_path}")
             else:
                 logger.warning(
                     "⚠️ Datos insuficientes para un análisis estadístico completo."
@@ -574,21 +570,61 @@ def massive(
     """
     Ejecuta benchmarks masivos con 1000+ ejecuciones y análisis estadístico riguroso.
     """
-    # Importar el módulo para benchmarking masivo
-    from scripts.run_massive import main as run_massive_main
+    # Configure output directory
+    if output_dir is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_dir = f"results/massive_{timestamp}"
 
-    # Ejecutar benchmarking masivo con los parámetros proporcionados
-    run_massive_main(
-        runs,
-        iterations,
-        population,
-        seed,
-        algorithm,
-        instances,
-        parallel,
-        resume,
-        output_dir,
-    )
+    # Prepare algorithms
+    if 'all' in algorithm:
+        algo_list = [name for name in ALGORITHMS.keys() if name not in ['hoa', 'fgo']]
+    else:
+        algo_list = list(algorithm)
+
+    # Prepare algorithm dictionary
+    algo_dict = {name: ALGORITHMS[name][0] for name in algo_list if name in ALGORITHMS}
+
+    # If no instances specified, use default set
+    if not instances:
+        instances = ['E-n22-k4', 'P-n16-k8', 'A-n32-k5']
+
+    logger.info(f"Starting massive benchmark with {runs} runs per algorithm/instance")
+    logger.info(f"Algorithms: {', '.join(algo_dict.keys())}")
+    logger.info(f"Instances: {', '.join(instances)}")
+    logger.info(f"Output directory: {output_dir}")
+
+    # Run massive benchmark
+    try:
+        results = run_massive_benchmark(
+            algorithms=algo_dict,
+            instances=instances,
+            runs=runs,
+            iterations=iterations,
+            population_size=population,
+            output_dir=output_dir,
+            num_workers=mp.cpu_count() if parallel else 1,
+            resume=resume
+        )
+
+        logger.info(f"Massive benchmark completed. Results saved to {output_dir}")
+
+        # Generate summary report
+        if results:
+            report_path = create_benchmark_report(
+                results,
+                os.path.join(output_dir, "massive_benchmark_report.html")
+            )
+            logger.info(f"Report generated: {report_path}")
+
+            # Save results as CSV for analysis
+            df = create_summary_dataframe(results)
+            csv_path = os.path.join(output_dir, "massive_benchmark_results.csv")
+            df.to_csv(csv_path, index=False)
+            logger.info(f"CSV results saved: {csv_path}")
+
+    except Exception as e:
+        logger.error(f"Error during massive benchmark: {e}")
+        raise
 
 
 # Comando para análisis de archivos CSV existentes
@@ -822,8 +858,21 @@ def stats(csv, out):
     logger.info(f"Performing advanced statistical analysis on {csv}")
     logger.info(f"Results will be saved to {out}")
 
-    # Run the analysis
-    results = run_advanced_stats(csv, out)
+    # Load CSV data
+    try:
+        df = pd.read_csv(csv)
+        logger.info(f"Loaded {len(df)} results from {csv}")
+    except Exception as e:
+        logger.error(f"Error loading CSV: {e}")
+        return
+
+    # Perform statistical analysis
+    results = perform_statistical_analysis(
+        df,
+        output_dir=out,
+        alpha=0.05,
+        extended_tests=True
+    )
 
     if "error" in results:
         logger.error(f"Error in statistical analysis: {results['error']}")
@@ -831,43 +880,116 @@ def stats(csv, out):
 
     # Print summary to console
     print("\n----- Statistical Analysis Summary -----")
-    print(f"Global p-value: {results['friedman_p']:.6f}")
 
-    if results['friedman_p'] < 0.05:
+    if "error" in results:
+        print(f"Error: {results['error']}")
+        return results
+
+    # Get Friedman test results
+    friedman = results.get('friedman_test', {})
+    p_value = friedman.get('p_value', 1.0)
+
+    print(f"Global p-value: {p_value:.6f}")
+
+    if p_value < 0.05:
         print("Result: Statistically significant differences between algorithms detected.")
 
         # Get top 3 algorithms
-        algorithm_ranks = results['mean_ranks']
+        algorithm_ranks = friedman.get('average_ranks', {})
         sorted_algos = sorted(algorithm_ranks.items(), key=lambda x: x[1])
 
         print("\nTop 3 algorithms:")
         for i, (algo, rank) in enumerate(sorted_algos[:3]):
             print(f"{i+1}. {algo} (rank: {rank:.2f})")
 
-        # Get statistically equivalent algorithms
-        cd = results['critical_distance']
-        best_algo = sorted_algos[0][0]
-        best_rank = sorted_algos[0][1]
+        # Get statistically equivalent algorithms from Nemenyi test
+        nemenyi = results.get('nemenyi_test', {})
+        cd = nemenyi.get('critical_distance', 0)
 
-        equivalent = [best_algo]
-        for algo, rank in sorted_algos[1:]:
-            if abs(rank - best_rank) <= cd:
-                equivalent.append(algo)
+        if cd > 0 and sorted_algos:
+            best_algo = sorted_algos[0][0]
+            best_rank = sorted_algos[0][1]
 
-        if len(equivalent) > 1:
-            print(f"\nAlgorithms statistically equivalent to the best ({best_algo}):")
-            for algo in equivalent[1:]:
-                print(f"- {algo}")
-        else:
-            print(f"\nThe best algorithm ({best_algo}) is significantly better than all others.")
+            equivalent = [best_algo]
+            for algo, rank in sorted_algos[1:]:
+                if abs(rank - best_rank) <= cd:
+                    equivalent.append(algo)
+
+            if len(equivalent) > 1:
+                print(f"\nAlgorithms statistically equivalent to the best ({best_algo}):")
+                for algo in equivalent[1:]:
+                    print(f"- {algo}")
+            else:
+                print(f"\nThe best algorithm ({best_algo}) is significantly better than all others.")
     else:
         print("Result: No statistically significant differences between algorithms.")
 
-    print(f"\nFull report: {results['report']}")
-    print(f"CD diagram: {results['cd_diagram']}")
+    # Report files
+    report_files = []
+    output_dir = Path(out)
+    if (output_dir / "stats_report.md").exists():
+        report_files.append(str(output_dir / "stats_report.md"))
+    if (output_dir / "cd_diagram.png").exists():
+        report_files.append(str(output_dir / "cd_diagram.png"))
+
+    if report_files:
+        print(f"\nReport files:")
+        for f in report_files:
+            print(f"- {f}")
     print("-----------------------------------------")
 
     return results
+
+
+@cli.command()
+@click.option("--json", "-j", "json_file", required=True, help="Input JSON file with benchmark results")
+@click.option("--csv", "-c", "csv_file", required=True, help="Output CSV file")
+def convert(json_file, csv_file):
+    """Convert benchmark results from JSON to CSV format."""
+    try:
+        # Load JSON results
+        with open(json_file, 'r') as f:
+            data = json.load(f)
+
+        # Convert to BenchmarkResult objects if needed
+        if isinstance(data, list) and all(isinstance(item, dict) for item in data):
+            from utils.benchmarking import BenchmarkResult
+            results = []
+            for item in data:
+                result = BenchmarkResult(
+                    algorithm_name=item.get('algorithm', 'Unknown'),
+                    instance_name=item.get('instance', 'Unknown'),
+                    runs=item.get('runs', 1)
+                )
+                # Restore the data from metrics
+                metrics = item.get('metrics', {})
+                result.best_fitness = metrics.get('best_fitness', float('inf'))
+                result.worst_fitness = metrics.get('worst_fitness', float('inf'))
+                result.mean_fitness = metrics.get('mean_fitness', float('inf'))
+                result.std_fitness = metrics.get('std_fitness', 0)
+                result.mean_time = metrics.get('mean_time', 0)
+                result.std_time = metrics.get('std_time', 0)
+
+                # Restore detailed results
+                detailed = item.get('detailed_results', {})
+                result.fitness_values = detailed.get('fitness_values', [])
+                result.execution_times = detailed.get('execution_times', [])
+                result.convergence_curves = detailed.get('convergence_curves', [])
+                results.append(result)
+        else:
+            logger.error("Invalid JSON format")
+            return
+
+        # Create DataFrame
+        df = create_summary_dataframe(results)
+
+        # Save to CSV
+        df.to_csv(csv_file, index=False)
+        logger.info(f"Converted {len(results)} results from {json_file} to {csv_file}")
+
+    except Exception as e:
+        logger.error(f"Error converting JSON to CSV: {e}")
+
 
 if __name__ == "__main__":
     cli()

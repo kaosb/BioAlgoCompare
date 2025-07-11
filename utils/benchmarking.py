@@ -13,6 +13,44 @@ from matplotlib.table import Table
 import matplotlib.gridspec as gridspec
 from scipy.stats import friedmanchisquare, wilcoxon
 import multiprocessing as mp
+import logging
+from tqdm import tqdm
+import pickle
+import gzip
+from pathlib import Path
+
+# Configure logger
+logger = logging.getLogger(__name__)
+
+
+def create_summary_dataframe(benchmark_results):
+    """
+    Create a summary DataFrame from benchmark results.
+
+    Args:
+        benchmark_results: List of BenchmarkResult objects
+
+    Returns:
+        DataFrame with all individual run data
+    """
+    data = []
+
+    for result in benchmark_results:
+        # For each run
+        for i in range(len(result.fitness_values)):
+            data.append(
+                {
+                    "Algorithm": result.algorithm_name,
+                    "Instance": result.instance_name,
+                    "Run": i + 1,
+                    "Best Fitness": result.fitness_values[i],
+                    "Execution Time (s)": result.execution_times[i],
+                    "Best_Cost": result.fitness_values[i],  # For compatibility
+                    "Time": result.execution_times[i],  # For compatibility
+                }
+            )
+
+    return pd.DataFrame(data)
 
 
 # Función auxiliar para la ejecución de algoritmos en paralelo
@@ -948,6 +986,9 @@ tr:nth-child(even) {
             f.write(html_content)
 
 
+# Note: create_summary_dataframe is defined at the top of the file
+
+
 def create_benchmark_report(benchmark_results, filename=None):
     """
     Crea un informe detallado de los resultados del benchmark.
@@ -961,3 +1002,148 @@ def create_benchmark_report(benchmark_results, filename=None):
     """
     builder = BenchmarkReportBuilder(benchmark_results)
     return builder.create_report(filename)
+
+
+def run_massive_benchmark(
+    algorithms,
+    instances,
+    runs=1000,
+    iterations=100,
+    population_size=40,
+    output_dir="massive_benchmark",
+    num_workers=None,
+    checkpoint_interval=50,
+    resume=True,
+    optimize_instances=None,
+):
+    """
+    Execute massive benchmark with checkpoint support.
+
+    Args:
+        algorithms: List of algorithm classes or names
+        instances: List of instance names
+        runs: Number of runs per algorithm-instance pair
+        iterations: Number of iterations per run
+        population_size: Population size
+        output_dir: Output directory
+        num_workers: Number of parallel workers
+        checkpoint_interval: Save checkpoint every N runs
+        resume: Resume from checkpoint if available
+        optimize_instances: Optional list of instances to optimize
+
+    Returns:
+        List of BenchmarkResult objects
+    """
+    import gzip
+    import pickle
+    from pathlib import Path
+    from datetime import datetime
+
+    # Create output directory
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    checkpoint_dir = output_path / "checkpoints"
+    checkpoint_dir.mkdir(exist_ok=True)
+
+    # Checkpoint file
+    checkpoint_file = output_path / "benchmark_state.pkl.gz"
+
+    # Initialize results and completed tasks
+    all_results = []
+    completed_tasks = set()
+
+    # Load checkpoint if resuming
+    if resume and checkpoint_file.exists():
+        try:
+            logger.info(f"Loading checkpoint from {checkpoint_file}")
+            with gzip.open(checkpoint_file, "rb") as f:
+                checkpoint_data = pickle.load(f)
+            all_results = checkpoint_data["results"]
+            completed_tasks = set(checkpoint_data["completed_tasks"])
+            logger.info(f"Resumed {len(completed_tasks)} completed tasks")
+        except Exception as e:
+            logger.warning(f"Failed to load checkpoint: {e}")
+
+    # Prepare tasks
+    tasks = []
+    for algo_name, algo_class in algorithms.items():
+        for instance in instances:
+            for run_id in range(runs):
+                task_id = f"{algo_name}_{instance}_run{run_id}"
+                if task_id not in completed_tasks:
+                    tasks.append((algo_name, algo_class, instance, run_id, task_id))
+
+    logger.info(f"Total tasks to run: {len(tasks)}")
+
+    if not tasks:
+        logger.info("All tasks already completed!")
+        return all_results
+
+    # Run tasks
+    num_workers = num_workers or mp.cpu_count()
+    checkpoint_counter = 0
+
+    def save_checkpoint():
+        """Save current state to checkpoint file."""
+        checkpoint_data = {
+            "results": all_results,
+            "completed_tasks": list(completed_tasks),
+            "timestamp": datetime.now().isoformat(),
+            "total_runs": runs,
+            "algorithms": [
+                a.__name__ if hasattr(a, "__name__") else a for a in algorithms
+            ],
+            "instances": instances,
+        }
+        with gzip.open(checkpoint_file, "wb") as f:
+            pickle.dump(checkpoint_data, f)
+        logger.debug(f"Checkpoint saved: {len(completed_tasks)} tasks completed")
+
+    # Initial checkpoint
+    save_checkpoint()
+
+    # Process tasks
+    checkpoint_counter = 0
+    with tqdm(total=len(tasks), desc="Running massive benchmark") as pbar:
+        for algo_name, algo_class, instance, run_id, task_id in tasks:
+            try:
+                # Run single benchmark
+                result = run_benchmark(
+                    algorithms={algo_name: algo_class},
+                    problem_instances=[instance],
+                    runs=1,  # Single run at a time
+                    iterations=iterations,
+                    population=population_size,
+                    seed=None,  # Will be randomized for each run
+                    parallel=False,
+                )
+
+                if result:
+                    all_results.extend(result)
+                    completed_tasks.add(task_id)
+
+                    # Save individual result
+                    result_file = checkpoint_dir / f"{task_id}.pkl"
+                    with open(result_file, "wb") as f:
+                        pickle.dump(result[0], f)
+
+            except Exception as e:
+                logger.error(f"Error in task {task_id}: {e}")
+
+            pbar.update(1)
+            checkpoint_counter += 1
+
+            # Save checkpoint periodically
+            if checkpoint_counter >= checkpoint_interval:
+                save_checkpoint()
+                checkpoint_counter = 0
+
+    # Final checkpoint
+    save_checkpoint()
+
+    # Create summary CSV
+    summary_path = output_path / "massive_benchmark_summary.csv"
+    create_summary_dataframe(all_results).to_csv(summary_path, index=False)
+
+    logger.info(f"Massive benchmark completed. Results saved to {output_path}")
+    return all_results
