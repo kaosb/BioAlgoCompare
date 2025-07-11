@@ -222,9 +222,9 @@ class TestModuleImports:
     def test_utility_imports(self):
         """Test importing utility modules."""
         # Test statistical analysis
-        from utils.statistical_analysis import StatisticalAnalysis
+        from utils.statistical_analysis import AdvancedStatisticalAnalysis
 
-        assert StatisticalAnalysis is not None
+        assert AdvancedStatisticalAnalysis is not None
 
         # Test benchmarking
         from utils.benchmarking import BenchmarkResult, create_benchmark_report

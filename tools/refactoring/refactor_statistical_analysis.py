@@ -16,19 +16,21 @@ def refactor_statistical_analysis():
     print("Starting refactoring of statistical_analysis.py...")
 
     # Read the original file
-    with open('utils/statistical_analysis.py', 'r', encoding='utf-8') as f:
+    with open("utils/statistical_analysis.py", "r", encoding="utf-8") as f:
         content = f.read()
 
     # Find the location where we need to insert the new classes
     # We'll add them before the generate_statistical_analysis_report function
-    insert_pos = content.find('@staticmethod\n    def generate_statistical_analysis_report(')
+    insert_pos = content.find(
+        "@staticmethod\n    def generate_statistical_analysis_report("
+    )
 
     if insert_pos == -1:
         print("Error: Could not find generate_statistical_analysis_report function")
         return False
 
     # Find the start of the line
-    while insert_pos > 0 and content[insert_pos-1] != '\n':
+    while insert_pos > 0 and content[insert_pos - 1] != "\n":
         insert_pos -= 1
 
     # Create the new class definitions
@@ -547,31 +549,35 @@ tr:nth-child(even) {
 
     # Find the end of the original function
     # Look for the next method or class definition
-    func_start = content.find('@staticmethod\n    def generate_statistical_analysis_report(')
+    func_start = content.find(
+        "@staticmethod\n    def generate_statistical_analysis_report("
+    )
     if func_start == -1:
         print("Error: Could not find function to replace")
         return False
 
     # Find the end of the function by looking for the next method at the same indentation level
-    func_end = content.find('\n    @staticmethod', func_start + 1)
+    func_end = content.find("\n    @staticmethod", func_start + 1)
     if func_end == -1:
-        func_end = content.find('\n    def ', func_start + 1)
+        func_end = content.find("\n    def ", func_start + 1)
     if func_end == -1:
-        func_end = content.find('\nclass ', func_start + 1)
+        func_end = content.find("\nclass ", func_start + 1)
     if func_end == -1:
         func_end = len(content)
 
     # Build the new content
     new_content = (
-        content[:insert_pos] +
-        new_classes + '\n\n' +
-        content[insert_pos:func_start] +
-        refactored_function + '\n' +
-        content[func_end:]
+        content[:insert_pos]
+        + new_classes
+        + "\n\n"
+        + content[insert_pos:func_start]
+        + refactored_function
+        + "\n"
+        + content[func_end:]
     )
 
     # Write the refactored content
-    with open('utils/statistical_analysis.py', 'w', encoding='utf-8') as f:
+    with open("utils/statistical_analysis.py", "w", encoding="utf-8") as f:
         f.write(new_content)
 
     print("✅ Successfully refactored generate_statistical_analysis_report")

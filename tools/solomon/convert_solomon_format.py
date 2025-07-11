@@ -9,11 +9,12 @@ import re
 from pathlib import Path
 import argparse
 
+
 def extract_data_from_solomon(file_path):
     """
     Extrae datos de un archivo Solomon en formato original
     """
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         lines = f.readlines()
 
     # Extraer nombre
@@ -44,7 +45,7 @@ def extract_data_from_solomon(file_path):
     nodes = []
     demands = []
 
-    for line in lines[customer_line + 2:]:
+    for line in lines[customer_line + 2 :]:
         line = line.strip()
         if not line:
             continue
@@ -70,30 +71,35 @@ def extract_data_from_solomon(file_path):
         "capacity": capacity,
         "nodes": nodes,
         "demands": demands,
-        "dimension": len(nodes)
+        "dimension": len(nodes),
     }
+
 
 def convert_to_vrp_format(data, output_path):
     """
     Convierte los datos extraídos al formato VRP requerido por el parser
     """
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         # Escribir encabezado original
         f.write(f"{data['name']}\n\n")
         f.write("VEHICLE\n")
         f.write("NUMBER     CAPACITY\n")
         f.write(f"  25         {data['capacity']}\n\n")
         f.write("CUSTOMER\n")
-        f.write("CUST NO.   XCOORD.   YCOORD.    DEMAND   READY TIME   DUE DATE   SERVICE TIME\n")
+        f.write(
+            "CUST NO.   XCOORD.   YCOORD.    DEMAND   READY TIME   DUE DATE   SERVICE TIME\n"
+        )
         f.write(" \n")
 
         # Ordenar nodos por id
-        sorted_nodes = sorted(data['nodes'], key=lambda x: x[0])
-        demands_dict = {d[0]: d[1] for d in data['demands']}
+        sorted_nodes = sorted(data["nodes"], key=lambda x: x[0])
+        demands_dict = {d[0]: d[1] for d in data["demands"]}
 
         # Escribir datos de clientes (conservamos la parte original)
         for node_id, x, y in sorted_nodes:
-            f.write(f"{node_id:5d}      {x:<9.0f} {y:<9.0f} {demands_dict[node_id]:<9d}")
+            f.write(
+                f"{node_id:5d}      {x:<9.0f} {y:<9.0f} {demands_dict[node_id]:<9d}"
+            )
             # Agregar valores ficticios para ready time, due date y service time
             # (estos valores no son utilizados en VRP básico)
             if node_id == 0:  # Depósito
@@ -122,16 +128,25 @@ def convert_to_vrp_format(data, output_path):
         f.write("-1\n")
         f.write("EOF")
 
+
 def main():
     """Función principal"""
-    parser = argparse.ArgumentParser(description="Convierte archivos Solomon 101 al formato requerido por VRPProblem")
+    parser = argparse.ArgumentParser(
+        description="Convierte archivos Solomon 101 al formato requerido por VRPProblem"
+    )
     parser.add_argument("files", nargs="+", help="Archivos o patrones a convertir")
-    parser.add_argument("--output-dir", "-o", default=None, help="Directorio de salida (por defecto, sobrescribe los originales)")
+    parser.add_argument(
+        "--output-dir",
+        "-o",
+        default=None,
+        help="Directorio de salida (por defecto, sobrescribe los originales)",
+    )
 
     args = parser.parse_args()
 
     # Expandir patrones glob
     import glob
+
     all_files = []
     for pattern in args.files:
         matched = glob.glob(pattern)
@@ -165,6 +180,7 @@ def main():
             print(f"  Error al procesar {file_path}: {str(e)}")
 
     print("Conversión completada.")
+
 
 if __name__ == "__main__":
     main()

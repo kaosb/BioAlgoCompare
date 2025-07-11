@@ -14,26 +14,26 @@ import subprocess
 def get_complexity_violations():
     """Get all current complexity violations."""
     result = subprocess.run(
-        ['ruff', 'check', '.', '--select', 'C901'],
-        capture_output=True,
-        text=True
+        ["ruff", "check", ".", "--select", "C901"], capture_output=True, text=True
     )
 
     violations = []
-    for line in result.stdout.strip().split('\n'):
-        if 'is too complex' in line:
-            parts = line.split(':')
+    for line in result.stdout.strip().split("\n"):
+        if "is too complex" in line:
+            parts = line.split(":")
             if len(parts) >= 4:
                 file_path = parts[0]
                 line_num = parts[1]
-                func_name = parts[3].split('`')[1] if '`' in parts[3] else 'unknown'
-                complexity = int(parts[3].split('(')[1].split('>')[0].strip())
-                violations.append({
-                    'file': file_path,
-                    'line': int(line_num),
-                    'function': func_name,
-                    'complexity': complexity
-                })
+                func_name = parts[3].split("`")[1] if "`" in parts[3] else "unknown"
+                complexity = int(parts[3].split("(")[1].split(">")[0].strip())
+                violations.append(
+                    {
+                        "file": file_path,
+                        "line": int(line_num),
+                        "function": func_name,
+                        "complexity": complexity,
+                    }
+                )
 
     return violations
 
@@ -43,17 +43,17 @@ def refactor_create_benchmark_report():
     print("Refactoring create_benchmark_report...")
 
     # Read the file
-    with open('utils/benchmarking.py', 'r', encoding='utf-8') as f:
+    with open("utils/benchmarking.py", "r", encoding="utf-8") as f:
         content = f.read()
 
     # Find where to insert the new class
-    insert_pos = content.find('def create_benchmark_report(')
+    insert_pos = content.find("def create_benchmark_report(")
     if insert_pos == -1:
         print("Error: Could not find create_benchmark_report")
         return False
 
     # Find start of line
-    while insert_pos > 0 and content[insert_pos-1] != '\n':
+    while insert_pos > 0 and content[insert_pos - 1] != "\n":
         insert_pos -= 1
 
     # Create the refactored class
@@ -433,26 +433,28 @@ tr:nth-child(even) {
 '''
 
     # Find end of original function
-    func_start = content.find('def create_benchmark_report(')
+    func_start = content.find("def create_benchmark_report(")
     if func_start == -1:
         print("Error: Could not find function")
         return False
 
     # Find the next function
-    func_end = content.find('\ndef ', func_start + 1)
+    func_end = content.find("\ndef ", func_start + 1)
     if func_end == -1:
         func_end = len(content)
 
     # Build new content
     new_content = (
-        content[:insert_pos] +
-        refactored_class + '\n\n' +
-        wrapper_function + '\n' +
-        content[func_end:]
+        content[:insert_pos]
+        + refactored_class
+        + "\n\n"
+        + wrapper_function
+        + "\n"
+        + content[func_end:]
     )
 
     # Write back
-    with open('utils/benchmarking.py', 'w', encoding='utf-8') as f:
+    with open("utils/benchmarking.py", "w", encoding="utf-8") as f:
         f.write(new_content)
 
     print("✅ Successfully refactored create_benchmark_report")
@@ -464,14 +466,14 @@ def refactor_load_instance():
     print("Refactoring load_instance...")
 
     # Read the file
-    with open('problems/vrp.py', 'r', encoding='utf-8') as f:
+    with open("problems/vrp.py", "r", encoding="utf-8") as f:
         content = f.read()
 
     # Find the method
-    method_start = content.find('def load_instance(self) -> None:')
+    method_start = content.find("def load_instance(self) -> None:")
     if method_start == -1:
         # Try without type annotation
-        method_start = content.find('def load_instance(self):')
+        method_start = content.find("def load_instance(self):")
     if method_start == -1:
         print("Error: Could not find load_instance method")
         return False
@@ -600,27 +602,29 @@ def refactor_load_instance():
 
     # Find the insertion point (before load_instance)
     insert_pos = method_start
-    while insert_pos > 0 and content[insert_pos-1] != '\n':
+    while insert_pos > 0 and content[insert_pos - 1] != "\n":
         insert_pos -= 1
 
     # Find end of load_instance method
-    method_end = content.find('\n    def ', method_start + 1)
+    method_end = content.find("\n    def ", method_start + 1)
     if method_end == -1:
         # Look for class end
-        method_end = content.find('\nclass ', method_start + 1)
+        method_end = content.find("\nclass ", method_start + 1)
     if method_end == -1:
         method_end = len(content)
 
     # Build new content
     new_content = (
-        content[:insert_pos] +
-        refactored_methods + '\n' +
-        simplified_method + '\n' +
-        content[method_end:]
+        content[:insert_pos]
+        + refactored_methods
+        + "\n"
+        + simplified_method
+        + "\n"
+        + content[method_end:]
     )
 
     # Write back
-    with open('problems/vrp.py', 'w', encoding='utf-8') as f:
+    with open("problems/vrp.py", "w", encoding="utf-8") as f:
         f.write(new_content)
 
     print("✅ Successfully refactored load_instance")
@@ -639,11 +643,11 @@ def main():
     success = True
 
     # 1. create_benchmark_report (already done in previous step)
-    if any(v['function'] == 'create_benchmark_report' for v in violations):
+    if any(v["function"] == "create_benchmark_report" for v in violations):
         success &= refactor_create_benchmark_report()
 
     # 2. load_instance
-    if any(v['function'] == 'load_instance' for v in violations):
+    if any(v["function"] == "load_instance" for v in violations):
         success &= refactor_load_instance()
 
     # Report results
@@ -657,7 +661,9 @@ def main():
         if remaining:
             print("\nRemaining issues:")
             for v in remaining:
-                print(f"  - {v['file']}:{v['line']} - {v['function']} (complexity: {v['complexity']})")
+                print(
+                    f"  - {v['file']}:{v['line']} - {v['function']} (complexity: {v['complexity']})"
+                )
     else:
         print("\n❌ Some refactoring failed")
         return 1

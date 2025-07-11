@@ -185,7 +185,7 @@ The algorithm simulates three main behaviors:
 
 def add_module_docstring(filepath, info):
     """Add module docstring to an algorithm file."""
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         content = f.read()
 
     # Check if file already has a module docstring
@@ -219,7 +219,7 @@ Example:
     # Add docstring before imports
     new_content = docstring + content
 
-    with open(filepath, 'w') as f:
+    with open(filepath, "w") as f:
         f.write(new_content)
 
     print(f"Added module docstring to {filepath}")

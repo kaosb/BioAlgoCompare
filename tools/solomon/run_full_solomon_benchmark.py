@@ -12,6 +12,7 @@ import glob
 from pathlib import Path
 import re
 
+
 def get_solomon_instances():
     """Obtiene la lista de instancias Solomon desde el directorio data/vrp/Solomon"""
     solomon_path = Path("data/vrp/Solomon")
@@ -28,6 +29,7 @@ def get_solomon_instances():
 
     return sorted(instances)
 
+
 def prepare_temp_files(instances):
     """Prepara archivos temporales en data/vrp para las instancias Solomon"""
     for instance in instances:
@@ -40,6 +42,7 @@ def prepare_temp_files(instances):
             print(f"Error al copiar {source}: {str(e)}")
 
     return
+
 
 def cleanup_temp_files(instances):
     """Elimina archivos temporales creados en data/vrp"""
@@ -54,15 +57,30 @@ def cleanup_temp_files(instances):
 
     return
 
+
 def main():
     """Función principal para ejecutar el benchmark"""
-    parser = argparse.ArgumentParser(description="Ejecuta benchmark con instancias Solomon")
-    parser.add_argument("--runs", type=int, default=10, help="Número de ejecuciones (default: 10)")
-    parser.add_argument("--iterations", type=int, default=50, help="Número de iteraciones (default: 50)")
-    parser.add_argument("--algorithms", type=str, default="woa,opa",
-                        help="Algoritmos a ejecutar separados por comas (default: woa,opa)")
-    parser.add_argument("--series", type=str, default="201",
-                        help="Series a ejecutar: 101, 201 o all (default: 201)")
+    parser = argparse.ArgumentParser(
+        description="Ejecuta benchmark con instancias Solomon"
+    )
+    parser.add_argument(
+        "--runs", type=int, default=10, help="Número de ejecuciones (default: 10)"
+    )
+    parser.add_argument(
+        "--iterations", type=int, default=50, help="Número de iteraciones (default: 50)"
+    )
+    parser.add_argument(
+        "--algorithms",
+        type=str,
+        default="woa,opa",
+        help="Algoritmos a ejecutar separados por comas (default: woa,opa)",
+    )
+    parser.add_argument(
+        "--series",
+        type=str,
+        default="201",
+        help="Series a ejecutar: 101, 201 o all (default: 201)",
+    )
 
     args = parser.parse_args()
 
@@ -82,9 +100,9 @@ def main():
     # Filtrar por serie
     selected_instances = []
     if args.series == "101":
-        selected_instances = [i for i in all_instances if re.search(r'101$', i)]
+        selected_instances = [i for i in all_instances if re.search(r"101$", i)]
     elif args.series == "201":
-        selected_instances = [i for i in all_instances if re.search(r'201$', i)]
+        selected_instances = [i for i in all_instances if re.search(r"201$", i)]
     else:  # all
         selected_instances = all_instances
 
@@ -103,7 +121,7 @@ def main():
     try:
         # Construir comando de benchmark
         algo_args = []
-        for algo in args.algorithms.split(','):
+        for algo in args.algorithms.split(","):
             algo_args.append(f"--algorithm {algo.strip()}")
 
         instance_args = []
@@ -125,6 +143,7 @@ def main():
         cleanup_temp_files(selected_instances)
 
     print("\nBenchmark completado.")
+
 
 if __name__ == "__main__":
     main()

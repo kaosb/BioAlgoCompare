@@ -12,6 +12,7 @@ import argparse
 from pathlib import Path
 import numpy as np
 
+
 def load_benchmark_results(results_dir):
     """Carga los resultados del benchmark desde un directorio"""
     summary_path = Path(results_dir) / "massive_benchmark_summary.csv"
@@ -26,6 +27,7 @@ def load_benchmark_results(results_dir):
     except Exception as e:
         print(f"Error al cargar el archivo CSV: {e}")
         return None
+
 
 def create_comparison_charts(df, output_dir="benchmark_comparisons"):
     """Crea gráficos comparativos entre algoritmos y series de Solomon"""
@@ -117,19 +119,23 @@ def create_comparison_charts(df, output_dir="benchmark_comparisons"):
     plt.close()
 
     # 7. Tabla resumen
-    summary_table = df.groupby("Algorithm")[["Best", "Mean", "Std", "Time"]].mean().reset_index()
+    summary_table = (
+        df.groupby("Algorithm")[["Best", "Mean", "Std", "Time"]].mean().reset_index()
+    )
     summary_table = summary_table.sort_values("Best")
 
     # Guardar tabla como CSV
     summary_table.to_csv(output_path / "resumen_algoritmos.csv", index=False)
 
     # También crear una versión visual de la tabla
-    fig, ax = plt.figure(figsize=(10, len(summary_table)*0.5)), plt.gca()
-    ax.axis('tight')
-    ax.axis('off')
-    table = ax.table(cellText=summary_table.round(2).values,
-                    colLabels=summary_table.columns,
-                    loc='center')
+    fig, ax = plt.figure(figsize=(10, len(summary_table) * 0.5)), plt.gca()
+    ax.axis("tight")
+    ax.axis("off")
+    table = ax.table(
+        cellText=summary_table.round(2).values,
+        colLabels=summary_table.columns,
+        loc="center",
+    )
     plt.title("Resumen de rendimiento por algoritmo")
     plt.tight_layout()
     plt.savefig(output_path / "tabla_resumen.png", dpi=300)
@@ -138,13 +144,24 @@ def create_comparison_charts(df, output_dir="benchmark_comparisons"):
     print("Análisis completado. Gráficos guardados en", output_dir)
     return output_path
 
+
 def main():
     """Función principal"""
-    parser = argparse.ArgumentParser(description="Analiza resultados de benchmarks en instancias Solomon")
-    parser.add_argument("--results", type=str, help="Directorio con resultados del benchmark",
-                        default=None)
-    parser.add_argument("--output", type=str, help="Directorio para guardar análisis",
-                        default="benchmark_comparisons")
+    parser = argparse.ArgumentParser(
+        description="Analiza resultados de benchmarks en instancias Solomon"
+    )
+    parser.add_argument(
+        "--results",
+        type=str,
+        help="Directorio con resultados del benchmark",
+        default=None,
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Directorio para guardar análisis",
+        default="benchmark_comparisons",
+    )
 
     args = parser.parse_args()
 
@@ -165,18 +182,23 @@ def main():
     if df is None:
         return
 
-    print(f"Cargados datos de {len(df)} filas con {len(df['Algorithm'].unique())} algoritmos")
+    print(
+        f"Cargados datos de {len(df)} filas con {len(df['Algorithm'].unique())} algoritmos"
+    )
 
     # Crear gráficos
     output_path = create_comparison_charts(df, args.output)
 
     # Mostrar un resumen
     print("\nResumen de resultados:")
-    algo_summary = df.groupby("Algorithm")["Best"].agg(["min", "mean", "std"]).reset_index()
+    algo_summary = (
+        df.groupby("Algorithm")["Best"].agg(["min", "mean", "std"]).reset_index()
+    )
     algo_summary.columns = ["Algoritmo", "Mejor", "Promedio", "Desv. Std."]
     print(algo_summary.to_string(index=False))
 
     print(f"\nAnálisis completo disponible en: {output_path}")
+
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BioAlgoCompare is a platform for rigorous statistical evaluation of bio-inspired algorithms applied to the Vehicle Routing Problem (VRP). It implements 18 metaheuristic algorithms (2016-2025) with massive benchmarking capabilities (1000+ runs), advanced statistical analysis, and scientific visualizations.
+BioAlgoCompare is a platform for rigorous statistical evaluation of bio-inspired algorithms applied to the Vehicle Routing Problem (VRP). It implements 17 metaheuristic algorithms (2016-2025) with massive benchmarking capabilities (1000+ runs), advanced statistical analysis, and scientific visualizations.
 
 ## Key Commands
 
@@ -41,16 +41,19 @@ ruff format .
 ### Running Algorithms
 ```bash
 # Single algorithm execution
-python scripts/analyze.py run --algorithm hoa --instance A-n32-k5 --iterations 100 --population 30
+python scripts/analyze.py run --algorithm sho --instance A-n32-k5 --iterations 100 --population 30
 
 # Benchmark multiple algorithms
-python scripts/analyze.py benchmark --run-benchmark --instances "E-n22-k4,P-n16-k8" --algorithms "hoa,foa,egto" --parallel
+python scripts/analyze.py benchmark --run-benchmark --instances "E-n22-k4,P-n16-k8" --algorithms "sho,foa,egto" --parallel
 
 # Massive benchmarking (1000+ runs)
 python scripts/analyze.py massive --runs 1000 --algorithm all --instances E-n22-k4 --parallel --resume
 
-# Run with specific configuration
-python scripts/run.py --algorithm egto --instance E-n51-k5 --iterations 300 --population 50
+# Statistical analysis of results
+python scripts/analyze.py stats --csv results/massive_20250111_123456/results.csv --out results/analysis
+
+# Convert JSON results to CSV
+python scripts/analyze.py convert --json results/benchmark_results.json --csv results/results.csv
 ```
 
 ### Building Documentation
@@ -92,15 +95,18 @@ The VRP problem uses ordinal encoding:
 4. Algorithm updates based on fitness feedback
 
 **Benchmarking System:**
-- `utils/benchmarking.py`: Core benchmarking with metrics collection
-- `utils/improved/enhanced_benchmarking.py`: Adds checkpointing and massive runs
+- `utils/benchmarking.py`: Unified benchmarking system with metrics collection, checkpointing, and massive runs
 - Results stored as BenchmarkResult objects with statistical metrics
+- Supports parallel execution and automatic resume functionality
 
 **Statistical Analysis Pipeline:**
 1. Data collection via benchmarking
-2. `utils/statistical_analysis.py`: Basic statistical tests
-3. `utils/improved/enhanced_statistics.py`: Advanced tests (Friedman, Nemenyi)
-4. `utils/advanced_statistical_analysis.py`: Effect sizes, CD diagrams
+2. `utils/statistical_analysis.py`: Complete statistical analysis including:
+   - Friedman and Quade tests for multiple algorithm comparison
+   - Nemenyi post-hoc test with corrected CD formula: `q_α/√2 * sqrt(k(k+1)/(6n))`
+   - Wilcoxon signed-rank test for pairwise comparisons
+   - Effect size measures: Vargha-Delaney A12 and Cliff's delta
+   - Critical difference diagrams and comprehensive reports
 
 ## Important Patterns
 
@@ -108,7 +114,7 @@ The VRP problem uses ordinal encoding:
 1. Create new file in `algorithms/` directory
 2. Import and extend `MetaheuristicAlgorithm` and `Individual` from base.py
 3. Implement required abstract methods
-4. Add to ALGORITHMS dict in scripts/analyze.py
+4. Add to ALGORITHMS dict in `utils/algorithm_factory.py`
 5. Follow seed initialization pattern for reproducibility
 
 ### Running Experiments
@@ -127,7 +133,7 @@ The VRP problem uses ordinal encoding:
 
 ### Ruff Linter Settings (pyproject.toml)
 - Line length: 88 (Black compatible)
-- Excludes: scripts/, utils/improved/, legacy code
+- Excludes: legacy code
 - Ignores: F401, E501, E712, E741, F841, F823, E722, F811
 - Target: Python 3.8+
 
@@ -144,3 +150,28 @@ The VRP problem uses ordinal encoding:
 
 ## Language Note
 While code is in English, some documentation and comments may be in Spanish as this is an academic project for a Chilean conference (CISTI 2025). Maintain consistency within each file.
+
+## Recent Refactoring (Sprint Estadístico v2)
+
+The project underwent a major refactoring to consolidate duplicate code and improve maintainability:
+
+### Key Changes
+1. **Unified CLI**: All functionality now accessible through `scripts/analyze.py` with subcommands:
+   - `run`: Execute single algorithm runs
+   - `benchmark`: Run comparative benchmarks
+   - `massive`: Execute massive benchmarks with 1000+ runs
+   - `stats`: Perform advanced statistical analysis
+   - `convert`: Convert JSON results to CSV format
+   - `analyze_csv`: Analyze existing CSV results
+
+2. **Consolidated Modules**:
+   - `utils/statistical_analysis.py`: All statistical analysis functionality in one place
+   - `utils/benchmarking.py`: Unified benchmarking system with all features
+   - `utils/algorithm_factory.py`: Centralized algorithm registry and creation
+
+3. **Removed Duplicates**:
+   - Eliminated `utils/improved/` directory and its contents
+   - Removed duplicate scripts (`run.py`, `run_massive.py`, `demo_benchmark.py`, etc.)
+   - Consolidated multiple statistical analysis modules into one
+
+4. **Algorithm Count**: Corrected from 18 to 17 unique algorithms (HOA and FGO are aliases)
