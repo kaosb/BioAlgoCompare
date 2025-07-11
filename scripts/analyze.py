@@ -161,7 +161,20 @@ def run(
 
     # Visualize
     if visualize and results:
-        plot_convergence(results)
+        # Extract convergence curve from the first result
+        result = results[0]
+        if hasattr(result, 'convergence_curves') and result.convergence_curves:
+            # Use the first run's convergence curve or the average if available
+            if hasattr(result, 'avg_convergence') and result.avg_convergence is not None:
+                curve = result.avg_convergence
+            else:
+                curve = result.convergence_curves[0]
+
+            plot_convergence(curve,
+                           title=f"{result.algorithm_name} - {result.instance_name}")
+            plt.show()
+        else:
+            logger.warning("No convergence curve data available for visualization")
 
 
 # Comando para análisis de resultados
