@@ -1,0 +1,134 @@
+--- a/scripts/analyze.py
++++ b/scripts/analyze.py
+@@ -204,11 +204,17 @@ python scripts/analyze.py run --algorithm egto --instance E-n51-k5 --runs 10 --s
+ @click.option("--population", "-pop", default=30, help="Tamaño de población")
+ @click.option("--seed", "-s", default=42, type=int, help="Semilla para reproducibilidad")
+ @click.option(
+     "--parallel/--no-parallel", "-p", default=False, help="Ejecutar en paralelo"
+ )
++@click.option(
++    "--dynamic/--no-dynamic", default=False, help="Simular demandas dinámicas (Poisson λ=5-15)"
++)
++@click.option(
++    "--multiobjective/--no-multiobjective", default=False, help="Evaluar métricas multiobjetivo (Pareto, hipervolumen, IGD)"
++)
+ @click.option("--output", "-o", help="Directorio de salida para resultados")
+ def benchmark(
+     input,
+     run_benchmark,
+     instances,
+@@ -217,11 +223,13 @@ def benchmark(
+     iterations,
+     population,
+     seed,
+     parallel,
++    dynamic,
++    multiobjective,
+     output,
+ ):
+     """Ejecuta benchmarking comparativo de algoritmos."""
+     if run_benchmark:
+         # Ejecutar nuevo benchmark
+@@ -254,11 +262,19 @@ def benchmark(
+             runs=runs,
+             iterations=iterations,
+             population=population,
+             seed=seed,
+             parallel=parallel,
++            dynamic=dynamic,
++            multiobjective=multiobjective,
+         )
++
++        # Mostrar métricas QC-DVRP si están disponibles
++        if multiobjective:
++            logger.info("\n=== Métricas QC-DVRP ===")
++            for result in results:
++                if result.on_time_delivery_rate is not None:
++                    logger.info(f"{result.algorithm_name}: {result.on_time_delivery_rate*100:.1f}% entregas a tiempo")
+
+         # Guardar resultados
+         if output:
+             output_dir = output
+         else:
+@@ -343,11 +359,13 @@ def benchmark(
+ @click.option("--extended/--no-extended", default=True, help="Incluir tests extendidos")
+ @click.option(
+     "--cd-diagram/--no-cd-diagram", default=True, help="Generar diagrama CD"
+ )
+ @click.option("--output", "-o", help="Directorio de salida")
+-def stats(input, alpha, extended, cd_diagram, output):
++@click.option("--latex/--no-latex", default=False, help="Generar tablas LaTeX")
++@click.option("--multiobjective/--no-multiobjective", default=False, help="Análisis multiobjetivo")
++def stats(input, alpha, extended, cd_diagram, output, latex, multiobjective):
+     """Realiza análisis estadístico riguroso de resultados."""
+     if not input:
+         logger.error("Se requiere archivo de entrada con --input")
+         return
+
+@@ -366,20 +384,31 @@ def stats(input, alpha, extended, cd_diagram, output):
+         df = pd.read_json(input)
+     else:
+         logger.error(f"Formato no soportado: {input}")
+         return
+
+-    # Ejecutar análisis estadístico
+-    analyzer = AdvancedStatisticalAnalysis(df)
++    # Configurar análisis
++    if multiobjective and all(col in df.columns for col in ['DeliveryTime', 'LoadVariation', 'Distance']):
++        analyzer = AdvancedStatisticalAnalysis(
++            df,
++            multiobjective=True,
++            objective_cols=['DeliveryTime', 'LoadVariation', 'Distance']
++        )
++    else:
++        analyzer = AdvancedStatisticalAnalysis(df)
+
+     # Generar reporte completo
+     results = analyzer.generate_comprehensive_report(
+         output_dir=output_dir,
+         alpha=alpha,
+         extended_tests=extended
+     )
+
+     logger.info(f"Análisis estadístico completado. Resultados en: {output_dir}")
++
++    # Generar tablas LaTeX si se solicita
++    if latex:
++        latex_file = os.path.join(output_dir, "statistical_tables.tex")
++        analyzer.to_latex(latex_file, booktabs=True)
++        logger.info(f"Tablas LaTeX generadas en: {latex_file}")
+
+
+ # Comando para análisis masivo con checkpointing
+@@ -423,11 +452,17 @@ def stats(input, alpha, extended, cd_diagram, output):
+ @click.option(
+     "--resume/--no-resume", default=True, help="Reanudar desde checkpoint si existe"
+ )
+ @click.option("--seed", "-s", default=42, type=int, help="Semilla base")
+ @click.option("--output-dir", "-o", default="massive_benchmark", help="Directorio de salida")
+-def massive(algorithms, instances, runs, iterations, population, parallel, checkpoint_interval, resume, seed, output_dir):
++@click.option(
++    "--dynamic/--no-dynamic", default=False, help="Simular demandas dinámicas"
++)
++@click.option(
++    "--multiobjective/--no-multiobjective", default=False, help="Evaluar métricas multiobjetivo"
++)
++def massive(algorithms, instances, runs, iterations, population, parallel, checkpoint_interval, resume, seed, output_dir, dynamic, multiobjective):
+     """Ejecuta benchmarking masivo con soporte para checkpointing."""
+     # Parsear algoritmos
+     if algorithms == "all":
+         algo_dict = {k: v['class'] for k, v in ALGORITHMS.items() if k not in ['hoa', 'fgo']}
+     else:
+@@ -451,11 +486,13 @@ def massive(algorithms, instances, runs, iterations, population, parallel, check
+         output_dir=output_dir,
+         num_workers=mp.cpu_count() if parallel else 1,
+         checkpoint_interval=checkpoint_interval,
+         resume=resume,
+         optimize_instances=None,
++        dynamic=dynamic,
++        multiobjective=multiobjective,
+     )
+
+     logger.info(f"Benchmark masivo completado. Resultados en: {output_dir}")
+
+     # Generar reporte automáticamente

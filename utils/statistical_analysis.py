@@ -901,6 +901,148 @@ class AdvancedStatisticalAnalysis:
                 effect_df = pd.DataFrame(effect_data)
                 effect_df.to_csv(output_path / "effect_sizes.csv", index=False)
 
+    def to_latex(self, output_file: Optional[str] = None, booktabs: bool = True) -> str:
+        """
+        Generate LaTeX tables for the statistical analysis results.
+
+        Args:
+            output_file: Optional file to save LaTeX code
+            booktabs: Use booktabs package for better formatting
+
+        Returns:
+            LaTeX code as string
+        """
+        latex_code = []
+
+        # Header
+        if booktabs:
+            latex_code.append(
+                "% Requires \\usepackage{booktabs} and \\usepackage{siunitx}"
+            )
+            latex_code.append("% For multi-page tables: \\usepackage{longtable}")
+
+        # Summary statistics table
+        latex_code.append("\n% Summary Statistics")
+        latex_code.append("\\begin{table}[htbp]")
+        latex_code.append("\\centering")
+        latex_code.append("\\caption{Summary statistics for all algorithms}")
+        latex_code.append("\\label{tab:summary_stats}")
+
+        if booktabs:
+            latex_code.append("\\begin{tabular}{l" + "S" * 7 + "}")
+            latex_code.append("\\toprule")
+        else:
+            latex_code.append("\\begin{tabular}{l" + "r" * 7 + "}")
+            latex_code.append("\\hline")
+
+        # Header row
+        latex_code.append(
+            "Algorithm & {Mean} & {Std} & {Min} & {Max} & {Median} & {Q1} & {Q3} \\\\"
+        )
+
+        if booktabs:
+            latex_code.append("\\midrule")
+        else:
+            latex_code.append("\\hline")
+
+        # Data rows
+        summary_stats = self._get_summary_statistics()
+        for alg, stats_data in summary_stats.items():
+            row = f"{alg} & {stats_data['mean']:.2f} & {stats_data['std']:.2f} & "
+            row += f"{stats_data['min']:.2f} & {stats_data['max']:.2f} & "
+            row += f"{stats_data['median']:.2f} & {stats_data['q1']:.2f} & {stats_data['q3']:.2f} \\\\"
+            latex_code.append(row)
+
+        if booktabs:
+            latex_code.append("\\bottomrule")
+        else:
+            latex_code.append("\\hline")
+
+        latex_code.append("\\end{tabular}")
+        latex_code.append("\\end{table}")
+
+        # Friedman test results
+        friedman_results = self.friedman_test()
+        if friedman_results and "error" not in friedman_results:
+            latex_code.append("\n% Friedman Test Results")
+            latex_code.append("\\begin{table}[htbp]")
+            latex_code.append("\\centering")
+            latex_code.append("\\caption{Friedman test results and average ranks}")
+            latex_code.append("\\label{tab:friedman}")
+
+            # Test statistics
+            latex_code.append("\\begin{minipage}{0.45\\textwidth}")
+            latex_code.append("\\centering")
+            if booktabs:
+                latex_code.append("\\begin{tabular}{lr}")
+                latex_code.append("\\toprule")
+            else:
+                latex_code.append("\\begin{tabular}{|l|r|}")
+                latex_code.append("\\hline")
+
+            latex_code.append(
+                f"Friedman statistic & {friedman_results['statistic']:.4f} \\\\"
+            )
+            latex_code.append(f"p-value & {friedman_results['p_value']:.4f} \\\\")
+            latex_code.append(f"Degrees of freedom & {friedman_results['df']} \\\\")
+
+            if booktabs:
+                latex_code.append("\\bottomrule")
+            else:
+                latex_code.append("\\hline")
+
+            latex_code.append("\\end{tabular}")
+            latex_code.append("\\end{minipage}")
+
+            # Average ranks
+            latex_code.append("\\hfill")
+            latex_code.append("\\begin{minipage}{0.45\\textwidth}")
+            latex_code.append("\\centering")
+            if booktabs:
+                latex_code.append("\\begin{tabular}{lS}")
+                latex_code.append("\\toprule")
+            else:
+                latex_code.append("\\begin{tabular}{|l|r|}")
+                latex_code.append("\\hline")
+
+            latex_code.append("Algorithm & {Average Rank} \\\\")
+            if booktabs:
+                latex_code.append("\\midrule")
+            else:
+                latex_code.append("\\hline")
+
+            for alg, rank in sorted(
+                friedman_results["average_ranks"].items(), key=lambda x: x[1]
+            ):
+                latex_code.append(f"{alg} & {rank:.3f} \\\\")
+
+            if booktabs:
+                latex_code.append("\\bottomrule")
+            else:
+                latex_code.append("\\hline")
+
+            latex_code.append("\\end{tabular}")
+            latex_code.append("\\end{minipage}")
+            latex_code.append("\\end{table}")
+
+        # Nemenyi critical difference
+        nemenyi_results = self.nemenyi_test()
+        if nemenyi_results:
+            latex_code.append("\n% Nemenyi Post-hoc Test")
+            latex_code.append(
+                f"% Critical difference (α={nemenyi_results['alpha']}): {nemenyi_results['critical_distance']:.4f}"
+            )
+
+        # Join all code
+        latex_str = "\n".join(latex_code)
+
+        # Save to file if requested
+        if output_file:
+            with open(output_file, "w") as f:
+                f.write(latex_str)
+
+        return latex_str
+
 
 # Convenience functions for backward compatibility
 

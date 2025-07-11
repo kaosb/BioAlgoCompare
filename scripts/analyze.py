@@ -215,6 +215,16 @@ def run(
     default=None,
     help="Directorio de salida (por defecto se genera automáticamente)",
 )
+@click.option(
+    "--dynamic/--no-dynamic",
+    default=False,
+    help="Simular demandas dinámicas (Poisson λ=5-15)",
+)
+@click.option(
+    "--multiobjective/--no-multiobjective",
+    default=False,
+    help="Evaluar métricas multiobjetivo (Pareto, hipervolumen, IGD)",
+)
 def benchmark(
     input,
     run_benchmark,
@@ -227,6 +237,8 @@ def benchmark(
     parallel,
     optimize,
     output_dir,
+    dynamic,
+    multiobjective,
 ):
     """
     Analiza resultados de algoritmos metaheurísticos y genera informes.
@@ -268,15 +280,32 @@ def benchmark(
         logger.info(
             f"Ejecutando benchmark con {len(algo_dict)} algoritmos en {len(instance_list)} instancias..."
         )
-        benchmark_results = benchmark_function(
-            algo_dict,
-            instance_list,
-            runs=runs,
-            iterations=iterations,
-            population=population,
-            seed=seed,
-            parallel=parallel,
-        )
+
+        # Usar benchmark QC-DVRP si está habilitado
+        if dynamic or multiobjective:
+            from utils.qc_dvrp_benchmarking import run_qc_dvrp_benchmark
+            logger.info("Modo QC-DVRP activado: dynamic={}, multiobjective={}".format(dynamic, multiobjective))
+            benchmark_results = run_qc_dvrp_benchmark(
+                algo_dict,
+                instance_list,
+                runs=runs,
+                iterations=iterations,
+                population=population,
+                seed=seed,
+                parallel=parallel,
+                dynamic=dynamic,
+                multiobjective=multiobjective,
+            )
+        else:
+            benchmark_results = benchmark_function(
+                algo_dict,
+                instance_list,
+                runs=runs,
+                iterations=iterations,
+                population=population,
+                seed=seed,
+                parallel=parallel,
+            )
 
         # Guardar resultados del benchmark
         benchmark_path = os.path.join(output_dir, "benchmark_results.json")

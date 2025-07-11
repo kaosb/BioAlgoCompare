@@ -1,0 +1,437 @@
+--- a/utils/benchmarking.py
++++ b/utils/benchmarking.py
+@@ -21,6 +21,11 @@ import pickle
+ import gzip
+ from pathlib import Path
+
++# Import for multi-objective metrics
++try:
++    from deap.tools import hypervolume as deap_hypervolume
++except ImportError:
++    deap_hypervolume = None
++
+ # Configure logger
+ logger = logging.getLogger(__name__)
+
+@@ -92,6 +97,11 @@ class BenchmarkResult:
+         self.fitness_values = []
+         self.execution_times = []
+         self.convergence_curves = []
++
++        # For multi-objective optimization
++        self.pareto_fronts = []
++        self.hypervolume_values = []
++        self.igd_values = []
++        self.dynamic_metrics = []
+
+         # Métricas derivadas
+         self.best_fitness = None
+@@ -100,10 +110,13 @@ class BenchmarkResult:
+         self.std_fitness = None
+         self.mean_time = None
+         self.std_time = None
+         self.gap_to_optimal = None
+         self.success_rate = None
+         self.avg_convergence = None
++        self.avg_hypervolume = None
++        self.avg_igd = None
++        self.on_time_delivery_rate = None
++        self.avg_load_variation = None
+
+         # Si no se especifica el número de ejecuciones, se determina por los datos
+         self.runs = runs
+
+@@ -111,6 +124,19 @@ class BenchmarkResult:
+         """Añade los resultados de una ejecución."""
+         self.fitness_values.append(fitness)
+         self.execution_times.append(execution_time)
+         self.convergence_curves.append(convergence_curve)
++
++    def add_multiobjective_run(self, pareto_front, hypervolume, igd, dynamic_metrics=None):
++        """Añade resultados de una ejecución multiobjetivo."""
++        self.pareto_fronts.append(pareto_front)
++        self.hypervolume_values.append(hypervolume)
++        self.igd_values.append(igd)
++        if dynamic_metrics:
++            self.dynamic_metrics.append(dynamic_metrics)
+
+     def compute_metrics(self):
+         """Calcula las métricas derivadas de los resultados."""
+@@ -143,6 +169,20 @@ class BenchmarkResult:
+                 curve[:min_length] for curve in self.convergence_curves
+             ]
+             self.avg_convergence = np.mean(standardized_curves, axis=0)
++
++        # Multi-objective metrics
++        if self.hypervolume_values:
++            self.avg_hypervolume = np.mean(self.hypervolume_values)
++
++        if self.igd_values:
++            self.avg_igd = np.mean(self.igd_values)
++
++        # Dynamic metrics for QC-DVRP
++        if self.dynamic_metrics:
++            on_time_deliveries = [m.get('on_time_rate', 0) for m in self.dynamic_metrics]
++            load_variations = [m.get('load_variation_coef', 0) for m in self.dynamic_metrics]
++            self.on_time_delivery_rate = np.mean(on_time_deliveries) if on_time_deliveries else None
++            self.avg_load_variation = np.mean(load_variations) if load_variations else None
+
+     def to_dict(self):
+         """Convierte los resultados a un diccionario para almacenamiento/serialización."""
+@@ -161,11 +201,18 @@ class BenchmarkResult:
+                 "std_time": self.std_time,
+                 "gap_to_optimal": self.gap_to_optimal,
+                 "success_rate": self.success_rate,
++                "avg_hypervolume": self.avg_hypervolume,
++                "avg_igd": self.avg_igd,
++                "on_time_delivery_rate": self.on_time_delivery_rate,
++                "avg_load_variation": self.avg_load_variation,
+             },
+             "detailed_results": {
+                 "fitness_values": self.fitness_values,
+                 "execution_times": self.execution_times,
++                "hypervolume_values": self.hypervolume_values,
++                "igd_values": self.igd_values,
+             },
+         }
+
+         # No incluimos las curvas de convergencia en el diccionario para evitar objetos muy grandes
+@@ -195,10 +242,136 @@ OPTIMAL_VALUES = {
+     "E-n22-k4": 375,
+     "B-n31-k5": 672,
+     "E-n51-k5": 521,
++    # Solomon instances for DVRP
++    "Solomon-RC101": 1696.94,  # Best known solution
++    "Solomon-RC102": 1554.75,
++    "Solomon-RC103": 1261.67,
++    "Solomon-RC104": 1135.48,
+ }
+
+
++def calculate_hypervolume(pareto_front, reference_point=None):
++    """
++    Calcula el hipervolumen de un frente de Pareto.
++
++    Args:
++        pareto_front: Lista de soluciones [(obj1, obj2, obj3), ...]
++        reference_point: Punto de referencia (peor caso)
++
++    Returns:
++        float: Valor del hipervolumen
++    """
++    if not pareto_front:
++        return 0.0
++
++    # Si DEAP está disponible, usar su implementación
++    if deap_hypervolume:
++        if reference_point is None:
++            # Calcular punto de referencia automáticamente
++            max_obj1 = max(s[0] for s in pareto_front) * 1.1
++            max_obj2 = max(s[1] for s in pareto_front) * 1.1
++            max_obj3 = max(s[2] for s in pareto_front) * 1.1
++            reference_point = [max_obj1, max_obj2, max_obj3]
++
++        hv = deap_hypervolume.Hypervolume(reference_point)
++        return hv.compute(pareto_front)
++    else:
++        # Implementación simplificada si DEAP no está disponible
++        logger.warning("DEAP not available, using simplified hypervolume calculation")
++        if reference_point is None:
++            reference_point = [
++                max(s[0] for s in pareto_front) * 1.1,
++                max(s[1] for s in pareto_front) * 1.1,
++                max(s[2] for s in pareto_front) * 1.1
++            ]
++
++        # Aproximación simple: suma de volúmenes dominados
++        volume = 0.0
++        for sol in pareto_front:
++            vol = 1.0
++            for i in range(3):
++                diff = reference_point[i] - sol[i]
++                if diff > 0:
++                    vol *= diff
++                else:
++                    vol = 0
++                    break
++            volume += vol
++        return volume
++
++
++def calculate_igd(pareto_front, reference_set):
++    """
++    Calcula el Inverted Generational Distance (IGD).
++
++    Args:
++        pareto_front: Frente de Pareto obtenido
++        reference_set: Conjunto de referencia (Pareto óptimo conocido)
++
++    Returns:
++        float: Valor del IGD
++    """
++    if not pareto_front or not reference_set:
++        return float('inf')
++
++    total_distance = 0.0
++    for ref_point in reference_set:
++        min_distance = float('inf')
++        for sol in pareto_front:
++            # Distancia euclidiana
++            distance = sum((ref_point[i] - sol[i])**2 for i in range(len(ref_point)))
++            distance = sqrt(distance)
++            min_distance = min(min_distance, distance)
++        total_distance += min_distance
++
++    return total_distance / len(reference_set)
++
++
++def simulate_dynamic_demands(problem, lambda_rate=10, time_horizon=480, seed=None):
++    """
++    Simula demandas dinámicas siguiendo un proceso de Poisson.
++
++    Args:
++        problem: Instancia de VRPProblem
++        lambda_rate: Tasa de llegada de Poisson (pedidos/hora)
++        time_horizon: Horizonte temporal en minutos
++        seed: Semilla para reproducibilidad
++
++    Returns:
++        list: Lista de nuevos pedidos con timestamps
++    """
++    if seed is not None:
++        np.random.seed(seed)
++
++    dynamic_orders = []
++    current_time = 0
++
++    while current_time < time_horizon:
++        # Tiempo hasta siguiente pedido (exponencial)
++        interval = np.random.exponential(60 / lambda_rate)  # en minutos
++        current_time += interval
++
++        if current_time < time_horizon:
++            # Generar nuevo pedido
++            customer_id = np.random.randint(1, problem.dimension)
++            demand = np.random.randint(5, 20)
++
++            order = {
++                'customer_id': customer_id,
++                'demand': demand,
++                'arrival_time': current_time,
++                'coord': problem.nodes[customer_id] if hasattr(problem, 'nodes') else (0, 0),
++                'time_window': (current_time, current_time + 120),  # 2 horas de ventana
++            }
++            dynamic_orders.append(order)
++
++    return dynamic_orders
++
++
+ def save_benchmark_results(results, filename=None):
+     """
+     Guarda los resultados de benchmarking en un archivo JSON.
+@@ -248,11 +421,13 @@ def run_benchmark(
+     iterations=100,
+     population=30,
+     seed=None,
+     parallel=False,
++    dynamic=False,
++    multiobjective=False,
+ ):
+     """
+     Ejecuta un benchmark comparativo de algoritmos sobre instancias de problemas.
+
+     Args:
+         algorithms: Diccionario de algoritmos {nombre: clase}
+         problem_instances: Lista de instancias VRP
+@@ -260,11 +435,13 @@ def run_benchmark(
+         iterations: Número de iteraciones por ejecución
+         population: Tamaño de población para los algoritmos
+         seed: Semilla inicial para reproducibilidad
+         parallel: Si es True, se ejecutan en paralelo
++        dynamic: Si es True, simula demandas dinámicas
++        multiobjective: Si es True, evalúa métricas multiobjetivo
+
+     Returns:
+         Lista de objetos BenchmarkResult
+     """
+     from problems.vrp import VRPProblem
+@@ -283,6 +460,13 @@ def run_benchmark(
+             print(f"Error: La instancia {instance_name} no existe en data/vrp")
+             continue
+
+         problem = VRPProblem(instance_path)
++
++        # Configurar para QC-DVRP si es dinámico
++        if dynamic and hasattr(problem, 'update_demand'):
++            # Configurar múltiples depósitos si no existen
++            if not hasattr(problem, 'depots') or not problem.depots:
++                problem.depots = [(0, 0)]  # Depósito por defecto
++
+         print(f"Benchmark para instancia: {instance_name}")
+
+         for algo_name, AlgoClass in algorithms.items():
+@@ -307,21 +491,96 @@ def run_benchmark(
+             else:
+                 # Ejecución secuencial
+                 for run in range(runs):
+                     run_seed = seed + run if seed is not None else None
++
++                    # Configurar algoritmo con soporte IL si es HO
++                    if algo_name.lower() in ['ho', 'hoa']:
++                        algo = AlgoClass(
++                            problem,
++                            population_size=population,
++                            max_iterations=iterations,
++                            seed=run_seed,
++                            use_il=True if os.path.exists('models/ho_il_model.pth') else False,
++                            il_model_path='models/ho_il_model.pth'
++                        )
++                    else:
++                        algo = AlgoClass(
++                            problem,
++                            population_size=population,
++                            max_iterations=iterations,
++                            seed=run_seed,
++                        )
++
++                    # Simular demandas dinámicas si está habilitado
++                    if dynamic:
++                        lambda_rate = np.random.uniform(5, 15)  # λ entre 5-15
++                        dynamic_orders = simulate_dynamic_demands(
++                            problem, lambda_rate=lambda_rate, seed=run_seed
++                        )
++
++                        # Actualizar problema con demandas dinámicas
++                        if hasattr(problem, 'update_demand'):
++                            for order in dynamic_orders[:5]:  # Primeras 5 órdenes
++                                problem.update_demand([order])
+
+-                    algo = AlgoClass(
+-                        problem,
+-                        population_size=population,
+-                        max_iterations=iterations,
+-                        seed=run_seed,
+-                    )
+-
+                     start_time = time.time()
+                     best_solution = algo.execute()
+                     execution_time = time.time() - start_time
+
+-                    benchmark_result.add_run(
+-                        best_solution.fitness(),
+-                        execution_time,
+-                        algo.get_convergence_curve(),
+-                    )
++                    # Evaluación estándar
++                    fitness = best_solution.fitness()
++                    convergence_curve = algo.get_convergence_curve()
++
++                    # Evaluación multiobjetivo si está habilitado
++                    if multiobjective and hasattr(problem, 'evaluate_multi'):
++                        # Obtener frente de Pareto
++                        pareto_front = []
++                        if hasattr(algo, 'pareto_front'):
++                            pareto_front = algo.pareto_front
++                        elif hasattr(algo, 'population'):
++                            # Evaluar toda la población para obtener aproximación del frente
++                            for ind in algo.population:
++                                obj_vals = problem.evaluate_multi(ind.position)
++                                pareto_front.append(obj_vals)
++
++                            # Filtrar soluciones dominadas (simplificado)
++                            non_dominated = []
++                            for i, sol1 in enumerate(pareto_front):
++                                dominated = False
++                                for j, sol2 in enumerate(pareto_front):
++                                    if i != j and all(sol2[k] <= sol1[k] for k in range(3)):
++                                        dominated = True
++                                        break
++                                if not dominated:
++                                    non_dominated.append(sol1)
++                            pareto_front = non_dominated
++
++                        # Calcular hipervolumen
++                        hypervolume = calculate_hypervolume(pareto_front)
++
++                        # Calcular IGD si hay conjunto de referencia
++                        igd = 0.0  # Por ahora, sin conjunto de referencia
++
++                        # Métricas dinámicas
++                        dynamic_metrics = None
++                        if dynamic:
++                            # Evaluar solución final
++                            delivery_time, load_var, distance = problem.evaluate_multi(best_solution.position)
++
++                            # Calcular tasa de entregas a tiempo (≤30 min)
++                            on_time_rate = 1.0 if delivery_time <= 30 else 0.0
++
++                            dynamic_metrics = {
++                                'avg_delivery_time': delivery_time,
++                                'load_variation_coef': load_var,
++                                'total_distance': distance,
++                                'on_time_rate': on_time_rate,
++                                'lambda_rate': lambda_rate,
++                            }
++
++                        benchmark_result.add_multiobjective_run(
++                            pareto_front, hypervolume, igd, dynamic_metrics
++                        )
++
++                    # Añadir resultado estándar también
++                    benchmark_result.add_run(fitness, execution_time, convergence_curve)
+
+                     print(
+                         f"    Ejecución {run+1}/{runs}: Fitness = {best_solution.fitness():.2f}, Tiempo = {execution_time:.2f}s"
+@@ -336,6 +595,15 @@ def run_benchmark(
+                         f"  Gap al óptimo: {benchmark_result.gap_to_optimal:.2f}%, "
+                         + f"Tasa de éxito: {benchmark_result.success_rate:.2f}%"
+                     )
++
++                if multiobjective and benchmark_result.avg_hypervolume:
++                    print(f"  Hipervolumen promedio: {benchmark_result.avg_hypervolume:.2f}")
++                    if benchmark_result.on_time_delivery_rate is not None:
++                        print(f"  Tasa de entregas a tiempo: {benchmark_result.on_time_delivery_rate*100:.1f}%")
++                    if benchmark_result.avg_load_variation is not None:
++                        print(f"  Coef. variación de carga: {benchmark_result.avg_load_variation:.3f}")
++
+                 print()
+
+     # Ejecutar tareas en paralelo si está habilitado
+@@ -1014,11 +1282,13 @@ def run_massive_benchmark(
+     checkpoint_interval=50,
+     resume=True,
+     optimize_instances=None,
++    dynamic=False,
++    multiobjective=False,
+ ):
+     """
+     Execute massive benchmark with checkpoint support.
+
+     Args:
+         algorithms: List of algorithm classes or names
+         instances: List of instance names
+@@ -1028,11 +1298,13 @@ def run_massive_benchmark(
+         output_dir: Output directory
+         num_workers: Number of parallel workers
+         checkpoint_interval: Save checkpoint every N runs
+         resume: Resume from checkpoint if available
+         optimize_instances: Optional list of instances to optimize
++        dynamic: Enable dynamic VRP simulation
++        multiobjective: Enable multi-objective evaluation
+
+     Returns:
+         List of BenchmarkResult objects
+     """
+     import gzip
+@@ -1113,11 +1385,13 @@ def run_massive_benchmark(
+                     iterations=iterations,
+                     population=population_size,
+                     seed=None,  # Will be randomized for each run
+                     parallel=False,
++                    dynamic=dynamic,
++                    multiobjective=multiobjective,
+                 )
+
+                 if result:
+                     all_results.extend(result)
+                     completed_tasks.add(task_id)
