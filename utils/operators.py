@@ -126,6 +126,7 @@ def repair_bounds(solution, lb=0.0, ub=1.0):
 # Operadores específicos para VRP
 # ============================================================================
 
+
 class VRPOperators:
     """Clase de operadores avanzados para problemas de ruteo de vehículos (VRP)."""
 

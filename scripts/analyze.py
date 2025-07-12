@@ -49,7 +49,7 @@ from utils.statistical_analysis import (
     perform_statistical_analysis,
     generate_cd_diagram
 )
-from utils.vrp_operators import VRPOperators
+from utils.operators import VRPOperators
 from utils.visualization import plot_convergence
 from utils.algorithm_factory import (
     ALGORITHMS,
@@ -283,7 +283,7 @@ def benchmark(
 
         # Usar benchmark QC-DVRP si está habilitado
         if dynamic or multiobjective:
-            from utils.qc_dvrp_benchmarking import run_qc_dvrp_benchmark
+            from utils.benchmarking import run_qc_dvrp_benchmark
             logger.info("Modo QC-DVRP activado: dynamic={}, multiobjective={}".format(dynamic, multiobjective))
             benchmark_results = run_qc_dvrp_benchmark(
                 algo_dict,
