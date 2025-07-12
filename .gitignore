@@ -136,3 +136,35 @@ texput.*
 analyze.log
 benchmark.log
 massive_benchmark.log
+
+# Archivos patch (ya aplicados)
+*.patch
+
+# Directorios de instalación
+*.egg-info/
+bioalgocompare.egg-info/
+
+# Archivos de checkpoint
+*.pkl
+*.pkl.gz
+checkpoint.pkl
+
+# Directorios temporales de resultados
+results/test_*/
+results/validation_*/
+clei_submission_test/
+test_publication_full/
+sensitivity_test/
+validation_results/
+validation_logs/
+
+# Archivos HTML de cobertura
+**/coverage_html/
+htmlcov/
+
+# Archivos de salida temporales
+ho_phase_analysis.png
+cec2017_comparison_results.csv
+*.png
+!figures/*.png
+!docs/**/*.png

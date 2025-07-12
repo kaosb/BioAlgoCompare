@@ -1147,3 +1147,206 @@ def run_massive_benchmark(
 
     logger.info(f"Massive benchmark completed. Results saved to {output_path}")
     return all_results
+
+
+# QC-DVRP Extensions (migrated from qc_dvrp_benchmarking.py)
+# =========================================================
+
+# Extended optimal values including Solomon instances
+QC_OPTIMAL_VALUES = OPTIMAL_VALUES.copy()
+QC_OPTIMAL_VALUES.update(
+    {
+        "Solomon-RC101": 1696.94,  # Best known solution
+        "Solomon-RC102": 1554.75,
+        "Solomon-RC103": 1261.67,
+        "Solomon-RC104": 1135.48,
+        "Solomon-RC105": 1629.44,
+        "Solomon-RC106": 1424.73,
+        "Solomon-RC107": 1230.48,
+        "Solomon-RC108": 1139.82,
+    }
+)
+
+
+class QCDVRPBenchmarkResult(BenchmarkResult):
+    """Extended benchmark result for QC-DVRP with multi-objective metrics."""
+    
+    def __init__(self, algorithm_name, instance_name, runs=None):
+        super().__init__(algorithm_name, instance_name, runs)
+        # Multi-objective metrics
+        self.hypervolume_values = []
+        self.igd_values = []
+        self.pareto_fronts = []
+        
+        # QC-specific metrics
+        self.on_time_rates = []
+        self.load_variations = []
+        self.delivery_times = []
+        
+        # Dynamic demand info
+        self.demand_patterns = []
+        self.response_times = []
+
+
+def run_qc_dvrp_benchmark(
+    algorithms,
+    problem_instances,
+    runs=30,
+    iterations=100,
+    population=30,
+    seed=None,
+    parallel=True,
+    output_dir=None,
+    dynamic=False,
+    multiobjective=False,
+    lambda_min=5,
+    lambda_max=15,
+    time_horizon=480,
+):
+    """
+    Run QC-DVRP benchmark with dynamic demands and multi-objective evaluation.
+    
+    Args:
+        algorithms: Dictionary of algorithm name -> algorithm class
+        problem_instances: List of instance names
+        runs: Number of independent runs per algorithm-instance pair
+        iterations: Number of iterations per run
+        population: Population size
+        seed: Random seed for reproducibility
+        parallel: Whether to run in parallel
+        output_dir: Output directory for results
+        dynamic: Enable dynamic demand simulation
+        multiobjective: Enable multi-objective evaluation
+        lambda_min: Minimum Poisson rate for dynamic demands
+        lambda_max: Maximum Poisson rate for dynamic demands
+        time_horizon: Time horizon in minutes
+        
+    Returns:
+        List of QCDVRPBenchmarkResult objects
+    """
+    # Import at runtime to avoid circular imports
+    from utils.multiobjective_metrics import (
+        calculate_hypervolume,
+        calculate_igd,
+        simulate_dynamic_demands,
+        calculate_qc_metrics,
+    )
+    
+    # Use base benchmark function for standard execution
+    base_results = run_benchmark(
+        algorithms=algorithms,
+        problem_instances=problem_instances,
+        runs=runs,
+        iterations=iterations,
+        population=population,
+        seed=seed,
+        parallel=parallel,
+        output_dir=output_dir,
+        optimize_instances=None,
+    )
+    
+    # Convert to QC-DVRP results and add QC-specific metrics
+    qc_results = []
+    
+    for base_result in base_results:
+        # Create QC-DVRP result
+        qc_result = QCDVRPBenchmarkResult(
+            base_result.algorithm_name,
+            base_result.instance_name,
+            base_result.runs,
+        )
+        
+        # Copy base metrics
+        qc_result.fitness_values = base_result.fitness_values
+        qc_result.execution_times = base_result.execution_times
+        qc_result.convergence_curves = base_result.convergence_curves
+        qc_result.best_solutions = base_result.best_solutions
+        qc_result.iterations_to_best = base_result.iterations_to_best
+        
+        # Add QC-specific evaluation
+        if dynamic or multiobjective:
+            logger.info(f"Adding QC-DVRP metrics for {qc_result.algorithm_name} on {qc_result.instance_name}")
+            
+            # Simulate dynamic demands if enabled
+            if dynamic:
+                lambda_rate = np.random.uniform(lambda_min, lambda_max)
+                qc_result.demand_patterns.append({
+                    'lambda': lambda_rate,
+                    'time_horizon': time_horizon,
+                    'demands': simulate_dynamic_demands(lambda_rate, time_horizon)
+                })
+            
+            # Calculate multi-objective metrics
+            if multiobjective and qc_result.best_solutions:
+                for solution in qc_result.best_solutions:
+                    # Calculate QC metrics
+                    qc_metrics = calculate_qc_metrics(solution, time_horizon)
+                    
+                    qc_result.delivery_times.append(qc_metrics.get('avg_delivery_time', 0))
+                    qc_result.on_time_rates.append(qc_metrics.get('on_time_rate', 0))
+                    qc_result.load_variations.append(qc_metrics.get('load_variation', 0))
+                    
+                    # Calculate hypervolume if we have a Pareto front
+                    if hasattr(solution, 'objectives'):
+                        # Placeholder for actual Pareto front calculation
+                        hv = calculate_hypervolume(
+                            [(qc_metrics['avg_delivery_time'], 
+                              qc_metrics['load_variation'], 
+                              qc_metrics['total_distance'])],
+                            reference_point=(100, 1.0, 10000)
+                        )
+                        qc_result.hypervolume_values.append(hv)
+        
+        qc_results.append(qc_result)
+    
+    # Save results with QC-specific format
+    if output_dir:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        # Create summary with QC metrics
+        summary_df = create_qc_dvrp_summary_dataframe(qc_results)
+        summary_df.to_csv(output_path / f"qc_dvrp_summary_{timestamp}.csv", index=False)
+        
+        # Save detailed results
+        results_file = output_path / f"qc_dvrp_results_{timestamp}.json"
+        save_results_to_json(qc_results, results_file)
+        
+        logger.info(f"QC-DVRP results saved to {output_path}")
+    
+    return qc_results
+
+
+def create_qc_dvrp_summary_dataframe(benchmark_results):
+    """Create summary DataFrame with QC-DVRP specific metrics."""
+    summary_data = []
+    
+    for result in benchmark_results:
+        row = {
+            'Algorithm': result.algorithm_name,
+            'Instance': result.instance_name,
+            'Runs': result.runs,
+            # Standard metrics
+            'Best_Fitness': np.min(result.fitness_values) if result.fitness_values else np.nan,
+            'Avg_Fitness': np.mean(result.fitness_values) if result.fitness_values else np.nan,
+            'Std_Fitness': np.std(result.fitness_values) if result.fitness_values else np.nan,
+            'Avg_Time': np.mean(result.execution_times) if result.execution_times else np.nan,
+        }
+        
+        # QC-specific metrics
+        if hasattr(result, 'on_time_rates') and result.on_time_rates:
+            row['Avg_OnTime_Rate'] = np.mean(result.on_time_rates)
+            row['Std_OnTime_Rate'] = np.std(result.on_time_rates)
+        
+        if hasattr(result, 'load_variations') and result.load_variations:
+            row['Avg_Load_Variation'] = np.mean(result.load_variations)
+            row['Std_Load_Variation'] = np.std(result.load_variations)
+        
+        if hasattr(result, 'hypervolume_values') and result.hypervolume_values:
+            row['Avg_Hypervolume'] = np.mean(result.hypervolume_values)
+            row['Std_Hypervolume'] = np.std(result.hypervolume_values)
+        
+        summary_data.append(row)
+    
+    return pd.DataFrame(summary_data)
