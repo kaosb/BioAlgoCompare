@@ -93,7 +93,7 @@ def create_algorithm(
     return algo_class(
         problem=problem,
         population_size=population_size,
-        iterations=iterations,
+        max_iterations=iterations,  # Changed from iterations to max_iterations
         seed=seed,
         **kwargs,
     )

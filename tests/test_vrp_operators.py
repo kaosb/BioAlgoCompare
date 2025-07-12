@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from utils.vrp_operators import (
+from utils.operators import (
     VRPOperators,
     calculate_route_distance,
     check_route_capacity,

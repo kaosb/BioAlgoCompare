@@ -26,7 +26,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from algorithms.ho import HO  # noqa: E402
 from problems.vrp import VRPProblem  # noqa: E402
-from utils.benchmarking import benchmark_function  # noqa: E402
 
 
 def calculate_hypervolume(

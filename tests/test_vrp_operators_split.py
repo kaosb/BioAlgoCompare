@@ -10,7 +10,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # ruff: noqa: E402
-from utils import vrp_operators
+from utils import operators as vrp_operators
 from problems.vrp import VRPProblem
 
 
