@@ -2,9 +2,15 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Algorithms](https://img.shields.io/badge/algorithms-16-orange)](algorithms/)
+[![Algorithms](https://img.shields.io/badge/algorithms-17-orange)](algorithms/)
+[![Coverage](https://img.shields.io/badge/coverage-80%25-yellowgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-687%20passed-brightgreen)](tests/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
+
+## 🎯 Enfoque de Investigación: Quick-HO para VRP Dinámico
+
+Esta plataforma incluye la adaptación del **Hippopotamus Optimizer (HO)** para Quick Commerce Dynamic VRP (QC-DVRP) con optimización multiobjetivo, demandas dinámicas e integración con Imitation Learning. Preparado para sumisión a CLEI 2025.
 
 ## 🚀 Inicio Rápido
 
@@ -25,26 +31,42 @@ python scripts/analyze.py benchmark --run-benchmark --algorithms "sho,foa,egto" 
 
 - [Características](#-características)
 - [Instalación](#-instalación)
-- [Uso](#-uso)
+- [Uso Completo](#-uso-completo)
   - [Ejecución Básica](#ejecución-básica)
-  - [Benchmarking](#benchmarking-y-análisis)
+  - [Benchmarking Comparativo](#benchmarking-comparativo)
+  - [Benchmarking Masivo](#benchmarking-masivo)
+  - [QC-DVRP Dinámico](#qc-dvrp-dinámico-y-multiobjetivo)
   - [Análisis Estadístico](#análisis-estadístico-de-resultados)
+- [Flujo de Reproducibilidad](#-flujo-de-reproducibilidad-datos--paper)
+- [Generación de Papers](#-generación-de-papers-y-reportes)
 - [Algoritmos Implementados](#-algoritmos-implementados)
+- [Características Avanzadas](#-características-avanzadas)
+- [Herramientas Solomon](#-herramientas-solomon)
 - [Arquitectura](#-arquitectura)
+- [Tests y Cobertura](#-tests-y-cobertura)
 - [Documentación](#-documentación)
+- [Referencias](#-referencias)
 - [Contribuir](#-contribuir)
 - [Licencia](#-licencia)
 
 ## ✨ Características
 
-- **16 algoritmos bioinspirados** modernos (2016-2025)
+### Capacidades Principales
+- **17 algoritmos bioinspirados** únicos (2016-2025)
 - **Benchmarking masivo** con soporte para 1000+ ejecuciones
-- **Análisis estadístico completo**: Friedman, Nemenyi, Wilcoxon, tamaños de efecto
+- **Análisis estadístico completo**: Friedman, Nemenyi (CD corregido), Wilcoxon, tamaños de efecto
 - **Ejecución paralela** para máximo rendimiento
-- **Checkpointing** para experimentos largos
+- **Checkpointing automático** para experimentos largos
 - **Visualizaciones científicas** de calidad publicación
 - **CLI unificado** con interfaz intuitiva
 - **100% reproducible** con control de semillas
+
+### Extensiones QC-DVRP (Quick Commerce)
+- **Demandas dinámicas**: Simulación con proceso de Poisson (λ ∈ [5, 15])
+- **Optimización multiobjetivo**: Hipervolumen, IGD
+- **Métricas QC específicas**: Tasa de entregas a tiempo, variación de carga
+- **Imitation Learning**: Adaptación de parámetros HO
+- **Instancias Solomon**: Soporte RC101-RC108
 
 ## 🛠️ Instalación
 
@@ -74,11 +96,15 @@ pip install -r requirements.txt
 # Instalar en modo desarrollo
 pip install -e .
 
+# Instalar dependencias opcionales
+pip install torch torchvision  # Para Imitation Learning
+pip install cec2017           # Para validación CEC2017
+
 # Esto habilita el comando 'bioalgo' globalmente
 bioalgo run --algorithm sho --instance A-n32-k5
 ```
 
-## 📖 Uso
+## 📖 Uso Completo
 
 ### Ejecución Básica
 
@@ -94,17 +120,35 @@ Con múltiples ejecuciones y semilla fija:
 python scripts/analyze.py run --algorithm egto --instance E-n51-k5 --runs 10 --seed 42
 ```
 
-### Benchmarking y Análisis
+Ejecutar todos los algoritmos en paralelo:
 
-Comparar múltiples algoritmos:
+```bash
+python scripts/analyze.py run --algorithm all --instance P-n16-k8 --parallel
+```
+
+### Benchmarking Comparativo
+
+Comparar múltiples algoritmos (30+ runs recomendado):
 
 ```bash
 python scripts/analyze.py benchmark \
     --run-benchmark \
-    --algorithms "sho,foa,egto,ewa,hho" \
+    --algorithms "ho,sho,foa,egto,woa" \
     --instances "E-n22-k4,P-n16-k8,A-n32-k5" \
     --runs 30 \
-    --parallel
+    --iterations 100 \
+    --population 40 \
+    --parallel \
+    --seed 42
+```
+
+Con optimización local:
+
+```bash
+python scripts/analyze.py benchmark \
+    --run-benchmark \
+    --optimize \
+    --output-dir results/optimized_benchmark
 ```
 
 ### Benchmarking Masivo
@@ -114,11 +158,47 @@ Para experimentos de gran escala con 1000+ ejecuciones:
 ```bash
 python scripts/analyze.py massive \
     --runs 1000 \
-    --algorithm sho --algorithm egto --algorithm foa \
-    --instances E-n22-k4 P-n16-k8 \
+    --algorithm all \
+    --instances E-n22-k4 P-n16-k8 A-n32-k5 \
     --parallel \
     --resume \
-    --output-dir results/exp_massive_jan2025
+    --iterations 300 \
+    --population 50
+```
+
+Reanudar experimento interrumpido:
+
+```bash
+python scripts/analyze.py massive \
+    --resume \
+    --checkpoint results/massive_20250111_123456/checkpoint.pkl
+```
+
+### QC-DVRP Dinámico y Multiobjetivo
+
+Benchmark con demandas dinámicas:
+
+```bash
+python scripts/analyze.py benchmark \
+    --run-benchmark \
+    --dynamic \
+    --multiobjective \
+    --instances "Solomon-RC101,Solomon-RC102,Solomon-RC103" \
+    --algorithms "ho,sho,foa" \
+    --runs 100 \
+    --seed 42
+```
+
+Configurar parámetros dinámicos:
+
+```bash
+python scripts/analyze.py benchmark \
+    --run-benchmark \
+    --dynamic \
+    --lambda-min 5 \
+    --lambda-max 15 \
+    --time-horizon 480 \
+    --objectives "delivery_time,load_balance,distance"
 ```
 
 ### Análisis Estadístico de Resultados
@@ -139,10 +219,13 @@ python scripts/analyze.py stats \
 
 El análisis incluye:
 - Tests de Friedman y Quade
-- Test post-hoc de Nemenyi con CD corregido
-- Tamaños de efecto (A12, Cliff's delta)
+- Test post-hoc de Nemenyi con CD corregido: `q_α/√2 * sqrt(k(k+1)/(6n))`
+- Test de Wilcoxon signed-rank para comparación pareada
+- Tamaños de efecto (Vargha-Delaney A12, Cliff's delta)
 - Diagramas de diferencias críticas
-- Reportes detallados en Markdown
+- Heatmaps de significancia
+- Reportes detallados en Markdown/HTML
+- Exportación a LaTeX con booktabs/siunitx
 
 ### Ejemplo de Flujo Completo
 
@@ -173,9 +256,157 @@ python scripts/analyze.py stats \
     --out "${OUTPUT}/analysis"
 ```
 
+## 🔬 Flujo de Reproducibilidad: Datos → Paper
+
+### Paso 1: Ejecutar Experimentos Comprehensivos
+
+```bash
+# 1.1 Benchmark masivo (resultados principales)
+python scripts/analyze.py massive \
+    --runs 1000 \
+    --algorithm ho sho foa egto woa \
+    --instances "E-n22-k4,P-n16-k8,A-n32-k5" \
+    --parallel \
+    --seed 42
+
+# 1.2 Experimentos QC-DVRP (para Quick-HO)
+python scripts/analyze.py benchmark \
+    --run-benchmark \
+    --dynamic \
+    --multiobjective \
+    --instances "Solomon-RC101,Solomon-RC102,Solomon-RC103" \
+    --algorithms "ho,sho,foa" \
+    --runs 100 \
+    --seed 42
+```
+
+### Paso 2: Análisis Estadístico
+
+```bash
+# 2.1 Convertir resultados
+python scripts/analyze.py convert \
+    --json results/massive_*/benchmark_results.json \
+    --csv results/all_results.csv
+
+# 2.2 Análisis estadístico completo
+python scripts/analyze.py stats \
+    --csv results/all_results.csv \
+    --out results/statistical_analysis
+```
+
+### Paso 3: Análisis de Sensibilidad de Parámetros
+
+```bash
+# 3.1 Análisis de sensibilidad HO
+python scripts/tools/sensitivity_analysis_ho.py \
+    --instance data/vrp/P-n16-k8.vrp \
+    --runs 30 \
+    --output results/sensitivity
+
+# Analiza: α ∈ [0.1, 0.9], β ∈ [0.2, 0.8], γ ∈ [0.3, 1.0]
+```
+
+### Paso 4: Generar Materiales del Paper
+
+```bash
+# 4.1 Generar reporte comprehensivo
+python scripts/tools/generate_paper_report.py \
+    --input results/massive_*/benchmark_results.json \
+    --out paper_submission \
+    --seed 42
+
+# 4.2 Generar reporte de validación
+python scripts/tools/generate_validation_report.py \
+    --results-path results/all_results.csv \
+    --output-path paper_submission/validation_report.tex
+```
+
+### Paso 5: Paquete de Sumisión Completo
+
+```bash
+# 5.1 Generar sumisión CLEI 2025
+./scripts/tools/generate_clei_submission.sh
+
+# Genera:
+# - paper_clei2025.pdf (LaTeX compilado)
+# - Todas las tablas en formato booktabs/siunitx
+# - Figuras en calidad publicación (300 DPI)
+# - Metadatos completos
+# - Archivo ZIP para sumisión
+```
+
+## 📝 Generación de Papers y Reportes
+
+### Scripts de Generación Disponibles
+
+#### 1. **generate_paper_report.py** - Generador de Informes Científicos
+
+```bash
+python scripts/tools/generate_paper_report.py \
+    --input results/benchmark_results.json \
+    --out clei_submission \
+    --format ieee \
+    --include-sensitivity \
+    --include-convergence
+```
+
+Genera:
+- `paper_clei2025.tex`: Paper completo en LaTeX
+- `tables/`: Tablas con formato booktabs/siunitx
+- `figures/`: Visualizaciones de convergencia y frentes de Pareto
+- `informe_tecnico.md`: Informe técnico detallado
+
+#### 2. **generate_validation_report.py** - Reporte de Validación
+
+```bash
+python scripts/tools/generate_validation_report.py \
+    --results-path results/validation_results.json \
+    --output-path validation_report.tex
+```
+
+#### 3. **sensitivity_analysis_ho.py** - Análisis de Sensibilidad
+
+```bash
+python scripts/tools/sensitivity_analysis_ho.py \
+    --instance data/vrp/P-n16-k8.vrp \
+    --runs 10 \
+    --output sensitivity_results
+```
+
+Genera:
+- Mapas de calor de interacción de parámetros
+- Gráficos de efectos principales
+- Configuración óptima: α=0.10, β=0.50, γ=0.65
+
+### Scripts de Validación
+
+#### **validate_quick_ho.sh** - Validación Completa
+
+```bash
+./scripts/tools/validate_quick_ho.sh
+```
+
+Ejecuta:
+- Tests unitarios con cobertura (objetivo: 80%+)
+- Validación HO+IL integración
+- Benchmark pequeño (30 runs)
+- Análisis estadístico
+- Validación métricas QC-DVRP (≥85% entregas a tiempo, ≤0.2 variación carga)
+- Comando para benchmark masivo (1000 runs)
+
+#### **compare_cec_benchmarks.py** - Comparación CEC2017
+
+```bash
+python scripts/tools/compare_cec_benchmarks.py
+```
+
+- Compara en funciones unimodales (F1, F3) y multimodales (F7, F10)
+- Analiza fases HO (Position, Defense, Evasion)
+- Valida métricas QC en instancias Solomon
+
 ## 🧪 Algoritmos Implementados
 
-El proyecto implementa **16 algoritmos metaheurísticos bioinspirados únicos**:
+El proyecto implementa **17 algoritmos metaheurísticos bioinspirados únicos**:
 
 | Algoritmo | Nombre Completo | Año | Inspiración |
 |-----------|-----------------|-----|-------------|
@@ -195,8 +426,105 @@ El proyecto implementa **16 algoritmos metaheurísticos bioinspirados únicos**:
 | **rro** | Raven Roosting Optimization | 2016 | Dormideros de cuervos |
 | **smo** | Starling Murmuration Optimizer | 2022 | Bandadas de estorninos |
 | **gvoa** | Griffon Vultures Optimization | 2025 | Vuelo termal de buitres |
+| **ho** | Hippopotamus Optimizer | 2024 | Comportamiento territorial |
 
 **Nota**: Los alias `hoa` (→ `sho`) y `fgo` (→ `fsa`) están disponibles para compatibilidad.
+
+### Detalles de Implementación HO
+
+El Hippopotamus Optimizer implementa tres fases comportamentales:
+
+1. **Fase de Posición**: Exploración del espacio de búsqueda
+2. **Fase de Defensa**: Intensificación territorial con parámetro α
+3. **Fase de Evasión**: Escape de óptimos locales con parámetro γ
+
+Parámetros: α ∈ [0.1, 0.9], β ∈ [0.2, 0.8], γ ∈ [0.3, 1.0]
+
+## 🚀 Características Avanzadas
+
+### 1. Imitation Learning (IL) Integration
+
+```bash
+# Generar demostraciones
+python utils/generate_demos.py \
+    --algorithm ho \
+    --instances "E-n22-k4,P-n16-k8" \
+    --runs 100 \
+    --output demos/ho_demos.csv
+
+# Entrenar modelo IL
+python utils/train_il.py \
+    --dataset demos/ho_demos.csv \
+    --epochs 100 \
+    --batch-size 32 \
+    --learning-rate 0.001 \
+    --output models/ho_il_model.pth
+
+# Evaluar con IL
+python utils/evaluate_il.py \
+    --model models/ho_il_model.pth \
+    --test-instances "A-n32-k5,E-n51-k5" \
+    --runs 50
+```
+
+### 2. Operadores de Optimización Local VRP
+
+- **2-opt**: Intercambio de arcos
+- **Or-opt**: Reubicación de secuencias
+- **Relocate**: Mover clientes entre rutas
+- **Exchange**: Intercambiar clientes
+
+### 3. Métricas Multi-objetivo
+
+```python
+from utils.multiobjective_metrics import calculate_hypervolume, calculate_igd
+
+# Calcular hipervolumen
+hv = calculate_hypervolume(pareto_front, reference_point=(1000, 1.0, 5000))
+
+# Calcular IGD
+igd = calculate_igd(pareto_front, true_pareto_front)
+```
+
+## 🛠️ Herramientas Solomon
+
+### Benchmark Completo Solomon
+
+```bash
+# Ejecutar todas las instancias Solomon
+python tools/solomon/run_full_solomon_benchmark.py \
+    --algorithms ho sho foa woa \
+    --runs 100 \
+    --parallel
+```
+
+### Benchmark Extendido Solomon
+
+```bash
+# Series específicas RC (clientes agrupados)
+python tools/solomon/run_extended_solomon_benchmark.py \
+    --series RC \
+    --subset 101 102 103 104 \
+    --time-limit 3600
+```
+
+### Análisis de Resultados Solomon
+
+```bash
+# Analizar resultados
+python tools/solomon/analyze_solomon_results.py \
+    --results results/solomon_benchmark \
+    --output solomon_analysis
+```
+
+### Conversión de Formato
+
+```bash
+# Convertir instancias Solomon a formato VRP estándar
+python tools/solomon/convert_solomon_format.py \
+    --input solomon_instances \
+    --output data/vrp/Solomon
+```
 
 ## 🏗️ Arquitectura
 
@@ -247,6 +575,35 @@ BioAlgoCompare/
 │   Statistics    │────▶│  Visualization   │
 └─────────────────┘     └──────────────────┘
 ```
+
+## 🧪 Tests y Cobertura
+
+### Ejecutar Tests
+
+```bash
+# Ejecutar todos los tests con cobertura
+pytest --cov=algorithms --cov=problems --cov=utils --cov=scripts
+
+# Tests específicos por categoría
+pytest tests/unit/algorithms/
+pytest tests/integration/
+
+# Tests con marcadores
+pytest -m "not slow"
+
+# Generar reporte de cobertura HTML
+pytest --cov-report=html --cov-report=term-missing
+```
+
+### Estado Actual de Cobertura: **80%** (Objetivo: 100%)
+
+#### Gaps de Cobertura a Resolver
+
+1. `utils/algorithm_factory.py` (0%)
+2. `utils/evaluate_il.py` (0%)
+3. `utils/generate_demos.py` (0%)
+4. `utils/train_il.py` (0%)
+5. `problems/vrp.py` (92% - casos edge faltantes)
 
 ## 📊 Opciones de Línea de Comandos
 
@@ -341,6 +698,45 @@ Ver [Guía de Contribución](docs/development/contribution.md) para más detalle
 - [Paper IEEE Format](docs/papers/paper_ieee/) - Formato IEEE estándar
 - [Paper Extended](docs/papers/paper_extended/) - Versión extendida del análisis
 - [Paper Current](docs/papers/paper_current/) - Versión actual en desarrollo
+- [CLEI 2025 Submission](clei_submission_20250711_214745/) - Materiales para CLEI 2025
+
+## 📚 Referencias
+
+### Referencias Principales
+
+1. **Amiri, M. H., et al. (2024)**. "Hippopotamus optimization algorithm: a novel nature-inspired optimization algorithm". *Scientific Reports* 14, 5032.
+   - Algoritmo HO base implementado verbatim
+   - Tres fases comportamentales modeladas
+   - Rangos de parámetros respetados
+
+2. **Potvin, J. Y. (2009)**. "State-of-the-art review—evolutionary algorithms for vehicle routing". *INFORMS Journal on Computing*, 21(4), 518-548.
+   - Comparación con baselines establecidos
+   - Métricas VRP estándar utilizadas
+
+3. **Barros, T. D., & Everett, J. W. (2023)**. "Imitation Learning for Metaheuristic Optimization". *arXiv preprint*.
+   - Base para integración IL con HO
+   - Arquitectura de red neuronal
+
+### Citar Este Trabajo
+
+Si utilizas BioAlgoCompare en tu investigación:
+
+```bibtex
+@inproceedings{quickho2025,
+  title={Quick-HO: Hippopotamus Optimizer for Quick Commerce Dynamic Vehicle Routing},
+  author={[Tu Nombre]},
+  booktitle={Proceedings of CLEI 2025},
+  year={2025},
+  organization={CLEI}
+}
+
+@software{bioalgocompare2025,
+  title={BioAlgoCompare: A Comprehensive Platform for Bio-inspired Algorithm Evaluation},
+  author={[Tu Nombre]},
+  year={2025},
+  url={https://github.com/username/BioAlgoCompare}
+}
+```
 
 ## 📄 Licencia
 
