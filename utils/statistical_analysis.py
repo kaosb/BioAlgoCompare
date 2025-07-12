@@ -1043,6 +1043,76 @@ class AdvancedStatisticalAnalysis:
 
         return latex_str
 
+    def export_latex_multiobjective(
+        self,
+        mo_results: Dict[str, Any],
+        output_file: Optional[str] = None,
+        booktabs: bool = True,
+    ) -> str:
+        """
+        Export multi-objective optimization results to LaTeX format.
+
+        Args:
+            mo_results: Dictionary with multi-objective metrics
+            output_file: Optional file path to save LaTeX code
+            booktabs: Use booktabs package for better formatting
+
+        Returns:
+            LaTeX code as string
+        """
+        latex_lines = []
+
+        # Multi-objective metrics table
+        latex_lines.append("% Multi-objective Optimization Results")
+        latex_lines.append("\\begin{table}[htbp]")
+        latex_lines.append("\\centering")
+        latex_lines.append(
+            "\\caption{Multi-objective optimization metrics for QC-DVRP}"
+        )
+        latex_lines.append("\\label{tab:mo_metrics}")
+
+        if booktabs:
+            latex_lines.append("\\begin{tabular}{lSSSS}")
+            latex_lines.append("\\toprule")
+            latex_lines.append(
+                "Algorithm & {Hypervolume} & {IGD} & {On-time (\\%)} & {Load CV} \\\\"
+            )
+            latex_lines.append("\\midrule")
+        else:
+            latex_lines.append("\\begin{tabular}{|l|r|r|r|r|}")
+            latex_lines.append("\\hline")
+            latex_lines.append(
+                "Algorithm & Hypervolume & IGD & On-time (\\%) & Load CV \\\\"
+            )
+            latex_lines.append("\\hline")
+
+        # Add data rows
+        for algo, metrics in mo_results.items():
+            hv = metrics.get("hypervolume", 0)
+            igd = metrics.get("igd", 0)
+            on_time = metrics.get("on_time_rate", 0) * 100
+            load_cv = metrics.get("load_variation", 0)
+
+            latex_lines.append(
+                f"{algo} & {hv:.3f} & {igd:.3f} & {on_time:.1f} & {load_cv:.3f} \\\\"
+            )
+
+        if booktabs:
+            latex_lines.append("\\bottomrule")
+        else:
+            latex_lines.append("\\hline")
+
+        latex_lines.append("\\end{tabular}")
+        latex_lines.append("\\end{table}")
+
+        latex_str = "\n".join(latex_lines)
+
+        if output_file:
+            with open(output_file, "w") as f:
+                f.write(latex_str)
+
+        return latex_str
+
 
 # Convenience functions for backward compatibility
 

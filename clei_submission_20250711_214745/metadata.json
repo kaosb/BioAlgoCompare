@@ -1,0 +1,15 @@
+{
+  "title": "Quick-HO: Optimizador Hippopotamus para Ruteo Dinámico en Quick Commerce",
+  "conference": "CLEI 2025",
+  "track": "Optimization and Metaheuristics",
+  "keywords": ["Vehicle Routing Problem", "Quick Commerce", "Hippopotamus Optimizer", "Multi-objective Optimization", "Dynamic VRP"],
+  "abstract_length": 150,
+  "paper_length": 8,
+  "language": "Spanish",
+  "submission_date": "2025-07-11",
+  "corresponding_author": {
+    "name": "[Por completar]",
+    "email": "[Por completar]",
+    "affiliation": "[Por completar]"
+  }
+}
