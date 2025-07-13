@@ -38,14 +38,14 @@ from .base import Individual, MetaheuristicAlgorithm
 
 
 class Hyena(Individual):
-    """Clase para representar un individuo en el algoritmo SHO (Spotted Hyena Optimizer)."""
+    """Class to represent an individual in the SHO (Spotted Hyena Optimizer) algorithm."""
 
     def __init__(self, problem):
         """
-        Inicializa una hiena con una posición aleatoria.
+        Initialize a hyena with a random position.
 
         Args:
-            problem: Instancia del problema a resolver
+            problem: Problem instance to solve
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
@@ -53,39 +53,39 @@ class Hyena(Individual):
         self._fitness = None
 
     def fitness(self):
-        """Calcula el fitness del individuo."""
+        """Calculate the individual's fitness."""
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
     def is_feasible(self):
-        """Verifica si el individuo representa una solución factible."""
+        """Check if the individual represents a feasible solution."""
         return (
-            True  # En VRP todas las soluciones son factibles con nuestro decodificador
+            True  # In VRP all solutions are feasible with our decoder
         )
 
     def move(self, alpha, beta, delta, iteration, max_iterations):
         """
-        Mueve la hiena según las reglas del algoritmo SHO.
+        Move the hyena according to SHO algorithm rules.
 
         Args:
-            alpha: Mejor hiena (líder)
-            beta: Segunda mejor hiena
-            delta: Tercera mejor hiena
-            iteration: Iteración actual
-            max_iterations: Número máximo de iteraciones
+            alpha: Best hyena (leader)
+            beta: Second best hyena
+            delta: Third best hyena
+            iteration: Current iteration
+            max_iterations: Maximum number of iterations
         """
-        a = 2 - iteration * (2 / max_iterations)  # Decrece linealmente de 2 a 0
+        a = 2 - iteration * (2 / max_iterations)  # Linearly decreases from 2 to 0
 
         for i in range(self.dimension):
             r1 = random.random()
             r2 = random.random()
 
-            A = 2 * a * r1 - a  # Vector de coeficiente
-            C = 2 * r2  # Vector de énfasis
+            A = 2 * a * r1 - a  # Coefficient vector
+            C = 2 * r2  # Emphasis vector
 
-            # Fase de exploración/explotación
-            if abs(A) >= 1:  # Exploración
+            # Exploration/exploitation phase
+            if abs(A) >= 1:  # Exploration
                 rand_index = random.randint(0, 2)
                 if rand_index == 0:
                     D = abs(C * alpha.position[i] - self.position[i])
@@ -96,7 +96,7 @@ class Hyena(Individual):
                 else:
                     D = abs(C * delta.position[i] - self.position[i])
                     self.position[i] = delta.position[i] - A * D
-            else:  # Explotación - Ataque en círculo
+            else:  # Exploitation - Circular attack
                 D_alpha = abs(C * alpha.position[i] - self.position[i])
                 D_beta = abs(C * beta.position[i] - self.position[i])
                 D_delta = abs(C * delta.position[i] - self.position[i])
@@ -107,39 +107,39 @@ class Hyena(Individual):
 
                 self.position[i] = (X1 + X2 + X3) / 3
 
-            # Mantener la posición dentro de los límites [0, 1]
+            # Keep position within bounds [0, 1]
             self.position[i] = max(0, min(1, self.position[i]))
 
-        # Invalidar el fitness ya que la posición ha cambiado
+        # Invalidate fitness since position has changed
         self._fitness = None
 
     def copy(self, other):
-        """Copia los valores de otro individuo a este."""
+        """Copy values from another individual to this one."""
         if isinstance(other, Hyena):
             self.position = other.position.copy()
             self._fitness = other._fitness
 
 
 class SHO(MetaheuristicAlgorithm):
-    """Implementación del algoritmo Spotted Hyena Optimizer (SHO)."""
+    """Implementation of the Spotted Hyena Optimizer (SHO) algorithm."""
 
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         """
-        Inicializa el algoritmo SHO.
+        Initialize the SHO algorithm.
 
         Args:
-            problem: Instancia del problema a resolver
-            population_size: Tamaño de la población
-            max_iterations: Número máximo de iteraciones
-            seed: Semilla para reproducibilidad
+            problem: Problem instance to solve
+            population_size: Population size
+            max_iterations: Maximum number of iterations
+            seed: Seed for reproducibility
         """
         super().__init__(problem, population_size, max_iterations, seed)
-        self.alpha = None  # Mejor hiena
-        self.beta = None  # Segunda mejor hiena
-        self.delta = None  # Tercera mejor hiena
+        self.alpha = None  # Best hyena
+        self.beta = None  # Second best hyena
+        self.delta = None  # Third best hyena
 
     def initialize_population(self):
-        """Inicializa la población de hienas."""
+        """Initialize the hyena population."""
         # Set random seed if provided
 
         if self.seed is not None:
@@ -153,10 +153,10 @@ class SHO(MetaheuristicAlgorithm):
             hyena = Hyena(self.problem)
             self.population.append(hyena)
 
-        # Ordenar la población por fitness
+        # Sort population by fitness
         self.population.sort(key=lambda x: x.fitness())
 
-        # Asignar líderes (manejar caso de población pequeña)
+        # Assign leaders (handle small population case)
         self.alpha = self.population[0]
         self.beta = (
             self.population[1] if len(self.population) > 1 else self.population[0]
@@ -165,27 +165,27 @@ class SHO(MetaheuristicAlgorithm):
             self.population[2] if len(self.population) > 2 else self.population[0]
         )
 
-        # Guardar la mejor solución
+        # Save the best solution
         self.best_solution = Hyena(self.problem)
         self.best_solution.copy(self.alpha)
 
-        # Inicializar curva de convergencia
+        # Initialize convergence curve
         self.convergence_curve = [self.best_solution.fitness()]
 
     def update_population(self):
-        """Actualiza la población en cada iteración."""
+        """Update the population in each iteration."""
         iteration = len(self.convergence_curve)
 
         for i in range(self.population_size):
-            # Mover cada hiena
+            # Move each hyena
             self.population[i].move(
                 self.alpha, self.beta, self.delta, iteration, self.max_iterations
             )
 
-        # Ordenar la población por fitness
+        # Sort population by fitness
         self.population.sort(key=lambda x: x.fitness())
 
-        # Actualizar líderes (manejar caso de población pequeña)
+        # Update leaders (handle small population case)
         self.alpha = self.population[0]
         self.beta = (
             self.population[1] if len(self.population) > 1 else self.population[0]
@@ -194,13 +194,13 @@ class SHO(MetaheuristicAlgorithm):
             self.population[2] if len(self.population) > 2 else self.population[0]
         )
 
-        # Actualizar la mejor solución si es necesario
+        # Update best solution if necessary
         if self.alpha.is_better_than(self.best_solution):
             self.best_solution.copy(self.alpha)
 
-        # Actualizar curva de convergencia
+        # Update convergence curve
         self.convergence_curve.append(self.best_solution.fitness())
 
 
-# Alias para mantener compatibilidad con código existente
+# Alias to maintain compatibility with existing code
 HOA = SHO

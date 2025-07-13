@@ -224,7 +224,7 @@ class TestMain:
         assert any(call[0][0] == "nonexistent.csv" for call in mock_exists.call_args_list)
         
         # Verificar que se imprimió el mensaje de error
-        mock_print.assert_any_call(f"\nError: No se encontró el dataset nonexistent.csv")
+        mock_print.assert_any_call("\nError: No se encontró el dataset nonexistent.csv")
         
         # Verificar que retornó None (terminó temprano)
         assert result is None

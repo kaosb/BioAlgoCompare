@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test del algoritmo FGO (Flamingo Optimization Algorithm).
+Test for the FGO (Flamingo Optimization Algorithm) algorithm.
 """
 
 import numpy as np
@@ -11,7 +11,7 @@ from algorithms.base import MetaheuristicAlgorithm
 
 
 class MockProblem:
-    """Problema mock para pruebas."""
+    """Mock problem for testing."""
 
     def __init__(self, dimension=5):
         self.dimension = dimension
@@ -21,20 +21,20 @@ class MockProblem:
         return self.dimension
 
     def evaluate(self, solution):
-        """Función de evaluación simple para test."""
+        """Simple evaluation function for testing."""
         self.eval_count += 1
-        # Función simple: suma de los elementos
+        # Simple function: sum of elements
         return np.sum(solution)
 
 
 def test_flamingo_initialization():
-    """Test de inicialización del individuo Flamingo."""
-    np.random.seed(42)  # Para reproducibilidad
+    """Test for Flamingo individual initialization."""
+    np.random.seed(42)  # For reproducibility
 
     problem = MockProblem(dimension=5)
     flamingo = Flamingo(problem)
 
-    # Verificar inicialización
+    # Verify initialization
     assert flamingo.problem == problem
     assert flamingo.dimension == 5
     assert flamingo.position.shape == (5,)
@@ -42,43 +42,43 @@ def test_flamingo_initialization():
     assert np.array_equal(flamingo.personal_best_position, flamingo.position)
     assert flamingo.personal_best_fitness == float("inf")
 
-    # Verificar que la posición está en el rango [0, 1]
+    # Verify that position is in range [0, 1]
     assert np.all(flamingo.position >= 0) and np.all(flamingo.position <= 1)
 
 
 def test_flamingo_fitness():
-    """Test del cálculo de fitness del Flamingo."""
+    """Test for Flamingo fitness calculation."""
     problem = MockProblem(dimension=3)
     flamingo = Flamingo(problem)
 
-    # Establecer una posición conocida
+    # Set a known position
     flamingo.position = np.array([0.1, 0.2, 0.3])
 
-    # Verificar cálculo de fitness (usar almost equal para floats)
+    # Verify fitness calculation (use almost equal for floats)
     fitness = flamingo.fitness()
     assert np.isclose(fitness, 0.6)  # 0.1 + 0.2 + 0.3
 
-    # Verificar que se actualizó el mejor fitness personal
+    # Verify that personal best fitness was updated
     assert np.isclose(flamingo.personal_best_fitness, 0.6)
     assert np.array_equal(flamingo.personal_best_position, np.array([0.1, 0.2, 0.3]))
 
-    # Verificar que el fitness se almacena en caché
-    flamingo.position = np.array([0.4, 0.5, 0.6])  # Cambiar posición
+    # Verify that fitness is cached
+    flamingo.position = np.array([0.4, 0.5, 0.6])  # Change position
     assert np.isclose(
         flamingo.fitness(), 0.6
-    )  # Debería seguir siendo 0.6 porque está en caché
+    )  # Should still be 0.6 because it's cached
 
-    # Invalidar fitness y recalcular
+    # Invalidate fitness and recalculate
     flamingo._fitness = None
     assert np.isclose(flamingo.fitness(), 1.5)  # 0.4 + 0.5 + 0.6
 
-    # Verificar que se actualizó el mejor fitness personal al ser peor
-    assert np.isclose(flamingo.personal_best_fitness, 0.6)  # No debería cambiar
+    # Verify that personal best fitness was updated al ser peor
+    assert np.isclose(flamingo.personal_best_fitness, 0.6)  # Should not change
     assert np.array_equal(flamingo.personal_best_position, np.array([0.1, 0.2, 0.3]))
 
 
 def test_flamingo_comparison():
-    """Test de comparación entre Flamingos."""
+    """Test for comparison between Flamingos."""
     problem = MockProblem()
 
     flamingo1 = Flamingo(problem)
@@ -87,22 +87,22 @@ def test_flamingo_comparison():
     flamingo2 = Flamingo(problem)
     flamingo2._fitness = 20
 
-    # Verificar comparación
+    # Verify comparison
     assert flamingo1.is_better_than(flamingo2)
     assert not flamingo2.is_better_than(flamingo1)
 
 
 def test_flamingo_is_feasible():
-    """Test para verificar si la solución es factible."""
+    """Test to verify if solution is feasible."""
     problem = MockProblem()
     flamingo = Flamingo(problem)
 
-    # En el contexto de VRP, todas las soluciones son factibles
+    # In VRP context, all solutions are feasible
     assert flamingo.is_feasible()
 
 
 def test_flamingo_move_forage():
-    """Test del movimiento de forrajeo del Flamingo."""
+    """Test for Flamingo foraging movement."""
     np.random.seed(42)
     problem = MockProblem(dimension=3)
 
@@ -114,20 +114,20 @@ def test_flamingo_move_forage():
     best.position = np.array([0.05, 0.15, 0.25])
     best._fitness = 0.45
 
-    # Mock para el cálculo de fitness para que siempre devuelva un valor menor (mejora)
+    # Mock fitness calculation to always return a lower value (improvement)
     problem.evaluate = MagicMock(return_value=0.4)
 
-    # Patchar random.choice para tener valores predecibles
+    # Patch random.choice to have predictable values
     with patch("random.choice", side_effect=lambda x: x[0]):
-        # Test de movimiento de forrajeo
+        # Test foraging movement
         flamingo.move(best, 0, 100, mode="forage")
 
-    # Verificar que se actualizó el fitness
+    # Verify that fitness was updated
     assert flamingo._fitness == 0.4
 
 
 def test_flamingo_move_migrate():
-    """Test del movimiento de migración del Flamingo."""
+    """Test for Flamingo migration movement."""
     np.random.seed(42)
     problem = MockProblem(dimension=3)
 
@@ -139,18 +139,18 @@ def test_flamingo_move_migrate():
     best.position = np.array([0.05, 0.15, 0.25])
     best._fitness = 0.45
 
-    # Mock para el cálculo de fitness para que siempre devuelva un valor menor (mejora)
+    # Mock fitness calculation to always return a lower value (improvement)
     problem.evaluate = MagicMock(return_value=0.4)
 
-    # Test de movimiento de migración
+    # Test migration movement
     flamingo.move(best, 0, 100, mode="migrate")
 
-    # Verificar que se actualizó el fitness
+    # Verify that fitness was updated
     assert flamingo._fitness == 0.4
 
 
 def test_flamingo_copy():
-    """Test de la función de copia de Flamingo."""
+    """Test for Flamingo copy function."""
     problem = MockProblem()
 
     flamingo1 = Flamingo(problem)
@@ -162,7 +162,7 @@ def test_flamingo_copy():
     flamingo2 = Flamingo(problem)
     flamingo2.copy(flamingo1)
 
-    # Verificar que se han copiado los valores
+    # Verify that values have been copied
     assert np.array_equal(flamingo2.position, flamingo1.position)
     assert flamingo2._fitness == flamingo1._fitness
     assert np.array_equal(
@@ -170,82 +170,82 @@ def test_flamingo_copy():
     )
     assert flamingo2.personal_best_fitness == flamingo1.personal_best_fitness
 
-    # Verificar que son objetos diferentes (deep copy)
+    # Verify they are different objects (deep copy)
     flamingo1.position[0] = 0.9
     assert flamingo2.position[0] == 0.1
 
 
 def test_fgo_initialization():
-    """Test de inicialización del algoritmo FGO."""
+    """Test for FGO algorithm initialization."""
     np.random.seed(42)
     problem = MockProblem()
 
-    # Inicialización del algoritmo
+    # Algorithm initialization
     fgo = FGO(problem, population_size=10, max_iterations=50, seed=42)
 
-    # Verificar parámetros
+    # Verify parameters
     assert fgo.problem == problem
     assert fgo.population_size == 10
     assert fgo.max_iterations == 50
 
-    # Inicializar la población
+    # Initialize population
     fgo.initialize_population()
 
-    # Verificar que la población se ha creado
+    # Verify population has been created
     assert len(fgo.population) == 10
     assert all(isinstance(ind, Flamingo) for ind in fgo.population)
 
-    # Verificar que se ha calculado el fitness de cada individuo
+    # Verify fitness has been calculated for each individual
     assert all(ind._fitness is not None for ind in fgo.population)
 
-    # Verificar que la población está ordenada por fitness
+    # Verify population is sorted by fitness
     fitnesses = [ind.fitness() for ind in fgo.population]
     assert fitnesses == sorted(fitnesses)
 
-    # Verificar que se ha guardado la mejor solución
+    # Verify best solution has been saved
     assert isinstance(fgo.best_solution, Flamingo)
     assert fgo.best_solution._fitness == fgo.population[0]._fitness
 
-    # Verificar la curva de convergencia
+    # Verify convergence curve
     assert len(fgo.convergence_curve) == 1
     assert fgo.convergence_curve[0] == fgo.best_solution.fitness()
 
 
 def test_fgo_update_population():
-    """Test de actualización de la población en FGO."""
+    """Test for population update in FGO."""
     np.random.seed(42)
     problem = MockProblem()
 
-    # Inicialización del algoritmo
+    # Algorithm initialization
     fgo = FGO(problem, population_size=10, max_iterations=50, seed=42)
     fgo.initialize_population()
 
-    # Guardar fitness inicial
+    # Save initial fitness
     initial_best_fitness = fgo.best_solution.fitness()
 
-    # Actualizar la población
+    # Update population
     fgo.update_population()
 
-    # Verificar que se ha actualizado la curva de convergencia
+    # Verify convergence curve has been updated
     assert len(fgo.convergence_curve) == 2
 
-    # Como estamos minimizando, el nuevo fitness debería ser menor o igual
+    # Since we're minimizing, new fitness should be less than or equal
     assert fgo.best_solution.fitness() <= initial_best_fitness
 
 
 def test_fgo_full_execution():
-    """Test de ejecución completa del algoritmo FGO."""
+    """Test for complete FGO algorithm execution."""
     np.random.seed(42)
     problem = MockProblem()
 
-    # Inicialización del algoritmo
+    # Algorithm initialization
     fgo = FGO(problem, population_size=10, max_iterations=5, seed=42)
 
-    # Ejecutar el algoritmo
+    # Execute the algorithm
     best_solution = fgo.execute()
 
-    # Verificar que la ejecución completó las iteraciones
-    assert len(fgo.convergence_curve) == 6  # Iteración inicial + 5 iteraciones
+    # Verify execution completed iterations
+    assert len(fgo.convergence_curve) == 6  # Initial iteration + 5 iterations
 
-    # Verificar que la mejor solución es una instancia de Flamingo
+    # Verify best solution is a Flamingo instance
     assert isinstance(best_solution, Flamingo)

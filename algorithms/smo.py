@@ -1,6 +1,6 @@
 """
-Starling Murmuration Optimizer (SMO) - Versión adaptada para optimización continua
-Fuente: Zamani, Nadimi-Shahraki & Gandomi (2022), Computer Methods in Applied Mechanics and Engineering.
+Starling Murmuration Optimizer (SMO) - Version adapted for continuous optimization
+Source: Zamani, Nadimi-Shahraki & Gandomi (2022), Computer Methods in Applied Mechanics and Engineering.
 DOI: 10.1016/j.cma.2022.114616
 """
 
@@ -26,30 +26,30 @@ class Starling(Individual):
 
     def __init__(self, problem):
         """
-        Inicializa un estornino para el algoritmo SMO.
+        Initialize a starling for the SMO algorithm.
 
         Args:
-            problem: Instancia del problema a resolver
+            problem: Problem instance to solve
         """
         self.problem = problem
-        # Generar solución aleatoria - representación continua
+        # Generate random solution - continuous representation
         self.position = self.problem.random_solution()
         self.personal_best_position = copy.deepcopy(self.position)
         self._fitness = None
         self.personal_best_fitness = None
 
     def fitness(self):
-        """Calcula el fitness del individuo."""
+        """Calculate the individual's fitness."""
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
     def is_feasible(self):
-        """Verifica si el individuo representa una solución factible."""
+        """Check if the individual represents a feasible solution."""
         return bool(self.problem.is_valid(self.position))
 
     def copy(self):
-        """Crea una copia del estornino actual."""
+        """Create a copy of the current starling."""
         new_starling = Starling(self.problem)
         new_starling.position = copy.deepcopy(self.position)
         new_starling.personal_best_position = copy.deepcopy(self.personal_best_position)
@@ -61,24 +61,24 @@ class Starling(Individual):
         self, best_position, behavior_type, members=None, coef=0.5, it=0, max_it=100
     ):
         """
-        Mueve el estornino - adaptado para representación continua (array de numpy).
+        Move the starling - adapted for continuous representation (numpy array).
         - behavior_type: 'separating', 'diving', 'whirling'
         - coef and it/max_it can be used to tune operator intensity
         """
-        # Crear copia de seguridad de posición actual
+        # Create backup copy of current position
         new_position = copy.deepcopy(self.position)
 
-        # Adaptación temporal (decrece con las iteraciones)
+        # Temporal adaptation (decreases with iterations)
         decay = 1 - (it / max_it) if max_it > 0 else 0.5
 
         try:
-            # Aplicar diferentes comportamientos según la estrategia
+            # Apply different behaviors according to strategy
             if behavior_type == "separating":
-                # Exploración más aleatoria
+                # More random exploration
                 r = np.random.random(new_position.shape)
                 new_position = new_position + decay * coef * (2 * r - 1)
             elif behavior_type == "diving":
-                # Explotación hacia mejor solución (movimiento más pequeño)
+                # Exploitation towards best solution (smaller movement)
                 if (
                     hasattr(best_position, "shape")
                     and best_position.shape == new_position.shape
@@ -87,11 +87,11 @@ class Starling(Individual):
                         best_position - new_position
                     )
                 else:
-                    # Perturbación pequeña si no hay información del mejor
+                    # Small perturbation if no best information available
                     r = np.random.random(new_position.shape)
                     new_position = new_position + decay * coef * 0.1 * (2 * r - 1)
             elif behavior_type == "whirling":
-                # Movimiento intermedio - combinación de exploración y explotación
+                # Intermediate movement - combination of exploration and exploitation
                 if (
                     hasattr(best_position, "shape")
                     and best_position.shape == new_position.shape
@@ -103,31 +103,31 @@ class Starling(Individual):
                         + r2 * 0.1 * (2 * np.random.random(new_position.shape) - 1)
                     )
                 else:
-                    # Movimiento aleatorio si no hay información del mejor
+                    # Random movement if no best information available
                     r = np.random.random(new_position.shape)
                     new_position = new_position + decay * coef * 0.5 * (2 * r - 1)
 
-            # Asegurar que la posición esté dentro de los límites [0,1]
+            # Ensure position is within bounds [0,1]
             new_position = np.clip(new_position, 0, 1)
         except Exception:
-            # En caso de error, aplicar una pequeña perturbación
+            # In case of error, apply small perturbation
             new_position = (
                 self.position
                 + np.random.uniform(-0.05, 0.05, self.position.shape) * decay
             )
             new_position = np.clip(new_position, 0, 1)
 
-        # Evaluar y actualizar si mejora
+        # Evaluate and update if improved
         try:
             new_fit = self.problem.evaluate(new_position)
             curr_fit = self.fitness()
 
-            # Aceptar si mejora o con pequeña probabilidad (criterio de Metropolis)
+            # Accept if improved or with small probability (Metropolis criterion)
             if new_fit < curr_fit or random.random() < 0.1 * decay:
                 self.position = new_position
                 self._fitness = new_fit
 
-                # Actualizar mejor personal si corresponde
+                # Update personal best if applicable
                 if (
                     self.personal_best_fitness is None
                     or new_fit < self.personal_best_fitness
@@ -135,40 +135,40 @@ class Starling(Individual):
                     self.personal_best_position = copy.deepcopy(self.position)
                     self.personal_best_fitness = new_fit
         except Exception:
-            # Si hay error, mantener posición actual
+            # If error, keep current position
             pass
 
 
 class SMO(MetaheuristicAlgorithm):
-    """Implementación del algoritmo Starling Murmuration Optimizer (SMO)."""
+    """Implementation of the Starling Murmuration Optimizer (SMO) algorithm."""
 
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         """
-        Inicializa el algoritmo SMO.
+        Initialize the SMO algorithm.
 
         Args:
-            problem: Instancia del problema
-            population_size: Tamaño de la población
-            max_iterations: Número máximo de iteraciones
-            seed: Semilla para reproducibilidad
+            problem: Problem instance
+            population_size: Population size
+            max_iterations: Maximum number of iterations
+            seed: Seed for reproducibility
         """
         super().__init__(problem, population_size, max_iterations, seed)
-        self.k = min(10, self.population_size // 3)  # Número de grupos (flocks)
-        self.mu = 0.3  # Proporción de individuos en separación
-        self.seed = seed  # Guardar la semilla como atributo
-        self.convergence_curve = []  # Inicializar curva de convergencia
+        self.k = min(10, self.population_size // 3)  # Number of groups (flocks)
+        self.mu = 0.3  # Proportion of individuals in separation
+        self.seed = seed  # Save seed as attribute
+        self.convergence_curve = []  # Initialize convergence curve
 
     def initialize_population(self):
-        """Inicializa la población de estorninos."""
-        # Inicializar semilla si está disponible
+        """Initialize the starling population."""
+        # Initialize seed if available
         if self.seed is not None:
             random.seed(self.seed)
             np.random.seed(self.seed)
 
-        # Reiniciar la convergence_curve
+        # Reset convergence_curve
         self.convergence_curve = []
 
-        # Inicializar población de estorninos
+        # Initialize starling population
         self.population = []
         for _ in range(self.population_size):
             s = Starling(self.problem)
@@ -176,23 +176,23 @@ class SMO(MetaheuristicAlgorithm):
             s.personal_best_fitness = s._fitness
             self.population.append(s)
 
-        # Guardar mejor solución encontrada
+        # Save best solution found
         self.best_solution = min(self.population, key=lambda s: s.fitness()).copy()
-        # Añadir primer punto de convergencia
+        # Add first convergence point
         self.convergence_curve.append(float(self.best_solution.fitness()))
 
     def update_population(self):
-        """Actualiza la población de estorninos en cada iteración."""
-        # Iteración actual
+        """Update the starling population in each iteration."""
+        # Current iteration
         current_iter = len(self.convergence_curve)
 
-        # Ordenar población por fitness
+        # Sort population by fitness
         self.population.sort(key=lambda s: s.fitness())
 
-        # Tamaño del subconjunto de separación (exploración)
+        # Size of separation subset (exploration)
         sep_size = int(self.mu * self.population_size)
 
-        # Dividir en k grupos (bandadas)
+        # Divide into k groups (flocks)
         flocks = []
         group_size = max(1, self.population_size // self.k)
 
@@ -201,7 +201,7 @@ class SMO(MetaheuristicAlgorithm):
             end_idx = (i + 1) * group_size if i < self.k - 1 else self.population_size
             flocks.append(self.population[start_idx:end_idx])
 
-        # Calcular calidad promedio de cada grupo
+        # Calculate average quality of each group
         flock_qualities = []
         for flock in flocks:
             quality = sum(s.fitness() for s in flock) / len(flock)
@@ -209,28 +209,28 @@ class SMO(MetaheuristicAlgorithm):
 
         avg_quality = sum(flock_qualities) / len(flock_qualities)
 
-        # Actualizar cada estornino según su grupo y posición
+        # Update each starling according to its group and position
         for i, s in enumerate(self.population):
-            # Determinar comportamiento y grupo
+            # Determine behavior and group
             if i < sep_size:
-                # Grupo de exploración (separación)
+                # Exploration group (separation)
                 behavior = "separating"
                 flock_members = None
             else:
-                # Grupo regular basado en calidad
+                # Regular group based on quality
                 flock_idx = min(i // group_size, self.k - 1)
                 flock_members = flocks[flock_idx]
                 if flock_qualities[flock_idx] < avg_quality:
-                    # Grupo mejor que el promedio: buceo (explotación)
+                    # Group better than average: diving (exploitation)
                     behavior = "diving"
                 else:
-                    # Grupo peor que el promedio: remolino (exploración)
+                    # Group worse than average: whirling (exploration)
                     behavior = "whirling"
 
-            # Factor de adaptación basado en la posición
+            # Adaptation factor based on position
             coef = 0.5 * (1 - i / self.population_size)
 
-            # Mover el estornino
+            # Move the starling
             s.move(
                 best_position=self.best_solution.position,
                 behavior_type=behavior,
@@ -240,12 +240,12 @@ class SMO(MetaheuristicAlgorithm):
                 max_it=self.max_iterations,
             )
 
-        # Actualizar mejor solución encontrada globalmente
+        # Update best solution found globally
         best_individual = min(self.population, key=lambda s: s.fitness())
         if best_individual.is_better_than(self.best_solution):
             self.best_solution = best_individual.copy()
 
-        # Añadir punto a la curva de convergencia
+        # Add point to convergence curve
         self.convergence_curve.append(float(self.best_solution.fitness()))
 
     def get_convergence_curve(self):
