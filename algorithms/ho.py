@@ -146,18 +146,28 @@ class HO(MetaheuristicAlgorithm):
         self.use_il = use_il
         self.il_model = None
         if use_il:
+            # Try sklearn-based IL first (to avoid PyTorch issues)
             try:
-                from utils.imitation_learning import HOImitationLearning
-
-                self.il_model = HOImitationLearning()
-                if il_model_path and os.path.exists(il_model_path):
+                from utils.train_il_simple import SimpleILModel
+                from pathlib import Path
+                
+                # Check for sklearn model first
+                sklearn_model_path = "models/ho_il_model.pkl"
+                if Path(sklearn_model_path).exists():
+                    self.il_model = SimpleILModel()
+                    self.il_model.load(sklearn_model_path)
+                    print(f"✅ Modelo IL (sklearn) cargado desde {sklearn_model_path}")
+                elif il_model_path and os.path.exists(il_model_path):
+                    # Fallback to PyTorch model if specified
+                    from utils.imitation_learning import HOImitationLearning
+                    self.il_model = HOImitationLearning()
                     self.il_model.load(il_model_path)
-                    print(f"Modelo IL cargado desde {il_model_path}")
+                    print(f"Modelo IL (PyTorch) cargado desde {il_model_path}")
                 else:
-                    print("Advertencia: IL habilitado pero sin modelo entrenado")
+                    print("⚠️ IL habilitado pero sin modelo entrenado")
                     self.use_il = False
-            except ImportError:
-                print("Advertencia: No se pudo importar módulo IL")
+            except ImportError as e:
+                print(f"⚠️ No se pudo importar módulo IL: {e}")
                 self.use_il = False
 
     def initialize_population(self) -> None:
@@ -193,15 +203,25 @@ class HO(MetaheuristicAlgorithm):
         # Si IL está habilitado, usar modelo para predecir parámetros
         if self.use_il and self.il_model is not None:
             try:
-                from utils.imitation_learning import create_state_from_problem
-
-                state = create_state_from_problem(
-                    self.problem, self, iteration, self.max_iterations
-                )
-                alpha, beta, gamma = self.il_model.predict(state)
+                # Create state for IL model
+                if hasattr(self.il_model, 'predict'):  # sklearn model
+                    # Use simplified state creation
+                    from utils.test_il_integration import create_state_dict
+                    state = create_state_dict(
+                        self.problem, iteration, self.max_iterations, 
+                        self.convergence_curve
+                    )
+                    alpha, beta, gamma = self.il_model.predict(state)
+                else:  # PyTorch model
+                    from utils.imitation_learning import create_state_from_problem
+                    state = create_state_from_problem(
+                        self.problem, self, iteration, self.max_iterations
+                    )
+                    alpha, beta, gamma = self.il_model.predict(state)
             except Exception as e:
                 # Fallback a parámetros adaptativos estándar
-                print(f"Advertencia IL: {e}")
+                if iteration == 0:  # Only print once
+                    print(f"⚠️ IL fallback to standard params: {e}")
                 alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
                 beta = self.beta_max - (self.beta_max - self.beta_min) * progress
                 gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
