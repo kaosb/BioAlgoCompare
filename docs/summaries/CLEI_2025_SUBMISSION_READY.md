@@ -161,4 +161,3 @@ python utils/train_il_model.py --demos demos/ --output models/ho_il_model.pth
 
 **📧 Para sumisión**: Usar archivo `CLEI2025_QuickHO_Submission.zip`
 **📅 Generado**: 2025-07-11 21:47:45
-**🤖 Powered by**: Claude Code + Quick-HO Research Team

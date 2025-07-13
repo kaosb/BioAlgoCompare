@@ -3,7 +3,6 @@
 
 **Fecha:** 12 de Julio, 2025
 **Objetivo:** Validar rigor científico y preparación para experimentación de tesis
-**Evaluador:** Claude Code + BioAlgoCompare Platform
 
 ---
 
@@ -211,6 +210,5 @@ python scripts/analyze.py benchmark \
 
 ---
 
-**🤖 Validado por:** Claude Code AI Assistant
 **📧 Generado:** 2025-07-12 22:07:00
 **🔬 Estándar:** Investigación reproducible de máximo rigor científico

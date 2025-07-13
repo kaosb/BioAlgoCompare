@@ -87,6 +87,7 @@ results/**/*
 # Archivos Claude
 .claude/
 **/.claude/settings.local.json
+CLAUDE.md
 
 # Directorios de backup
 backup/
