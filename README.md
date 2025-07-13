@@ -75,7 +75,7 @@ python scripts/analyze.py run --algorithm sho --instance A-n32-k5 --iterations 5
 python scripts/analyze.py benchmark --run-benchmark --algorithms "ho,apo,hho" --instances "E-n22-k4" --runs 10
 
 # 4. Ejecutar experimentos con máximo rigor (CEC standards)
-python scripts/run_thesis_experiments.py --preset thesis_clei2025
+python scripts/analyze.py benchmark --run-benchmark --algorithms "ho,apo,egto,foa,hho,sma,woa" --runs 51
 ```
 
 ### Ejemplos Garantizados (Casos de Uso Paso a Paso)
@@ -503,15 +503,15 @@ python scripts/tools/generate_validation_report.py \
 ### Paso 5: Paquete de Sumisión Completo
 
 ```bash
-# 5.1 Generar sumisión CLEI 2025
-./scripts/tools/generate_clei_submission.sh
+# 5.1 Generar reportes de publicación
+./scripts/tools/generate_paper_report.py
 
 # Genera:
-# - paper_clei2025.pdf (LaTeX compilado)
+# - paper.pdf (LaTeX compilado)
 # - Todas las tablas en formato booktabs/siunitx
 # - Figuras en calidad publicación (300 DPI)
 # - Metadatos completos
-# - Archivo ZIP para sumisión
+# - Archivo ZIP para publicación
 ```
 
 ## 📝 Generación de Papers y Reportes
@@ -523,14 +523,14 @@ python scripts/tools/generate_validation_report.py \
 ```bash
 python scripts/tools/generate_paper_report.py \
     --input results/benchmark_results.json \
-    --out clei_submission \
+    --out paper_submission \
     --format ieee \
     --include-sensitivity \
     --include-convergence
 ```
 
 Genera:
-- `paper_clei2025.tex`: Paper completo en LaTeX
+- `paper.tex`: Paper completo en LaTeX
 - `tables/`: Tablas con formato booktabs/siunitx
 - `figures/`: Visualizaciones de convergencia y frentes de Pareto
 - `informe_tecnico.md`: Informe técnico detallado
@@ -1139,7 +1139,6 @@ Si encuentras un bug, incluye:
 - [Paper IEEE Format](docs/papers/paper_ieee/) - Formato IEEE estándar
 - [Paper Extended](docs/papers/paper_extended/) - Versión extendida del análisis
 - [Paper Current](docs/papers/paper_current/) - Versión actual en desarrollo
-- [CLEI 2025 Submission](clei_submission_20250711_214745/) - Materiales para CLEI 2025
 
 ## 📚 Referencias
 
@@ -1166,9 +1165,8 @@ Si utilizas BioAlgoCompare en tu investigación:
 @inproceedings{bioalgocompare2025,
   title={A Comprehensive Evaluation of Bio-inspired Algorithms for Vehicle Routing Problems},
   author={[Tu Nombre]},
-  booktitle={Proceedings of CLEI 2025},
-  year={2025},
-  organization={CLEI}
+  booktitle={Proceedings of International Conference},
+  year={2025}
 }
 
 @software{bioalgocompare2025,
