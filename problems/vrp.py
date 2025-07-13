@@ -559,13 +559,24 @@ class VRPProblem:
             # Distancia de la ruta
             route_dist = 0.0
             for i in range(len(route) - 1):
-                route_dist += self.distance_matrix[route[i], route[i + 1]]
+                node_a, node_b = route[i], route[i + 1]
+                # Validar que los índices estén dentro del rango
+                if (node_a >= self.distance_matrix.shape[0] or 
+                    node_b >= self.distance_matrix.shape[0] or
+                    node_a < 0 or node_b < 0):
+                    # Nodos inválidos, aplicar penalización
+                    route_dist += 1000.0
+                else:
+                    route_dist += self.distance_matrix[node_a, node_b]
 
             route_distances.append(route_dist)
             total_distance += route_dist
 
             # Carga de la ruta
-            route_load = sum(self.demands[node] for node in route[1:-1])
+            route_load = 0
+            for node in route[1:-1]:  # Excluir depósitos
+                if 0 <= node < len(self.demands):
+                    route_load += self.demands[node]
             route_loads.append(route_load)
 
             # Tiempo de entrega (distancia/velocidad + tiempo servicio)
@@ -584,6 +595,9 @@ class VRPProblem:
         # Coeficiente de variación de carga (inspirado en defensa grupal HO)
         if route_loads and np.mean(route_loads) > 0:
             coef_variacion = np.std(route_loads) / np.mean(route_loads)
+        elif route_loads and all(load == 0 for load in route_loads):
+            # All loads are zero - perfect balance
+            coef_variacion = 0.0
         else:
             coef_variacion = float("inf")
 

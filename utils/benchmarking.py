@@ -53,8 +53,8 @@ def create_summary_dataframe(benchmark_results):
     return pd.DataFrame(data)
 
 
-# Función auxiliar para la ejecución de algoritmos en paralelo
-# Definida a nivel de módulo para evitar problemas de pickle
+# Helper function for parallel algorithm execution
+# Defined at module level to avoid pickle issues
 def _run_algo_task(params):
     AlgoClass, problem, population, iterations, run_seed, _ = params
     algo = AlgoClass(
@@ -69,27 +69,27 @@ def _run_algo_task(params):
 
 
 class BenchmarkResult:
-    """Clase para almacenar y analizar resultados de benchmarking."""
+    """Class to store and analyze benchmarking results."""
 
     def __init__(self, algorithm_name, instance_name, runs=None):
         """
-        Inicializa un resultado de benchmark.
+        Initialize a benchmark result.
 
         Args:
-            algorithm_name: Nombre del algoritmo
-            instance_name: Nombre de la instancia
-            runs: Número de ejecuciones independientes (si es None, se determina por los datos)
+            algorithm_name: Algorithm name
+            instance_name: Instance name
+            runs: Number of independent executions (if None, determined by data)
         """
         self.algorithm_name = algorithm_name
         self.instance_name = instance_name
         self.optimal_value = OPTIMAL_VALUES.get(instance_name, None)
 
-        # Resultados por ejecución
+        # Results per execution
         self.fitness_values = []
         self.execution_times = []
         self.convergence_curves = []
 
-        # Métricas derivadas
+        # Derived metrics
         self.best_fitness = None
         self.worst_fitness = None
         self.mean_fitness = None
@@ -100,21 +100,21 @@ class BenchmarkResult:
         self.success_rate = None
         self.avg_convergence = None
 
-        # Si no se especifica el número de ejecuciones, se determina por los datos
+        # If number of executions is not specified, it's determined by data
         self.runs = runs
 
     def add_run(self, fitness, execution_time, convergence_curve):
-        """Añade los resultados de una ejecución."""
+        """Add the results of an execution."""
         self.fitness_values.append(fitness)
         self.execution_times.append(execution_time)
         self.convergence_curves.append(convergence_curve)
 
     def compute_metrics(self):
-        """Calcula las métricas derivadas de los resultados."""
+        """Calculate derived metrics from results."""
         if not self.fitness_values:
             return
 
-        # Métricas básicas
+        # Basic metrics
         self.best_fitness = min(self.fitness_values)
         self.worst_fitness = max(self.fitness_values)
         self.mean_fitness = np.mean(self.fitness_values)
@@ -122,21 +122,21 @@ class BenchmarkResult:
         self.mean_time = np.mean(self.execution_times)
         self.std_time = np.std(self.execution_times)
 
-        # Gap respecto al óptimo conocido
+        # Gap with respect to known optimum
         if self.optimal_value:
             self.gap_to_optimal = (
                 (self.best_fitness - self.optimal_value) / self.optimal_value * 100
             )
 
-            # Tasa de éxito (soluciones dentro del 1% del óptimo)
+            # Success rate (solutions within 1% of optimum)
             threshold = self.optimal_value * 1.01
             successful_runs = sum(
                 1 for fitness in self.fitness_values if fitness <= threshold
             )
             self.success_rate = successful_runs / len(self.fitness_values) * 100
 
-        # Calcular curva de convergencia promedio
-        # Primero aseguramos que todas las curvas tengan la misma longitud
+        # Calculate average convergence curve
+        # First ensure all curves have the same length
         if self.convergence_curves:
             min_length = min(len(curve) for curve in self.convergence_curves)
             standardized_curves = [
@@ -145,7 +145,7 @@ class BenchmarkResult:
             self.avg_convergence = np.mean(standardized_curves, axis=0)
 
     def to_dict(self):
-        """Convierte los resultados a un diccionario para almacenamiento/serialización."""
+        """Convert results to dictionary for storage/serialization."""
         self.compute_metrics()
 
         result = {
@@ -169,27 +169,27 @@ class BenchmarkResult:
             },
         }
 
-        # No incluimos las curvas de convergencia en el diccionario para evitar objetos muy grandes
+        # We don't include convergence curves in the dictionary to avoid very large objects
         return result
 
     @classmethod
     def from_dict(cls, data):
-        """Crea un objeto BenchmarkResult a partir de un diccionario."""
+        """Create a BenchmarkResult object from a dictionary."""
         result = cls(data["algorithm"], data["instance"])
 
         for i in range(data["runs"]):
             result.add_run(
                 data["detailed_results"]["fitness_values"][i],
                 data["detailed_results"]["execution_times"][i],
-                [],  # No se almacenan las curvas de convergencia en el diccionario
+                [],  # Convergence curves are not stored in the dictionary
             )
 
-        # Calculamos las métricas
+        # Calculate metrics
         result.compute_metrics()
         return result
 
 
-# Valores óptimos conocidos para instancias estándar de VRP
+# Known optimal values for standard VRP instances
 OPTIMAL_VALUES = {
     "A-n32-k5": 784,
     "P-n16-k8": 450,
@@ -201,23 +201,23 @@ OPTIMAL_VALUES = {
 
 def save_benchmark_results(results, filename=None):
     """
-    Guarda los resultados de benchmarking en un archivo JSON.
+    Save benchmarking results to a JSON file.
 
     Args:
-        results: Lista de objetos BenchmarkResult
-        filename: Nombre del archivo (si es None, se genera automáticamente)
+        results: List of BenchmarkResult objects
+        filename: File name (if None, generated automatically)
     """
     if filename is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"results/benchmark_{timestamp}.json"
 
-    # Crear directorio si no existe
+    # Create directory if it doesn't exist
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-    # Convertir resultados a diccionarios
+    # Convert results to dictionaries
     data = [result.to_dict() for result in results]
 
-    # Guardar en formato JSON
+    # Save in JSON format
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
 
@@ -226,18 +226,18 @@ def save_benchmark_results(results, filename=None):
 
 def load_benchmark_results(filename):
     """
-    Carga resultados de benchmarking desde un archivo JSON.
+    Load benchmarking results from a JSON file.
 
     Args:
-        filename: Ruta al archivo JSON
+        filename: Path to JSON file
 
     Returns:
-        Lista de objetos BenchmarkResult
+        List of BenchmarkResult objects
     """
     with open(filename, "r") as f:
         data = json.load(f)
 
-    # Convertir diccionarios a objetos BenchmarkResult
+    # Convert dictionaries to BenchmarkResult objects
     results = [BenchmarkResult.from_dict(item) for item in data]
     return results
 
@@ -252,25 +252,25 @@ def run_benchmark(
     parallel=False,
 ):
     """
-    Ejecuta un benchmark comparativo de algoritmos sobre instancias de problemas.
+    Execute a comparative benchmark of algorithms on problem instances.
 
     Args:
-        algorithms: Diccionario de algoritmos {nombre: clase}
-        problem_instances: Lista de instancias VRP
-        runs: Número de ejecuciones independientes por combinación
-        iterations: Número de iteraciones por ejecución
-        population: Tamaño de población para los algoritmos
-        seed: Semilla inicial para reproducibilidad
-        parallel: Si es True, se ejecutan en paralelo
+        algorithms: Dictionary of algorithms {name: class}
+        problem_instances: List of VRP instances
+        runs: Number of independent executions per combination
+        iterations: Number of iterations per execution
+        population: Population size for algorithms
+        seed: Initial seed for reproducibility
+        parallel: If True, execute in parallel
 
     Returns:
-        Lista de objetos BenchmarkResult
+        List of BenchmarkResult objects
     """
     from problems.vrp import VRPProblem
 
     results = []
 
-    # Configurar procesamiento paralelo si está habilitado
+    # Configure parallel processing if enabled
     if parallel:
         pool = mp.Pool(
             processes=min(mp.cpu_count(), len(algorithms) * len(problem_instances))
@@ -280,18 +280,18 @@ def run_benchmark(
     for instance_name in problem_instances:
         instance_path = f"data/vrp/{instance_name}.vrp"
         if not os.path.exists(instance_path):
-            print(f"Error: La instancia {instance_name} no existe en data/vrp")
+            print(f"Error: Instance {instance_name} doesn't exist in data/vrp")
             continue
 
         problem = VRPProblem(instance_path)
-        print(f"Benchmark para instancia: {instance_name}")
+        print(f"Benchmark for instance: {instance_name}")
 
         for algo_name, AlgoClass in algorithms.items():
-            print(f"  Ejecutando {algo_name}...")
+            print(f"  Running {algo_name}..."
             benchmark_result = BenchmarkResult(algo_name, instance_name, runs)
 
             if parallel:
-                # Agregar tarea a la lista para ejecución paralela
+                # Add task to list for parallel execution
                 for run in range(runs):
                     run_seed = seed + run if seed is not None else None
                     tasks.append(
@@ -305,7 +305,7 @@ def run_benchmark(
                         )
                     )
             else:
-                # Ejecución secuencial
+                # Sequential execution
                 for run in range(runs):
                     run_seed = seed + run if seed is not None else None
                     algo = AlgoClass(
@@ -326,26 +326,26 @@ def run_benchmark(
                     )
 
                     print(
-                        f"    Ejecución {run+1}/{runs}: Fitness = {best_solution.fitness():.2f}, Tiempo = {execution_time:.2f}s"
+                        f"    Run {run+1}/{runs}: Fitness = {best_solution.fitness():.2f}, Time = {execution_time:.2f}s"
                     )
 
                 benchmark_result.compute_metrics()
                 results.append(benchmark_result)
 
                 print(
-                    f"  Mejor: {benchmark_result.best_fitness:.2f}, Promedio: {benchmark_result.mean_fitness:.2f}, "
-                    + f"Tiempo: {benchmark_result.mean_time:.2f}s"
+                    f"  Best: {benchmark_result.best_fitness:.2f}, Average: {benchmark_result.mean_fitness:.2f}, "
+                    + f"Time: {benchmark_result.mean_time:.2f}s"
                 )
                 if benchmark_result.optimal_value:
                     print(
-                        f"  Gap al óptimo: {benchmark_result.gap_to_optimal:.2f}%, "
-                        + f"Tasa de éxito: {benchmark_result.success_rate:.2f}%"
+                        f"  Gap to optimum: {benchmark_result.gap_to_optimal:.2f}%, "
+                        + f"Success rate: {benchmark_result.success_rate:.2f}%"
                     )
                 print()
 
-    # Ejecutar tareas en paralelo si está habilitado
+    # Execute tasks in parallel if enabled
     if parallel and tasks:
-        # Ejecutar las tareas en paralelo utilizando la función _run_algo_task definida a nivel de módulo
+        # Execute tasks in parallel using the module-level _run_algo_task function
         parallel_results = pool.map(_run_algo_task, tasks)
         pool.close()
         pool.join()
@@ -1168,185 +1168,3 @@ QC_OPTIMAL_VALUES.update(
 )
 
 
-class QCDVRPBenchmarkResult(BenchmarkResult):
-    """Extended benchmark result for QC-DVRP with multi-objective metrics."""
-    
-    def __init__(self, algorithm_name, instance_name, runs=None):
-        super().__init__(algorithm_name, instance_name, runs)
-        # Multi-objective metrics
-        self.hypervolume_values = []
-        self.igd_values = []
-        self.pareto_fronts = []
-        
-        # QC-specific metrics
-        self.on_time_rates = []
-        self.load_variations = []
-        self.delivery_times = []
-        
-        # Dynamic demand info
-        self.demand_patterns = []
-        self.response_times = []
-
-
-def run_qc_dvrp_benchmark(
-    algorithms,
-    problem_instances,
-    runs=30,
-    iterations=100,
-    population=30,
-    seed=None,
-    parallel=True,
-    output_dir=None,
-    dynamic=False,
-    multiobjective=False,
-    lambda_min=5,
-    lambda_max=15,
-    time_horizon=480,
-):
-    """
-    Run QC-DVRP benchmark with dynamic demands and multi-objective evaluation.
-    
-    Args:
-        algorithms: Dictionary of algorithm name -> algorithm class
-        problem_instances: List of instance names
-        runs: Number of independent runs per algorithm-instance pair
-        iterations: Number of iterations per run
-        population: Population size
-        seed: Random seed for reproducibility
-        parallel: Whether to run in parallel
-        output_dir: Output directory for results
-        dynamic: Enable dynamic demand simulation
-        multiobjective: Enable multi-objective evaluation
-        lambda_min: Minimum Poisson rate for dynamic demands
-        lambda_max: Maximum Poisson rate for dynamic demands
-        time_horizon: Time horizon in minutes
-        
-    Returns:
-        List of QCDVRPBenchmarkResult objects
-    """
-    # Import at runtime to avoid circular imports
-    from utils.multiobjective_metrics import (
-        calculate_hypervolume,
-        calculate_igd,
-        simulate_dynamic_demands,
-        calculate_qc_metrics,
-    )
-    
-    # Use base benchmark function for standard execution
-    base_results = run_benchmark(
-        algorithms=algorithms,
-        problem_instances=problem_instances,
-        runs=runs,
-        iterations=iterations,
-        population=population,
-        seed=seed,
-        parallel=parallel,
-        output_dir=output_dir,
-        optimize_instances=None,
-    )
-    
-    # Convert to QC-DVRP results and add QC-specific metrics
-    qc_results = []
-    
-    for base_result in base_results:
-        # Create QC-DVRP result
-        qc_result = QCDVRPBenchmarkResult(
-            base_result.algorithm_name,
-            base_result.instance_name,
-            base_result.runs,
-        )
-        
-        # Copy base metrics
-        qc_result.fitness_values = base_result.fitness_values
-        qc_result.execution_times = base_result.execution_times
-        qc_result.convergence_curves = base_result.convergence_curves
-        qc_result.best_solutions = base_result.best_solutions
-        qc_result.iterations_to_best = base_result.iterations_to_best
-        
-        # Add QC-specific evaluation
-        if dynamic or multiobjective:
-            logger.info(f"Adding QC-DVRP metrics for {qc_result.algorithm_name} on {qc_result.instance_name}")
-            
-            # Simulate dynamic demands if enabled
-            if dynamic:
-                lambda_rate = np.random.uniform(lambda_min, lambda_max)
-                qc_result.demand_patterns.append({
-                    'lambda': lambda_rate,
-                    'time_horizon': time_horizon,
-                    'demands': simulate_dynamic_demands(lambda_rate, time_horizon)
-                })
-            
-            # Calculate multi-objective metrics
-            if multiobjective and qc_result.best_solutions:
-                for solution in qc_result.best_solutions:
-                    # Calculate QC metrics
-                    qc_metrics = calculate_qc_metrics(solution, time_horizon)
-                    
-                    qc_result.delivery_times.append(qc_metrics.get('avg_delivery_time', 0))
-                    qc_result.on_time_rates.append(qc_metrics.get('on_time_rate', 0))
-                    qc_result.load_variations.append(qc_metrics.get('load_variation', 0))
-                    
-                    # Calculate hypervolume if we have a Pareto front
-                    if hasattr(solution, 'objectives'):
-                        # Placeholder for actual Pareto front calculation
-                        hv = calculate_hypervolume(
-                            [(qc_metrics['avg_delivery_time'], 
-                              qc_metrics['load_variation'], 
-                              qc_metrics['total_distance'])],
-                            reference_point=(100, 1.0, 10000)
-                        )
-                        qc_result.hypervolume_values.append(hv)
-        
-        qc_results.append(qc_result)
-    
-    # Save results with QC-specific format
-    if output_dir:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = Path(output_dir)
-        output_path.mkdir(parents=True, exist_ok=True)
-        
-        # Create summary with QC metrics
-        summary_df = create_qc_dvrp_summary_dataframe(qc_results)
-        summary_df.to_csv(output_path / f"qc_dvrp_summary_{timestamp}.csv", index=False)
-        
-        # Save detailed results
-        results_file = output_path / f"qc_dvrp_results_{timestamp}.json"
-        save_results_to_json(qc_results, results_file)
-        
-        logger.info(f"QC-DVRP results saved to {output_path}")
-    
-    return qc_results
-
-
-def create_qc_dvrp_summary_dataframe(benchmark_results):
-    """Create summary DataFrame with QC-DVRP specific metrics."""
-    summary_data = []
-    
-    for result in benchmark_results:
-        row = {
-            'Algorithm': result.algorithm_name,
-            'Instance': result.instance_name,
-            'Runs': result.runs,
-            # Standard metrics
-            'Best_Fitness': np.min(result.fitness_values) if result.fitness_values else np.nan,
-            'Avg_Fitness': np.mean(result.fitness_values) if result.fitness_values else np.nan,
-            'Std_Fitness': np.std(result.fitness_values) if result.fitness_values else np.nan,
-            'Avg_Time': np.mean(result.execution_times) if result.execution_times else np.nan,
-        }
-        
-        # QC-specific metrics
-        if hasattr(result, 'on_time_rates') and result.on_time_rates:
-            row['Avg_OnTime_Rate'] = np.mean(result.on_time_rates)
-            row['Std_OnTime_Rate'] = np.std(result.on_time_rates)
-        
-        if hasattr(result, 'load_variations') and result.load_variations:
-            row['Avg_Load_Variation'] = np.mean(result.load_variations)
-            row['Std_Load_Variation'] = np.std(result.load_variations)
-        
-        if hasattr(result, 'hypervolume_values') and result.hypervolume_values:
-            row['Avg_Hypervolume'] = np.mean(result.hypervolume_values)
-            row['Std_Hypervolume'] = np.std(result.hypervolume_values)
-        
-        summary_data.append(row)
-    
-    return pd.DataFrame(summary_data)
