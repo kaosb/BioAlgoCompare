@@ -1134,11 +1134,6 @@ Si encuentras un bug, incluye:
 4. **Sistema operativo**
 5. **Output de**: `pip list | grep -E "(numpy|scipy|pandas)"`
 
-## 📝 Documentación de Investigación
-
-- [Paper IEEE Format](docs/papers/paper_ieee/) - Formato IEEE estándar
-- [Paper Extended](docs/papers/paper_extended/) - Versión extendida del análisis
-- [Paper Current](docs/papers/paper_current/) - Versión actual en desarrollo
 
 ## 📚 Referencias
 
