@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """
-Script para generar demostraciones de parámetros óptimos de HO.
+Generate Demonstrations for Imitation Learning
+=============================================
 
-Utiliza algoritmos de referencia (versiones simplificadas de GA y PSO) para
-encontrar parámetros óptimos de HO en diferentes estados de optimización,
-generando un dataset de entrenamiento para Imitation Learning.
+This script generates expert demonstrations by running optimized algorithms
+(PSO, GA) and collecting their parameter choices for training the IL model.
 
-Uso:
-    python utils/generate_demos.py --algorithms ga,pso --instances Solomon-RC101 --num 500 --seed 42
+The demonstrations capture:
+- Problem state (instance features, iteration, convergence)
+- Expert actions (α, β, γ parameters that led to good performance)
+- Outcomes (fitness improvement)
+
+Usage:
+    python utils/generate_demos.py --algorithm both --instances P-n16-k8,E-n22-k4 --runs 100
 """
 
 import argparse

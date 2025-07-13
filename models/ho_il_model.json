@@ -1,0 +1,98 @@
+{
+  "training_date": "2025-07-12T23:57:23.336883",
+  "n_train": 4000,
+  "n_val": 1000,
+  "results": {
+    "alpha": {
+      "train_mse": 0.002524731001103334,
+      "train_r2": 0.9333063070368695,
+      "feature_importance": {
+        "iteration": 0.46468915615391265,
+        "n_customers": 0.0,
+        "n_depots": 0.0,
+        "avg_demand": 0.0,
+        "demand_std": 0.0,
+        "capacity": 0.0,
+        "area_span": 0.0,
+        "density": 0.0,
+        "progress": 0.5030566534044976,
+        "best_fitness": 0.002209432809617834,
+        "avg_fitness": 0.002251547666513866,
+        "fitness_std": 0.00775338614129188,
+        "convergence_rate": 0.0,
+        "stagnation_counter": 0.020039823824166303,
+        "population_diversity": 0.0,
+        "elite_ratio": 0.0,
+        "improvement_rate": 0.0,
+        "dynamic_orders": 0.0,
+        "avg_delay": 0.0,
+        "load_imbalance": 0.0
+      },
+      "val_mse": 0.002990692604903836,
+      "val_r2": 0.9200763868905827
+    },
+    "beta": {
+      "train_mse": 0.00591427524193252,
+      "train_r2": 0.6958357495377651,
+      "feature_importance": {
+        "iteration": 0.42894056581098033,
+        "n_customers": 0.0,
+        "n_depots": 0.0,
+        "avg_demand": 0.0,
+        "demand_std": 0.0,
+        "capacity": 0.0,
+        "area_span": 0.0,
+        "density": 0.0,
+        "progress": 0.5193065184017006,
+        "best_fitness": 0.010679778660412064,
+        "avg_fitness": 0.011231994995048435,
+        "fitness_std": 0.001429838099567953,
+        "convergence_rate": 0.0,
+        "stagnation_counter": 0.02841130403229063,
+        "population_diversity": 0.0,
+        "elite_ratio": 0.0,
+        "improvement_rate": 0.0,
+        "dynamic_orders": 0.0,
+        "avg_delay": 0.0,
+        "load_imbalance": 0.0
+      },
+      "val_mse": 0.007004595560717329,
+      "val_r2": 0.632116844296309
+    },
+    "gamma": {
+      "train_mse": 0.0022850605804847256,
+      "train_r2": 0.8245458140672881,
+      "feature_importance": {
+        "iteration": 0.4639261634092087,
+        "n_customers": 0.0,
+        "n_depots": 0.0,
+        "avg_demand": 0.0,
+        "demand_std": 0.0,
+        "capacity": 0.0,
+        "area_span": 0.0,
+        "density": 0.0,
+        "progress": 0.4974483145747388,
+        "best_fitness": 0.007665984367026023,
+        "avg_fitness": 0.007703314762286509,
+        "fitness_std": 0.0004239493565029472,
+        "convergence_rate": 0.0,
+        "stagnation_counter": 0.02283227353023693,
+        "population_diversity": 0.0,
+        "elite_ratio": 0.0,
+        "improvement_rate": 0.0,
+        "dynamic_orders": 0.0,
+        "avg_delay": 0.0,
+        "load_imbalance": 0.0
+      },
+      "val_mse": 0.002643959619396458,
+      "val_r2": 0.7973960615286154
+    }
+  },
+  "args": {
+    "demos": "data/demos/ho_demos.csv",
+    "output": "models/ho_il_model.pkl",
+    "test_split": 0.2,
+    "n_estimators": 100,
+    "seed": 42
+  }
+}
