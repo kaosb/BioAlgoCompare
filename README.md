@@ -2,8 +2,8 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Algorithms](https://img.shields.io/badge/algorithms-17-orange)](algorithms/)
-[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)](tests/)
+[![Algorithms](https://img.shields.io/badge/algorithms-19-orange)](algorithms/)
+[![Coverage](https://img.shields.io/badge/coverage-84%25-brightgreen)](tests/)
 [![Tests](https://img.shields.io/badge/tests-759%20passed-brightgreen)](tests/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
@@ -91,8 +91,8 @@ python scripts/analyze.py run \
     --seed 42
 
 # ✅ Resultado esperado:
-# Best: ~380-420, Gap: ~1-12%, Time: ~0.05s
-# Interpretación: HHO converge rápido en instancias pequeñas
+# Best: ~520-580, Gap: ~38-55%, Time: ~0.03s
+# Interpretación: HHO encuentra soluciones decentes rápidamente
 ```
 
 #### 🏁 **Ejemplo 2: Comparación de 3 Algoritmos**
@@ -106,9 +106,9 @@ python scripts/analyze.py benchmark \
     --seed 42
 
 # ✅ Resultado esperado:
-# hho: ~450-480 (mejor gap)
-# ho:  ~470-500
-# sho: ~500-550 (mayor variabilidad)
+# hho: ~580-620 (gap: ~28-38%)
+# ho:  ~600-650 (gap: ~33-44%)
+# sho: ~650-750 (gap: ~44-67%, mayor variabilidad)
 ```
 
 #### 📈 **Ejemplo 3: Análisis Estadístico Completo**
@@ -485,65 +485,19 @@ python scripts/tools/sensitivity_analysis_ho.py \
 # Analiza: α ∈ [0.1, 0.9], β ∈ [0.2, 0.8], γ ∈ [0.3, 1.0]
 ```
 
-### Paso 4: Generar Materiales del Paper
+### Paso 4: Preparar Resultados para Publicación
 
-```bash
-# 4.1 Generar reporte comprehensivo
-python scripts/tools/generate_paper_report.py \
-    --input results/massive_*/benchmark_results.json \
-    --out paper_submission \
-    --seed 42
+Los resultados del análisis estadístico ya incluyen todos los elementos necesarios para publicación:
+- Tablas con formato LaTeX (booktabs/siunitx)
+- Diagramas de diferencias críticas
+- Reportes HTML/Markdown completos
+- Datos CSV para análisis adicional
 
-# 4.2 Generar reporte de validación
-python scripts/tools/generate_validation_report.py \
-    --results-path results/all_results.csv \
-    --output-path paper_submission/validation_report.tex
-```
+## 📝 Herramientas de Análisis Avanzado
 
-### Paso 5: Paquete de Sumisión Completo
+### Scripts de Análisis Disponibles
 
-```bash
-# 5.1 Generar reportes de publicación
-./scripts/tools/generate_paper_report.py
-
-# Genera:
-# - paper.pdf (LaTeX compilado)
-# - Todas las tablas en formato booktabs/siunitx
-# - Figuras en calidad publicación (300 DPI)
-# - Metadatos completos
-# - Archivo ZIP para publicación
-```
-
-## 📝 Generación de Papers y Reportes
-
-### Scripts de Generación Disponibles
-
-#### 1. **generate_paper_report.py** - Generador de Informes Científicos
-
-```bash
-python scripts/tools/generate_paper_report.py \
-    --input results/benchmark_results.json \
-    --out paper_submission \
-    --format ieee \
-    --include-sensitivity \
-    --include-convergence
-```
-
-Genera:
-- `paper.tex`: Paper completo en LaTeX
-- `tables/`: Tablas con formato booktabs/siunitx
-- `figures/`: Visualizaciones de convergencia y frentes de Pareto
-- `informe_tecnico.md`: Informe técnico detallado
-
-#### 2. **generate_validation_report.py** - Reporte de Validación
-
-```bash
-python scripts/tools/generate_validation_report.py \
-    --results-path results/validation_results.json \
-    --output-path validation_report.tex
-```
-
-#### 3. **sensitivity_analysis_ho.py** - Análisis de Sensibilidad
+#### 1. **sensitivity_analysis_ho.py** - Análisis de Sensibilidad
 
 ```bash
 python scripts/tools/sensitivity_analysis_ho.py \
@@ -557,23 +511,7 @@ Genera:
 - Gráficos de efectos principales
 - Configuración óptima: α=0.10, β=0.50, γ=0.65
 
-### Scripts de Validación
-
-#### **validate_quick_ho.sh** - Validación Completa
-
-```bash
-./scripts/tools/validate_quick_ho.sh
-```
-
-Ejecuta:
-- Tests unitarios con cobertura (objetivo: 80%+)
-- Validación HO+IL integración
-- Benchmark pequeño (30 runs)
-- Análisis estadístico
-- Validación de factibilidad de rutas y restricciones de capacidad
-- Comando para benchmark masivo (1000 runs)
-
-#### **compare_cec_benchmarks.py** - Comparación CEC2017
+#### 2. **compare_cec_benchmarks.py** - Comparación CEC2017
 
 ```bash
 python scripts/tools/compare_cec_benchmarks.py
@@ -585,7 +523,7 @@ python scripts/tools/compare_cec_benchmarks.py
 
 ## 🧪 Algoritmos Implementados
 
-El proyecto implementa **17 algoritmos metaheurísticos bioinspirados únicos**:
+El proyecto implementa **19 algoritmos metaheurísticos únicos** (17 bioinspirados + 2 clásicos de comparación):
 
 | Algoritmo | Nombre Completo | Año | Inspiración |
 |-----------|-----------------|-----|-------------|
@@ -606,6 +544,8 @@ El proyecto implementa **17 algoritmos metaheurísticos bioinspirados únicos**:
 | **smo** | Starling Murmuration Optimizer | 2022 | Bandadas de estorninos |
 | **gvoa** | Griffon Vultures Optimization | 2025 | Vuelo termal de buitres |
 | **ho** | Hippopotamus Optimizer | 2024 | Comportamiento territorial |
+| **pso** | Particle Swarm Optimization | 1995 | Movimiento de partículas (clásico) |
+| **ga** | Genetic Algorithm | 1975 | Evolución natural (clásico) |
 
 **Nota**: Los alias `hoa` (→ `sho`) y `fgo` (→ `fsa`) están disponibles para compatibilidad.
 
