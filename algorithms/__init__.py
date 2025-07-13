@@ -48,7 +48,6 @@ from .fsa import FSA, Flamingo as FlamingoFSA
 from .gto import GTO, Gorilla
 from .gvoa import GVOA, Vulture
 from .hho import HHO, Hawk
-from .hoa import HOA, Hyena as HyenaHOA
 from .mrfo import MRFO, MantaRay
 from .opa import OPA, Orca
 from .rro import RRO, Raven
@@ -69,7 +68,7 @@ ALGORITHMS = {
     "gto": GTO,
     "gvoa": GVOA,
     "hho": HHO,
-    "hoa": HOA,
+    "hoa": SHO,  # HOA is an alias for SHO
     "mrfo": MRFO,
     "opa": OPA,
     "rro": RRO,
@@ -119,7 +118,6 @@ __all__ = [
     "GTO",
     "GVOA",
     "HHO",
-    "HOA",
     "MRFO",
     "OPA",
     "RRO",
@@ -138,7 +136,6 @@ __all__ = [
     "Gorilla",
     "Vulture",
     "Hawk",
-    "HyenaHOA",
     "MantaRay",
     "Orca",
     "Raven",

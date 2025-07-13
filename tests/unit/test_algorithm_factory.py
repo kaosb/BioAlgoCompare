@@ -25,6 +25,8 @@ class TestAlgorithmFactory:
         problem.dimension = 10
         problem.lower_bound = 0
         problem.upper_bound = 1
+        problem.get_dimension.return_value = 10
+        problem.evaluate.return_value = 1.0
         return problem
 
     def test_algorithms_registry_structure(self):

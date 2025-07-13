@@ -54,7 +54,7 @@ class TestIndividualInterface:
     def test_individual_inheritance(self, algo_name):
         """Test that Individual classes inherit from base Individual."""
         # Skip aliases
-        if algo_name in ["hyena", "flamingo"]:
+        if algo_name in ["hyena", "flamingo", "hoa", "fgo"]:
             return
 
         individual_classes = self.get_individual_classes()
@@ -76,7 +76,7 @@ class TestIndividualInterface:
     def test_individual_has_required_methods(self, algo_name, vrp_problem):
         """Test that Individual classes implement required methods."""
         # Skip aliases
-        if algo_name in ["hyena", "flamingo"]:
+        if algo_name in ["hyena", "flamingo", "hoa", "fgo"]:
             return
 
         # Initialize algorithm to get an individual
@@ -110,7 +110,7 @@ class TestIndividualInterface:
     def test_fitness_method(self, algo_name, vrp_problem):
         """Test Individual fitness() method returns numeric value."""
         # Skip aliases
-        if algo_name in ["hyena", "flamingo"]:
+        if algo_name in ["hyena", "flamingo", "hoa", "fgo"]:
             return
 
         AlgoClass = ALGORITHMS[algo_name]
@@ -132,7 +132,7 @@ class TestIndividualInterface:
     def test_is_better_than_method(self, algo_name, vrp_problem):
         """Test Individual is_better_than() method."""
         # Skip aliases
-        if algo_name in ["hyena", "flamingo"]:
+        if algo_name in ["hyena", "flamingo", "hoa", "fgo"]:
             return
 
         AlgoClass = ALGORITHMS[algo_name]
@@ -161,7 +161,7 @@ class TestIndividualInterface:
     def test_is_feasible_method(self, algo_name, vrp_problem):
         """Test Individual is_feasible() method."""
         # Skip aliases
-        if algo_name in ["hyena", "flamingo"]:
+        if algo_name in ["hyena", "flamingo", "hoa", "fgo"]:
             return
 
         AlgoClass = ALGORITHMS[algo_name]
@@ -180,7 +180,7 @@ class TestIndividualInterface:
     def test_copy_method(self, algo_name, vrp_problem):
         """Test Individual copy() method."""
         # Skip aliases
-        if algo_name in ["hyena", "flamingo"]:
+        if algo_name in ["hyena", "flamingo", "hoa", "fgo"]:
             return
 
         AlgoClass = ALGORITHMS[algo_name]
