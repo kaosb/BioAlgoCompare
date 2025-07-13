@@ -12,7 +12,7 @@ python scripts/analyze.py massive \
     --instances E-n22-k4 \
     --iterations 300 \
     --population 50 \
-    --output-dir "/Users/kaosb/optimizacion/results/thesis_E-n22-k4_20250713_072835/ga" \
+    --output-dir "results/experiment_E-n22-k4/ga" \
     --parallel \
     --seed 42
 
@@ -24,7 +24,7 @@ python scripts/analyze.py massive \
     --instances P-n16-k8 \
     --iterations 300 \
     --population 50 \
-    --output-dir "/Users/kaosb/optimizacion/results/thesis_P-n16-k8_20250713_072835/ga" \
+    --output-dir "results/experiment_P-n16-k8/ga" \
     --parallel \
     --seed 42
 
@@ -36,7 +36,7 @@ python scripts/analyze.py massive \
     --instances P-n16-k8 \
     --iterations 300 \
     --population 50 \
-    --output-dir "/Users/kaosb/optimizacion/results/thesis_P-n16-k8_20250713_072835/pso" \
+    --output-dir "results/experiment_P-n16-k8/pso" \
     --parallel \
     --seed 42
 

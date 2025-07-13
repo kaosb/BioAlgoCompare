@@ -173,3 +173,11 @@ cec2017_comparison_results.csv
 *.png
 !figures/*.png
 !docs/**/*.png
+
+# Archivos académicos (mantenidos en rama academic)
+academic/
+CLEI*.zip
+*thesis*
+*THESIS*
+*tesis*
+*TESIS*

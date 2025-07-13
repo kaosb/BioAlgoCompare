@@ -14,7 +14,7 @@
     },
 
     "algorithms": {
-      "thesis_comparison": [
+      "research_comparison": [
         "ho",
         "apo",
         "egto",
@@ -107,7 +107,7 @@
       "population": 50
     },
 
-    "thesis_clei2025": {
+    "publication_ready": {
       "runs": 51,
       "algorithms": ["ho", "apo", "egto", "foa", "hho", "sma", "woa"],
       "instances": ["P-n16-k8", "E-n22-k4", "A-n32-k5", "A-n45-k7", "A-n60-k9"],
