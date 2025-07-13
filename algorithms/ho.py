@@ -28,27 +28,7 @@ from typing import List, Tuple, Optional
 from algorithms.base import Individual, MetaheuristicAlgorithm
 from scipy.spatial.distance import cdist
 from scipy.cluster.hierarchy import linkage, fcluster
-
-
-def levy_flight(dim: int, beta: float = 1.5) -> np.ndarray:
-    """
-    Genera un vector de desplazamiento siguiendo una distribución Lévy.
-
-    Args:
-        dim: Dimensión del vector
-        beta: Parámetro de la distribución (típicamente 1.5)
-
-    Returns:
-        Vector de desplazamiento Lévy
-    """
-    sigma = (
-        math.gamma(1 + beta)
-        * math.sin(math.pi * beta / 2)
-        / (math.gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))
-    ) ** (1 / beta)
-    u = np.random.normal(0, sigma, dim)
-    v = np.random.normal(0, 1, dim)
-    return u / (np.abs(v) ** (1 / beta))
+from utils.math_functions import levy_flight
 
 
 class Hippopotamus(Individual):
