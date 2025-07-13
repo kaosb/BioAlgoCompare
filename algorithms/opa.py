@@ -38,11 +38,11 @@ from algorithms.base import Individual, MetaheuristicAlgorithm
 
 
 class Orca(Individual):
-    """Una orca (solución VRP) con representación basada en rutas."""
+    """An orca (VRP solution) with route-based representation."""
 
     def __init__(self, problem):
         self.problem = problem
-        # Inicializar con rutas aleatorias directamente
+        # Initialize with random routes directly
         self.position = self.problem.random_routes()
         self._fitness = None
         self.personal_best_position = copy.deepcopy(self.position)
@@ -74,7 +74,7 @@ class Orca(Individual):
         This method is required by the base class but OPA uses a different
         update mechanism that works directly with route representations.
         """
-        # No se usa directamente, se usa update en su lugar
+        # Not used directly, update is used instead
         pass
 
     def fitness(self):
@@ -84,7 +84,7 @@ class Orca(Individual):
             float: The fitness value (total cost) of the current route configuration
         """
         if self._fitness is None:
-            # Evaluación directa usando las rutas
+            # Direct evaluation using routes
             self._fitness = self.problem.evaluate_routes(self.position)
         return self._fitness
 
@@ -98,105 +98,105 @@ class Orca(Individual):
 
     # --- util operators --------------------------------------------------
     def _random_swap(self, routes):
-        """Intercambia dos clientes aleatorios entre dos rutas distintas."""
-        non_empty = [r for r in routes if len(r) > 2]  # Rutas con al menos un cliente
+        """Swap two random customers between two different routes."""
+        non_empty = [r for r in routes if len(r) > 2]  # Routes with at least one customer
         if len(non_empty) < 2:
             return
         r1, r2 = random.sample(non_empty, 2)
-        # Elegir clientes aleatorios (excluyendo depósito al inicio y fin)
+        # Choose random customers (excluding depot at start and end)
         i = random.randrange(1, len(r1) - 1) if len(r1) > 2 else 1
         j = random.randrange(1, len(r2) - 1) if len(r2) > 2 else 1
         r1[i], r2[j] = r2[j], r1[i]
 
     def _two_opt(self, route):
-        """Aplica 2‑opt a una sola ruta."""
-        if len(route) < 4:  # Ruta debe tener al menos 2 clientes
+        """Apply 2-opt to a single route."""
+        if len(route) < 4:  # Route must have at least 2 customers
             return
-        # Elegir dos posiciones dentro de la ruta (excluyendo depósito)
+        # Choose two positions within the route (excluding depot)
         i = random.randrange(1, len(route) - 2)
         k = random.randrange(i + 1, len(route) - 1)
-        # Invertir el segmento entre i y k
+        # Reverse the segment between i and k
         route[i : k + 1] = list(reversed(route[i : k + 1]))
 
     def _relocate(self, routes, leader_routes):
         """
-        Mueve un cliente desde una ruta aleatoria a otra posición.
-        Si se provee leader_routes, preferentemente inserta en una de estas rutas.
+        Move a customer from a random route to another position.
+        If leader_routes is provided, preferentially insert into one of these routes.
         """
-        # Identificar rutas con al menos un cliente
+        # Identify routes with at least one customer
         src_candidates = [r for r in routes if len(r) > 2]
         if not src_candidates:
-            return  # No hay rutas con clientes
+            return  # No routes with customers
 
-        # Elegir ruta fuente y cliente a mover
+        # Choose source route and customer to move
         src = random.choice(src_candidates)
-        idx = random.randrange(1, len(src) - 1)  # Elegir un cliente (no depósito)
+        idx = random.randrange(1, len(src) - 1)  # Choose a customer (not depot)
         cust = src.pop(idx)
 
-        # Si la ruta fuente queda solo con depósitos, eliminarla
+        # If source route only has depots left, remove it
         if len(src) <= 2:
             routes.remove(src)
 
-        # Elegir ruta destino, preferentemente del líder
+        # Choose destination route, preferentially from leader
         dst_candidates = []
         if leader_routes:
             dst_candidates = [r for r in leader_routes if r != src]
 
-        # Si no hay rutas del líder, usar cualquier otra ruta existente
+        # If no leader routes, use any other existing route
         if not dst_candidates:
             dst_candidates = [r for r in routes if r != src]
 
-        # Si no hay rutas destino, crear una nueva
+        # If no destination routes, create a new one
         if not dst_candidates:
-            new_route = [0, cust, 0]  # Nueva ruta con depósito - cliente - depósito
+            new_route = [0, cust, 0]  # New route with depot - customer - depot
             routes.append(new_route)
             return
 
-        # Insertar en la ruta destino
+        # Insert into destination route
         dst = random.choice(dst_candidates)
         insert_pos = random.randrange(
             1, len(dst)
-        )  # Posición después del depósito inicial
+        )  # Position after initial depot
         dst.insert(insert_pos, cust)
 
     def update(self, g_best, phase, accept_prob):
         """
-        Actualiza la posición de la Orca según la fase y probabilidad.
+        Update the Orca's position according to phase and probability.
 
         Args:
-            g_best: Mejor posición global (rutas del líder)
-            phase: "chase" para exploración, "attack" para explotación
-            accept_prob: Probabilidad de aceptar soluciones peores
+            g_best: Global best position (leader's routes)
+            phase: "chase" for exploration, "attack" for exploitation
+            accept_prob: Probability of accepting worse solutions
         """
-        # Crear una copia de la posición actual para modificar
+        # Create a copy of current position to modify
         new_pos = copy.deepcopy(self.position)
 
-        # Aplicar operadores según la fase
-        if phase == "chase":  # Fase de exploración
+        # Apply operators according to phase
+        if phase == "chase":  # Exploration phase
             self._random_swap(new_pos)
             candidates_2opt = [r for r in new_pos if len(r) >= 4]
             if candidates_2opt:
                 route_for_2opt = random.choice(candidates_2opt)
                 self._two_opt(route_for_2opt)
-        else:  # Fase de ataque (explotación)
+        else:  # Attack phase (exploitation)
             self._relocate(new_pos, g_best)
 
-        # Reparar solución si el problema ofrece esa funcionalidad
+        # Repair solution if problem offers that functionality
         if hasattr(self.problem, "repair_routes"):
             new_pos = self.problem.repair_routes(new_pos)
 
-        # Verificar factibilidad
+        # Check feasibility
         if not self.problem.routes_are_feasible(new_pos):
-            return  # No actualizar si no es factible
+            return  # Don't update if not feasible
 
-        # Evaluar nueva posición
+        # Evaluate new position
         new_fit = self.problem.evaluate_routes(new_pos)
 
-        # Actualizar si mejora o según probabilidad de aceptación
+        # Update if improved or according to acceptance probability
         if new_fit < self.fitness() or random.random() < accept_prob:
             self.position = new_pos
             self._fitness = new_fit
-            # Actualizar mejor posición personal si corresponde
+            # Update personal best position if applicable
             if new_fit < self.personal_best_fitness:
                 self.personal_best_position = copy.deepcopy(new_pos)
                 self.personal_best_fitness = new_fit
@@ -204,10 +204,10 @@ class Orca(Individual):
 
 class OPA(MetaheuristicAlgorithm):
     """
-    Orca Predator Algorithm (OPA) – Adaptado al problema de ruteo de vehículos (VRP)
-    Inspirado en: Jiang et al. (2021)
+    Orca Predator Algorithm (OPA) - Adapted for Vehicle Routing Problem (VRP)
+    Inspired by: Jiang et al. (2021)
 
-    Esta implementación trabaja directamente con la representación de rutas para VRP.
+    This implementation works directly with route representation for VRP.
     """
 
     def __init__(self, problem, population_size=40, max_iterations=1000, seed=None):
@@ -218,7 +218,7 @@ class OPA(MetaheuristicAlgorithm):
         self.convergence_curve = []
 
     def initialize_population(self) -> None:
-        """Inicializa la población de orcas con soluciones aleatorias."""
+        """Initialize the orca population with random solutions."""
         if self.seed is not None:
             random.seed(self.seed)
             np.random.seed(self.seed)
@@ -229,25 +229,25 @@ class OPA(MetaheuristicAlgorithm):
         self.current_iter = 0
 
     def update_population(self) -> None:
-        """Actualiza la población para una iteración."""
-        # Determinar fase actual y probabilidad de aceptación
+        """Update the population for one iteration."""
+        # Determine current phase and acceptance probability
         frac = self.current_iter / self.max_iterations
         phase = "chase" if frac < 0.5 else "attack"
         accept_prob = 0.3 * (1 - frac)
 
-        # Obtener la mejor posición global actual
+        # Get current global best position
         leader_pos = copy.deepcopy(self.best_solution.position)
 
-        # Actualizar cada orca
+        # Update each orca
         for orca in self.population:
             orca.update(leader_pos, phase, accept_prob)
 
-        # Actualizar mejor solución global
+        # Update global best solution
         current_best = min(self.population, key=lambda o: o.fitness())
         if current_best.is_better_than(self.best_solution):
             self.best_solution = current_best.copy()
 
-        # Actualizar curva de convergencia
+        # Update convergence curve
         self.convergence_curve.append(self.best_solution.fitness())
         self.current_iter += 1
 

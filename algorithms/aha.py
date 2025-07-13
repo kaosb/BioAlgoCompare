@@ -1,6 +1,6 @@
 """
 Artificial Hummingbird Algorithm (AHA)
-Fuente: Zhao, Wang & Mirjalili (2022), Computer Methods in Applied Mechanics and Engineering.
+Source: Zhao, Wang & Mirjalili (2022), Computer Methods in Applied Mechanics and Engineering.
 DOI: 10.1016/j.cma.2021.114194
 """
 
@@ -50,114 +50,114 @@ class Hummingbird(Individual):
 
     def move(self, population=None, iteration=None, max_iterations=None):
         """
-        Implementa el movimiento del colibrí según el tipo de vuelo y modo de forrajeo.
-        Adaptado para la interfaz requerida por la clase base Individual.
+        Implements hummingbird movement according to flight type and foraging mode.
+        Adapted for the interface required by the Individual base class.
 
         Args:
-            population: La población actual de individuos.
-            iteration: La iteración actual del algoritmo.
-            max_iterations: El número máximo de iteraciones.
+            population: Current population of individuals.
+            iteration: Current algorithm iteration.
+            max_iterations: Maximum number of iterations.
         """
-        # Esta implementación específica de AHA será llamada desde update_population()
-        # y no a través de esta interfaz, por lo que no necesitamos implementar la lógica aquí
+        # This specific AHA implementation will be called from update_population()
+        # and not through this interface, so we don't need to implement the logic here
         pass
 
     def aha_move(
         self, best_individual, population: List["Hummingbird"], memory_table: set
     ):
         """
-        Implementa el movimiento del colibrí según el tipo de vuelo y modo de forrajeo.
+        Implements hummingbird movement according to flight type and foraging mode.
         """
-        # Selección aleatoria del tipo de vuelo: axial, diagonal u omnidireccional
+        # Random selection of flight type: axial, diagonal or omnidirectional
         flight_type = np.random.choice(["axial", "diagonal", "omnidirectional"])
 
-        # Selección aleatoria del modo de forrajeo: guiado, territorial, migratorio
+        # Random selection of foraging mode: guided, territorial, migratory
         forage_mode = np.random.choice(["guided", "territorial", "migratory"])
 
         new_position = self.position.copy()
         dim = self.dimension
 
         if flight_type == "axial":
-            # Movimiento en una sola dimensión (eje)
+            # Movement in a single dimension (axis)
             axis = np.random.randint(0, dim)
             step = np.random.uniform(-1, 1)
             direction = np.zeros(dim)
             direction[axis] = step
         elif flight_type == "diagonal":
-            # Movimiento en una diagonal (subconjunto de dimensiones)
+            # Movement in a diagonal (subset of dimensions)
             direction = np.random.uniform(-1, 1, size=dim)
-            # Para simular diagonal, poner algunos ceros aleatorios
+            # To simulate diagonal, set some random zeros
             zero_mask = np.random.rand(dim) < 0.5
             direction[zero_mask] = 0
-        else:  # omnidireccional
-            # Movimiento en cualquier dirección
+        else:  # omnidirectional
+            # Movement in any direction
             direction = np.random.uniform(-1, 1, size=dim)
 
-        # Normalizar dirección para que el paso sea proporcional
+        # Normalize direction so step is proportional
         norm = np.linalg.norm(direction)
         if norm > 0:
             direction = direction / norm
 
-        # Parámetros del paso (pueden ajustarse)
-        step_size = 0.1  # tamaño base del paso
+        # Step parameters (can be adjusted)
+        step_size = 0.1  # base step size
 
         if forage_mode == "guided":
-            # Eq. 6: Movimiento hacia el mejor individuo con memoria
+            # Eq. 6: Movement towards best individual with memory
             diff = best_individual.personal_best_position - self.position
             new_position = self.position + step_size * diff + step_size * direction
         elif forage_mode == "territorial":
-            # Eq. 7: Perturbación aleatoria local
+            # Eq. 7: Local random perturbation
             new_position = self.position + step_size * direction * np.random.uniform(
                 -1, 1
             )
         else:  # migratory
-            # Eq. 8: Hacia un individuo aleatorio lejos
+            # Eq. 8: Towards a random distant individual
             other = self
             while other is self:
                 other = np.random.choice(population)
             diff = other.position - self.position
             new_position = self.position + step_size * diff + step_size * direction
 
-        # Clip para mantener dentro de los límites
+        # Clip to keep within bounds
         for i in range(dim):
             low, high = self.bounds[i]
             new_position[i] = np.clip(new_position[i], low, high)
 
-        # Discretizar posición para la tabla de memoria
+        # Discretize position for memory table
         discretized_pos = tuple(np.round(new_position, decimals=6))
 
-        # Verificar si la posición ya está en la memoria para evitar repetir
+        # Check if position is already in memory to avoid repetition
         if discretized_pos in memory_table:
-            # Si ya visitado, hacer un pequeño movimiento aleatorio para evitar estancamiento
+            # If already visited, make small random movement to avoid stagnation
             new_position += step_size * np.random.uniform(-1, 1, size=dim)
             for i in range(dim):
                 low, high = self.bounds[i]
                 new_position[i] = np.clip(new_position[i], low, high)
             discretized_pos = tuple(np.round(new_position, decimals=6))
 
-        # Actualizar posición y memoria
+        # Update position and memory
         self.position = new_position
-        self._fitness = None  # reset fitness
+        self._fitness = None  # Reset fitness
         memory_table.add(discretized_pos)
 
     def copy(self, other=None):
         """
-        Copia los valores de otro individuo a este, o crea una copia si no se proporciona otro.
+        Copy values from another individual to this one, or create a copy if no other is provided.
 
         Args:
-            other: Otro individuo del que copiar (opcional).
+            other: Another individual to copy from (optional).
 
         Returns:
-            Una copia del individuo si other es None, o None si se copiaron atributos.
+            A copy of the individual if other is None, or None if attributes were copied.
         """
         if other is None:
-            # Crear y devolver una nueva copia
+            # Create and return a new copy
             new_copy = Hummingbird(self.position.copy(), self.bounds)
             new_copy.personal_best_position = self.personal_best_position.copy()
             new_copy._fitness = self._fitness
             return new_copy
         else:
-            # Copiar atributos desde other
+            # Copy attributes from other
             self.position = other.position.copy()
             self.personal_best_position = other.personal_best_position.copy()
             self._fitness = other._fitness
@@ -200,7 +200,7 @@ class AHA(MetaheuristicAlgorithm):
             np.random.seed(self.seed)
 
         self.population = []
-        # Para el problema VRP, usamos el dominio [0,1] por cada dimensión
+        # For VRP problem, we use domain [0,1] for each dimension
         dim = self.problem.get_dimension()
         bounds = [(0, 1) for _ in range(dim)]
 
@@ -210,33 +210,33 @@ class AHA(MetaheuristicAlgorithm):
             discretized_pos = tuple(np.round(position, decimals=6))
             self.memory_table.add(discretized_pos)
             self.population.append(hummingbird)
-        # Inicializar fitness
+        # Initialize fitness
         for ind in self.population:
             ind._fitness = self.problem.evaluate(ind.position)
-        # Inicializar mejor solución
+        # Initialize best solution
         self.best_solution = min(self.population, key=lambda ind: ind.fitness()).copy()
-        # Registrar el fitness inicial en la curva de convergencia
+        # Record initial fitness in convergence curve
         self.convergence_curve = [self.best_solution.fitness()]
 
     def update_population(self):
-        # Ordenar población por fitness
+        # Sort population by fitness
         for ind in self.population:
             if ind._fitness is None:
                 ind._fitness = self.problem.evaluate(ind.position)
         self.population.sort(key=lambda ind: ind.fitness())
-        # Actualizar mejor solución
+        # Update best solution
         current_best = self.population[0]
         if current_best.fitness() < self.best_solution.fitness():
             self.best_solution = current_best.copy()
 
-        # Aplicar aha_move a todos menos el mejor
+        # Apply aha_move to all except the best
         for ind in self.population[1:]:
             ind.aha_move(self.best_solution, self.population, self.memory_table)
-            # Actualizar personal best si mejora
+            # Update personal best if improved
             current_fitness = self.problem.evaluate(ind.position)
             ind._fitness = current_fitness
 
-            # Calcular el fitness de personal_best_position
+            # Calculate fitness of personal_best_position
             best_fitness = self.problem.evaluate(ind.personal_best_position)
 
             if current_fitness < best_fitness:

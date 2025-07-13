@@ -246,6 +246,8 @@ def simulate_dynamic_demands(
 
     while current_time < time_horizon:
         # Time until next order (exponential)
+        if lambda_rate <= 0:
+            break  # No orders with zero or negative rate
         interval = np.random.exponential(60 / lambda_rate)  # in minutes
         current_time += interval
 
@@ -269,41 +271,37 @@ def simulate_dynamic_demands(
 
 
 def calculate_qc_metrics(
-    solution, problem, dynamic_orders: Optional[List[dict]] = None
-) -> dict:
+    routes: List[List[int]], dynamic_orders: Optional[List[dict]] = None
+) -> float:
     """
-    Calculate Quick Commerce specific metrics.
+    Calculate Quick Commerce specific on-time delivery rate.
 
     Args:
-        solution: Solution to evaluate
-        problem: VRPProblem instance
+        routes: List of routes (each route is a list of customer indices)
         dynamic_orders: List of dynamic orders (optional)
 
     Returns:
-        Dictionary with QC metrics
+        On-time delivery rate (0.0 to 1.0)
     """
-    metrics = {}
-
-    # Evaluate multi-objective if available
-    if hasattr(problem, "evaluate_multi"):
-        delivery_time, load_var, distance = problem.evaluate_multi(solution.position)
-
-        # On-time delivery rate (≤30 min)
-        metrics["avg_delivery_time"] = delivery_time
-        metrics["on_time_rate"] = 1.0 if delivery_time <= 30 else 0.0
-        metrics["load_variation_coef"] = load_var
-        metrics["total_distance"] = distance
-
-        # Additional QC metrics
-        metrics["service_level"] = (
-            min(1.0, 30.0 / delivery_time) if delivery_time > 0 else 1.0
-        )
-
-    # Dynamic metrics if orders provided
+    if not routes or not any(len(route) > 2 for route in routes):
+        return 0.0
+    
+    # Calculate service level based on route structure
+    total_customers = sum(len(route) - 2 for route in routes if len(route) > 2)
+    
+    if total_customers == 0:
+        return 0.0
+    
+    # Estimate on-time rate based on route efficiency
+    # More customers per route = potential delays
+    avg_customers_per_route = total_customers / len([r for r in routes if len(r) > 2])
+    
+    # Simple heuristic: efficiency decreases with more customers per route
+    on_time_rate = max(0.0, min(1.0, 1.0 - (avg_customers_per_route - 3) * 0.1))
+    
+    # Factor in dynamic orders if available
     if dynamic_orders:
-        metrics["total_dynamic_orders"] = len(dynamic_orders)
-        metrics["orders_per_hour"] = (
-            len(dynamic_orders) * 60 / 480
-        )  # Assuming 8hr horizon
-
-    return metrics
+        dynamic_factor = min(1.0, len(dynamic_orders) / 20.0)  # More orders = more complexity
+        on_time_rate *= (1.0 - dynamic_factor * 0.2)  # Reduce rate by up to 20%
+    
+    return on_time_rate

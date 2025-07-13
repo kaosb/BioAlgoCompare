@@ -32,18 +32,7 @@ import numpy as np
 import random
 import math
 from .base import Individual, MetaheuristicAlgorithm
-
-
-def levy_flight(dim, beta: float = 1.5):
-    """Genera un vector de desplazamiento siguiendo una distribución Lévy (β‑estable)."""
-    sigma = (
-        math.gamma(1 + beta)
-        * math.sin(math.pi * beta / 2)
-        / (math.gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))
-    ) ** (1 / beta)
-    u = np.random.normal(0, sigma, dim)
-    v = np.random.normal(0, 1, dim)
-    return u / (np.abs(v) ** (1 / beta))
+from utils.math_functions import levy_flight
 
 
 class Hawk(Individual):

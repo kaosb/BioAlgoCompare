@@ -317,8 +317,8 @@ class TestPlotComparison:
         # Verificar que se creó el directorio
         mock_makedirs.assert_called_once_with(output_dir, exist_ok=True)
         
-        # Verificar que se crearon 3 figuras
-        assert mock_figure.call_count == 3
+        # Verificar que se crearon 2 figuras (la tercera usa subplots)
+        assert mock_figure.call_count == 2
         
         # Verificar que se guardaron 3 archivos
         assert mock_savefig.call_count == 3

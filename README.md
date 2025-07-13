@@ -3,14 +3,14 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Algorithms](https://img.shields.io/badge/algorithms-17-orange)](algorithms/)
-[![Coverage](https://img.shields.io/badge/coverage-80%25-yellowgreen)](tests/)
-[![Tests](https://img.shields.io/badge/tests-687%20passed-brightgreen)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-759%20passed-brightgreen)](tests/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
 
-## 🎯 Enfoque de Investigación: Quick-HO para VRP Dinámico
+## 🎯 Enfoque de Investigación
 
-Esta plataforma incluye la adaptación del **Hippopotamus Optimizer (HO)** para Quick Commerce Dynamic VRP (QC-DVRP) con optimización multiobjetivo, demandas dinámicas e integración con Imitation Learning. Preparado para sumisión a CLEI 2025.
+Esta plataforma se centra en la evaluación rigurosa de algoritmos bioinspirados para el Vehicle Routing Problem (VRP) estándar, con énfasis en análisis estadístico reproducible y benchmarking masivo.
 
 ## 🚀 Inicio Rápido
 
@@ -35,7 +35,6 @@ python scripts/analyze.py benchmark --run-benchmark --algorithms "sho,foa,egto" 
   - [Ejecución Básica](#ejecución-básica)
   - [Benchmarking Comparativo](#benchmarking-comparativo)
   - [Benchmarking Masivo](#benchmarking-masivo)
-  - [QC-DVRP Dinámico](#qc-dvrp-dinámico-y-multiobjetivo)
   - [Análisis Estadístico](#análisis-estadístico-de-resultados)
 - [Flujo de Reproducibilidad](#-flujo-de-reproducibilidad-datos--paper)
 - [Generación de Papers](#-generación-de-papers-y-reportes)
@@ -61,12 +60,11 @@ python scripts/analyze.py benchmark --run-benchmark --algorithms "sho,foa,egto" 
 - **CLI unificado** con interfaz intuitiva
 - **100% reproducible** con control de semillas
 
-### Extensiones QC-DVRP (Quick Commerce)
-- **Demandas dinámicas**: Simulación con proceso de Poisson (λ ∈ [5, 15])
-- **Optimización multiobjetivo**: Hipervolumen, IGD
-- **Métricas QC específicas**: Tasa de entregas a tiempo, variación de carga
-- **Imitation Learning**: Adaptación de parámetros HO
-- **Instancias Solomon**: Soporte RC101-RC108
+### Capacidades Adicionales
+- **Optimización local**: Operadores 2-opt, Or-opt, Relocate, Exchange
+- **Métricas avanzadas**: Gap to optimal, success rate
+- **Instancias Solomon**: Soporte completo para benchmarks Solomon
+- **Análisis de sensibilidad**: Herramientas para análisis paramétrico
 
 ## 🛠️ Instalación
 
@@ -174,31 +172,17 @@ python scripts/analyze.py massive \
     --checkpoint results/massive_20250111_123456/checkpoint.pkl
 ```
 
-### QC-DVRP Dinámico y Multiobjetivo
+### Análisis de Instancias Solomon
 
-Benchmark con demandas dinámicas:
+Benchmark con instancias Solomon para VRP:
 
 ```bash
 python scripts/analyze.py benchmark \
     --run-benchmark \
-    --dynamic \
-    --multiobjective \
-    --instances "Solomon-RC101,Solomon-RC102,Solomon-RC103" \
+    --instances "RC101,RC102,RC103" \
     --algorithms "ho,sho,foa" \
     --runs 100 \
     --seed 42
-```
-
-Configurar parámetros dinámicos:
-
-```bash
-python scripts/analyze.py benchmark \
-    --run-benchmark \
-    --dynamic \
-    --lambda-min 5 \
-    --lambda-max 15 \
-    --time-horizon 480 \
-    --objectives "delivery_time,load_balance,distance"
 ```
 
 ### Análisis Estadístico de Resultados
@@ -269,12 +253,10 @@ python scripts/analyze.py massive \
     --parallel \
     --seed 42
 
-# 1.2 Experimentos QC-DVRP (para Quick-HO)
+# 1.2 Experimentos con instancias Solomon
 python scripts/analyze.py benchmark \
     --run-benchmark \
-    --dynamic \
-    --multiobjective \
-    --instances "Solomon-RC101,Solomon-RC102,Solomon-RC103" \
+    --instances "RC101,RC102,RC103" \
     --algorithms "ho,sho,foa" \
     --runs 100 \
     --seed 42
@@ -391,7 +373,7 @@ Ejecuta:
 - Validación HO+IL integración
 - Benchmark pequeño (30 runs)
 - Análisis estadístico
-- Validación métricas QC-DVRP (≥85% entregas a tiempo, ≤0.2 variación carga)
+- Validación de factibilidad de rutas y restricciones de capacidad
 - Comando para benchmark masivo (1000 runs)
 
 #### **compare_cec_benchmarks.py** - Comparación CEC2017
@@ -477,13 +459,8 @@ python utils/evaluate_il.py \
 ### 3. Métricas Multi-objetivo
 
 ```python
-from utils.multiobjective_metrics import calculate_hypervolume, calculate_igd
-
-# Calcular hipervolumen
-hv = calculate_hypervolume(pareto_front, reference_point=(1000, 1.0, 5000))
-
-# Calcular IGD
-igd = calculate_igd(pareto_front, true_pareto_front)
+# Las métricas multi-objetivo están disponibles para futuras extensiones
+# en utils/multiobjective_metrics.py
 ```
 
 ## 🛠️ Herramientas Solomon
@@ -595,7 +572,7 @@ pytest -m "not slow"
 pytest --cov-report=html --cov-report=term-missing
 ```
 
-### Estado Actual de Cobertura: **80%** (Objetivo: 100%)
+### Estado Actual de Cobertura: **92%**
 
 #### Gaps de Cobertura a Resolver
 
@@ -722,8 +699,8 @@ Ver [Guía de Contribución](docs/development/contribution.md) para más detalle
 Si utilizas BioAlgoCompare en tu investigación:
 
 ```bibtex
-@inproceedings{quickho2025,
-  title={Quick-HO: Hippopotamus Optimizer for Quick Commerce Dynamic Vehicle Routing},
+@inproceedings{bioalgocompare2025,
+  title={A Comprehensive Evaluation of Bio-inspired Algorithms for Vehicle Routing Problems},
   author={[Tu Nombre]},
   booktitle={Proceedings of CLEI 2025},
   year={2025},

@@ -25,7 +25,7 @@ class TestModuleImports:
         """Test importing individual algorithm classes."""
         # Test direct imports
         from algorithms import AHA, APO, EGTO, EWA, FGO, FOA, FSA, GTO, GVOA
-        from algorithms import HHO, HOA, MRFO, OPA, RRO, SHO, SMA, SMO, WOA
+        from algorithms import HHO, MRFO, OPA, RRO, SHO, SMA, SMO, WOA
 
         # Verify all imports succeeded
         algorithms = [
@@ -39,7 +39,6 @@ class TestModuleImports:
             GTO,
             GVOA,
             HHO,
-            HOA,
             MRFO,
             OPA,
             RRO,
@@ -73,7 +72,7 @@ class TestModuleImports:
         )
 
         # Note: Flamingo and Hyena have multiple versions
-        from algorithms import FlamingoFGO, FlamingoFSA, HyenaHOA, HyenaSHO
+        from algorithms import FlamingoFGO, FlamingoFSA, HyenaSHO
 
         individuals = [
             Hummingbird,
@@ -92,7 +91,6 @@ class TestModuleImports:
             Whale,
             FlamingoFGO,
             FlamingoFSA,
-            HyenaHOA,
             HyenaSHO,
         ]
 
