@@ -287,7 +287,7 @@ def run_benchmark(
         print(f"Benchmark for instance: {instance_name}")
 
         for algo_name, AlgoClass in algorithms.items():
-            print(f"  Running {algo_name}..."
+            print(f"  Running {algo_name}...")
             benchmark_result = BenchmarkResult(algo_name, instance_name, runs)
 
             if parallel:
@@ -1166,5 +1166,3 @@ QC_OPTIMAL_VALUES.update(
         "Solomon-RC108": 1139.82,
     }
 )
-
-
