@@ -1,0 +1,138 @@
+{
+  "experiment_name": "Quick-HO_Tesis_CLEI2025_Validation",
+  "description": "Configuración experimental rigurosa para validación de Quick-HO en tesis de magíster",
+  "version": "1.0",
+  "date_created": "2025-07-12",
+
+  "experimental_design": {
+    "type": "between_subjects_factorial",
+    "factors": {
+      "algorithm": ["ho", "sho", "foa", "hho"],
+      "instance": ["P-n16-k8", "E-n22-k4", "A-n32-k5"]
+    },
+    "independent_runs": 30,
+    "statistical_power": 0.80,
+    "alpha_level": 0.05,
+    "effect_size_target": 0.5
+  },
+
+  "algorithm_parameters": {
+    "ho": {
+      "population_size": 40,
+      "max_iterations": 200,
+      "alpha_range": [0.9, 0.1],
+      "beta_range": [0.8, 0.2],
+      "gamma_range": [0.3, 1.0],
+      "use_il": true,
+      "il_model_path": "models/ho_il_model.pth"
+    },
+    "sho": {
+      "population_size": 40,
+      "max_iterations": 200
+    },
+    "foa": {
+      "population_size": 40,
+      "max_iterations": 200
+    },
+    "hho": {
+      "population_size": 40,
+      "max_iterations": 200
+    }
+  },
+
+  "instance_characteristics": {
+    "P-n16-k8": {
+      "customers": 15,
+      "vehicles": 8,
+      "capacity": 35,
+      "optimal_value": 450,
+      "type": "small_dense"
+    },
+    "E-n22-k4": {
+      "customers": 21,
+      "vehicles": 4,
+      "capacity": 6000,
+      "optimal_value": 375,
+      "type": "medium_sparse"
+    },
+    "A-n32-k5": {
+      "customers": 31,
+      "vehicles": 5,
+      "capacity": 100,
+      "optimal_value": 784,
+      "type": "large_mixed"
+    }
+  },
+
+  "evaluation_metrics": {
+    "primary": [
+      "best_fitness",
+      "convergence_speed",
+      "success_rate"
+    ],
+    "multiobjective": [
+      "average_delivery_time_minutes",
+      "load_variation_coefficient",
+      "total_distance_km"
+    ],
+    "performance": [
+      "execution_time_seconds",
+      "iterations_to_convergence"
+    ]
+  },
+
+  "statistical_analysis": {
+    "normality_tests": ["shapiro_wilk", "kolmogorov_smirnov"],
+    "non_parametric_tests": ["wilcoxon_signed_rank", "mann_whitney_u"],
+    "parametric_tests": ["paired_t_test", "anova"],
+    "effect_sizes": ["cohen_d", "vargha_delaney_a12", "cliff_delta"],
+    "multiple_comparisons": "holm_bonferroni",
+    "confidence_level": 0.95
+  },
+
+  "reproducibility": {
+    "seeds": {
+      "master_seed": 42,
+      "run_seeds": "range(42, 72)",
+      "algorithm_seeds": "deterministic_per_run"
+    },
+    "environment": {
+      "python_version": "3.12.5",
+      "numpy_version": ">=1.20.0",
+      "scipy_version": ">=1.7.0",
+      "random_state_control": true
+    }
+  },
+
+  "quality_assurance": {
+    "pre_experiment_checks": [
+      "test_suite_100_percent_pass",
+      "algorithm_deterministic_validation",
+      "instance_loading_verification",
+      "metric_calculation_accuracy"
+    ],
+    "during_experiment": [
+      "progress_monitoring",
+      "intermediate_result_validation",
+      "outlier_detection",
+      "convergence_verification"
+    ],
+    "post_experiment": [
+      "statistical_assumption_testing",
+      "result_sanity_checks",
+      "reproducibility_verification"
+    ]
+  },
+
+  "file_organization": {
+    "base_dir": "experimental_results/tesis_validation",
+    "subdirs": {
+      "raw_data": "raw_results/",
+      "processed_data": "processed_results/",
+      "statistical_analysis": "statistical_output/",
+      "visualizations": "plots/",
+      "reports": "reports/"
+    },
+    "naming_convention": "{algorithm}_{instance}_{timestamp}_{run_id}"
+  }
+}

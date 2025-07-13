@@ -1,0 +1,269 @@
+\label{sc:METOD}
+
+Para este trabajo, se utilizará una metodología investigativa cuantitativa con enfoque experimental \cite{metodologia_investigacion} basada en \cite{10.5555/1718024}, la cual es ampliamente utilizada para analizar el comportamiento de las metaheurísticas. Esta metodología, se basa en 3 fases, la primera es el diseño experimental, la segunda las mediciones que serán realizadas en el experimento y por último definir cómo se hará el reporte de resultados y su visualización. En en la Figura \ref{fig:metodologia} se ve representada.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{imagenes/disExpUpgrade.png}
+    \caption{Metodología investigativa experimental basada en \cite{10.5555/1718024}}
+    \label{fig:metodologia}
+\end{figure}
+
+
+
+\begin{enumerate}
+    \item \textbf{Diseño experimental}: En esta fase, se deben definir claramente:
+    \begin{itemize}
+        \item \textbf{Definición de metas}: se deben definir claramente los objetivos de los experimentos. Estos objetivos pueden variar ampliamente y deben especificar qué se espera lograr o demostrar con el análisis de la metaheurística. Los objetivos ya fueron declarados en la sección anterior, tanto el general como los específicos.
+
+        \item \textbf{Selección de instancias}: es crucial seleccionar adecuadamente las instancias de prueba (problemas de optimización combinatorial), asegurando que sean diversas en términos de tamaño, dificultad y estructura. Estas instancias se deben dividir en dos subconjuntos: uno para calibrar los parámetros de la metaheurística y otro para evaluar su rendimiento. La calibración de parámetros debe hacerse con cuidado para evitar el sobreajuste, que podría reducir la robustez de la metaheurística en instancias no conocidas.
+
+        Para el presente trabajo, la calibración será omitida y solo se utilizarán los parámetros recomendados para la metaheurística en específico, que posteriormente serán plasmados en la sección de ``Configuración experimental de parámetros de metaheurísticas''.
+
+        %Metric: Variables/Escalas/Tipos de Mediciones%
+        También existen otro tipo de parámetros para los algoritmos de optimización, que se conocen como factores que pueden ser considerados generales para todas las metaheurísticas. Estas dos variables independientes son:
+        %variables independientes
+        \begin{itemize}
+            \item número máximo de iteraciones
+            \item número de individuos/soluciones/agentes por cada generación (también conocido como ``tamaño de la población'')
+        \end{itemize}
+
+        Por otra parte, para evaluar el rendimiento de estos algoritmos, se seleccionarán instancias llamadas ``funciones benchmark'', en particular las de la CEC 2013 y 2017 Large-Scale Global Optimization (LSGO) \cite{li2013benchmark, wu2017problem}. Por último, se probará la propuesta en una instancia de un problema de ingeniería de la vida real llamado, \textit{Profitable Tour Problem} (PTP) \cite{Vansteenwegen2019}.
+
+        El PTP o Problema del Recorrido Rentable, es una variante del problema clásico del vendedor viajero (TSP \cite{LAPORTE1992231}, por sus siglas en inglés). En el PTP, tanto el beneficio como el costo de viaje se consideran en la función objetivo, convirtiendose en una función multiobjetivo. El objetivo principal es maximizar el beneficio total recolectado menos el costo total del viaje. Esto implica que no necesariamente se deben visitar todos los clientes, sino seleccionar aquellos cuya visita sea más rentable considerando la relación entre el beneficio obtenido y el costo de incluirlos en la ruta (considerado como unas de las diferencias con el TSP).
+
+        Este problema es crucial e importante en cuanto a los beneficios que entrega tanto para las empresas de transporte como para los clientes. Para las empresas, el PTP optimiza las rutas al maximizar el beneficio neto, considerando costos y ganancias de visitar diferentes clientes. Esto mejora la eficiencia operativa y la rentabilidad, reduciendo costos y aumentando ingresos. La capacidad de determinar las rutas más rentables permite a las empresas utilizar mejor sus recursos, minimizar tiempos de inactividad y ofrecer un servicio más competitivo en un mercado exigente. En el ámbito de los clientes, el PTP permite ofrecer un servicio más eficiente y personalizado, priorizando entregas críticas y rentables. Esto mejora la satisfacción del cliente al recibir un servicio más rápido y adaptado a sus necesidades. La optimización de rutas basada en el PTP asegura que las entregas sean puntuales y confiables, lo que fortalece la relación con los clientes y mejora la reputación de la empresa. En conjunto, el PTP podría proporcionar una ventaja competitiva significativa, equilibrando costos y beneficios, y mejorando tanto la gestión de recursos como la adaptabilidad al mercado.
+
+        \textbf{Definición matemática del PTP}: El PTP se puede formular como un modelo de programación entera con las siguientes variables de decisión:
+        \begin{itemize}
+            \item $x_{ij} = 1$ si se visita el nodo $i$ seguido del nodo $j$, y 0 en caso contrario.
+            \item $v_i$ se usa en las restricciones de eliminación de subtours para determinar la posición de los nodos visitados en la ruta.
+        \end{itemize}
+
+        \textbf{Función objetivo}:
+        \[
+            \text{Maximizar} \sum_{i=1}^{|N|-1} \sum_{j=2}^{|N|} (P_i x_{ij} - t_{ij} x_{ij})
+        \]
+        Donde $P_i$ es el beneficio de visitar el nodo $i$ y $t_{ij}$ es el costo de viajar del nodo $i$ al nodo $j$.
+
+        \textbf{Restricciones}:
+        \begin{enumerate}
+            \item La ruta comienza en el nodo 1 y termina en el nodo $|N|$:
+            \[
+            \sum_{j=2}^{|N|} x_{1j} = \sum_{i=1}^{|N|-1} x_{i|N|} = 1
+            \]
+            \item Cada nodo $k$ es visitado a lo sumo una vez:
+            \[
+            \sum_{i=1}^{|N|-1} x_{ik} = \sum_{j=2}^{|N|} x_{kj} \leq 1, \forall k = 2, \ldots, (|N|-1)
+            \]
+            \item Restricciones de eliminación de subtours basadas en la formulación de Miller–Tucker–Zemlin:
+            \[
+            2 \leq u_i \leq |N|, \forall i = 2, \ldots, |N|
+            \]
+            \[
+            u_i - u_j + 1 \leq (|N| - 1)(1 - x_{ij}), \forall i, j = 2, \ldots, |N|
+            \]
+        \end{enumerate}
+
+        \textbf{Eliminación de Subtours}: En muchos problemas de enrutamiento, formulaciones matemáticas incompletas pueden permitir la aparición de subtours en una solución. Las restricciones de subtour eliminan estas soluciones no válidas. Sin las restricciones de (c), la combinación de rutas como 1-5-1 y 2-3-4-2 sería aceptable, pero no es válida en términos de la definición del problema. Las restricciones para eliminar subtours en el PTP son las siguientes:
+
+        \[
+            2 \leq u_i \leq |N|, \forall i = 2, \ldots, |N|
+        \]
+        \[
+            u_i - u_j + 1 \leq (|N| - 1)(1 - x_{ij}), \forall i, j = 2, \ldots, |N|
+        \]
+
+        Para cualquier posible subtour, estas restricciones se violarían, asegurando que no se formen subtours en la solución óptima \cite{Vansteenwegen2019}.
+
+
+
+
+
+    \end{itemize}
+
+
+    \item \textbf{Mediciones}: En esta fase se seleccionan las medidas de rendimiento y los indicadores que se van a calcular durante el proceso de optimización. Estas medidas o métricas son variables dependientes que pueden incluir:
+
+    \begin{itemize}
+        \item \textbf{Fitness}: cuantitativamente esta variable es ordinal y dependiente del contexto. Esta variable es el valor resultante de la función objetivo que se da en la ecuación perteniente a la instancia que se esta resolviendo. %permite evaluar la mejora de la solución que entrega el algoritmo --> tributa a la pregunta de invest. 1 y 3%
+
+        \item \textbf{Tiempo de resolución o tasa de convergencia}: cuantitativamente esta variable es ordinal y dependiente del contexto. Es una medida de cuánto mejora el valor fitness por cada iteración. Una tasa de convergencia alta indica que el algoritmo está convergiendo rápidamente hacia la solución óptima. Esta se calcula de la siguiente manera:
+        \begin{equation}
+            TC = \frac{f(x_0) - f^*}{\Delta t}
+        \end{equation}
+        donde $f(x_0)$ es el valor fitness de la iteración inicial (0), $f^*$ es el valor fitness de la última iteración del algoritmo y $\Delta t$ es la cantidad máxima de iteraciones.
+        %permite evaluar la rapidez con la que el algoritmo converge al optimo encontrado --> tributa a la pregunta de invest. 1 y 3%
+
+
+        \item \textbf{Calidad de la solución:} Los indicadores de desempeño para definir la calidad de la solución en términos de precisión, se basa en medir la distancia (o el porcentaje) de desviación de la solución obtenida con respecto a la solución óptima del problema o una conocida hasta el momento. Cuantitativamente es una variable ordinal y dependiente del contexto. La medida calcula la diferencia que existe entre la solución conocida y la solución que se obtuvo en la última iteración del algoritmo en cuestión. Mientras más se acerque a 0, menos diferencia existe entre la mejor solución y la encontrada. La ecuación de esta es:
+        \begin{equation}
+            Calidad = \frac{f(x^*) - f_{optimo}}{max(|f(x*)|,|f_{optimo}|)}
+        \end{equation}
+        donde $f(x^*)$ es la solución encontrada por el algoritmo, y $f_{optimo}$ es el valor fitness conocido de la instancia/problema.
+
+
+        \item \textbf{Robustez}: En general, la robustez se define como el nivel de insensibilidad que presenta el algoritmo, frente a pequeñas desviaciones en las entradas de las instancias, o en los parámetros de la metaheurística. Cuanto menor sea la variabilidad de las soluciones obtenidas, mejor será la robustez.
+
+    \end{itemize}
+
+
+    En adición a esto, en esta fase se detalla el diseño de todo el análisis de las variables dependientes resultantes de los experimentos (métricas anteriores) con el fin de ser interpretadas y poder dar una conclusión clara del estudio realizado. Se procederá definiendo un \textit{Análisis de datos atípicos}, el \textit{Análisis ordinario} y luego el \textit{Análisis estadístico}.
+
+
+    %Definición de análisis de datos: Describe el test estadístico a utilizar y las variables sobre las cuales lo va a aplicar.
+    \begin{itemize}
+        \item \textbf{Análisis de datos atípicos}:en esta análisis se detectan datos atípicos para proceder a realizar una reducción de datos. Este es un tipo de análisis que se realiza sobre un conjunto de datos para determinar cuáles de estos son considerados como datos atípicos (también llamados en inglés \textit{outliers}) \cite{VijayBala2019}. Estos datos son valores extremos o lejanos al conjunto de datos de una muestra que anormalmente se encuentran fuera del patrón general de una distribución de variables \cite{kjae2017}. Como en la mayoría de las pruebas estadísticas asumen que los datos se distribuyen normalmente, la identificación de valores atípicos debe preceder al análisis de datos. Se utilizan diferentes métodos para identificar valores atípicos en una distribución normal \cite{kjae2017}. Al saber cuales son los valores que desvirtúan la muestra se clasifican por medio de dos tipos de datos outliers: \textit{Leves} y \textit{Extremos}. Un valor de muestra pertenecerá a una, u otra clasificación, dependiendo de su ubicación dentro de los rangos intercuartílicos.
+
+        \begin{itemize}
+            \item \textbf{Leves}: Sea $VM$ el valor de la muestra, $Q1$ el cuartil 1, $Q3$ el cuartil 3, y $IQR$ el rango inter-cuartil, se dice que $VM$ es outlier leve si es:
+            \begin{align*}
+                VM < (Q1 - 1.5 \cdot IQR) \\
+                VM > (Q3 + 1.5 \cdot IQR)
+            \end{align*}
+
+            \item \textbf{Extremos}: Sea $VM$ el valor de la muestra, $Q1$ el cuartil 1, $Q3$ el cuartil 3, y $IQR$ el rango inter-cuartil, se dice que $VM$ es outlier extremo si es:
+            \begin{align*}
+                VM < (Q1 - 3 \cdot IQR) \\
+                VM > (Q3 + 3 \cdot IQR)
+            \end{align*}
+
+            Luego de que los valores atípicos sean reconocidos, estos se remueven para evitar que la muestra se desvirtúe, y posteriormente se realizan nuevas pruebas para completar las 30 salidas por ejecución.
+
+        \end{itemize}
+
+
+        \item \textbf{Análisis de ordinario}: en este análisis se procede a buscar una serie de medidas estandarizadas que nos ayuden a contrastar los resultados obtenidos. Las medidas utilizadas son las siguientes:
+
+        \begin{enumerate}
+            \item \textbf{Media aritmética}: esta se define como el promedio aritmético de una distribución. Esta es la suma de todos los valores dividida entre el número de casos. Es una medida solamente aplicable a mediciones por intervalos o de razón \cite{metodologia_investigacion}. Esta medida se basa en el principio de la \textit{esperanza matemática} (valor esperado). La fórmula de esta es:
+            \begin{align*}
+                \overline{x} = \frac{\sum_{i=1}^{N} x_i}{N}
+            \end{align*}
+            donde $N$ es la cantidad total de valores a trabajar. $\overline{x}$ es la media del conjunto de $N$ valores, y $\sum_{i=1}^{N} x_i$ manifiesta la suma total desde el elemento $i$ hasta el $N$ de dicho conjunto.
+
+            \item \textbf{Mejor valor}: es aquel valor, del total de valores obtenidos, que es superior al resto basándose en los requerimientos del problema. El mejor valor del conjunto puede ser muy grande (maximización), o bien muy pequeño (minimización).
+
+            \item \textbf{Peor valor}: es aquel valor, del total de valores obtenidos, que es inferior al resto basándose en los requerimientos del problema. El peor valor del conjunto puede ser muy grande (minimización), o bien muy pequeño (maximización).
+
+            \item \textbf{Desviación estándar}: es el promedio de desviación de las puntuaciones con respecto a la media. Esta medida se expresa en las unidades originales de medición de la distribución. Se interpreta en relación con la media. Cuanto mayor sea la dispersión de los datos alrededor de la media, mayor será la desviación estándar \cite{metodologia_investigacion}. Por lo que, esta mide la distancia a la que se encuentran cada uno de los valores de un conjunto respecto a la media aritmética de este. Esta se simboliza con una $s$ o $\sigma$ y se calcula de la siguiente manera:
+            \begin{align*}
+                \sigma = \sqrt{ \frac{ \sum_{i=1}^{N} (x_i - \overline{x})^2 }{N - 1} }
+            \end{align*}
+
+            \item \textbf{Rango intercuartílico}: este es el rango de valores que incluye el 50\% medio de una distribución \cite{Kipfer2021}. Denotado por las siglas \textit{IQR} es una medida de dispersión estadística que se obtiene de la \textit{diferencia entre el tercer y primer cuartil} de una distribución y que además sirve para encontrar valores atípicos \cite{10.1007/978-981-10-7563-6_53}. Las definiciones de primer y tercer cuartil, junto a sus respectivas fórmulas para calcularlos, se muestran a continuación.
+
+            \begin{itemize}
+                \item \textbf{Primer cuartil}: es aquel valor límite que nos indica que el 25\% de los datos de la distribución estadística son menores o iguales a él. Para determinar dicho valor se utiliza la siguiente fórmula:
+                \begin{align*}
+                    Q_1 = \frac{N+1}{4}
+                \end{align*}
+
+                \item \textbf{Tercer cuartil}: es aquel valor límite que nos indica que el 75\% de los datos de la distribución estadística son menores o iguales a él. Para determinar dicho valor se utiliza la siguiente fórmula:
+                \begin{align*}
+                    Q_3 = \frac{3(N+1)}{4}
+                \end{align*}
+
+            \end{itemize}
+
+        \end{enumerate}
+
+
+        \textbf{Análisis estadístico}: la estadística es la metodología que los científicos y matemáticos han desarrollado para interpretar y sacar conclusiones de los datos \cite{Anderson1996}.
+
+        Un análisis estadístico debe ser enfocado de diversas \textit{pruebas estadísticas}. Una prueba estadística es, en palabras sencillas, una forma de evaluar la evidencia entregada por un conjunto de datos disponibles para respaldar una hipótesis propuesta. Los pasos necesarios para realizar una prueba estadística son:
+
+        \begin{enumerate}
+            \item \textbf{Hipótesis}: en este se debe plantear la \textit{Hipótesis nula} ($H_0$), que es la afirmación de que una serie de parámetros (o fenómenos) no tienen relación entre sí. Se utiliza como punto de partida en cualquier investigación, y se rechaza solamente si los datos de la muestra evidencian lo contrario a lo planteado. Por otro lado, la \textit{Hipótesis investigativa} ($H_1$) es aquello que el investigador especula que sucederá al realizar un experimento, al finalizar una investigación, o tras ocurrir un cierto acontecimiento. Para poder aceptar $H_1$ se debe rechazar $H_0$ \cite{metodologia_investigacion}.
+
+            \item \textbf{Nivel de significancia}: representado por la letra griega $\alpha$, es un valor umbral que nos indica si el resultado de un estudio es estadísticamente significante \cite{Devore2012}. Un resultado se dice que es estadísticamente significante cuando es improbable que este surgiera por obra del azar.
+
+            El nivel de significancia representa la probabilidad de aceptar la hipótesis nula, y por lo general en metaheurísticas se suele limitar a 0.05 (5\%). En otras palabras, ese cinco por ciento representa a aquellos casos contrario a $H_1$ (favorables a $H_0$) que, se asume, surgieron por obra del azar.
+
+            \item \textbf{Valor calculado}: También conocido como \textit{Estadístico de Prueba}, es una variable aleatoria que mide el grado de concordancia entre una muestra de datos y la hipótesis nula \cite{Devore2012}. En otras palabras, el estadístico de prueba compara los datos de una muestra con los resultados esperados bajo la hipótesis nula, con el objetivo de poder determinar si es posible o no rechazar dicha hipótesis. Este estadístico se utiliza para calcular el \textit{Valor P} y, dependiendo de la prueba a realizar, el estadístico empleado cambia. Las distintas pruebas y estadísticos pueden observarse en la Tabla \ref{tab:pruebas-hipo}.
+
+            \begin{table}[ht!]
+            \centering
+            \begin{tabular}{|c|c|}\hline
+                Prueba de hipótesis & Estadístico de prueba \\\hline
+
+                Pruebas Z & Estadísticos Z \\
+
+                Pruebas t & Estadísticos t \\
+
+                Anova & Estadísticos F \\
+
+                Pruebas chi-cuadrada & Estadístico chi-cuadrada \\
+
+                Kolmogorov-Smirnov & Máxima diferencia \\
+
+                Shapiro-Wilk & Estadístico W \\\hline
+            \end{tabular}
+            \caption{Prueba de hipótesis y estadísticos de prueba.}
+            \label{tab:pruebas-hipo}
+            \end{table}
+
+            \item \textbf{Valor P}: es la probabilidad de cometer un \textit{Error tipo I}. Un error tipo I es cuando no se rechaza $H_1$ a pesar de que el evento ocurrido (proposición) no cabe dentro de dicha hipótesis \cite{Iversen1997}. En otras palabras, un error tipo I es cuando ocurre un evento contrario a lo estadísticamente esperado.
+
+            \item \textbf{Decisión}: es la decisión de rechazar o no rechazar la hipótesis nula ($H_0$). Para saber cuando hacer esto, $H_0$ se debe tener en cuenta lo siguiente:
+            \begin{itemize}
+                \item \textbf{Rechazo}: si se rechaza $H_0$, esto implica no rechazar $H_1$. $H_0$ se rechaza si $P \leq \alpha$.
+
+                \item \textbf{No se rechaza}: si se no se rechaza $H_0$, esto implica rechazar $H_1$. $H_0$ no se rechaza si $P > \alpha$.
+
+            \end{itemize}
+
+            \item \textbf{Conclusión}: Una vez realizados todos los pasos anteriores se debe llegar a una conclusión. La conclusión debe ir acorde a las hipótesis planteadas ($H_0$ y $H_1$) y, básicamente, sirve como reafirmación final sobre la hipótesis aceptada.
+
+        \end{enumerate}
+
+
+        \begin{figure}[ht!]
+            \centering
+            \includegraphics[width=0.9\textwidth]{imagenes/analisis_estadistico.png}
+            \caption{Análisis estadístico junto a sus ramas y pruebas estadísticas.}
+            \label{fig:analisisEsta}
+        \end{figure}
+
+        Ya explicado el funcionamiento de una prueba estadística, se detallan los test mencionados en la Figura \ref{fig:analisisEsta}. Para este estudio se utilizará lo que esta en marcado en azul en la imagen. Debido a la cantidad de pruebas y datos a analizar no superarán las 30 muestras, se utilizará las pruebas de estadístico no-paramétrico de Shapiro-Wilk. También se utilizará Wilcoxon Mann Whitney, ya que las muestras de los algoritmos no provienen de la naturaleza (es decir, que no debieran tener una distribución normal) y porque cada ejecución es totalmente independiente a la anterior. De acuerdo a estas pruebas, a continuación se indicará cuándo utilizarlas, para qué sirven y cómo desarrollarlas.
+
+        \begin{itemize}
+            \item \textbf{Prueba de Shapiro-Wilk}: test utilizado cuando el tamaño de la muestra es menor a 50 datos ($N < 50$). El propósito de este test es contrastar la normalidad (distribución) de un conjunto de datos \cite{Hanusz_Tarasinska_Zielinski_2016}. Para utilizar este test se debe partir de la premisa ($H_0$) de que una muestra $\{x_1, x_2, ..., x_n\}$ proviene de una población normalmente distribuida. Para saber si dicha hipótesis $H_0$ es rechazada o no rechazada, primero se debe ordenar la muestra de menor a mayor, y luego utilizar el siguiente estadístico de contraste:
+
+            \begin{gather*}  \label{eq:shapiro_wilk}
+                W = \frac{1}{n \cdot s^2} ( \sum_{j=1}^{h} a_{ni} (x_{n-i+1} - x_i))^2 \\
+                \wedge \;
+                f(n) =  \begin{cases}
+                    \frac{n}{2},  & \text{ si } n \text{ es par} \\
+                    \frac{n-1}{2}, & \text{ si } n \text{ es impar} \\
+                \end{cases}
+            \end{gather*}
+
+            donde $x_j$ es el j-ésimo valor muestral del ordenamiento, $s_2$ es la varianza muestral, $a_{ni}$ es un coeficiente tabulado, y $h$ es una variable real que puede tomar dos valores dependiendo del tamano de la muestra, mostrados en \ref{eq:shapiro_wilk}. Obtenido el valor de $W$, su distribución permite calcular el valor crítico del test, del cual se toma la decisión sobre factibilidad de la normalidad de la muestra.
+
+            \item \textbf{Prueba de Wilcoxon Mann Whitney}: también conocido como \textit{Test U}, es una prueba no paramétrica (los datos no se ajustan a una distribución conocida) que se aplica sobre dos muestras independientes \cite{fagerland2009wilcoxon}. El objetivo de esta prueba es comprobar la similitud entre ambas muestras a partir de las diferencias que puedan detectarse en ellas. Para utilizar este test se debe partir de la premisa ($H_0$) de que las distribuciones de ambas muestras son las mismas. Para saber si dicha hipótesis es rechazada o no rechazada, primero se debe ordenar ambas muestras de menor a mayor, y luego utilizar el siguiente estadístico de contraste:
+
+            \begin{subequations} \label{eq:wmw}
+                \begin{equation}
+                    U = \sum_{i=1}^{m} R(Y_i)
+                \end{equation}
+                \begin{equation}
+                    T = \sum_{i=1}^{n} R(X_i)
+                \end{equation}
+                \begin{equation}
+                    U + T = \frac{N(N+1)}{2}
+                \end{equation}
+            \end{subequations}
+
+            donde $m$ y $n$ son los tamaños de la primera y segunda muestra respectivamente, y $R(Y_i)$ junto a $R(X_i)$ son las funciones de rangos de dichas muestras. Una vez obtenidos los valores $U$ y $T$, se comprueba que se cumpla la Ec. \ref{eq:wmw}.
+
+        \end{itemize}
+
+
+    \end{itemize}
+
+
+    \item \textbf{Reporte}: la interpretación de los resultados es de forma crítica basada en los datos obtenidos de los experimentos realizados. Para efectuar lo anterior la muestra de resultados y el análisis se realiza mediante tablas de comparación, herramientas gráficas, como barras de desviación (intervalos de confianza, diagramas de caja o violín) y gráficas de convergencia hacia el óptimo encontrado en la ejecución. Esto permitirá tener una mejor comprensión de la evaluación del desempeño de los resultados obtenidos. La interpretación de los resultados debe estar alineada con los objetivos definidos inicialmente, y se debe asegurar la reproducibilidad de los experimentos computacionales, proporcionando suficiente detalle sobre los procedimientos seguidos y los parámetros utilizados.
+
+\end{enumerate}

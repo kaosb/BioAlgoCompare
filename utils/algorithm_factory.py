@@ -90,12 +90,18 @@ def create_algorithm(
     algo_class, _, _ = ALGORITHMS[name]
 
     # Create algorithm instance with standard parameters
+    # Filter kwargs to only include parameters that the algorithm actually accepts
+    import inspect
+
+    sig = inspect.signature(algo_class.__init__)
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
+
     return algo_class(
         problem=problem,
         population_size=population_size,
         max_iterations=iterations,
         seed=seed,
-        **kwargs,
+        **filtered_kwargs,
     )
 
 

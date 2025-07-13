@@ -1,0 +1,271 @@
+
+\section{Marco Teórico}
+\label{sc:MC}
+
+% ------------------------------------ \\
+
+\subsection{Problemas combinatoriales con restricciones}
+
+\vspace{1mm}
+\normalsize
+
+Los problemas de optimización requieren tomar decisiones para seleccionar una solución óptima dentro de un dominio determinado, respetando las restricciones asociadas. El objetivo es cumplir con un criterio específico, que puede ser maximizar o minimizar una determinada medida. Un ejemplo común es maximizar las ganancias de una empresa considerando los costos e ingresos, como en el caso de la venta de camas y veladores. El proceso básico para tomar una decisión en problemas de optimización implica formular el problema, modelarlo, optimizarlo e implementar una solución \cite{10.5555/1718024}.
+
+Para resolver estos problemas mediante algoritmos, se modelan a través de los siguientes componentes:
+
+\begin{itemize}
+\item \textbf{Función objetivo f(x)}: es una fórmula matemática que depende de las variables de decisión, coeficientes y una magnitud que representa el objetivo del sistema. El valor resultante de esta función se denota por la letra \textit{z}. La función objetivo busca encontrar el máximo o mínimo de un criterio específico, como maximizar ingresos o minimizar el tiempo de respuesta.
+
+    \item \textbf{Variables de decisión}: son los factores involucrados en la decisión de la función objetivo, representados como $\{x_1, x_2, x_3, ... x_n\}$. Estas variables pueden tener dominios binarios, enteros, reales u otros, dependiendo del problema. Ejemplos incluyen la cantidad de máquinas en una fábrica o la cantidad de computadoras necesarias.
+
+    \item \textbf{Restricciones}: son las limitaciones que deben ser consideradas según el problema. No todos los problemas tienen restricciones, pero cuando existen, pueden incluir recursos, tiempo, etc. Las restricciones se representan mediante ecuaciones o inecuaciones.
+
+\end{itemize}
+
+Las soluciones de estos problemas se representan mediante vectores de tamaño \textit{n}, donde \textit{n} es el número de variables involucradas. Los valores de los vectores solución se sustituyen en la función objetivo para obtener un valor \textit{z}. El conjunto de posibles soluciones que satisfacen las restricciones se denomina \textit{espacio de búsqueda n-dimensional} \cite{10.5555/1718024}. Cada solución es un punto en este espacio, representando una combinación de valores para la función objetivo que se desea maximizar o minimizar \cite{investigacion-operaciones}. La definición formal de un problema de optimización es la siguiente, según \cite{investigacion-operaciones}:
+
+Función objetivo:
+\begin{equation}
+minimizar/maximizar \quad Z = c_1 x_1 + c_2 x_2 + ... + c_n x_n,
+\end{equation}
+sujeta a las restricciones:
+\begin{align*}
+    a_{11} x_1 + a_{12} x_2 + \cdots + a_{1n} x_n \leq b_1 \\
+    a_{21} x_1 + a_{22} x_2 + \cdots + a_{2n} x_n \leq b_2 \\
+    \cdots \cdots \\
+    a_{m1} x_1 + a_{m2} x_2 + \cdots + a_{mn} x_n \leq b_m
+\end{align*}
+\noindent
+y otras restricciones del dominio de $x_i$, donde $i \in\ {1,2, ... ,n}$, $a_{ij}$ es el consumo de recurso por unidad de actividad, $c_{i}$ la contribución a Z por unidad de actividad, y $b_{i}$ la cantidad de recursos disponibles \cite{investigacion-operaciones}.
+
+Las soluciones que cumplen las restricciones se denominan soluciones factibles. Dentro del espacio de búsqueda de soluciones factibles, existen regiones o subconjuntos con un valor \textit{fitness} mejor que otros. Este valor se llama \textit{óptimo local} y puede haber varios en la misma región. La solución con el mejor valor \textit{fitness} para la función objetivo en toda la región factible se llama \textit{óptimo global}.
+
+\vspace{2mm}
+%----
+
+
+\subsection{Heurísticas}
+
+\vspace{1mm}
+\normalsize
+
+El concepto de heurística se remonta a la Grecia clásica y, en resumen, significa "encontrar" o "descubrir" algo. En el contexto moderno, la heurística se relaciona con la capacidad de resolver problemas de manera inteligente, aprovechando la información disponible \cite{aprox-heuristica-metaheu}. La historia de la heurística puede caracterizarse como una búsqueda de algoritmos eficientes. Una de las principales motivaciones para utilizar heurísticas es la capacidad de tomar decisiones rápidas y económicas, sin necesariamente comprometer la calidad o la efectividad de la decisión final \cite{heu-tools-for-un-world}.
+
+En el ámbito de las ciencias de la computación, las heurísticas se emplean principalmente para resolver problemas de optimización. Sin embargo, es importante destacar que los métodos y algoritmos de optimización heurística no garantizan encontrar la solución óptima \cite{10.5555/2020934}.
+
+Dentro del campo de la heurística, se han desarrollado varios métodos, la mayoría de los cuales están diseñados para problemas específicos. Algunas de las clasificaciones de heurísticas descritas por \cite{aprox-heuristica-metaheu} incluyen: métodos de descomposición, inductivos, de reducción, constructivos y de búsqueda local. En resumen, todos estos métodos tienen como objetivo generar una solución inicial para un problema y luego, mediante la aplicación de técnicas heurísticas, mejorar gradualmente esta solución hasta alcanzar una aproximación de alta calidad, aunque no necesariamente óptima.
+
+\vspace{2mm}
+%----
+
+
+\subsection{Metaheurísticas (MH)}
+
+\vspace{1mm}
+\normalsize
+
+Estas técnicas se consideran una estructura algorítmica estocástica que generalmente se aplica a una variedad de problemas de optimización con solo algunas modificaciones para adaptarse al problema dado. Estas son estrategias para diseñar y/o mejorar los procedimientos heurísticos orientados a obtener un alto rendimiento. Las metaheurísticas proponen un marco general para crear nuevos algoritmos híbridos, combinando varios conceptos, como lo son la genética, biología, inteligencia artificial, matemáticas, física, neurología, entre otras \cite{aprox-heuristica-metaheu}. Estos algoritmos de metaheurística usan alguna compensación de búsqueda local y exploración global aleatoria. Los algoritmos utilizados suelen terminar en un tiempo razonable a como lo haría un algoritmo que pretende buscar dentro de todas las posibles soluciones que se puedan encontrar \cite{metaheu-algo-modeling-optimization}. Por lo que, no hay garantía de encontrar la mejor solución, pero si encontrar una solución de calidad en un tiempo aceptable.
+
+Los principales componentes de los algoritmos de metaheurística son la intensificación y diversificación, también conocidos como explotación y exploración respectivamente. A pesar de que muchos investigadores en sus trabajos han mencionado con frecuencia estos dos conceptos, a menudo, se utilizan definiciones informales y algo vagas de los procesos de estos. Exploración se refiere a generar varias soluciones con el fin de explorar el espacio de búsqueda del problema a escala global, visitando regiones completamente nuevas \cite{metaheu-algo-modeling-optimization}. Mientras que explotación se define como visitar aquellas regiones de un espacio de búsqueda dentro de la vecindad de puntos previamente visitados, centrando la búsqueda dentro del área o región en específica \cite{10.1145/2480741.2480752}. Esto con el fin de que esta última explote la información donde una buena solución fue encontrada en aquella prometedora región.
+
+La diversidad se refiere a las diferencias entre los individuos, es decir, (en términos metaheurísticos) las distancias entre los agentes dentro de la dimensión del espacio de búsqueda en le que se encuentren \cite{10.1145/2480741.2480752}. Según las medidas de diversificación de \cite{10.1145/2480741.2480752}, un aumento en la diversidad indicaba que el algoritmo en cuestión estaba en fase de exploración o ``búsqueda aleatoria'', lo que permite evitar quedar atrapado en óptimos locales de manera temprana, mientras que una disminución en la diversidad indicaba que el procedimiento estaba en fase de explotación o ``búsqueda local''.
+
+En la metaheurística, podemos hablar de que hay dos principales clases. De acuerdo a \cite{10.5555/1718024}, estas son:
+\begin{itemize}
+    \item \textbf{Single-solution-based} o \textbf{Trajectory-based}: el concepto principal detrás de este, es aplicar iterativamente los procedimientos de generación y reemplazo de la solución única actual. El proceso se comienza, en la fase de generación. Donde un conjunto de soluciones candidatas se generan a partir de la solución actual $s$. Este conjunto $C(s)$ se obtiene generalmente por transformaciones locales de la solución. En la fase de reemplazo, se realiza una selección del conjunto de soluciones candidatas $C(s)$ para reemplazar la solución actual; es decir, se selecciona una solución $s' \in C(s)$ para que sea la nueva solución. Este proceso itera hasta un criterio de parada entregado previamente \cite{10.5555/1718024}.
+
+    \item \textbf{Population-based}: Las metaheurísticas basadas en esta categoría parten de una población inicial de soluciones. Luego, iterativamente aplican la generación de una nueva población y el reemplazo de la población actual. En la fase de generación, se crea una nueva población de soluciones. En la fase de reposición se realiza una selección entre las poblaciones actuales y las nuevas. Este proceso itera hasta un criterio de parada dado \cite{10.5555/1718024}.
+
+\end{itemize}
+
+Dentro de la clase de metaheurísticas population-based, existen algoritmos bio-inspirados (de la biología), uno de ellos es el interesante paradigma llamado \textit{Swarm Intelligence (SI)}. Los algoritmos basados en el comportamiento colectivo de especies como lobos, hormigas, abejas, avispas, termitas, peces, pájaros, etcetera, se denominan algoritmos SI \cite{10.5555/1718024}. Este tipo de algoritmos se originaron a partir del comportamiento social de aquellas especies que compiten por los alimentos. Las características principales de los algoritmos SI son que las partículas son agentes simples que cooperan mediante una comunicación indirecta, y que realizan movimientos en el espacio de decisión \cite{10.5555/1718024}.
+
+\vspace{2mm}
+%-----
+
+
+\subsection{Óptimo global y óptimo local}
+
+\vspace{1mm}
+\normalsize
+En el contexto de las metaheurísticas, los conceptos de óptimo global y óptimo local son fundamentales para entender su funcionamiento y desafíos \cite{10.5555/1718024}.
+\begin{itemize}
+    \item \textbf{Óptimo global}: es la mejor solución posible para un problema de optimización, la que tiene el valor más favorable de la función objetivo en todo el espacio de búsqueda.
+    \item \textbf{Óptimo local}: es una solución que es mejor que todas las soluciones en su vecindad inmediata, pero no necesariamente la mejor en todo el espacio de búsqueda .
+\end{itemize}
+
+
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{imagenes/localAndGlobalOptima.png}
+    \caption{Imagen de ejemplo de óptimo local y global con función de minimización.}
+    \label{fig:ex_opt_local_global}
+\end{figure}
+
+En la Figura \ref{fig:ex_opt_local_global} se puede ver una función objetivo que toma una variable unidimensional, la cual es evaluada y toma un valor. La función es de minimización, por lo que un algoritmo podría encontrar el mínimo valor de una curva en zonas convexas en esta función varias veces, que podría no ser el óptimo global (el punto rojo), estos son los puntos azules, los óptimos locales.
+
+
+
+
+
+
+
+\vspace{2mm}
+%-----
+
+
+
+\subsection{Análisis Estadístico de Variables y Modelos de Clasificación}
+
+\vspace{1mm}
+\normalsize
+
+El análisis estadístico de variables es una parte fundamental de la ciencia de datos que implica el estudio y la comprensión de las relaciones entre variables, así como la construcción de modelos predictivos para clasificar datos en diferentes categorías. En este contexto existen dos ramas de la estadística, la descriptiva y la bayesiana. La estadística descriptiva se enfoca en describir y resumir características clave de un conjunto de datos, como la media, la mediana y la desviación estándar, proporcionando una comprensión clara de la distribución de los datos. Por otro lado, la estadística bayesiana utiliza el teorema de Bayes para actualizar las creencias sobre los parámetros del modelo a medida que se observan datos adicionales, permitiendo una estimación más completa de la incertidumbre en las inferencias y una toma de decisiones más informada en base a la evidencia observada y tomar decisiones basadas en esta información \cite{McClave2016_lz}.
+
+
+\subsubsection{Estadística Bayesiana}
+
+Como se dijo, la estadística bayesiana es un enfoque estadístico que se basa en el teorema de Bayes para actualizar las creencias sobre los parámetros de un modelo a medida que se observan datos adicionales. En lugar de tratar los parámetros como valores fijos pero desconocidos, la estadística bayesiana los modela como variables aleatorias con distribuciones de probabilidad. Al combinar la información previa (a priori) con la evidencia observada (verosimilitud), se obtiene una distribución posterior que representa la incertidumbre sobre los parámetros después de observar los datos. Esto permite una estimación más completa de la incertidumbre en las inferencias y una toma de decisiones más informada \cite{Gelman2013_ay}.
+
+El teorema de Bayes se expresa como:
+
+\begin{equation}
+P(\theta|D) = \frac{P(D|\theta) \cdot P(\theta)}{P(D)}
+\end{equation}
+
+Donde:
+\begin{itemize}
+    \item $P(\theta|D)$ es la distribución posterior de los parámetros $\theta$ dado el conjunto de datos $D$.
+    \item $P(D|\theta)$ es la verosimilitud del conjunto de datos $D$ dado el parámetro $\theta$.
+    \item $P(\theta)$ es la distribución a priori de los parámetros $\theta$.
+    \item $P(D)$ es la verosimilitud marginal o evidencia.
+\end{itemize}
+
+
+\subsubsection{Modelos de Clasificación}
+
+Los modelos de clasificación son herramientas estadísticas que se utilizan para asignar una categoría o etiqueta a una observación en función de sus características. En el contexto de la estadística bayesiana, los modelos de clasificación bayesianos utilizan la probabilidad condicional para calcular la probabilidad de pertenencia a cada clase dado un conjunto de características observadas. Estos modelos pueden ser simples, como el clasificador bayesiano ingenuo (Naive Bayes), que asume independencia condicional entre las características, o más complejos, como los modelos de regresión logística bayesianos o las máquinas de vectores de soporte bayesianas \cite{Murphy2012_nx}.
+
+Estos modelos de clasificación bayesianos no solo proporcionan predicciones de clase, sino también estimaciones de incertidumbre que pueden ser útiles en la toma de decisiones. Además, la estadística bayesiana permite la inclusión de información previa sobre los parámetros del modelo, lo que puede ser especialmente útil cuando se tienen pocos datos o se requiere una actualización continua del modelo a medida que se obtienen más observaciones.
+
+\vspace{2mm}
+%-----
+
+
+
+
+\subsection{Surrogate Fitness Models}
+
+\vspace{1mm}
+\normalsize
+
+Los Surrogate Fitness Models, también conocidos como modelos de fitness sustitutos, son herramientas útiles en la optimización con metaheurísticas, ya que permiten predecir los valores de fitness a partir de la función objetivo sin necesidad de evaluarla directamente en cada iteración. Estos modelos se construyen utilizando técnicas de aprendizaje supervisado, como la regresión lineal, polinómica, las máquinas de soporte vectorial (SVM) y las redes neuronales. A partir de un conjunto inicial de datos de entrenamiento generado en las primeras etapas del proceso de optimización, se ajusta un modelo que puede estimar con precisión los valores de fitness de nuevas soluciones. Esto resulta en una evaluación más rápida y eficiente, crucial en problemas de optimización donde las evaluaciones de la función objetivo son costosas en términos de tiempo y recursos computacionales \cite{10138291, Jin2005_te}.
+
+
+\vspace{2mm}
+%-----
+
+
+
+
+
+\subsection{eXplainable Artificial Intelligence (XAI)}
+
+\vspace{1mm}
+\normalsize
+
+La explicabilidad en el aprendizaje automático o XAI es una disciplina que busca hacer comprensibles los modelos de inteligencia artificial para los humanos. Este concepto es crucial para fomentar la confianza, facilitar la toma de decisiones y garantizar la transparencia. Existen varios enfoques para lograr la explicabilidad según \cite{das2020opportunitieschallengesexplainableartificial}, los cuales se pueden categorizar en base a diferentes criterios:
+
+\subsubsection{Enfoques de XAI}
+
+\begin{enumerate}
+    \item{Explicabilidad intrínseca vs. explicabilidad post-hoc}
+    \begin{itemize}
+        \item \textbf{Intrínseca}: Modelos que son interpretables por naturaleza debido a su simplicidad y estructura, como los árboles de decisión y las regresiones lineales.
+        \item \textbf{Post-hoc}: Métodos aplicados a modelos complejos (como redes neuronales o ensamblajes de modelos) para explicar sus decisiones después de que han sido entrenados.
+    \end{itemize}
+\end{enumerate}
+
+
+\begin{enumerate}
+    \item{Explicabilidad global vs. Local}
+    \begin{itemize}
+        \item \textbf{Global}: Ofrece una comprensión de cómo funciona el modelo en su totalidad.
+        \item \textbf{Local}: Se centra en explicar una única predicción o un pequeño conjunto de predicciones.
+    \end{itemize}
+\end{enumerate}
+
+
+\begin{enumerate}
+    \item{Métodos agnósticos vs. Específicos de modelo}
+    \begin{itemize}
+        \item \textbf{Agnósticos}: Pueden ser aplicados a cualquier tipo de modelo, como LIME (Local Interpretable Model-agnostic Explanations) y SHAP (SHapley Additive exPlanations) \cite{ribeiro2016why}.
+        \item \textbf{Específicos de Modelo}: Diseñados para explicar modelos específicos, como los gráficos de importancia de características en árboles de decisión.
+    \end{itemize}
+\end{enumerate}
+
+
+\begin{enumerate}
+    \item{Técnicas de explicabilidad comunes}
+    \begin{itemize}
+        \item \textbf{Importancia de Características}: Mide la contribución de cada característica a las predicciones del modelo.
+        \item \textbf{Visualización de Gradientes}: Usada principalmente en redes neuronales para visualizar cómo los cambios en las entradas afectan las salidas.
+        \item \textbf{Métodos de Descomposición}: Descomponen la predicción en componentes aditivos que representan la contribución de cada característica, como SHAP.
+    \end{itemize}
+\end{enumerate}
+
+\vspace{2mm}
+%-----
+
+
+
+\subsection{SHapley Additive exPlanations (SHAP)}
+
+\vspace{1mm}
+\normalsize
+
+SHAP (SHapley Additive exPlanations) es un método post-hoc y agnóstico que proporciona explicaciones locales y globales de las predicciones de los modelos de aprendizaje automático. Basado en la teoría del valor de Shapley de la teoría de juegos, SHAP asigna un valor a cada característica que refleja su contribución a la predicción del modelo. Los valores de Shapley consideran todas las posibles combinaciones de características, proporcionando una medida justa y equitativa de la importancia de cada característica \cite{lundberg2017unifiedapproachinterpretingmodel}.
+
+El enfoque SHAP se destaca por varias razones:
+\begin{itemize}
+    \item \textbf{Equidad y Consistencia}: Utiliza la teoría de juegos para garantizar que las contribuciones se calculen de manera justa y consistente.
+    \item \textbf{Interpretabilidad Global y Local}: Puede descomponer la predicción de un modelo en contribuciones individuales de características para una sola predicción (explicabilidad local) y sumar estas contribuciones para obtener una comprensión global.
+    \item \textbf{Compatibilidad Agnóstica}: Se puede aplicar a cualquier tipo de modelo, lo que lo hace extremadamente versátil.
+\end{itemize}
+
+El proceso de SHAP implica calcular el valor de cada característica como la media ponderada de las diferencias en las predicciones que resultan de añadir esa característica a todas las combinaciones posibles de otras características. Esta metodología no solo permite comprender cómo cada característica individual influye en la predicción, sino que también facilita la detección de interacciones entre características.
+
+\vspace{2mm}
+%-----
+
+
+
+
+
+
+
+
+\section{Estado del Arte}
+\label{sc:EA}
+
+Esta sección recopila trabajos relacionados que han abordado el problema de estancamiento de soluciones en algoritmos de optimización, donde varios enfoques han sido propuestos en distintos algoritmos para resolver el problema del estancamiento de soluciones, que se encuentra estrechamente relacionado al balance de exploración y explotación que realiza el algoritmo durante el proceso de optimización.
+
+\textbf{Enfoques Basados en Inteligencia Artificial Mediante Técnicas Bayesianas:}
+
+En \cite{ZHANG2015138}, se presenta un enfoque avanzado para el algoritmo particle swarm optimizer (PSO) mediante la incorporación de técnicas bayesianas para el ajuste adaptativo del parámetro peso de inercia (que es propio de este algoritmo) que mejora significativamente el rendimiento del algoritmo a través del equilibrio entre exploración y explotación. El algoritmo en \cite{10.1371/journal.pone.0048710}, presenta una interpretación bayesiana del PSO, proporcionando un marco formal para incorporar conocimiento previo sobre el problema a resolver. Lo que hace, es extender el método de optimización mediante funciones kernel, que transforman los datos a un espacio diferente donde el problema puede ser más fácil de resolver. Esta transformación se considera una forma de conocimiento previo sobre la naturaleza del problema de optimización. Este enfoque se aplica para resolver problemas de optimización donde la evaluación de la función de desempeño es costosa en términos de tiempo. En \cite{logistics8010014}, se formula una técnica novedosa que combina la optimización bayesiana con los algoritmos genéticos de agrupamiento. Esta técnica utiliza un enfoque basado en la optimización bayesiana para ajustar los parámetros del Grouping Genetic Algorithms (GGA) de manera más eficiente y eficaz, permitiendo la capacidad para encontrar buenos valores de parámetros con menos evaluaciones de función en comparación con métodos tradicionales. La diferencia del enfoque bayesiano adoptado en este trabajo es que los parámetros que ajustan son tasa de cruce, tasa de mutación, tamaño relativo del grupo de apareamiento, proporción de la élite dentro de la población, probabilidades de aplicar variantes de cruce y otros vistos en la investigación.
+
+\textbf{Enfoques Basados en Combinación Híbrida de Operadores Heurísticos:}
+
+En \cite{wang2021hybrid} se aborda la ineficacia del Butterfly Optimization Algorithm (BOA) en mantener la diversidad y evitar la convergencia prematura en problemas de optimización global que es propenso a caer en óptimos locales y puede perder su capacidad exploratoria en las etapas iniciales de búsqueda. Este trabajo combina BOA y el Flower Pollination Algorithm (FPA), basado en un mecanismo de mutualismo que fundamenta en la capacidad exploratoria del FPA y la capacidad explotadora del BOA, donde las mariposas y las flores se benefician mutuamente: las mariposas obtienen néctar y hábitat, mientras que las flores aseguran la polinización. Otro trabajo \cite{8962051}, trabaja con el algoritmo Ant Colony Optimizer (ACO) que tradicionalmente ha enfrentado problemas al resolver el Travel Salesman Problem (TSP), tales como caer en óptimos locales y tener una convergencia lenta. En por esto que han propuesto un nuevo algoritmo de colonia de hormigas multi-colonia que utiliza Redes Generativas Adversarias (GAN) y una estrategia adaptativa de evitación de estancamiento (GAACO). Enfoque que hizo mejorar la velocidad de convergencia y evitar la convergencia prematura. En \cite{a_hybrid_WOA_seagullAlgorithm}, se propone un nuevo algoritmo híbrido llamado Whale Optimization with Seagull Algorithm (WSOA). Este algoritmo combina el mecanismo de contracción circundante del Whale Optimization Algorithm (WOA) con el comportamiento de ataque en espiral del Seagull Optimization Algorithm (SOA). Además, se introduce la estrategia de vuelo Lévy en la fórmula de búsqueda del SOA para evitar la convergencia prematura y equilibrar de manera más efectiva la exploración y explotación del algoritmo. En \cite{ccelik2021advancement}, trabaja con el algoritmo Slap Swarm Algorithm (SSA), el cual es efectivo en varios casos, pero presenta problemas como la incapacidad de intercambiar información entre los líderes del enjambre y una convergencia prematura, lo que reduce la precisión de la solución y la capacidad de exploración del algoritmo. Este estudio modifica SSA con un mapa sinusoidal para modificar caóticamente el parámetro que equilibra la exploración y explotación, se añade una relación mutualista entre dos líderes del enjambre para mejorar el intercambio de información, y se aplica una técnica aleatoria a los seguidores del enjambre para introducir diversidad y mejorar la exploración de áreas no visitadas del espacio de búsqueda.
+
+\textbf{Enfoques Basados en Optimización Bioinspirada y Algoritmos Evolutivos:}
+
+En \cite{ABDELMAGEED2022107904}, se propone un algoritmo denominado Improved Binary Adaptive Wind Driven Optimization (iBAWDO). Este algoritmo combina técnicas de optimización inspiradas en la naturaleza con operadores evolutivos (como el cruce, la mutación y la hibridación con el algoritmo Simulated Annealing, SA) para mejorar la capacidad de exploración y explotación del espacio de soluciones. Principalmente, se aborda el problema de la selección de características en la clasificación supervisada, donde la alta dimensionalidad de los datos puede afectar negativamente el rendimiento de los clasificadores. Sin embargo, este algoritmo mejorado resulta ser efectivo durante el proceso de optimización. En \cite{garcia2020enhancing}, se propone mejorar un marco de binarización existente que utiliza la técnica K-means incorporando un operador de perturbación basado en la técnica K-nearest neighbor (KNN). Este operador de perturbación tiene como objetivo aumentar la diversificación y la intensificación de los algoritmos metaheurísticos en su versión binaria. En el estudio se utilizaron técnicas como Particle Swarm Optimization (PSO) y Cuckoo Search (CS) para demostrar la eficacia del marco mejorado. En \cite{seyyedabbasi2021gwo}, también trata de resolver el problema de la convergencia temprana en óptimos locales, pero esta vez en el algoritmo Grey Wolf Optimizer (GWO). En este trabajo se introducen dos algoritmos mejorados basados en el anterior, Expanded GWO e Incremental GWO. En el primero se adopta una estrategia que permite que los lobos actualicen sus posiciones en función de los tres mejores lobos (alfa, beta y delta) así como de sus propias posiciones previas y en el segundo enfoque cada lobo actualiza su posición basándose en todos los lobos seleccionados antes que él, permitiendo una mayor diversidad en la búsqueda de soluciones. Esto con el objetivo de mejorar la capacidad de exploración y explotación para encontrar soluciones más eficaces en problemas con múltiples óptimos locales. En \cite{rauf2020particle}, aborda las limitaciones en la inicialización de la población en los algoritmos de optimización por enjambre de partículas (PSO). Para resolver esta problemática el estudio propone una nueva técnica de inicialización de la población utilizando secuencias de probabilidad, específicamente una distribución Weibull. Esta técnica, denominada WI-PSO (Weibull Initialized PSO), aplica la distribución de probabilidad para generar números en ubicaciones aleatorias para la inicialización del enjambre y así  mejorar la diversidad del enjambre y la velocidad de convergencia en la optimización global. La propuesta es comparada con el mismo algoritmo PSO, pero que ha sido utilizado con otras probabilidades para la inicialización de la población. En \cite{zhang2020modified}, se propusieron seis estrategias diferentes para actualizar la energía de escape (E) en el Harris Hawks Optimizer (HHO). Estas estrategias fueron diseñadas para modelar mejor las situaciones reales de caza de los Harris Hawks en la naturaleza. Mediante un estudio comparativo utilizando veinte funciones de referencia representativas, se evaluaron estas estrategias para determinar la más efectiva. La primera estrategia trata de la aplicación de decreciente lineal a \textit{E}, la segunda y tercera de decrecientes no lineales basadas en poder, la cuarta una estrategia convexa-cóncava de una función seno de traslación, la quinta seno cóncavoconvexa (variante de seno), y sexta, con función exponencial. En donde se elige mediante experimentos la mejor de estas, y luego la mejor se compara con otros algoritmos de optimización conocidos.
+
+
+\textbf{Enfoques Basados en Metaheurísticas Explicables (XAI):}
+
+En \cite{wallace2021towards}, aborda el problema de la falta de justificación en las soluciones generadas por metaheurísticas, las cuales son algoritmos de búsqueda aleatorizados utilizados para encontrar soluciones "suficientemente buenas" a problemas de optimización. El trabajo se enfoca en identificar las combinaciones de variables que influyen fuertemente en la calidad de la solución y la naturaleza de esta relación, lo que representa un paso hacia la explicación de las decisiones tomadas por una metaheurística. La propuesta del artículo consiste en utilizar funciones de fitness sustitutas (surrogate fitness functions) dentro de una metaheurística para identificar las variables importantes en la calidad de la solución generada. Estas funciones sustitutas son modelos matemáticos que se ajustan a las evaluaciones reales de la función objetivo, permitiendo la evaluación rápida de la calidad de la solución y la interpretación del impacto de cada variable en la solución final. En \cite{towardsXAImh_featureExtraction}, se propone un enfoque para la extracción de características explicativas de las metaheurísticas mediante la minería de trayectorias (trajectory mining). La minería de trayectorias se refiere al proceso de análisis y extracción de patrones a partir de las trayectorias seguidas por las soluciones durante el proceso de optimización. En el caso de las metaheurísticas, las trayectorias representan las secuencias de movimientos y cambios en las soluciones generadas a lo largo de las iteraciones del algoritmo. Este enfoque incluye el uso de análisis de componentes principales (Principal Component Analysis, PCA) para reducir la dimensionalidad de los datos de las trayectorias y facilitar la identificación de patrones significativos. Posteriormente, se aplica una técnica de clustering para agrupar las trayectorias en categorías distintas, lo que permite la interpretación de las características de cada grupo y su influencia en el rendimiento de la metaheurística. Este enfoque permite a los investigadores y usuarios de metaheurísticas entender mejor cómo los cambios en las soluciones afectan el desempeño del algoritmo y proporciona una base para mejorar la explicación y la interpretabilidad de los resultados obtenidos. En \cite{singh2022towards}, se utiliza una técnica de optimización basada en modelos de ajuste sustitutos (surrogate modeling) que sirve como proxy para la metaheurística original. En el contexto de las metaheurísticas, un modelo de ajuste sustituto es una aproximación matemática que emula el comportamiento de la metaheurística en términos de sus decisiones y resultados generados. Este enfoque permite descomponer el proceso de búsqueda en una serie de pasos explicables, identificando las interacciones y combinaciones de variables que tienen un impacto significativo en la calidad de la solución. Los modelos de ajuste sustitutos pueden ser de varios tipos, como regresión lineal, árboles de decisión, redes neuronales, entre otros. La técnica propuesta consiste en entrenar un modelo sustituto utilizando datos generados por la metaheurística original durante su proceso de búsqueda. Luego, este modelo se utiliza para analizar y explicar las decisiones tomadas por la metaheurística en términos de las variables de entrada y su influencia en la calidad de la solución. En el contexto de los Algoritmos Genéticos (GA), la técnica se aplica para descomponer y entender los factores que contribuyen a la calidad de las soluciones generadas por el algoritmo. Esta técnica ofrece una manera de interpretar y explicar las decisiones tomadas por una metaheurística, lo que puede ser útil tanto para mejorar el diseño del algoritmo como para aumentar la confianza de los usuarios en los resultados obtenidos.
+
+% tengo justo 15 trabajos relacionados

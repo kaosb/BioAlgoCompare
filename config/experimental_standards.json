@@ -1,0 +1,134 @@
+{
+  "title": "BioAlgoCompare Experimental Standards - Maximum Rigor Configuration",
+  "version": "2.0",
+  "last_updated": "2025-07-12",
+  "standard": "CEC Competition Level",
+
+  "default_configuration": {
+    "runs": {
+      "minimum": 30,
+      "standard": 51,
+      "massive": 100,
+      "default": 51,
+      "justification": "CEC Competition standard, allows robust median calculation"
+    },
+
+    "algorithms": {
+      "thesis_comparison": [
+        "ho",
+        "apo",
+        "egto",
+        "foa",
+        "hho",
+        "sma",
+        "woa"
+      ],
+      "modern_2024": ["ho", "apo", "egto", "foa", "gvoa"],
+      "highly_cited": ["hho", "woa", "sma"],
+      "all_available": [
+        "ho", "apo", "egto", "foa", "gvoa", "aha", "smo",
+        "gto", "fsa", "opa", "mrfo", "sma", "hho", "ewa",
+        "sho", "woa", "rro"
+      ]
+    },
+
+    "instances": {
+      "quick_test": ["P-n16-k8"],
+      "standard_set": [
+        "P-n16-k8",
+        "E-n22-k4",
+        "A-n32-k5",
+        "A-n45-k7",
+        "A-n60-k9"
+      ],
+      "extended_set": [
+        "P-n16-k8", "P-n19-k2", "P-n20-k2",
+        "E-n22-k4", "E-n23-k3", "E-n30-k3",
+        "A-n32-k5", "A-n37-k6", "A-n45-k7",
+        "A-n60-k9", "A-n80-k10", "E-n101-k14"
+      ]
+    },
+
+    "parameters": {
+      "population_size": {
+        "small": 30,
+        "standard": 50,
+        "large": 100,
+        "default": 50
+      },
+      "iterations": {
+        "quick": 100,
+        "standard": 300,
+        "exhaustive": 500,
+        "default": 300
+      }
+    },
+
+    "statistical_analysis": {
+      "significance_level": 0.05,
+      "power_target": 0.80,
+      "effect_size_thresholds": {
+        "small": 0.2,
+        "medium": 0.5,
+        "large": 0.8
+      },
+      "tests": {
+        "normality": ["shapiro_wilk", "kolmogorov_smirnov"],
+        "parametric": ["paired_t_test", "anova"],
+        "non_parametric": ["wilcoxon_signed_rank", "friedman", "kruskal_wallis"],
+        "post_hoc": ["nemenyi", "holm", "finner"],
+        "effect_size": ["cohen_d", "vargha_delaney_a12", "cliff_delta"]
+      }
+    }
+  },
+
+  "presets": {
+    "quick_validation": {
+      "runs": 10,
+      "algorithms": ["ho", "hho", "sma"],
+      "instances": ["P-n16-k8"],
+      "iterations": 100,
+      "population": 30
+    },
+
+    "standard_benchmark": {
+      "runs": 30,
+      "algorithms": ["ho", "apo", "hho", "sma", "woa"],
+      "instances": ["P-n16-k8", "E-n22-k4", "A-n32-k5"],
+      "iterations": 200,
+      "population": 40
+    },
+
+    "maximum_rigor": {
+      "runs": 51,
+      "algorithms": ["ho", "apo", "egto", "foa", "hho", "sma", "woa"],
+      "instances": ["P-n16-k8", "E-n22-k4", "A-n32-k5", "A-n45-k7", "A-n60-k9"],
+      "iterations": 300,
+      "population": 50
+    },
+
+    "thesis_clei2025": {
+      "runs": 51,
+      "algorithms": ["ho", "apo", "egto", "foa", "hho", "sma", "woa"],
+      "instances": ["P-n16-k8", "E-n22-k4", "A-n32-k5", "A-n45-k7", "A-n60-k9"],
+      "iterations": 300,
+      "population": 50,
+      "seed": 42,
+      "parallel": true,
+      "resume": true,
+      "multiobjective": true
+    }
+  },
+
+  "citations": {
+    "runs_justification": [
+      "Derrac et al. (2011). A practical tutorial on the use of nonparametric statistical tests. Swarm and Evolutionary Computation, 1(1), 3-18.",
+      "García et al. (2009). A study on the use of non-parametric tests for analyzing the evolutionary algorithms' behaviour. Journal of Heuristics, 15(6), 617-644.",
+      "CEC Competition Guidelines (2024). IEEE Congress on Evolutionary Computation."
+    ],
+    "algorithm_selection": [
+      "Amiri et al. (2024). Hippopotamus optimization algorithm. Scientific Reports, 14, 5032.",
+      "Latest bio-inspired algorithms survey (2024). Applied Soft Computing Journal."
+    ]
+  }
+}

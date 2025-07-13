@@ -142,11 +142,13 @@ The VRP problem uses ordinal encoding:
 - Test discovery: tests/ directory, test_*.py files
 - Markers: "slow" for long-running tests
 
-### Algorithm Parameters
-- Default iterations: 100
-- Default population: 30-40
-- Massive benchmarks: 1000 runs minimum
+### Algorithm Parameters (Updated to CEC Standards - July 2025)
+- Default iterations: 300 (was 100)
+- Default population: 50 (was 30-40)
+- Standard benchmarks: 51 runs (CEC standard)
+- Massive benchmarks: 100-1000 runs
 - Statistical significance: p < 0.05
+- Default algorithms for comparison: ho,apo,egto,foa,hho,sma,woa (modern 2024 + highly cited)
 
 ## Language Note
 While code is in English, some documentation and comments may be in Spanish as this is an academic research project. Maintain consistency within each file.

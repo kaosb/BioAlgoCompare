@@ -33,7 +33,7 @@ El **VRP (Vehicle Routing Problem)** es un problema clásico de optimización co
 ### Restricciones Principales
 
 1. **🚛 Capacidad**: Cada vehículo tiene capacidad máxima
-2. **🏠 Visita única**: Cada cliente visitado exactamente una vez  
+2. **🏠 Visita única**: Cada cliente visitado exactamente una vez
 3. **🔄 Depósito**: Todas las rutas inician y terminan en el depósito
 4. **📦 Demanda**: Se debe satisfacer completamente la demanda de cada cliente
 
@@ -47,7 +47,7 @@ Depósito (0) ────→ Cliente A (demand: 20)
        (demand: 30)   (demand: 25)
 
 Capacidad vehículo: 100
-Solución: Ruta única [0→A→C→B→0] 
+Solución: Ruta única [0→A→C→B→0]
 Carga total: 20+25+30 = 75 ≤ 100 ✅
 ```
 
@@ -72,7 +72,10 @@ python scripts/analyze.py run --algorithm sho --instance A-n32-k5 --iterations 5
 # ✅ Salida esperada: "Best cost: ~1700" sin errores
 
 # 3. Primer benchmark comparativo (2 minutos)
-python scripts/analyze.py benchmark --run-benchmark --algorithms "sho,ho,hho" --instances "E-n22-k4" --runs 5
+python scripts/analyze.py benchmark --run-benchmark --algorithms "ho,apo,hho" --instances "E-n22-k4" --runs 10
+
+# 4. Ejecutar experimentos con máximo rigor (CEC standards)
+python scripts/run_thesis_experiments.py --preset thesis_clei2025
 ```
 
 ### Ejemplos Garantizados (Casos de Uso Paso a Paso)
@@ -92,7 +95,7 @@ python scripts/analyze.py run \
 # Interpretación: HHO converge rápido en instancias pequeñas
 ```
 
-#### 🏁 **Ejemplo 2: Comparación de 3 Algoritmos** 
+#### 🏁 **Ejemplo 2: Comparación de 3 Algoritmos**
 ```bash
 # Objetivo: Comparar rendimiento de algoritmos top en instancia mediana
 python scripts/analyze.py benchmark \
@@ -104,7 +107,7 @@ python scripts/analyze.py benchmark \
 
 # ✅ Resultado esperado:
 # hho: ~450-480 (mejor gap)
-# ho:  ~470-500 
+# ho:  ~470-500
 # sho: ~500-550 (mayor variabilidad)
 ```
 
@@ -183,7 +186,7 @@ python scripts/analyze.py massive \
 
 ### 🚀 **Capacidades Principales**
 - ✅ **17 algoritmos bioinspirados** únicos (2016-2025) - Estado del arte
-- ✅ **Benchmarking masivo** con soporte para 1000+ ejecuciones automáticas  
+- ✅ **Benchmarking masivo** con soporte para 1000+ ejecuciones automáticas
 - ✅ **Análisis estadístico riguroso**: Tests Friedman, Nemenyi (CD corregido), Wilcoxon, tamaños de efecto
 - ✅ **Ejecución paralela optimizada** para máximo rendimiento en multi-core
 - ✅ **Checkpointing inteligente** para experimentos largos con recuperación automática
@@ -421,7 +424,7 @@ Gap to optimum: 118.31%, Success rate: 0.00%
 **Formato: `[AUTOR]-n[CLIENTES]-k[VEHÍCULOS]`**
 
 - **A-n32-k5**: Augerat, 32 nodos (31 clientes + 1 depósito), 5 vehículos
-- **E-n22-k4**: Eilon, 22 nodos (21 clientes + 1 depósito), 4 vehículos  
+- **E-n22-k4**: Eilon, 22 nodos (21 clientes + 1 depósito), 4 vehículos
 - **P-n16-k8**: Pearn, 16 nodos (15 clientes + 1 depósito), 8 vehículos
 - **B-n31-k5**: Beasley, 31 nodos (30 clientes + 1 depósito), 5 vehículos
 
@@ -677,7 +680,7 @@ NODE_COORD_SECTION
 3 50 5      # Nodo 3 (cliente): coordenadas (50, 5)
 ...
 
-DEMAND_SECTION  
+DEMAND_SECTION
 1 0         # Depósito: demanda 0
 2 19        # Cliente 2: demanda 19
 3 21        # Cliente 3: demanda 21
