@@ -481,8 +481,8 @@ tar -czf benchmark_complete_results.tar.gz \
 
 ## Recursos Adicionales
 
-- [Referencia de Comandos](../COMMAND_REFERENCE.md)
-- [Referencia Técnica de Scripts](../technical/scripts_reference.md)
+- [Unified Command Reference](../UNIFIED_COMMAND_REFERENCE.md)
+- [Future Development Plans](../FUTURE_DEVELOPMENT.md)
 - [Documentación de Algoritmos](../algorithms/overview.md)
 - [Análisis Comparativo](../analysis/comparison.md)
 - [Principios FAIR de datos científicos](https://www.go-fair.org/fair-principles/)
