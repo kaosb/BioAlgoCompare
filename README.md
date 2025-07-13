@@ -1186,5 +1186,5 @@ MIT License - ver [LICENSE](LICENSE) para detalles.
 ---
 
 <div align="center">
-  <sub>Construido con ❤️ para la comunidad de optimización</sub>
+  <sub>Construido con ❤️ desde Valparaiso</sub>
 </div>
