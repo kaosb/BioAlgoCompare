@@ -10,10 +10,10 @@ The algorithm simulates:
 4. Social learning within the colony
 
 Reference:
-    Zheng, Y., et al. (2024).
+    Wang, Z., & Liu, J. (2021).
     Flamingo Search Algorithm: A New Swarm Intelligence Optimization Algorithm.
-    IEEE Access, 12, 23456-23478.
-    DOI: 10.1109/ACCESS.2024.1234567
+    IEEE Access, 9, 85975-85993.
+    DOI: 10.1109/ACCESS.2021.3086023
 
 Example:
     >>> from algorithms.fsa import FSA

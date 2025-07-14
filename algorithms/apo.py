@@ -9,11 +9,11 @@ The algorithm simulates three main behaviors of protozoa:
 3. Foraging: Active movement and food searching behavior
 
 Reference:
-    Wang, Z., Ding, H., Li, B., Bao, L., & Yang, Z. (2020).
+    Wang, X., Snášel, V., Mirjalili, S., et al. (2024).
     Artificial Protozoa Optimizer (APO): A novel bio-inspired metaheuristic algorithm
     for engineering optimization.
-    Knowledge-Based Systems, 191, 105239.
-    DOI: 10.1016/j.knosys.2019.105239
+    Knowledge-Based Systems, 295, 111737.
+    DOI: 10.1016/j.knosys.2024.111737
 
 Example:
     >>> from algorithms.apo import APO

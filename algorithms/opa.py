@@ -11,11 +11,11 @@ The algorithm models orca hunting behaviors:
 OPA uses a unique direct route manipulation approach for VRP problems.
 
 Reference:
-    Jiang, P., et al. (2024).
-    Orca predator algorithm: A novel bio-inspired metaheuristic algorithm
-    for global optimization and engineering problems.
-    Knowledge-Based Systems, 283, 111234.
-    DOI: 10.1016/j.knosys.2023.111234
+    Jiang, Y., Wu, Q., Zhu, S., & Zhang, L. (2021).
+    Orca Predation Algorithm: A Novel Bio-Inspired Algorithm for Global
+    Optimization Problems.
+    Expert Systems with Applications, 188, 116026.
+    DOI: 10.1016/j.eswa.2021.116026
 
 Example:
     >>> from algorithms.opa import OPA

@@ -11,11 +11,11 @@ The algorithm models fossa behaviors including:
 4. Adaptive hunting based on prey availability
 
 Reference:
-    Halim, Z., & Yousaf, M. N. (2024).
-    Fossa Optimization Algorithm: A novel metaheuristic based on
-    the hunting patterns of Cryptoprocta ferox.
-    Swarm and Evolutionary Computation, 78, 101234.
-    DOI: 10.1016/j.swevo.2024.101234
+    Hamadneh, T., Batiha, B., Werner, F., et al. (2024).
+    Fossa Optimization Algorithm: A New Bio-Inspired Metaheuristic Algorithm
+    for Engineering Applications.
+    International Journal of Intelligent Engineering and Systems, 17(5), 78-95.
+    DOI: 10.22266/ijies2024.1031.78
 
 Example:
     >>> from algorithms.foa import FOA

@@ -14,11 +14,11 @@ The enhanced version includes improvements like adaptive parameters and
 better balance between exploration and exploitation.
 
 Reference:
-    Abdollahzadeh, B., Soleimanian Gharehchopogh, F., & Mirjalili, S. (2021).
-    Artificial gorilla troops optimizer: A new nature-inspired metaheuristic
-    algorithm for global optimization problems.
-    International Journal of Intelligent Systems, 36(10), 5887-5958.
-    DOI: 10.1002/int.22535
+    Hassan, M. H., Kamel, S., Mohamed, A. W., et al. (2024).
+    Enhanced Gorilla Troops Optimizer Powered by Marine Predator Algorithm:
+    Global Optimization and Engineering Design.
+    Scientific Reports, 14, 57098.
+    DOI: 10.1038/s41598-024-57098-8
 
 Example:
     >>> from algorithms.egto import EGTO
