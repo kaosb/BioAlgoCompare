@@ -3,7 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Algorithms](https://img.shields.io/badge/algorithms-19-orange)](algorithms/)
-[![Coverage](https://img.shields.io/badge/coverage-84%25-brightgreen)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)](tests/)
 [![Tests](https://img.shields.io/badge/tests-759%20passed-brightgreen)](tests/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
@@ -563,28 +563,57 @@ Parámetros: α ∈ [0.1, 0.9], β ∈ [0.2, 0.8], γ ∈ [0.3, 1.0]
 
 ### 1. Imitation Learning (IL) Integration
 
+El proyecto incluye un sistema avanzado de aprendizaje por imitación que permite al algoritmo HO adaptar dinámicamente sus parámetros basándose en demostraciones de algoritmos expertos (GA, PSO).
+
 ```bash
-# Generar demostraciones
+# Generar demostraciones de expertos
 python utils/generate_demos.py \
-    --algorithm ho \
+    --algorithms "ga,pso" \
     --instances "E-n22-k4,P-n16-k8" \
-    --runs 100 \
-    --output demos/ho_demos.csv
+    --num 100 \
+    --seed 42 \
+    --output "demos/ho_demos.csv"
 
 # Entrenar modelo IL
 python utils/train_il.py \
-    --dataset demos/ho_demos.csv \
+    --dataset "demos/ho_demos.csv" \
     --epochs 100 \
     --batch-size 32 \
-    --learning-rate 0.001 \
-    --output models/ho_il_model.pth
+    --val-split 0.2 \
+    --seed 42 \
+    --model-output "models/ho_il_model.pth"
 
-# Evaluar con IL
+# Evaluar mejora con IL
 python utils/evaluate_il.py \
-    --model models/ho_il_model.pth \
-    --test-instances "A-n32-k5,E-n51-k5" \
-    --runs 50
+    --instances "A-n32-k5,E-n51-k5" \
+    --runs 50 \
+    --model "models/ho_il_model.pth" \
+    --output-dir "results/il_evaluation"
 ```
+
+**Componentes del sistema IL:**
+- **Generación de demos**: Algoritmos GA/PSO optimizan parámetros HO para diferentes estados
+- **Red neuronal**: Arquitectura 64→128→64→3 para predicción de parámetros α, β, γ  
+- **Evaluación**: Comparación estadística HO vs HO+IL con métricas de rendimiento
+
+**Flujo de trabajo completo IL:**
+
+1. **Generar dataset de demostraciones** (genera ~500 demos en 5 min):
+   ```bash
+   python utils/generate_demos.py --algorithms "ga,pso" --instances "E-n22-k4,P-n16-k8,A-n32-k5" --num 100 --seed 42
+   ```
+
+2. **Entrenar modelo IL** (entrena red neuronal en 2 min):
+   ```bash
+   python utils/train_il.py --dataset "results/demos_ho_il.csv" --epochs 100 --seed 42
+   ```
+
+3. **Evaluar mejora** (compara HO vs HO+IL):
+   ```bash
+   python utils/evaluate_il.py --instances "E-n22-k4" --runs 30 --model "models/ho_il_model.pth"
+   ```
+
+**Documentación técnica**: Ver `docs/summaries/IL_INTEGRATION_SUMMARY.md` para detalles completos de la arquitectura, tests y resultados científicos.
 
 ### 2. Operadores de Optimización Local VRP
 
@@ -848,7 +877,7 @@ pytest -m "not slow"
 pytest --cov-report=html --cov-report=term-missing
 ```
 
-### Estado Actual de Cobertura: **92%**
+### Estado Actual de Cobertura: **93%**
 
 #### Gaps de Cobertura a Resolver
 
