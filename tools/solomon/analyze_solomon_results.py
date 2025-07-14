@@ -128,10 +128,10 @@ def create_comparison_charts(df, output_dir="benchmark_comparisons"):
     summary_table.to_csv(output_path / "resumen_algoritmos.csv", index=False)
 
     # También crear una versión visual de la tabla
-    fig, ax = plt.figure(figsize=(10, len(summary_table) * 0.5)), plt.gca()
+    fig, ax = plt.subplots(figsize=(10, len(summary_table) * 0.5))
     ax.axis("tight")
     ax.axis("off")
-    table = ax.table(
+    ax.table(
         cellText=summary_table.round(2).values,
         colLabels=summary_table.columns,
         loc="center",

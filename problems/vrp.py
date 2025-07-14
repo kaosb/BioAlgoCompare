@@ -847,3 +847,49 @@ class VRPProblem:
             new_routes.append(current_route)
 
         return new_routes
+
+    def encode_routes(self, routes: List[List[int]]) -> np.ndarray:
+        """
+        Codifica una solución de rutas en un vector continuo.
+        
+        Este método implementa la transformación inversa de decode_solution,
+        permitiendo convertir rutas modificadas (por operadores como swap,
+        2-opt, etc.) de vuelta a la representación continua que usan los
+        algoritmos metaheurísticos.
+        
+        Args:
+            routes: Lista de rutas (cada ruta incluye depósito al inicio y fin)
+            
+        Returns:
+            solution: Vector de valores continuos en [0,1] que al decodificar
+                     produce las rutas dadas (o rutas equivalentes)
+        """
+        # Extraer la secuencia de clientes de las rutas
+        customer_sequence = []
+        for route in routes:
+            # Excluir depósito (primer y último elemento)
+            for customer in route[1:-1]:
+                if customer != self.depot_index:
+                    customer_sequence.append(customer)
+        
+        # Verificar que tenemos todos los clientes
+        expected_customers = set(range(1, self.dimension))
+        actual_customers = set(customer_sequence)
+        
+        # Agregar clientes faltantes al final
+        missing_customers = list(expected_customers - actual_customers)
+        customer_sequence.extend(missing_customers)
+        
+        # Crear vector de solución basado en el orden
+        # Asignar valores de 0 a 1 según la posición en la secuencia
+        solution = np.zeros(self.dimension - 1)  # Excluir depósito
+        
+        # Asignar valores incrementales basados en posición
+        for position, customer in enumerate(customer_sequence):
+            # customer-1 porque los índices del vector empiezan en 0
+            # pero los clientes empiezan en 1
+            if 1 <= customer < self.dimension:
+                # Valor entre 0 y 1 basado en posición
+                solution[customer - 1] = position / len(customer_sequence)
+        
+        return solution

@@ -1,0 +1,31 @@
+algorithms/ho.py:338:21: F841 [*] Local variable `balanced_routes` is assigned to but never used
+algorithms/ho.py:364:17: F841 [*] Local variable `improved_routes` is assigned to but never used
+tests/documentation/test_documentation_examples.py:189:9: F841 [*] Local variable `pop_sizes` is assigned to but never used
+tests/test_dvrp_extensions.py:84:45: E712 [*] Comparison to `True` should be `cond is True` or `if cond:`
+tests/test_dvrp_extensions.py:85:45: E712 [*] Comparison to `False` should be `cond is False` or `if not cond:`
+tests/test_dvrp_extensions.py:90:45: E712 [*] Comparison to `False` should be `cond is False` or `if not cond:`
+tests/test_dvrp_extensions.py:91:45: E712 [*] Comparison to `False` should be `cond is False` or `if not cond:`
+tests/test_ho_algorithm.py:211:37: E712 [*] Comparison to `True` should be `cond is True` or `if cond:`
+tests/test_imitation_learning.py:82:33: E712 [*] Comparison to `False` should be `cond is False` or `if not cond:`
+tests/test_imitation_learning.py:169:37: E712 [*] Comparison to `True` should be `cond is True` or `if cond:`
+tests/test_imitation_learning.py:235:38: E712 [*] Comparison to `True` should be `cond is True` or `if cond:`
+tests/test_imitation_learning.py:306:30: E712 [*] Comparison to `False` should be `cond is False` or `if not cond:`
+tests/test_imitation_learning.py:320:13: F841 [*] Local variable `ho3` is assigned to but never used
+tests/unit/test_algorithm_convergence_all.py:68:9: F841 [*] Local variable `best_solution` is assigned to but never used
+tests/unit/test_algorithm_convergence_all.py:200:9: F841 [*] Local variable `best_solution` is assigned to but never used
+tests/unit/test_algorithm_initialization.py:184:13: F841 [*] Local variable `algo` is assigned to but never used
+tests/unit/test_algorithm_interface.py:288:9: F841 [*] Local variable `initial_best` is assigned to but never used
+tests/unit/test_evaluate_il.py:334:55: F811 Redefinition of unused `call` from line 14
+tests/unit/test_generate_demos.py:305:9: F841 [*] Local variable `df` is assigned to but never used
+tests/unit/test_pso.py:54:9: F841 [*] Local variable `worse_fitness` is assigned to but never used
+tests/unit/test_train_il.py:224:56: F811 Redefinition of unused `call` from line 15
+tools/solomon/analyze_solomon_results.py:131:5: F841 Local variable `fig` is assigned to but never used
+tools/solomon/analyze_solomon_results.py:134:5: F841 [*] Local variable `table` is assigned to but never used
+utils/benchmarking.py:589:5: F841 [*] Local variable `algorithms` is assigned to but never used
+utils/benchmarking.py:1061:12: F811 Redefinition of unused `gzip` from line 19
+utils/benchmarking.py:1062:12: F811 Redefinition of unused `pickle` from line 18
+utils/benchmarking.py:1063:25: F811 Redefinition of unused `Path` from line 20
+utils/evaluate_il.py:220:5: F841 [*] Local variable `conv_standard` is assigned to but never used
+utils/evaluate_il.py:221:5: F841 [*] Local variable `conv_il` is assigned to but never used
+Found 29 errors.
+[*] 23 potentially fixable with the --fix option.

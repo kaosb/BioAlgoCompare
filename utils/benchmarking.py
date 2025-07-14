@@ -75,7 +75,7 @@ def _run_algo_task(params):
         if isinstance(best_solution, tuple):
             _, fitness_value, convergence_curve = best_solution
         else:
-            raise ValueError(f"Unexpected return type from algorithm")
+            raise ValueError("Unexpected return type from algorithm")
     
     return fitness_value, execution_time, convergence_curve
 
@@ -586,7 +586,6 @@ def plot_performance_radar(benchmark_results, instance_name, metrics=None, title
         metrics = ["quality", "time", "stability", "success"]
 
     # Obtener datos normalizados para cada métrica
-    algorithms = [r.algorithm_name for r in results]
     n_metrics = len(metrics)
 
     # Ángulos para el gráfico radar
@@ -1058,9 +1057,7 @@ def run_massive_benchmark(
     Returns:
         List of BenchmarkResult objects
     """
-    import gzip
-    import pickle
-    from pathlib import Path
+    # Imports ya realizados al inicio del archivo
     from datetime import datetime
 
     # Create output directory

@@ -1,15 +1,15 @@
 """
 Tests adicionales para alcanzar 100% de cobertura en problems/vrp.py
 """
-import pytest
-import numpy as np
 import os
 import sys
-from unittest.mock import Mock, patch, mock_open
 
 # Añadir el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import pytest
+import numpy as np
+from unittest.mock import Mock, patch, mock_open
 from problems.vrp import VRPProblem
 
 

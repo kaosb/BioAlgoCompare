@@ -8,13 +8,14 @@ Generates demonstrations without PyTorch dependency.
 
 import argparse
 import json
-import numpy as np
-import pandas as pd
-from pathlib import Path
 import sys
+from pathlib import Path
 from datetime import datetime
 
 sys.path.append(str(Path(__file__).parent.parent))
+
+import numpy as np
+import pandas as pd
 
 from problems.vrp import VRPProblem
 from algorithms.pso import PSO
@@ -189,7 +190,7 @@ def main():
     # Parse instances
     instances = [inst.strip() for inst in args.instances.split(',')]
     
-    print(f"🚀 Generating IL Demonstrations")
+    print("🚀 Generating IL Demonstrations")
     print(f"   Instances: {instances}")
     print(f"   Total demos: {args.num_demos}")
     print(f"   Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -207,7 +208,7 @@ def main():
     print(f"   Features: {len(df.columns)}")
     
     # Statistics
-    print(f"\n📊 Parameter Statistics:")
+    print("\n📊 Parameter Statistics:")
     for param in ['alpha', 'beta', 'gamma']:
         print(f"   {param}: mean={df[param].mean():.3f}, std={df[param].std():.3f}")
     

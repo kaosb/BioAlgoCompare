@@ -144,17 +144,17 @@ def analyze_training_results(results, df_train, df_val=None):
         # Top 5 features
         importance = results[param]['feature_importance']
         top_features = sorted(importance.items(), key=lambda x: x[1], reverse=True)[:5]
-        print(f"  Top features:")
+        print("  Top features:")
         for feat, imp in top_features:
             print(f"    - {feat}: {imp:.4f}")
     
     # Dataset statistics
-    print(f"\n📈 Dataset Statistics:")
+    print("\n📈 Dataset Statistics:")
     print(f"  Training samples: {len(df_train)}")
     if df_val is not None:
         print(f"  Validation samples: {len(df_val)}")
     
-    print(f"\n  Parameter ranges in training data:")
+    print("\n  Parameter ranges in training data:")
     for param in ['alpha', 'beta', 'gamma']:
         print(f"    {param}: [{df_train[param].min():.3f}, {df_train[param].max():.3f}]")
 
@@ -174,7 +174,7 @@ def main():
     
     args = parser.parse_args()
     
-    print(f"🚀 Training IL Model")
+    print("🚀 Training IL Model")
     print(f"   Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # Load demonstrations
@@ -187,7 +187,7 @@ def main():
                                         random_state=args.seed)
     
     # Create and train model
-    print(f"\n🔧 Training Random Forest models...")
+    print("\n🔧 Training Random Forest models...")
     model = SimpleILModel(n_estimators=args.n_estimators, random_state=args.seed)
     results = model.train(df_train, df_val)
     
@@ -210,7 +210,7 @@ def main():
             'args': vars(args)
         }, f, indent=2)
     
-    print(f"\n✅ Training complete!")
+    print("\n✅ Training complete!")
     print(f"   Model saved to: {output_path}")
     print(f"   Report saved to: {report_path}")
     print(f"   Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

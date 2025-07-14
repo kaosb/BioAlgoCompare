@@ -2,17 +2,17 @@
 Tests para el módulo generate_demos.
 Cubre la generación de demostraciones de parámetros óptimos para IL.
 """
-import pytest
 import os
 import sys
-import numpy as np
-import pandas as pd
-from unittest.mock import Mock, patch, MagicMock, call
-from datetime import datetime
 
 # Añadir el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import pytest
+import numpy as np
+import pandas as pd
+from unittest.mock import Mock, patch, MagicMock, call
+from datetime import datetime
 from utils.generate_demos import SimpleGA, SimplePSO, generate_demonstrations, main
 
 
@@ -302,7 +302,7 @@ class TestGenerateDemonstrations:
         instances = ["Solomon-RC101"]
         num_demos = 1
         
-        df = generate_demonstrations(algorithms, instances, num_demos, seed=42)
+        generate_demonstrations(algorithms, instances, num_demos, seed=42)
         
         # Verificar que se creó instancia Solomon
         assert mock_problem.capacity == 100

@@ -773,7 +773,7 @@ def analyze_csv(csv_file, output_dir):
     # Generar el HTML
     with open(html_report, "w") as f:
         f.write(
-            f"""
+            """
         <!DOCTYPE html>
         <html>
         <head>

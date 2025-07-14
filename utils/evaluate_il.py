@@ -216,22 +216,24 @@ def analyze_results(results: Dict, instance_name: str) -> Dict:
         * 100,
     }
 
-    # Convergencia
-    conv_standard = [curve[-1] for curve in results["standard"]["convergence_curves"]]
-    conv_il = [curve[-1] for curve in results["il"]["convergence_curves"]]
-
     # Calcular área bajo la curva de convergencia (menor es mejor)
     auc_standard = [
         np.trapz(curve) for curve in results["standard"]["convergence_curves"]
     ]
     auc_il = [np.trapz(curve) for curve in results["il"]["convergence_curves"]]
 
+    mean_auc_standard = np.mean(auc_standard)
+    mean_auc_il = np.mean(auc_il)
+    
+    # Evitar división por cero
+    auc_improvement = 0.0
+    if mean_auc_standard > 0:
+        auc_improvement = (mean_auc_standard - mean_auc_il) / mean_auc_standard * 100
+    
     analysis["convergence"] = {
-        "auc_standard": np.mean(auc_standard),
-        "auc_il": np.mean(auc_il),
-        "auc_improvement": (np.mean(auc_standard) - np.mean(auc_il))
-        / np.mean(auc_standard)
-        * 100,
+        "auc_standard": mean_auc_standard,
+        "auc_il": mean_auc_il,
+        "auc_improvement": auc_improvement,
     }
 
     # Test estadístico (Mann-Whitney U)

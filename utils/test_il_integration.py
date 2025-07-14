@@ -9,9 +9,10 @@ Tests whether HO with IL performs better than standard HO.
 import sys
 from pathlib import Path
 import pickle
-import numpy as np
 
 sys.path.append(str(Path(__file__).parent.parent))
+
+import numpy as np
 
 from problems.vrp import VRPProblem
 from algorithms.ho import HO

@@ -81,14 +81,14 @@ def test_pareto_dominance():
     # Solución 1 domina a solución 2 (mejor en todos los objetivos)
     sol1 = (10.0, 0.1, 100.0)  # tiempo, coef_var, distancia
     sol2 = (15.0, 0.2, 150.0)
-    assert problem.dominates(sol1, sol2) == True
-    assert problem.dominates(sol2, sol1) == False
+    assert problem.dominates(sol1, sol2) is True
+    assert problem.dominates(sol2, sol1) is False
 
     # Soluciones no dominadas
     sol3 = (10.0, 0.2, 150.0)
     sol4 = (15.0, 0.1, 100.0)
-    assert problem.dominates(sol3, sol4) == False
-    assert problem.dominates(sol4, sol3) == False
+    assert problem.dominates(sol3, sol4) is False
+    assert problem.dominates(sol4, sol3) is False
 
 
 def test_evasion_strategy():

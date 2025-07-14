@@ -83,7 +83,10 @@ class SlimeMould(Individual):
         p = math.tanh(abs((S_i - DF) / (bF - wF + epsilon)))
 
         r = random.random()
-        a = math.atanh(-t / max_t + 1)
+        # Evitar domain error en atanh
+        atanh_arg = -t / max_t + 1
+        atanh_arg = max(-0.999, min(0.999, atanh_arg))  # Clamp to avoid domain error
+        a = math.atanh(atanh_arg)
         vb = np.random.uniform(-a, a, size=dim)
         vc = np.random.uniform(-1, 1, size=dim) * (1 - t / max_t)
 

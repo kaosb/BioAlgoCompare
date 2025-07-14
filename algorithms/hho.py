@@ -103,9 +103,10 @@ class Hawk(Individual):
                     best_hawk.position - self.position
                 ) / (np.abs(E) + 1e-8)
             elif r < 0.5 and abs(E) >= 0.5:  # soft besiege + rapid dives
+                J = 2 * (1 - random.random())
                 Y = (
                     best_hawk.position
-                    - E * np.abs(J := 2 * (1 - random.random())) * best_hawk.position
+                    - E * np.abs(J) * best_hawk.position
                     - self.position
                 )
                 Z = Y + random.random() * levy_flight(dim)

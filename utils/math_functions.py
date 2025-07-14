@@ -54,6 +54,8 @@ def cauchy_distribution(size: Union[int, tuple]) -> np.ndarray:
     Returns:
         np.ndarray: Random samples from standard Cauchy distribution
     """
+    if isinstance(size, int):
+        size = (size,)
     return np.tan(np.pi * (np.random.rand(*size) - 0.5))
 
 
