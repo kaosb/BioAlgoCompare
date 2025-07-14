@@ -45,11 +45,14 @@ from .ewa import EWA, Earthworm
 from .fgo import FGO, Flamingo as FlamingoFGO
 from .foa import FOA, Fossa
 from .fsa import FSA, Flamingo as FlamingoFSA
+from .ga import GA, Chromosome
 from .gto import GTO, Gorilla
 from .gvoa import GVOA, Vulture
 from .hho import HHO, Hawk
+from .ho import HO, Hippopotamus
 from .mrfo import MRFO, MantaRay
 from .opa import OPA, Orca
+from .pso import PSO, Particle
 from .rro import RRO, Raven
 from .sho import SHO, Hyena as HyenaSHO
 from .sma import SMA, SlimeMould
@@ -65,12 +68,15 @@ ALGORITHMS = {
     "fgo": FGO,
     "foa": FOA,
     "fsa": FSA,
+    "ga": GA,
     "gto": GTO,
     "gvoa": GVOA,
     "hho": HHO,
+    "ho": HO,
     "hoa": SHO,  # HOA is an alias for SHO
     "mrfo": MRFO,
     "opa": OPA,
+    "pso": PSO,
     "rro": RRO,
     "sho": SHO,
     "sma": SMA,
@@ -115,11 +121,14 @@ __all__ = [
     "FGO",
     "FOA",
     "FSA",
+    "GA",
     "GTO",
     "GVOA",
     "HHO",
+    "HO",
     "MRFO",
     "OPA",
+    "PSO",
     "RRO",
     "SHO",
     "SMA",
