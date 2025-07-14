@@ -550,10 +550,8 @@ def benchmark(
 @click.option(
     "--algorithm",
     "-a",
-    multiple=True,
-    type=click.Choice(list(ALGORITHMS.keys()) + ["all"]),
-    default=["all"],
-    help="Algoritmos a ejecutar",
+    default="all",
+    help='Algoritmos a ejecutar (lista separada por comas, ej: "hho,ho,sho" o "all")',
 )
 @click.option(
     "--instances", "-i", multiple=True, help="Instancias a evaluar (sin extensión)"
@@ -590,10 +588,10 @@ def massive(
         output_dir = f"results/massive_{timestamp}"
 
     # Prepare algorithms
-    if 'all' in algorithm:
+    if algorithm == 'all':
         algo_list = [name for name in ALGORITHMS.keys() if name not in ['hoa', 'fgo']]
     else:
-        algo_list = list(algorithm)
+        algo_list = [algo.strip() for algo in algorithm.split(",")]
 
     # Prepare algorithm dictionary
     algo_dict = {name: ALGORITHMS[name][0] for name in algo_list if name in ALGORITHMS}
