@@ -40,7 +40,7 @@ class TestAlgorithmFactory:
             assert issubclass(algo_class, MetaheuristicAlgorithm)
             assert isinstance(full_name, str)
             assert isinstance(year, int)
-            assert 2000 <= year <= 2030  # Rango razonable de años
+            assert 1970 <= year <= 2030  # Rango razonable de años (incluye GA de 1975)
 
     def test_create_algorithm_valid(self, mock_problem):
         """Test crear algoritmo con nombre válido."""
@@ -151,10 +151,10 @@ class TestAlgorithmFactory:
         algos_no_alias = list_algorithms(include_aliases=False)
         algos_with_alias = list_algorithms(include_aliases=True)
         
-        # Debe haber 17 algoritmos únicos
-        assert len(algos_no_alias) == 17
-        # Con aliases debe haber 19 (17 + 2 aliases)
-        assert len(algos_with_alias) == 19
+        # Debe haber 19 algoritmos únicos (17 bioinspirados + 2 clásicos)
+        assert len(algos_no_alias) == 19
+        # Con aliases debe haber 21 (19 + 2 aliases)
+        assert len(algos_with_alias) == 21
 
     def test_get_algorithm_by_year_single(self):
         """Test obtener algoritmos de un año específico."""

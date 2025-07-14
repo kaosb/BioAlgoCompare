@@ -2,18 +2,18 @@
 Tests para el módulo train_il.
 Cubre el entrenamiento del modelo de Imitation Learning para HO.
 """
-import pytest
 import os
 import sys
-import numpy as np
-import pandas as pd
-import torch
-from unittest.mock import Mock, patch, MagicMock, call
-from datetime import datetime
 
 # Añadir el directorio raíz al path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import pytest
+import numpy as np
+import pandas as pd
+import torch
+from unittest.mock import Mock, patch, MagicMock, call as mock_call
+from datetime import datetime
 from utils.train_il import plot_training_history, analyze_predictions, main
 
 

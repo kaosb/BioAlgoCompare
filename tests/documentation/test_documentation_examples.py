@@ -186,11 +186,7 @@ class TestDocumentationExamples:
         problem.load_instance("P-n16-k8")
 
         # Test population size recommendations
-        pop_sizes = {
-            "small": 30,  # 30-50 for small
-            "medium": 50,  # 30-50 for medium
-            "large": 100,  # 50-100 for large
-        }
+        # Documented sizes: 30-50 for small/medium, 50-100 for large instances
 
         for size_type, pop_size in [("small", 30)]:
             AlgoClass = get_algorithm("ewa")

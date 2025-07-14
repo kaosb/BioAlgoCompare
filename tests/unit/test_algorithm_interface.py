@@ -285,8 +285,6 @@ class TestAlgorithmInterface:
 
         # Initialize population
         algo.initialize_population()
-        initial_best = algo.best_solution.fitness()
-
         # Update population once
         algo.update_population()
 

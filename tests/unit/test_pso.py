@@ -51,7 +51,8 @@ class TestParticle:
         # Change position to worse solution
         particle.position = np.array([0.9, 0.9])
         particle._fitness = None
-        worse_fitness = particle.fitness()
+        # Force fitness recalculation
+        particle.fitness()
         
         # pbest should not update to worse solution
         particle.update_pbest()
@@ -174,11 +175,17 @@ class TestPSO:
         pso1 = PSO(small_vrp_problem, population_size=5, max_iterations=5, seed=42)
         pso2 = PSO(small_vrp_problem, population_size=5, max_iterations=5, seed=123)
         
-        _, fitness1, _ = pso1.execute()
-        _, fitness2, _ = pso2.execute()
+        _, fitness1, conv1 = pso1.execute()
+        _, fitness2, conv2 = pso2.execute()
         
-        # Very unlikely to get exact same fitness with different seeds
-        assert fitness1 != fitness2
+        # For small problems, both might find optimal solution
+        # At least check that convergence patterns are different
+        if fitness1 == fitness2:
+            # If same fitness, convergence should be different
+            assert conv1 != conv2
+        # Otherwise fitnesses should be different
+        else:
+            assert fitness1 != fitness2
     
     def test_get_parameters(self, small_vrp_problem):
         """Test parameter reporting."""

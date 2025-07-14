@@ -177,11 +177,11 @@ class TestAlgorithmInitialization:
 
         # Test with negative population size (should handle gracefully)
         with pytest.raises((ValueError, AssertionError)):
-            algo = AlgoClass(problem=vrp_problem, population_size=-10)
+            AlgoClass(problem=vrp_problem, population_size=-10)
 
         # Test with zero iterations (should handle gracefully)
         with pytest.raises((ValueError, AssertionError)):
-            algo = AlgoClass(problem=vrp_problem, max_iterations=0)
+            AlgoClass(problem=vrp_problem, max_iterations=0)
 
 
 if __name__ == "__main__":

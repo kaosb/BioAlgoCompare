@@ -65,7 +65,7 @@ class TestAlgorithmConvergence:
 
         # Run algorithm
         algo.initialize_population()
-        best_solution = algo.run(iterations=iterations)
+        algo.run(iterations=iterations)
 
         # Get convergence curve
         curve = algo.get_convergence_curve()
@@ -197,7 +197,7 @@ class TestAlgorithmConvergence:
         )
 
         algo.initialize_population()
-        best_solution = algo.run(iterations=200)
+        algo.run(iterations=200)
 
         # These algorithms should achieve significant improvement
         curve = algo.get_convergence_curve()

@@ -316,8 +316,10 @@ class HO(MetaheuristicAlgorithm):
 
         # Calcular distancias y clusters
         if len(positions) > 1:
-            distances = cdist(positions, positions)
-            linkage_matrix = linkage(distances, method="ward")
+            # linkage espera una matriz de distancias condensada
+            from scipy.spatial.distance import pdist
+            distances_condensed = pdist(positions)
+            linkage_matrix = linkage(distances_condensed, method="ward")
             n_clusters = max(2, int(np.sqrt(self.population_size)))
             clusters = fcluster(linkage_matrix, n_clusters, criterion="maxclust")
 
@@ -332,12 +334,15 @@ class HO(MetaheuristicAlgorithm):
                     hippo.position
                 )
 
-                # Si coef_variacion alto, aplicar swap para balanceo
+                # Si coef_variación alto, aplicar balanceo de rutas
                 if coef_var > 0.3:  # Threshold para desbalance
                     routes, _, _ = self.problem.decode_solution(hippo.position)
                     balanced_routes = self._apply_swap_balancing(routes)
-                    # Recodificar a posición continua (simplificado)
-                    # En práctica, necesitaríamos un método más sofisticado
+                    # Recodificar rutas balanceadas a posición continua
+                    if hasattr(self.problem, 'encode_routes'):
+                        hippo.position = self.problem.encode_routes(balanced_routes)
+                    hippo.fitness_value = self.problem.evaluate_routes(balanced_routes)
+                else:
                     hippo.update_fitness()
 
     def _evasion_phase(self, gamma: float) -> None:
@@ -357,14 +362,8 @@ class HO(MetaheuristicAlgorithm):
             new_position = hippo.position + perturbation
             new_position = np.clip(new_position, 0, 1)
 
-            # Para QC-DVRP: Verificar retrasos y aplicar relocate
-            if hasattr(self.problem, "apply_evasion_strategy"):
-                routes, _, _ = self.problem.decode_solution(new_position)
-                # Aplicar estrategia de evasión si hay retrasos
-                improved_routes = self.problem.apply_evasion_strategy(
-                    routes, delay_threshold=30.0
-                )
-                # La estrategia ya está implementada en vrp.py
+            # Para QC-DVRP: La estrategia de evasión se aplica durante la evaluación
+            # No se modifica la posición aquí para mantener la integridad del espacio de búsqueda
 
             # Evaluar nueva posición
             temp_fitness = self.problem.evaluate(new_position)
@@ -411,53 +410,6 @@ class HO(MetaheuristicAlgorithm):
 
         return best_route
 
-    def _apply_swap_balancing(self, routes: List[List[int]]) -> List[List[int]]:
-        """
-        Aplica operador swap para balancear cargas entre rutas.
-
-        Args:
-            routes: Lista de rutas
-
-        Returns:
-            Rutas balanceadas
-        """
-        if len(routes) < 2:
-            return routes
-
-        # Calcular cargas actuales
-        route_loads = []
-        for route in routes:
-            load = sum(self.problem.demands[node] for node in route[1:-1])
-            route_loads.append(load)
-
-        # Encontrar rutas más y menos cargadas
-        max_idx = np.argmax(route_loads)
-        min_idx = np.argmin(route_loads)
-
-        if max_idx != min_idx and len(routes[max_idx]) > 2 and len(routes[min_idx]) > 2:
-            # Intentar swap de un cliente
-            max_route = routes[max_idx].copy()
-            min_route = routes[min_idx].copy()
-
-            # Seleccionar cliente aleatorio de ruta más cargada
-            if len(max_route) > 2:
-                customer_idx = np.random.randint(1, len(max_route) - 1)
-                customer = max_route[customer_idx]
-
-                # Verificar si cabe en ruta menos cargada
-                if (
-                    route_loads[min_idx] + self.problem.demands[customer]
-                    <= self.problem.capacity
-                ):
-                    # Realizar swap
-                    max_route.pop(customer_idx)
-                    insert_pos = np.random.randint(1, len(min_route))
-                    min_route.insert(insert_pos, customer)
-
-                    routes[max_idx] = max_route
-                    routes[min_idx] = min_route
-
-        return routes
 
     def _route_distance(self, route: List[int]) -> float:
         """Calcula distancia de una ruta (simplificado)."""
@@ -468,3 +420,67 @@ class HO(MetaheuristicAlgorithm):
         for i in range(len(route) - 1):
             distance += self.problem.distance_matrix[route[i], route[i + 1]]
         return distance
+
+    def _apply_swap_balancing(self, routes: List[List[int]]) -> List[List[int]]:
+        """
+        Aplica operador swap para balancear cargas entre rutas.
+        
+        Implementa la estrategia de defensa grupal del HO mediante
+        intercambio de clientes entre rutas desbalanceadas.
+        
+        Args:
+            routes: Lista de rutas actuales
+            
+        Returns:
+            Rutas balanceadas
+        """
+        if len(routes) < 2:
+            return routes
+            
+        # Calcular cargas actuales
+        route_loads = []
+        for route in routes:
+            load = sum(self.problem.demands[n] for n in route[1:-1])
+            route_loads.append(load)
+        
+        # Identificar rutas más y menos cargadas
+        max_load_idx = np.argmax(route_loads)
+        min_load_idx = np.argmin(route_loads)
+        
+        if max_load_idx == min_load_idx:
+            return routes
+            
+        # Copiar rutas para no modificar las originales
+        balanced_routes = [route[:] for route in routes]
+        
+        # Intentar intercambiar clientes
+        max_route = balanced_routes[max_load_idx]
+        min_route = balanced_routes[min_load_idx]
+        
+        best_swap = None
+        best_improvement = 0
+        
+        # Buscar mejor intercambio
+        for i, customer1 in enumerate(max_route[1:-1], 1):
+            for j, customer2 in enumerate(min_route[1:-1], 1):
+                # Verificar factibilidad del intercambio
+                new_max_load = route_loads[max_load_idx] - self.problem.demands[customer1] + self.problem.demands[customer2]
+                new_min_load = route_loads[min_load_idx] - self.problem.demands[customer2] + self.problem.demands[customer1]
+                
+                if new_max_load <= self.problem.capacity and new_min_load <= self.problem.capacity:
+                    # Calcular mejora en balance (reducción en diferencia de cargas)
+                    old_diff = abs(route_loads[max_load_idx] - route_loads[min_load_idx])
+                    new_diff = abs(new_max_load - new_min_load)
+                    improvement = old_diff - new_diff
+                    
+                    if improvement > best_improvement:
+                        best_improvement = improvement
+                        best_swap = (i, j, customer1, customer2)
+        
+        # Aplicar mejor intercambio si existe
+        if best_swap:
+            i, j, customer1, customer2 = best_swap
+            balanced_routes[max_load_idx][i] = customer2
+            balanced_routes[min_load_idx][j] = customer1
+        
+        return balanced_routes

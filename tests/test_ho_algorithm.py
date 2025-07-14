@@ -208,7 +208,7 @@ def test_ho_multiobjective_vrp():
     ho = HO(problem, population_size=20, max_iterations=30, seed=42)
 
     # Verificar que detecta capacidad multiobjetivo
-    assert ho.use_multiobjective == True
+    assert ho.use_multiobjective is True
 
     # Ejecutar algoritmo
     best_solution = ho.execute()
