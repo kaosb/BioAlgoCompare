@@ -158,15 +158,15 @@ class GA(MetaheuristicAlgorithm):
         
     def initialize_population(self) -> List[Chromosome]:
         """Initialize population with random chromosomes."""
-        population = []
+        self.population = []
         for i in range(self.population_size):
             chromosome = Chromosome(
                 dimension=self.problem.get_dimension(),
                 problem=self.problem,
                 seed=self.seed + i if self.seed else None
             )
-            population.append(chromosome)
-        return population
+            self.population.append(chromosome)
+        return self.population
     
     def tournament_selection(self) -> Chromosome:
         """
@@ -228,6 +228,7 @@ class GA(MetaheuristicAlgorithm):
         # Initialize population
         self.population = self.initialize_population()
         self.convergence = []
+        self.convergence_curve = []  # Initialize convergence curve for base class compatibility
         
         best_chromosome = min(self.population, key=lambda x: x.fitness())
         best_fitness = best_chromosome.fitness()
@@ -245,6 +246,7 @@ class GA(MetaheuristicAlgorithm):
             
             # Track convergence
             self.convergence.append(best_fitness)
+            self.convergence_curve.append(best_fitness)  # Add to convergence curve
             
             # Optional: Adaptive mutation rate
             # Increase mutation if population is converging
@@ -253,6 +255,9 @@ class GA(MetaheuristicAlgorithm):
                 self.mutation_rate = min(0.2, self.mutation_rate * 1.1)
             else:
                 self.mutation_rate = max(0.01, self.mutation_rate * 0.95)
+        
+        # Store best solution for base class compatibility
+        self.best_solution = best_chromosome
         
         # Return best solution found
         best_solution = self.problem.decode_solution(best_chromosome.position)

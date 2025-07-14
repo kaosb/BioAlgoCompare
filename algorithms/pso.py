@@ -147,21 +147,21 @@ class PSO(MetaheuristicAlgorithm):
         
     def initialize_population(self) -> List[Particle]:
         """Initialize swarm of particles with random positions and velocities."""
-        population = []
+        self.population = []
         for i in range(self.population_size):
             particle = Particle(
                 dimension=self.problem.get_dimension(),
                 problem=self.problem,
                 seed=self.seed + i if self.seed else None
             )
-            population.append(particle)
+            self.population.append(particle)
             
             # Update global best if needed
             if particle.fitness() < self.gbest_fitness:
                 self.gbest_fitness = particle.fitness()
                 self.gbest_position = particle.position.copy()
                 
-        return population
+        return self.population
     
     def update_global_best(self) -> None:
         """Update global best position based on all particles."""
@@ -180,6 +180,7 @@ class PSO(MetaheuristicAlgorithm):
         # Initialize swarm
         self.population = self.initialize_population()
         self.convergence = []
+        self.convergence_curve = []  # Initialize convergence curve for base class compatibility
         self.update_global_best()
         
         # Main PSO loop
@@ -193,10 +194,16 @@ class PSO(MetaheuristicAlgorithm):
             
             # Track convergence
             self.convergence.append(self.gbest_fitness)
+            self.convergence_curve.append(self.gbest_fitness)  # Add to convergence curve
             
             # Optional: Adaptive parameters (linearly decreasing inertia)
             for particle in self.population:
                 particle.w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
+        
+        # Store best solution for base class compatibility
+        # Find the particle with the best fitness
+        best_particle = min(self.population, key=lambda p: p.fitness())
+        self.best_solution = best_particle
         
         # Return best solution found
         best_solution = self.problem.decode_solution(self.gbest_position)
