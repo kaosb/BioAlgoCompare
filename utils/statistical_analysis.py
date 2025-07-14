@@ -503,7 +503,11 @@ class AdvancedStatisticalAnalysis:
         ax.axis("off")
 
         # Add info text
-        info_text = f"Friedman p-value: {self.friedman_test()['p_value']:.4f}\n"
+        friedman_result = self.friedman_test()
+        if "error" in friedman_result:
+            info_text = f"Friedman test: {friedman_result['error']}\n"
+        else:
+            info_text = f"Friedman p-value: {friedman_result['p_value']:.4f}\n"
         info_text += f"k={self.n_algorithms}, N={self.n_instances}, α={alpha}"
         ax.text(
             0.02,
@@ -550,18 +554,26 @@ class AdvancedStatisticalAnalysis:
         if extended_tests:
             results["quade_test"] = self.quade_test()
 
-            # Pairwise Wilcoxon tests for top algorithms
-            avg_ranks = results["friedman_test"]["average_ranks"]
-            top_algorithms = sorted(avg_ranks.items(), key=lambda x: x[1])[:3]
+            # Pairwise Wilcoxon tests for top algorithms (only if Friedman test succeeded)
+            friedman_result = results["friedman_test"]
+            if "average_ranks" in friedman_result:
+                avg_ranks = friedman_result["average_ranks"]
+                top_algorithms = sorted(avg_ranks.items(), key=lambda x: x[1])[:3]
 
-            wilcoxon_results = {}
-            for i in range(len(top_algorithms)):
-                for j in range(i + 1, len(top_algorithms)):
-                    alg1, alg2 = top_algorithms[i][0], top_algorithms[j][0]
-                    key = f"{alg1}_vs_{alg2}"
-                    wilcoxon_results[key] = self.wilcoxon_test(alg1, alg2)
+                wilcoxon_results = {}
+                for i in range(len(top_algorithms)):
+                    for j in range(i + 1, len(top_algorithms)):
+                        alg1, alg2 = top_algorithms[i][0], top_algorithms[j][0]
+                        key = f"{alg1}_vs_{alg2}"
+                        wilcoxon_results[key] = self.wilcoxon_test(alg1, alg2)
 
-            results["wilcoxon_tests"] = wilcoxon_results
+                results["wilcoxon_tests"] = wilcoxon_results
+            else:
+                # If Friedman test failed, skip Wilcoxon tests
+                results["wilcoxon_tests"] = {
+                    "error": "Skipped due to Friedman test failure",
+                    "reason": friedman_result.get("error", "Unknown error")
+                }
 
             # Effect sizes
             effect_sizes = {}
@@ -767,16 +779,22 @@ class AdvancedStatisticalAnalysis:
             # Friedman test
             f.write("## Friedman Test\n\n")
             friedman = results["friedman_test"]
-            f.write(f"- **Statistic**: {friedman['statistic']:.4f}\n")
-            f.write(f"- **p-value**: {friedman['p_value']:.4f}\n")
-            f.write(f"- **Interpretation**: {friedman['interpretation']}\n\n")
+            
+            if "error" in friedman:
+                f.write(f"- **Error**: {friedman['error']}\n")
+                f.write(f"- **Algorithms**: {friedman.get('n_algorithms', 'Unknown')}\n")
+                f.write(f"- **Instances**: {friedman.get('n_instances', 'Unknown')}\n\n")
+            else:
+                f.write(f"- **Statistic**: {friedman['statistic']:.4f}\n")
+                f.write(f"- **p-value**: {friedman['p_value']:.4f}\n")
+                f.write(f"- **Interpretation**: {friedman['interpretation']}\n\n")
 
-            f.write("### Average Ranks\n\n")
-            ranks_df = pd.DataFrame(
-                list(friedman["average_ranks"].items()), columns=["Algorithm", "Rank"]
-            )
-            ranks_df = ranks_df.sort_values("Rank")
-            f.write(ranks_df.to_markdown(index=False) + "\n\n")
+                f.write("### Average Ranks\n\n")
+                ranks_df = pd.DataFrame(
+                    list(friedman["average_ranks"].items()), columns=["Algorithm", "Rank"]
+                )
+                ranks_df = ranks_df.sort_values("Rank")
+                f.write(ranks_df.to_markdown(index=False) + "\n\n")
 
             # Nemenyi test
             f.write("## Nemenyi Post-hoc Test\n\n")
@@ -825,7 +843,9 @@ class AdvancedStatisticalAnalysis:
             f.write("\n## Conclusion\n\n")
             f.write("Based on the statistical analysis:\n\n")
 
-            if friedman["significant"]:
+            if "error" in friedman:
+                f.write(f"1. The Friedman test could not be performed: {friedman['error']}\n")
+            elif friedman["significant"]:
                 f.write(
                     "1. The Friedman test shows significant differences between algorithms.\n"
                 )
@@ -846,16 +866,29 @@ class AdvancedStatisticalAnalysis:
     def _save_csv_summaries(self, results: Dict[str, Any], output_path: Path) -> None:
         """Save CSV summaries of results."""
         # Save Friedman results
-        friedman_df = pd.DataFrame(
-            [
-                {
-                    "Test": "Friedman",
-                    "Statistic": results["friedman_test"]["statistic"],
-                    "p-value": results["friedman_test"]["p_value"],
-                    "Significant": results["friedman_test"]["significant"],
-                }
-            ]
-        )
+        friedman_result = results["friedman_test"]
+        if "error" in friedman_result:
+            friedman_df = pd.DataFrame(
+                [
+                    {
+                        "Test": "Friedman",
+                        "Error": friedman_result["error"],
+                        "n_algorithms": friedman_result.get("n_algorithms", "Unknown"),
+                        "n_instances": friedman_result.get("n_instances", "Unknown"),
+                    }
+                ]
+            )
+        else:
+            friedman_df = pd.DataFrame(
+                [
+                    {
+                        "Test": "Friedman",
+                        "Statistic": friedman_result["statistic"],
+                        "p-value": friedman_result["p_value"],
+                        "Significant": friedman_result["significant"],
+                    }
+                ]
+            )
         friedman_df.to_csv(output_path / "friedman_results.csv", index=False)
 
         # Save Nemenyi results
@@ -963,7 +996,7 @@ class AdvancedStatisticalAnalysis:
 
         # Friedman test results
         friedman_results = self.friedman_test()
-        if friedman_results and "error" not in friedman_results:
+        if friedman_results and "error" not in friedman_results and "average_ranks" in friedman_results:
             latex_code.append("\n% Friedman Test Results")
             latex_code.append("\\begin{table}[htbp]")
             latex_code.append("\\centering")
