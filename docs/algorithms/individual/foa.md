@@ -157,7 +157,7 @@ convergence_curve = foa.get_convergence_curve()
 
 ## Referencias
 
-- Ramirez, J. A., & Gonçalves, T. (2024). *Fossa Optimization Algorithm: A Novel Nature-Inspired Metaheuristic Based on the Hunting Behavior of Madagascar's Top Predator*. Swarm and Evolutionary Computation, 77, 101210. doi: 10.1016/j.swevo.2023.101210
+- Hamadneh, T., Batiha, B., Werner, F., et al. (2024). *Fossa Optimization Algorithm: A New Bio-Inspired Metaheuristic Algorithm for Engineering Applications*. International Journal of Intelligent Engineering and Systems, 17(5), 78-95. doi: 10.22266/ijies2024.1031.78
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

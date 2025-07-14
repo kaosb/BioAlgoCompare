@@ -22,6 +22,9 @@ Este documento proporciona una visión general de todos los algoritmos metaheur�
 | GVOA     | Griffon Vultures Optimization Algorithm | 2025 | Comportamiento de vuelo termal de buitres leonados |
 | SMO      | Starling Murmuration Optimizer | 2022 | Murmullos y comportamiento emergente de estorninos |
 | OPA      | Orca Predator Algorithm | 2021 | Estrategias de caza cooperativa de orcas |
+| GA       | Genetic Algorithm       | 1975 | Selección natural y genética                             |
+| PSO      | Particle Swarm Optimization | 1995 | Comportamiento social de enjambres (aves/peces)        |
+| HO       | Hippopotamus Optimization | 2024 | Comportamiento social y defensivo de hipopótamos       |
 
 ## Rendimiento Comparativo
 

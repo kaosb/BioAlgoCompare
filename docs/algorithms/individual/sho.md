@@ -158,7 +158,7 @@ convergence_curve = sho.get_convergence_curve()
 
 ## Referencias
 
-- Ahmed, S., & Moreno-García, C. F. (2024). *Spotted Hyena Optimizer: A Novel Bio-inspired Metaheuristic Algorithm for Global Optimization*. Applied Soft Computing, 128, 109728. doi: 10.1016/j.asoc.2023.109728
+- Dhiman, G., & Kumar, V. (2017). *Spotted hyena optimizer: A novel bio-inspired based metaheuristic technique for engineering applications*. Advances in Engineering Software, 114, 48-70. doi: 10.1016/j.advengsoft.2017.05.014
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

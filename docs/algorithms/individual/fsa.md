@@ -174,7 +174,7 @@ convergence_curve = fsa.get_convergence_curve()
 
 ## Referencias
 
-- Askari, M., & Naghizadeh, F. (2021). *Flamingo Search Algorithm: A Novel Bio-Inspired Metaheuristic for Global Optimization*. IEEE Access, 9, 125232-125249. doi: 10.1109/ACCESS.2021.3110279
+- Wang, Z., & Liu, J. (2021). *Flamingo Search Algorithm: A New Swarm Intelligence Optimization Algorithm*. IEEE Access, 9, 85975-85993. doi: 10.1109/ACCESS.2021.3086023
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

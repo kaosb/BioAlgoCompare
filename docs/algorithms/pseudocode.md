@@ -1,6 +1,6 @@
 # Pseudocódigo de Algoritmos Metaheurísticos implementados
 
-Este documento recopila el pseudocódigo de los 12 algoritmos bioinspirados que hemos implementado, basado en los artículos científicos originales:
+Este documento recopila el pseudocódigo de los 15 algoritmos bioinspirados que hemos implementado, basado en los artículos científicos originales:
 
 ---
 
@@ -379,6 +379,122 @@ Para t = 1 hasta T:
 
   Actualizar mejor orca global (líder)
 Retornar mejor solución encontrada
+```
+
+---
+
+## 13. Genetic Algorithm (GA)
+
+**Paper:** Holland (1975), *Adaptation in Natural and Artificial Systems*
+
+```
+Inicializar población de N cromosomas aleatoriamente
+Evaluar el fitness de cada cromosoma
+Para g = 1 hasta G (generaciones):
+  Crear nueva población vacía
+  # Elitismo
+  Añadir los k mejores cromosomas de la población actual a la nueva población
+
+  Mientras la nueva población no esté llena:
+    # Selección
+    Padre1 = SelecciónPorTorneo(población)
+    Padre2 = SelecciónPorTorneo(población)
+
+    # Crossover
+    Si rand() < tasa_crossover:
+      Hijo1, Hijo2 = Crossover(Padre1, Padre2)
+    Sino:
+      Hijo1, Hijo2 = Padre1, Padre2
+
+    # Mutación
+    Mutar(Hijo1, tasa_mutación)
+    Mutar(Hijo2, tasa_mutación)
+
+    Añadir Hijo1 e Hijo2 a la nueva población
+
+  Reemplazar la población antigua por la nueva
+  Evaluar fitness de la nueva población
+  Actualizar mejor solución global
+Retornar mejor solución global
+```
+
+---
+
+## 14. Particle Swarm Optimization (PSO)
+
+**Paper:** Kennedy & Eberhart (1995), *Particle Swarm Optimization*
+
+```
+Inicializar población de N partículas con posiciones y velocidades aleatorias
+Para cada partícula: pbest = posición inicial
+gbest = la mejor posición en toda la población
+
+Para t = 1 hasta T (iteraciones):
+  Para cada partícula i:
+    # Actualizar velocidad
+    r1, r2 = números aleatorios en [0, 1]
+    velocidad_cognitiva = c1 * r1 * (pbest_i - posicion_i)
+    velocidad_social = c2 * r2 * (gbest - posicion_i)
+    velocidad_i = w * velocidad_i + velocidad_cognitiva + velocidad_social
+
+    # Sujetar velocidad a [-v_max, v_max]
+
+    # Actualizar posición
+    posicion_i = posicion_i + velocidad_i
+
+    # Sujetar posición a los límites del dominio
+
+    # Evaluar fitness y actualizar mejores posiciones
+    Evaluar fitness(posicion_i)
+    Si fitness(posicion_i) es mejor que fitness(pbest_i):
+      pbest_i = posicion_i
+    Si fitness(pbest_i) es mejor que fitness(gbest):
+      gbest = pbest_i
+
+Retornar gbest
+```
+
+---
+
+## 15. Hippopotamus Optimization (HO)
+
+**Paper:** Amiri et al. (2024), *Hippopotamus optimization algorithm*
+
+```
+Inicializar población de N hipopótamos aleatoriamente
+Evaluar fitness y encontrar el mejor global (gbest)
+
+Para t = 1 hasta T (iteraciones):
+  # Actualizar parámetros (estándar o con IL)
+  alpha, beta, gamma = actualizar_parametros(t, T, il_model)
+
+  # Determinar fase
+  fitness_ratio = gbest.fitness / promedio_fitness(población)
+  Si fitness_ratio < theta:
+    Fase = POSICIÓN
+  Sino si t/T < 0.7:
+    Fase = DEFENSA
+  Sino:
+    Fase = EVASIÓN
+
+  Para cada hipopótamo i:
+    Si Fase == POSICIÓN:
+      líder = seleccionar_líder_aleatorio()
+      movimiento = alpha*(líder.pos - pos_i) + beta*rand()*(gbest.pos - pos_i)
+      pos_i += movimiento
+      Aplicar 2-opt a las rutas decodificadas
+    Si Fase == DEFENSA:
+      Realizar clustering jerárquico
+      Para rutas desbalanceadas:
+        Aplicar swap de clientes para balancear carga
+    Si Fase == EVASIÓN:
+      perturbación = gamma * LevyFlight()
+      pos_i += perturbación
+
+    Sujetar posición a los límites del dominio
+    Evaluar nuevo fitness y actualizar pbest y gbest
+
+Retornar gbest
 ```
 
 *Referencias bibliográficas completas en la carpeta **`docs/references.bib`**.*
