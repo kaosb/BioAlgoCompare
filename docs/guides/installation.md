@@ -36,11 +36,11 @@ Siga estos pasos para una instalación estándar:
    ```bash
    # Usando venv (integrado en Python 3.3+)
    python -m venv venv
-   
+
    # Activar el entorno virtual
    # En Linux/macOS:
    source venv/bin/activate
-   
+
    # En Windows:
    venv\Scripts\activate
    ```
@@ -122,8 +122,8 @@ BioAlgoCompare/
 
 Una vez completada la instalación, consulte:
 
-- [Guía de Inicio Rápido](getting_started.md) para comenzar a usar BioAlgoCompare
-- [Guía de Uso](usage.md) para instrucciones detalladas sobre cómo usar el sistema
+- [Referencia de Comandos](../COMMAND_REFERENCE.md) para instrucciones completas de uso
+- [Guía de Benchmarking](benchmarking.md) para ejecutar experimentos rigurosos
 
 ## Referencias Adicionales
 

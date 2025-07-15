@@ -39,14 +39,14 @@ Inicializar población de mantarrayas con posiciones aleatorias
 Encontrar mejor mantarraya
 Para t = 1 hasta T:
   Calcular β = 2*exp(1-(t/T))*sin(2π*r)  # Factor de control de espiral
-  
+
   Para cada mantarraya (excepto la mejor):
     # Determinar comportamiento según fase
     Si t/T < 0.5:  # Primera mitad: forrajeo en cadena
       Para cada dimensión i:
         r1 = aleatorio en [0, 1]
         posición[i] = mejor_posición[i] + β*(mejor_posición[i] - posición[i]) + α*r1
-    
+
     Sino:  # Segunda mitad: forrajeo en ciclón
       Para cada dimensión i:
         r2 = aleatorio en [0, 1]
@@ -54,20 +54,20 @@ Para t = 1 hasta T:
           posición[i] = mejor_posición[i] + α*exp(β*r2)*cos(2π*r2)*|mejor_posición[i] - posición[i]|
         Sino:  # Espiral interna
           posición[i] = mejor_posición[i] + aleatorio*(mejor_posición[i] - posición[i]) + β*r2
-    
+
     # Aplicar restricciones de límites [0,1]
     Clip posición
-    
+
     # Fase opcional: forrajeo con volteretas (salto)
     Si aleatorio < probabilidad_voltereta:
       Para cada dimensión i:
         posición[i] += aleatorio en [-1,1] * |mejor_posición[i] - posición[i]|
       Clip posición
-    
+
     # Actualizar mejor solución si es necesario
     Si fitness(posición) < fitness(mejor_posición):
       mejor_posición = posición
-  
+
   Actualizar curva de convergencia
 Retornar mejor solución
 ```

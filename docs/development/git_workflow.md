@@ -141,7 +141,7 @@ Closes #42
 
 ## Proceso de Pull Request
 
-1. **Creación**: 
+1. **Creación**:
    - Incluir descripción detallada del cambio
    - Referenciar issues relacionados (`Closes #123`)
    - Añadir etiquetas relevantes

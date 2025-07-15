@@ -60,13 +60,20 @@ SOLOMON_INSTANCES = ["R101.vrp", "C101.vrp", "RC101.vrp"]
 # Known optimal values for each instance (to calculate gap)
 # Source: Best known solutions from Solomon benchmark literature
 KNOWN_OPTIMA = {
+<<<<<<< HEAD
     "R101.vrp": 1637.7,
     "C101.vrp": 827.3,
     "RC101.vrp": 1619.8,
+=======
+    "R101.vrp": 1650,  # Valor aproximado para test
+    "C101.vrp": 830,  # Valor aproximado para test
+    "RC101.vrp": 1680,  # Valor aproximado para test
+>>>>>>> develop
 }
 
 # List of algorithms to test for convergence
 CONVERGENCE_ALGORITHMS = list(ALGORITHMS_V2.keys())
+
 
 
 def load_algorithm(algorithm_name):
@@ -143,7 +150,9 @@ def test_algorithm_convergence(algorithm_name, instance_name):
         pytest.fail(f"El algoritmo {algorithm_name} falló en {instance_name}: {str(e)}")
 
     # Verificar que hay una solución
-    assert best_solution is not None, f"El algoritmo {algorithm_name} no generó solución"
+    assert (
+        best_solution is not None
+    ), f"El algoritmo {algorithm_name} no generó solución"
 
     # Obtener rutas (los algoritmos v2 devuelven directamente las rutas)
     routes = problem.encode_continuous(best_solution.position)
@@ -152,12 +161,15 @@ def test_algorithm_convergence(algorithm_name, instance_name):
     all_covered, total_distance = evaluate_routes(routes, problem)
 
     # Verificar que todos los clientes estén cubiertos
-    assert all_covered, f"El algoritmo {algorithm_name} no cubrió todos los clientes en {instance_name}"
+    assert (
+        all_covered
+    ), f"El algoritmo {algorithm_name} no cubrió todos los clientes en {instance_name}"
 
     # Calcular el gap respecto al óptimo conocido
     optimal_distance = KNOWN_OPTIMA.get(instance_name, float("inf"))
     gap = (total_distance - optimal_distance) / optimal_distance
 
+<<<<<<< HEAD
     # Verificar que el gap sea razonable para Solomon
     # Nota: Las instancias Solomon son muy difíciles. Un gap del 100-150% es común
     # para metaheurísticas básicas con pocas iteraciones
@@ -170,11 +182,27 @@ def test_algorithm_convergence(algorithm_name, instance_name):
     assert gap <= MAX_ACCEPTABLE_GAP, (
         f"El algoritmo {algorithm_name} en {instance_name} obtuvo un gap de {gap:.2%}, "
         f"que excede el límite máximo de {MAX_ACCEPTABLE_GAP:.0%}% para problemas Solomon"
+=======
+    # Verificar que el gap sea menor o igual al 50%
+    # Solomon instances are difficult, allow higher gaps
+    instance_type = instance_name.split(".")[0]
+    max_gap = 3.0 if instance_type == "C101" else 2.0
+
+    assert gap <= max_gap, (
+        f"El algoritmo {algorithm_name} en {instance_name} obtuvo un gap de {gap:.2%}, "
+        f"que excede el límite máximo de {max_gap:.0%}"
+>>>>>>> develop
     )
 
     # Verificar que la curva de convergencia existe y muestra mejora
     convergence = algorithm.get_convergence_curve()
+<<<<<<< HEAD
     assert len(convergence) > 0, f"La curva de convergencia para {algorithm_name} está vacía"
+=======
+    assert (
+        len(convergence) > 0
+    ), f"La curva de convergencia para {algorithm_name} está vacía"
+>>>>>>> develop
 
     # Verificar que hay una tendencia de mejora en la convergencia
     if len(convergence) > 10:

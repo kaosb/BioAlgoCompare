@@ -168,40 +168,40 @@ def test_algorithm(algorithm_name, problem_name="P-n16-k8", iterations=100, popu
     from problems.vrp import VRPProblem
     import importlib
     import numpy as np
-    
+
     # Importar dinámicamente el algoritmo
     module = importlib.import_module(f"algorithms.{algorithm_name.lower()}")
     algorithm_class = getattr(module, algorithm_name.upper())
-    
+
     # Verificar herencia
     assert issubclass(algorithm_class, MetaheuristicAlgorithm), "La clase no hereda de MetaheuristicAlgorithm"
-    
+
     # Cargar problema
     problem = VRPProblem(f"data/vrp/{problem_name}.vrp")
-    
+
     # Crear y ejecutar algoritmo
     algorithm = algorithm_class(problem, population_size=population, max_iterations=iterations, seed=seed)
     best_solution = algorithm.execute()
-    
+
     # Verificar curva de convergencia
     assert len(algorithm.convergence_curve) == iterations, f"Curva de convergencia incorrecta: {len(algorithm.convergence_curve)} != {iterations}"
-    
+
     # Verificar monotonicidad (para problemas de minimización)
     for i in range(1, len(algorithm.convergence_curve)):
         assert algorithm.convergence_curve[i] <= algorithm.convergence_curve[i-1], f"Convergencia no monótona en iteración {i}"
-    
+
     # Verificar posiciones dentro de límites
     for individual in algorithm.population:
         assert np.all(individual.position >= 0) and np.all(individual.position <= 1), "Posiciones fuera de rango [0,1]"
-    
+
     # Verificar mejor solución
     assert best_solution is not None, "No se encontró una solución válida"
     assert best_solution.fitness() > 0, f"Fitness sospechoso: {best_solution.fitness()}"
-    
+
     print(f"✅ {algorithm_name} pasó todas las verificaciones básicas")
     print(f"   Mejor fitness: {best_solution.fitness():.2f}")
     print(f"   Tiempo de ejecución: {algorithm.execution_time:.2f} segundos")
-    
+
     return algorithm, best_solution
 ```
 

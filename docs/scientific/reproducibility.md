@@ -56,7 +56,7 @@ Las semillas aleatorias controlan la inicialización de los generadores de núme
 Todos los scripts aceptan un parámetro `--seed` que:
 
 1. **Establece la semilla global de NumPy**: `np.random.seed(seed)`
-2. **Establece la semilla de algoritmos individuales**: 
+2. **Establece la semilla de algoritmos individuales**:
    ```python
    algo = Algorithm(problem, seed=run_seed)
    ```
@@ -119,10 +119,10 @@ Para experimentos académicos completos, documente adicionalmente:
    ```bash
    # Guardar información del sistema
    uname -a > system_info.txt
-   
+
    # Guardar versiones de software
    pip freeze > requirements_frozen.txt
-   
+
    # Guardar información de CPU
    lscpu > cpu_info.txt
    ```

@@ -158,7 +158,7 @@ convergence_curve = egto.get_convergence_curve()
 
 ## Referencias
 
-- Chen, R., & Zhou, Y. (2024). *Enhanced Gorilla Troops Optimization: A Hybrid Approach with Marine Predators Concept for Global Optimization Problems*. Engineering Applications of Artificial Intelligence, 126, 106753. doi: 10.1016/j.engappai.2023.106753
+- Hassan, M. H., Kamel, S., Mohamed, A. W., et al. (2024). *Enhanced Gorilla Troops Optimizer Powered by Marine Predator Algorithm: Global Optimization and Engineering Design*. Scientific Reports, 14, 57098. doi: 10.1038/s41598-024-57098-8
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

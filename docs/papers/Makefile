@@ -1,17 +1,17 @@
-# LaTeX compilation Makefile para papers CISTI
-# ==========================================
+# LaTeX compilation Makefile for research papers
+# ==============================================
 #
-# Este Makefile permite compilar ambas versiones del paper CISTI.
+# This Makefile compiles different versions of the research paper.
 #
 # Uso:
-#   make -C docs/papers cisti_v2   - Compila la versión 2 (extarticle) del paper usando LuaLaTeX
-#                                   - Genera el archivo docs/papers/cisti_v2/main.pdf
+#   make -C docs/papers paper_extended - Compiles the extended version (extarticle) using LuaLaTeX
+#                                       - Generates docs/papers/paper_extended/main.pdf
 #
-#   make -C docs/papers cisti_v1   - Compila la versión 1 (IEEEtran) del paper usando LuaLaTeX
-#                                   - Genera el archivo docs/papers/cisti_v1/main.pdf
+#   make -C docs/papers paper_ieee    - Compiles the IEEE format version using LuaLaTeX
+#                                       - Generates docs/papers/paper_ieee/main.pdf
 #
-#   make -C docs/papers cisti      - Alias para cisti_v2 (versión actual)
-# 
+#   make -C docs/papers paper         - Alias for paper_extended (current version)
+#
 #   make -C docs/papers all        - Compila ambas versiones del paper
 #
 #   make -C docs/papers clean      - Elimina todos los archivos auxiliares de la compilación
@@ -22,31 +22,38 @@
 #   - Las referencias bibliográficas se encuentran en docs/references.bib
 #   - Las figuras se encuentran en el directorio figures/
 
-.PHONY: cisti cisti_v1 cisti_v2 all clean
+.PHONY: paper paper_ieee paper_extended all clean
 
-# Alias para la versión actual (v2)
-cisti: cisti_v2
+# Alias for current version (extended)
+paper: paper_extended
 
-# Compilar la versión 1 (formato IEEEtran para conferencia IEEE)
-cisti_v1:
-	@echo "Compilando paper CISTI v1 (IEEEtran) con LuaLaTeX..."
-	cd cisti_v1 && latexmk -lualatex -pdf main.tex
-	@echo "Compilación terminada. El PDF está disponible en docs/papers/cisti_v1/main.pdf"
+# Compile IEEE format version
+paper_ieee:
+	@echo "Compiling IEEE format paper with LuaLaTeX..."
+	cd paper_ieee && latexmk -lualatex -pdf main.tex
+	@echo "Compilation finished. PDF available at docs/papers/paper_ieee/main.pdf"
 
-# Compilar la versión 2 (formato extarticle - versión completa)
-cisti_v2:
-	@echo "Compilando paper CISTI v2 (extarticle) con LuaLaTeX..."
-	cd cisti_v2 && latexmk -lualatex -pdf main.tex
-	@echo "Compilación terminada. El PDF está disponible en docs/papers/cisti_v2/main.pdf"
+# Compile extended version (extarticle format)
+paper_extended:
+	@echo "Compiling extended paper with LuaLaTeX..."
+	cd paper_extended && latexmk -lualatex -pdf main.tex
+	@echo "Compilation finished. PDF available at docs/papers/paper_extended/main.pdf"
 
-# Compilar ambas versiones
-all: cisti_v1 cisti_v2
-	@echo "Todas las versiones compiladas correctamente."
+# Compile current version
+paper_current:
+	@echo "Compiling current paper with PDFLaTeX..."
+	cd paper_current && pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex paper.tex
+	@echo "Compilation finished. PDF available at docs/papers/paper_current/paper.pdf"
 
-# Limpiar archivos temporales
+# Compile all versions
+all: paper_ieee paper_extended paper_current
+	@echo "All paper versions compiled successfully."
+
+# Clean temporary files
 clean:
-	@echo "Limpiando archivos temporales de LaTeX..."
-	cd cisti_v1 && latexmk -C main.tex
-	cd cisti_v2 && latexmk -C main.tex
+	@echo "Cleaning LaTeX temporary files..."
+	cd paper_ieee && latexmk -C main.tex
+	cd paper_extended && latexmk -C main.tex
+	cd paper_current && rm -f *.aux *.log *.out *.bbl *.blg *.fdb_latexmk *.fls *.synctex.gz
 	rm -f *.aux *.log *.out *.bbl *.blg *.fdb_latexmk *.fls *.synctex.gz main.pdf
-	@echo "Limpieza completada"
+	@echo "Cleanup completed"

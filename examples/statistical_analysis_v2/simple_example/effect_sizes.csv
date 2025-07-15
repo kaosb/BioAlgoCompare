@@ -1,0 +1,6 @@
+Algorithm,A12,A12_interpretation,Cliff_delta,Cliff_interpretation,Is_best
+HOA,0.75,large,0.5,large,False
+FOA,0.75,large,0.5,large,False
+WOA,0.75,large,0.5,large,False
+HHO,0.75,large,0.5,large,False
+EGTO,0.5,negligible,0.0,negligible,True

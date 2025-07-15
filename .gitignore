@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
 
 # C extensions
 *.so
@@ -67,6 +69,10 @@ analyze.log
 .coverage.*
 coverage.xml
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+htmlcov/
 
 # Resultados masivos y temporales
 results/massive_*/checkpoints/
@@ -84,10 +90,16 @@ results/**/*
 
 # Temporary files
 *.tmp
+*.backup_*
+*.save
+*.orig
+*.rej
 
 # Archivos Claude
 .claude/
 **/.claude/settings.local.json
+CLAUDE.md
+CLAUDE.md.backup
 
 # Directorios de backup
 backup/
@@ -138,6 +150,7 @@ analyze.log
 benchmark.log
 massive_benchmark.log
 
+<<<<<<< HEAD
 # Legacy code (for reference only)
 /legacy/
 # Note: We track legacy files in git but exclude them from active development
@@ -148,3 +161,48 @@ massive_benchmark.log
 
 # Results and exports directories 
 /exports/
+=======
+# Archivos patch (ya aplicados)
+*.patch
+
+# Directorio de tesis (mantenido solo localmente en rama tesis)
+/tesis/
+tesis/
+
+# Directorios de instalación
+*.egg-info/
+bioalgocompare.egg-info/
+
+# Archivos de checkpoint
+*.pkl
+*.pkl.gz
+checkpoint.pkl
+
+# Directorios temporales de resultados
+results/test_*/
+results/validation_*/
+clei_submission_test/
+test_publication_full/
+sensitivity_test/
+validation_results/
+validation_logs/
+
+# Archivos HTML de cobertura
+**/coverage_html/
+htmlcov/
+
+# Archivos de salida temporales
+ho_phase_analysis.png
+cec2017_comparison_results.csv
+*.png
+!figures/*.png
+!docs/**/*.png
+
+# Archivos académicos (mantenidos en rama academic)
+academic/
+CLEI*.zip
+*thesis*
+*THESIS*
+*tesis*
+*TESIS*
+>>>>>>> develop

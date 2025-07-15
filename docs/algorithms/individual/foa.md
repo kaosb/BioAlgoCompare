@@ -55,11 +55,11 @@ Para t = 1 hasta T:
           rango_j = upper_bound[j] - lower_bound[j]
           xj_nueva = posición_actual[j] + (1 - 2*r_ij) * (rango_j / t)
         Aplicar restricciones de límites [0,1]
-      
+
       # Actualizar si hay mejora
       Si fitness(nueva_posición) ≤ fitness(posición_actual):
         Actualizar posición y fitness
-  
+
   Ordenar población por fitness
   Actualizar mejor solución global
   Registrar convergencia
@@ -157,7 +157,7 @@ convergence_curve = foa.get_convergence_curve()
 
 ## Referencias
 
-- Ramirez, J. A., & Gonçalves, T. (2024). *Fossa Optimization Algorithm: A Novel Nature-Inspired Metaheuristic Based on the Hunting Behavior of Madagascar's Top Predator*. Swarm and Evolutionary Computation, 77, 101210. doi: 10.1016/j.swevo.2023.101210
+- Hamadneh, T., Batiha, B., Werner, F., et al. (2024). *Fossa Optimization Algorithm: A New Bio-Inspired Metaheuristic Algorithm for Engineering Applications*. International Journal of Intelligent Engineering and Systems, 17(5), 78-95. doi: 10.22266/ijies2024.1031.78
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

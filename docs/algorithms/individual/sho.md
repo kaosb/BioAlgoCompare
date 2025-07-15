@@ -45,7 +45,7 @@ Para t = 1 hasta T:
     Para cada dimensión:
       Calcular A = 2a*r1 - a  # Vector de coeficiente
       Calcular C = 2*r2       # Vector de énfasis
-      
+
       Si |A| >= 1:  # Fase de exploración
         Seleccionar un líder aleatorio (alfa, beta o delta)
         D = |C*posición_líder - posición_hiena|
@@ -56,7 +56,7 @@ Para t = 1 hasta T:
         X2 = posición_beta - A*D_beta
         X3 = posición_delta - A*D_delta
         Nueva_posición = (X1 + X2 + X3)/3
-      
+
       Aplicar límites [0,1]
   Ordenar hienas por fitness
   Actualizar líderes alfa, beta y delta
@@ -158,7 +158,7 @@ convergence_curve = sho.get_convergence_curve()
 
 ## Referencias
 
-- Ahmed, S., & Moreno-García, C. F. (2024). *Spotted Hyena Optimizer: A Novel Bio-inspired Metaheuristic Algorithm for Global Optimization*. Applied Soft Computing, 128, 109728. doi: 10.1016/j.asoc.2023.109728
+- Dhiman, G., & Kumar, V. (2017). *Spotted hyena optimizer: A novel bio-inspired based metaheuristic technique for engineering applications*. Advances in Engineering Software, 114, 48-70. doi: 10.1016/j.advengsoft.2017.05.014
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

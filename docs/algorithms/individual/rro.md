@@ -11,9 +11,9 @@ El Raven Roosting Optimization (RRO) es un algoritmo bioinspirado propuesto por 
 ## Implementación y Mejoras
 
 - Implementado en Python siguiendo el pseudocódigo de la versión RRO0 del artículo.
-- Parámetros predeterminados (RRO0):  
-  - `Rpcpt = 3.6 * R * sqrt(D)`  
-  - `Npcpt = 10`, `Nsteps = 10`  
+- Parámetros predeterminados (RRO0):
+  - `Rpcpt = 3.6 * R * sqrt(D)`
+  - `Npcpt = 10`, `Nsteps = 10`
   - `Percfollow = 0.2`, `Pstop = 0.1`
 - Cada cuervo gestiona su `personal_best_position` y sigue al **LEADER** con probabilidad `Percfollow`.
 - Percepción local (`Npcpt`) y detención anticipada (`Pstop`) para mejorar eficiencia.

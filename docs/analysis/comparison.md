@@ -83,7 +83,7 @@ En base al comportamiento observado, podemos categorizar los algoritmos en 4 pat
 - FGO mejora rápidamente hasta 100 iteraciones, pero luego la calidad se deteriora
 
 ### Patrón 3: Inicio Lento, Mejora Tardía
-**Algoritmos**: SMA, APO 
+**Algoritmos**: SMA, APO
 - SMA muestra mejora modesta inicial (4.5%) pero aceleración notable entre 100-1000 (13.6%)
 - APO sigue patrón similar, con la mayor parte de mejora (14.9%) entre 100-1000 iteraciones
 

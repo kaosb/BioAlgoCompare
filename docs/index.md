@@ -12,15 +12,19 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 
 ### Guías de Usuario
 
-- [Inicio Rápido](guides/getting_started.md) - Primeros pasos con BioAlgoCompare
+- [Referencia de Comandos](COMMAND_REFERENCE.md) - Guía completa de comandos y uso
 - [Instalación](guides/installation.md) - Instrucciones detalladas de instalación
-- [Uso General](guides/usage.md) - Guía completa de uso del sistema
 - [Benchmarking](guides/benchmarking.md) - Instrucciones para ejecutar y analizar benchmarks
 
 ### Documentación Científica
 
 - [Reproducibilidad y Rigor Científico](scientific/reproducibility.md) - Garantías de reproducibilidad y rigor en experimentos
-- [Análisis Estadístico](scientific/statistical_analysis.md) - Metodología estadística detallada
+- [Metodología Estadística v2](STATISTICS.md) - **NUEVO** 🆕 Análisis estadístico con correcciones y mejoras
+  - Critical Distance (CD) corregido con q_α/√2
+  - Vargha-Delaney A12 y Cliff's delta
+  - Test de Quade como alternativa
+  - Ejemplos prácticos incluidos
+- [Análisis Estadístico v1](scientific/statistical_analysis.md) - Metodología estadística original
   - Test de Friedman alineado
   - Test post-hoc de Nemenyi
   - Tamaños de efecto A12 de Vargha-Delaney
@@ -61,7 +65,6 @@ Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para ev
 - [Flujo de Trabajo Git](development/git_workflow.md) - Guía del flujo de trabajo con Git
 - [Contribución](development/contribution.md) - Cómo contribuir al proyecto
 - [Requisitos Algorítmicos](development/algorithmic_requirements.md) - Requisitos para implementación de algoritmos
-- [Plan de Consolidación](development/consolidation_plan_revised.md) - Plan para la consolidación del proyecto
 
 ### Documentación Técnica
 
@@ -78,7 +81,7 @@ Los resultados de todas las ejecuciones experimentales se encuentran en el direc
 
 BioAlgoCompare es una plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados. Implementa benchmarking masivo (1000+ ejecuciones), análisis estadístico avanzado y visualizaciones científicas para comparar metaheurísticas en problemas de optimización. Incluye checkpointing, intervalos de confianza y tests no paramétricos para conclusiones estadísticamente significativas.
 
-El proyecto forma parte de una investigación académica para la Jornada Chilena de Computación 2025, cuyo objetivo es evaluar y comparar algoritmos bioinspirados recientes aplicados al Vehicle Routing Problem (VRP).
+El proyecto evalúa y compara algoritmos bioinspirados recientes aplicados al Vehicle Routing Problem (VRP), siguiendo las mejores prácticas de investigación reproducible en inteligencia computacional.
 
 ## Referencias
 
@@ -86,4 +89,4 @@ El proyecto forma parte de una investigación académica para la Jornada Chilena
 
 ---
 
-*Última actualización: 10 de mayo de 2025*
+*Última actualización: 9 de julio de 2025*

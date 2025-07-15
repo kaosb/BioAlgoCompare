@@ -34,36 +34,36 @@ class MetaheuristicAlgorithm(ABC):
         self.best_solution = None
         self.convergence_curve = []
         self.execution_time = 0
-        
+
         # Inicialización de generadores aleatorios
         if seed is not None:
             np.random.seed(seed)
             random.seed(seed)
-    
+
     @abstractmethod
     def initialize_population(self):
         """Inicializa la población con individuos aleatorios."""
         pass
-    
+
     @abstractmethod
     def update_population(self):
         """Actualiza la población según el algoritmo específico."""
         pass
-    
+
     def execute(self):
         """Ejecuta el algoritmo completo."""
         start_time = time.time()
-        
+
         try:
             # Inicializar población
             self.initialize_population()
-            
+
             # Actualizar población por max_iterations
             for i in range(self.max_iterations):
                 self.update_population()
-                
+
             return self.best_solution
-            
+
         finally:
             self.execution_time = time.time() - start_time
 ```
@@ -90,12 +90,12 @@ class Individual:
         self.dimension = problem.get_dimension()
         self.position = np.random.uniform(0, 1, self.dimension)
         self._fitness = None
-    
+
     def fitness(self):
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
-    
+
     def is_better_than(self, other):
         return self.fitness() < other.fitness()  # Minimización
 ```
@@ -111,17 +111,17 @@ class VRPProblem:
         self.nodes, self.capacity, self.demands = self.load_instance(instance_path)
         self.distance_matrix = self.compute_distance_matrix()
         self.optimal_value = self.get_optimal_value(instance_path)
-    
+
     def decode_solution(self, position):
         """Decodifica una solución continua a rutas discretas."""
         # Convertir posición continua a permutación
         permutation = np.argsort(position) + 1  # +1 porque el depósito es 0
-        
+
         # Construir rutas respetando restricciones de capacidad
         routes = []
         current_route = [0]  # Iniciar desde el depósito
         current_capacity = 0
-        
+
         for node in permutation:
             if current_capacity + self.demands[node] <= self.capacity:
                 current_route.append(node)
@@ -131,16 +131,16 @@ class VRPProblem:
                 routes.append(current_route)
                 current_route = [0, node]  # Nueva ruta
                 current_capacity = self.demands[node]
-        
+
         if len(current_route) > 1:
             current_route.append(0)  # Volver al depósito
             routes.append(current_route)
-        
+
         # Calcular distancia total
         total_distance = self.calculate_total_distance(routes)
-        
+
         return routes, total_distance, permutation
-    
+
     def evaluate(self, position):
         """Evalúa la calidad de una solución (menor es mejor)."""
         _, distance, _ = self.decode_solution(position)
@@ -178,12 +178,12 @@ El sistema de benchmarking (`utils/benchmarking.py`) proporciona:
 ```python
 def run_benchmark(algorithms, instances, runs=5, iterations=100, population=30, seed=42, parallel=False):
     results = []
-    
+
     # Procesar cada combinación algoritmo-instancia
-    combinations = [(algo_name, algo_class, instance) 
-                   for algo_name, algo_class in algorithms.items() 
+    combinations = [(algo_name, algo_class, instance)
+                   for algo_name, algo_class in algorithms.items()
                    for instance in instances]
-    
+
     if parallel:
         # Ejecutar en paralelo
         with mp.Pool() as pool:
@@ -200,7 +200,7 @@ def run_benchmark(algorithms, instances, runs=5, iterations=100, population=30, 
                 algo_name, algo_class, instance, runs, iterations, population, seed
             )
             results.append(result)
-    
+
     return results
 ```
 

@@ -1,0 +1,66 @@
+{
+  "analysis_date": "2025-07-11T21:47:14.544730",
+  "instance": "data/vrp/P-n16-k8.vrp",
+  "n_configurations": 72,
+  "parameter_ranges": {
+    "alpha": [
+      0.1,
+      0.9
+    ],
+    "beta": [
+      0.2,
+      0.8
+    ],
+    "gamma": [
+      0.3,
+      1.0
+    ]
+  },
+  "best_configs": [
+    {
+      "alpha": 0.1,
+      "beta": 0.5,
+      "gamma": 0.65,
+      "fitness": 450.582738571914,
+      "on_time_rate": 0.3313908714269535,
+      "load_variation": 0.14461615231322966,
+      "score": -0.8132252808862761
+    },
+    {
+      "alpha": 0.2,
+      "beta": 0.5,
+      "gamma": 0.65,
+      "fitness": 450.582738571914,
+      "on_time_rate": 0.3313908714269535,
+      "load_variation": 0.14461615231322966,
+      "score": -0.8132252808862761
+    },
+    {
+      "alpha": 0.30000000000000004,
+      "beta": 0.5,
+      "gamma": 0.65,
+      "fitness": 450.582738571914,
+      "on_time_rate": 0.3313908714269535,
+      "load_variation": 0.14461615231322966,
+      "score": -0.8132252808862761
+    },
+    {
+      "alpha": 0.4,
+      "beta": 0.5,
+      "gamma": 0.65,
+      "fitness": 450.582738571914,
+      "on_time_rate": 0.3313908714269535,
+      "load_variation": 0.14461615231322966,
+      "score": -0.8132252808862761
+    },
+    {
+      "alpha": 0.5,
+      "beta": 0.2,
+      "gamma": 0.65,
+      "fitness": 450.582738571914,
+      "on_time_rate": 0.3313908714269535,
+      "load_variation": 0.14461615231322966,
+      "score": -0.8132252808862761
+    }
+  ]
+}

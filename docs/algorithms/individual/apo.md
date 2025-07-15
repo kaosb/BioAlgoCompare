@@ -160,7 +160,7 @@ convergence_curve = apo.get_convergence_curve()
 
 ## Referencias
 
-- Chen, J., Xie, Q., & Zeng, J. (2024). *Artificial Protozoa Optimizer: A Novel Bio-inspired Algorithm for Global Optimization Problems*. Information Sciences, 642, 119-138. doi: 10.1016/j.ins.2023.12.017
+- Wang, X., Snášel, V., Mirjalili, S., et al. (2024). *Artificial Protozoa Optimizer (APO): A novel bio-inspired metaheuristic algorithm for engineering optimization*. Knowledge-Based Systems, 295, 111737. doi: 10.1016/j.knosys.2024.111737
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 

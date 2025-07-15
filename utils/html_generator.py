@@ -241,7 +241,8 @@ def generate_html_report(
             try:
                 if posthoc_matrix.loc[best_algo, algo_j] >= alpha:
                     not_diff_from_best.append(algo_j)
-            except:
+            except (KeyError, IndexError):
+                # Algorithm might not be in the matrix
                 continue
 
         if not_diff_from_best:

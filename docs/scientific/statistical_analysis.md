@@ -33,19 +33,19 @@ El sistema `utils/statistical_analysis.py` implementa automáticamente:
 def analyze_results(benchmark_data):
     # 1. Prueba de normalidad
     is_normal = test_normality(benchmark_data)
-    
+
     # 2. Selección de prueba apropiada
     if is_normal:
         p_value = parametric_test(benchmark_data)
     else:
         p_value = non_parametric_test(benchmark_data)
-    
+
     # 3. Corrección para comparaciones múltiples
     adjusted_p = correction_method(p_value)
-    
+
     # 4. Cálculo de tamaño del efecto
     effect_size = calculate_effect_size(benchmark_data)
-    
+
     return StatisticalResults(p_value, adjusted_p, effect_size)
 ```
 
@@ -142,10 +142,10 @@ from scipy import stats
 def anova_test(benchmark_data):
     # Agrupar datos por algoritmo
     groups = [data for alg, data in benchmark_data.items()]
-    
+
     # Aplicar ANOVA
     anova_result = stats.f_oneway(*groups)
-    
+
     return {
         'statistic': anova_result.statistic,
         'p_value': anova_result.pvalue,
@@ -157,7 +157,7 @@ def anova_test(benchmark_data):
 
 - **Hipótesis nula (H₀)**: No hay diferencias significativas entre los algoritmos
 - **Hipótesis alternativa (H₁)**: Al menos un algoritmo es significativamente diferente
-- **Decisión**: 
+- **Decisión**:
   - Si p ≤ 0.05: Rechazar H₀, existen diferencias significativas
   - Si p > 0.05: No rechazar H₀, no hay evidencia de diferencias significativas
 
@@ -356,29 +356,29 @@ import numpy as np
 def wilcoxon_tests_with_bonferroni(benchmark_data):
     algorithms = list(benchmark_data.keys())
     n_comparisons = len(algorithms) * (len(algorithms) - 1) // 2
-    
+
     results = {}
-    
+
     for i in range(len(algorithms)):
         for j in range(i+1, len(algorithms)):
             alg1, alg2 = algorithms[i], algorithms[j]
-            
+
             # Test de Wilcoxon
             w_stat, p_value = stats.wilcoxon(
                 benchmark_data[alg1],
                 benchmark_data[alg2]
             )
-            
+
             # Corrección de Bonferroni
             adjusted_p = min(p_value * n_comparisons, 1.0)
-            
+
             results[(alg1, alg2)] = {
                 'w_statistic': w_stat,
                 'p_value': p_value,
                 'adjusted_p': adjusted_p,
                 'significant': adjusted_p <= 0.05
             }
-    
+
     return results
 ```
 
@@ -535,10 +535,10 @@ def cliffs_delta(data1, data2):
     d = (#{X > Y} - #{X < Y}) / (m*n)
     """
     m, n = len(data1), len(data2)
-    
+
     larger = sum(x > y for x in data1 for y in data2)
     smaller = sum(x < y for x in data1 for y in data2)
-    
+
     return (larger - smaller) / (m * n)
 ```
 
@@ -565,7 +565,7 @@ def confidence_interval(data, confidence=0.95):
     mean = np.mean(data)
     sem = stats.sem(data)  # Error estándar de la media
     h = sem * stats.t.ppf((1 + confidence) / 2, n - 1)
-    
+
     return mean - h, mean + h
 ```
 
@@ -579,10 +579,10 @@ def bootstrap_confidence_interval(data, confidence=0.95, n_resamples=10000):
     n = len(data)
     resamples = np.random.choice(data, (n_resamples, n), replace=True)
     means = np.mean(resamples, axis=1)
-    
+
     lower = np.percentile(means, (1 - confidence) * 100 / 2)
     upper = np.percentile(means, 100 - (1 - confidence) * 100 / 2)
-    
+
     return lower, upper
 ```
 
@@ -601,18 +601,18 @@ BioAlgoCompare implementa visualizaciones estadísticas avanzadas para interpret
 ```python
 def create_boxplot_with_notches(benchmark_data):
     fig, ax = plt.subplots(figsize=(12, 6))
-    
+
     data = [values for alg, values in benchmark_data.items()]
     labels = list(benchmark_data.keys())
-    
+
     box = ax.boxplot(
         data, labels=labels, notch=True, patch_artist=True,
         showmeans=True, meanprops={'marker':'o', 'markerfacecolor':'white'}
     )
-    
+
     ax.set_ylabel('Fitness (menor es mejor)')
     ax.set_title('Comparación de algoritmos con intervalos de confianza (notches)')
-    
+
     return fig
 ```
 
@@ -862,16 +862,16 @@ def generate_markdown_report(results, score_column, output_path):
 ```python
 def plot_convergence_with_intervals(convergence_data):
     fig, ax = plt.subplots(figsize=(10, 6))
-    
+
     for algorithm, curves in convergence_data.items():
         # Calcular media y desviación estándar por iteración
         mean_curve = np.mean(curves, axis=0)
         std_curve = np.std(curves, axis=0)
-        
+
         # Plotear media
         line = ax.plot(mean_curve, label=algorithm)
         color = line[0].get_color()
-        
+
         # Añadir intervalo de confianza
         ax.fill_between(
             range(len(mean_curve)),
@@ -879,11 +879,11 @@ def plot_convergence_with_intervals(convergence_data):
             mean_curve + 1.96 * std_curve / np.sqrt(len(curves)),
             alpha=0.2, color=color
         )
-    
+
     ax.set_xlabel('Iteraciones')
     ax.set_ylabel('Fitness (menor es mejor)')
     ax.legend()
-    
+
     return fig
 ```
 
@@ -914,15 +914,15 @@ def plot_convergence_with_intervals(convergence_data):
 ### Ejemplo de Interpretación Completa
 
 ```
-Resultado: El test de Friedman indica diferencias significativas entre los algoritmos (p < 0.001). 
-Las pruebas post-hoc muestran que EGTO supera significativamente a FOA y WOA (p_adj < 0.01), 
-con un tamaño de efecto grande (A12 = 0.78 y 0.82, respectivamente). El algoritmo HOA no 
-presenta diferencias significativas con EGTO (p_adj = 0.14), pero sí supera a WOA 
+Resultado: El test de Friedman indica diferencias significativas entre los algoritmos (p < 0.001).
+Las pruebas post-hoc muestran que EGTO supera significativamente a FOA y WOA (p_adj < 0.01),
+con un tamaño de efecto grande (A12 = 0.78 y 0.82, respectivamente). El algoritmo HOA no
+presenta diferencias significativas con EGTO (p_adj = 0.14), pero sí supera a WOA
 (p_adj < 0.05, A12 = 0.67).
 
-Conclusión: EGTO y HOA constituyen el grupo de algoritmos con mejor desempeño, con EGTO 
-mostrando una ligera ventaja no estadísticamente significativa. Ambos superan claramente 
-a FOA y WOA con diferencias tanto estadísticamente significativas como de magnitud 
+Conclusión: EGTO y HOA constituyen el grupo de algoritmos con mejor desempeño, con EGTO
+mostrando una ligera ventaja no estadísticamente significativa. Ambos superan claramente
+a FOA y WOA con diferencias tanto estadísticamente significativas como de magnitud
 práctica relevante.
 ```
 

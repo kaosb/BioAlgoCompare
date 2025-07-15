@@ -46,10 +46,10 @@ Para t = 1 hasta T:
   MPo = 10% de la población (mejores)
   MPr = aleatorio * población * (1 - MPo/población)
   MPt = población - MPo - MPr (peores)
-  
+
   # Ordenar población
   Ordenar flamencos por fitness
-  
+
   # Mejores flamencos (migración)
   Para i = 0 hasta MPo-1:
     Para cada dimensión j:
@@ -58,7 +58,7 @@ Para t = 1 hasta T:
       x_nueva[j] = posición_actual[j] + delta
       Aplicar restricciones de límites [0,1]
     Actualizar si hay mejora
-  
+
   # Flamencos intermedios (forrajeo)
   Para i = MPo hasta MPo+MPr-1:
     Para cada dimensión j:
@@ -72,11 +72,11 @@ Para t = 1 hasta T:
       x_nueva[j] = posición_actual[j] + delta
       Aplicar restricciones de límites [0,1]
     Actualizar si hay mejora
-  
+
   # Peores flamencos (migración forzada)
   Para i = MPo+MPr hasta población-1:
     [Mismo proceso que migración]
-  
+
   Ordenar población por fitness
   Actualizar mejor solución global
   Registrar convergencia
@@ -174,7 +174,7 @@ convergence_curve = fsa.get_convergence_curve()
 
 ## Referencias
 
-- Askari, M., & Naghizadeh, F. (2021). *Flamingo Search Algorithm: A Novel Bio-Inspired Metaheuristic for Global Optimization*. IEEE Access, 9, 125232-125249. doi: 10.1109/ACCESS.2021.3110279
+- Wang, Z., & Liu, J. (2021). *Flamingo Search Algorithm: A New Swarm Intelligence Optimization Algorithm*. IEEE Access, 9, 85975-85993. doi: 10.1109/ACCESS.2021.3086023
 
 - Para análisis comparativo con otros algoritmos, consulte: [Análisis Comparativo Exhaustivo](../../analysis/comparison.md)
 
