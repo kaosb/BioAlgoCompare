@@ -131,6 +131,9 @@ texput.*
 !docs/papers/cisti_v1/main.pdf
 !docs/papers/cisti_v2/main.pdf
 
+# Runtime logs
+experiment_log.txt
+
 # Archivos temporales y de sistema
 .DS_Store
 ._.DS_Store
