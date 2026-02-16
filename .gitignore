@@ -150,24 +150,23 @@ analyze.log
 benchmark.log
 massive_benchmark.log
 
-<<<<<<< HEAD
 # Legacy code (for reference only)
 /legacy/
-# Note: We track legacy files in git but exclude them from active development
 
 # Temporary and experimental directories
 /temp/
 /experimental/
-
-# Results and exports directories 
 /exports/
-=======
+
 # Archivos patch (ya aplicados)
 *.patch
 
-# Directorio de tesis (mantenido solo localmente en rama tesis)
+# Directorio de tesis (NO pertenece al repo publico)
 /tesis/
 tesis/
+
+# Propuesta de tesis (archivos privados)
+ref/propuesta_tesis*
 
 # Directorios de instalación
 *.egg-info/
@@ -205,4 +204,3 @@ CLEI*.zip
 *THESIS*
 *tesis*
 *TESIS*
->>>>>>> develop
