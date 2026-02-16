@@ -28,6 +28,8 @@ from algorithms.gvoa import GVOA
 from algorithms.ho import HO
 from algorithms.pso import PSO
 from algorithms.ga import GA
+from algorithms.ssa import SSA
+from algorithms.gwo import GWO
 
 
 # Algorithm registry: name -> (class, full_name, year)
@@ -50,6 +52,9 @@ ALGORITHMS: Dict[str, Tuple[Type[MetaheuristicAlgorithm], str, int]] = {
     "smo": (SMO, "Starling Murmuration Optimizer", 2022),
     "gvoa": (GVOA, "Griffon Vultures Optimization Algorithm", 2025),
     "ho": (HO, "Hippopotamus Optimization", 2024),
+    # Modern bio-inspired algorithms
+    "ssa": (SSA, "Salp Swarm Algorithm", 2017),
+    "gwo": (GWO, "Grey Wolf Optimizer", 2014),
     # Classical algorithms for comparison
     "pso": (PSO, "Particle Swarm Optimization", 1995),
     "ga": (GA, "Genetic Algorithm", 1975),

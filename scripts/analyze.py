@@ -1003,5 +1003,32 @@ def convert(json_file, csv_file):
         logger.error(f"Error converting JSON to CSV: {e}")
 
 
+@cli.command()
+@click.option("--test", is_flag=True, help="Quick test (1 run per algorithm)")
+@click.option("--full", is_flag=True, help="Full experiment (30 runs per algorithm)")
+@click.option("--runs", "-r", default=None, type=int, help="Custom number of runs")
+@click.option("--algorithms", "-a", default=None, help="Comma-separated algorithm names")
+@click.option("--output-dir", "-o", default=None, help="Output directory")
+@click.option("--analyze", "analyze_path", type=click.Path(exists=True), help="Analyze existing results JSON")
+@click.pass_context
+def dvrp(ctx, test, full, runs, algorithms, output_dir, analyze_path):
+    """Run QC-DVRP experiments for IWINAC 2026 paper."""
+    import subprocess
+    cmd = [sys.executable, os.path.join(os.path.dirname(__file__), "run_dvrp_experiments.py")]
+    if test:
+        cmd.append("--test")
+    elif full:
+        cmd.append("--full")
+    elif runs:
+        cmd.extend(["--runs", str(runs)])
+    if algorithms:
+        cmd.extend(["--algorithms", algorithms])
+    if output_dir:
+        cmd.extend(["--output-dir", output_dir])
+    if analyze_path:
+        cmd.extend(["--analyze", analyze_path])
+    subprocess.run(cmd)
+
+
 if __name__ == "__main__":
     cli()

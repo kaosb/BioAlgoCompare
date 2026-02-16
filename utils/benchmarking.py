@@ -1187,3 +1187,94 @@ QC_OPTIMAL_VALUES.update(
         "Solomon-RC108": 1139.82,
     }
 )
+
+
+class DVRPBenchmarkResult:
+    """Store and analyze QC-DVRP simulation results across multiple runs.
+
+    Collects ADT (Average Delivery Time), DSR (Delivery Success Rate),
+    and WBI (Workload Balance Index) metrics per run, along with
+    tricriterion fitness and execution times.
+    """
+
+    def __init__(self, algorithm_name: str, n_runs: int = 30):
+        self.algorithm_name = algorithm_name
+        self.n_runs = n_runs
+
+        # Metrics per run
+        self.adt_values = []     # Average Delivery Time (minutes)
+        self.dsr_values = []     # Delivery Success Rate (%)
+        self.wbi_values = []     # Workload Balance Index
+        self.fitness_values = [] # Tricriterion Z
+        self.execution_times = []
+        self.total_orders = []
+        self.completed_orders = []
+
+    def add_run(self, result: dict):
+        """Add results from a single simulation run.
+
+        Args:
+            result: Dictionary from QCDVRPSimulator.run_simulation()
+        """
+        self.adt_values.append(result["adt"])
+        self.dsr_values.append(result["dsr"])
+        self.wbi_values.append(result["wbi"])
+        self.fitness_values.append(result["fitness"])
+        self.execution_times.append(result["execution_time"])
+        self.total_orders.append(result["total_orders"])
+        self.completed_orders.append(result["completed_orders"])
+
+    def compute_metrics(self) -> dict:
+        """Compute summary statistics across all runs."""
+        if not self.adt_values:
+            return {}
+
+        def _stats(values):
+            arr = np.array([v for v in values if v != float("inf")])
+            if len(arr) == 0:
+                return {"mean": float("inf"), "std": 0, "min": float("inf"), "max": float("inf")}
+            return {
+                "mean": float(np.mean(arr)),
+                "std": float(np.std(arr)),
+                "min": float(np.min(arr)),
+                "max": float(np.max(arr)),
+            }
+
+        return {
+            "algorithm": self.algorithm_name,
+            "runs": len(self.adt_values),
+            "adt": _stats(self.adt_values),
+            "dsr": _stats(self.dsr_values),
+            "wbi": _stats(self.wbi_values),
+            "fitness": _stats(self.fitness_values),
+            "execution_time": _stats(self.execution_times),
+            "total_orders_avg": float(np.mean(self.total_orders)) if self.total_orders else 0,
+            "completed_orders_avg": float(np.mean(self.completed_orders)) if self.completed_orders else 0,
+        }
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization."""
+        metrics = self.compute_metrics()
+        metrics["detailed_results"] = {
+            "adt_values": self.adt_values,
+            "dsr_values": self.dsr_values,
+            "wbi_values": self.wbi_values,
+            "fitness_values": self.fitness_values,
+            "execution_times": self.execution_times,
+        }
+        return metrics
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "DVRPBenchmarkResult":
+        """Create from dictionary."""
+        result = cls(data["algorithm"], data.get("runs", 30))
+        detailed = data.get("detailed_results", {})
+
+        for i in range(len(detailed.get("adt_values", []))):
+            result.adt_values.append(detailed["adt_values"][i])
+            result.dsr_values.append(detailed["dsr_values"][i])
+            result.wbi_values.append(detailed["wbi_values"][i])
+            result.fitness_values.append(detailed["fitness_values"][i])
+            result.execution_times.append(detailed["execution_times"][i])
+
+        return result

@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Algorithms](https://img.shields.io/badge/algorithms-19-orange)](algorithms/)
+[![Algorithms](https://img.shields.io/badge/algorithms-21-orange)](algorithms/)
 [![Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)](tests/)
 [![Tests](https://img.shields.io/badge/tests-759%20passed-brightgreen)](tests/)
 
@@ -523,7 +523,7 @@ python scripts/tools/compare_cec_benchmarks.py
 
 ## 🧪 Algoritmos Implementados
 
-El proyecto implementa **19 algoritmos metaheurísticos únicos** (17 bioinspirados + 2 clásicos de comparación):
+El proyecto implementa **21 algoritmos metaheurísticos únicos** (19 bioinspirados + 2 clásicos de comparación):
 
 | Algoritmo | Nombre Completo | Año | Inspiración |
 |-----------|-----------------|-----|-------------|
@@ -544,6 +544,8 @@ El proyecto implementa **19 algoritmos metaheurísticos únicos** (17 bioinspira
 | **smo** | Starling Murmuration Optimizer | 2022 | Bandadas de estorninos |
 | **gvoa** | Griffon Vultures Optimization | 2025 | Vuelo termal de buitres |
 | **ho** | Hippopotamus Optimizer | 2024 | Comportamiento territorial |
+| **ssa** | Salp Swarm Algorithm | 2017 | Cadenas de salpas marinas |
+| **gwo** | Grey Wolf Optimizer | 2014 | Jerarquía de manada de lobos |
 | **pso** | Particle Swarm Optimization | 1995 | Movimiento de partículas (clásico) |
 | **ga** | Genetic Algorithm | 1975 | Evolución natural (clásico) |
 

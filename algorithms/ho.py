@@ -110,6 +110,9 @@ class HO(MetaheuristicAlgorithm):
         seed: int = None,
         use_il: bool = False,
         il_model_path: str = None,
+        alpha_fixed: float = None,
+        beta_fixed: float = None,
+        gamma_fixed: float = None,
     ):
         """
         Inicializa el algoritmo HO.
@@ -121,8 +124,16 @@ class HO(MetaheuristicAlgorithm):
             seed: Semilla para reproducibilidad
             use_il: Si usar Imitation Learning para parámetros dinámicos
             il_model_path: Ruta al modelo IL entrenado
+            alpha_fixed: Valor fijo de alpha (None = adaptativo)
+            beta_fixed: Valor fijo de beta (None = adaptativo)
+            gamma_fixed: Valor fijo de gamma (None = adaptativo)
         """
         super().__init__(problem, population_size, max_iterations, seed)
+
+        # Fixed parameters (for paper experiments)
+        self.alpha_fixed = alpha_fixed
+        self.beta_fixed = beta_fixed
+        self.gamma_fixed = gamma_fixed
 
         # Parámetros del algoritmo según el paper
         self.alpha_min = 0.1
@@ -226,10 +237,21 @@ class HO(MetaheuristicAlgorithm):
                 beta = self.beta_max - (self.beta_max - self.beta_min) * progress
                 gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
         else:
-            # Actualizar parámetros adaptativos estándar
-            alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
-            beta = self.beta_max - (self.beta_max - self.beta_min) * progress
-            gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
+            # Use fixed parameters if provided, otherwise adaptive
+            if self.alpha_fixed is not None:
+                alpha = self.alpha_fixed
+            else:
+                alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
+
+            if self.beta_fixed is not None:
+                beta = self.beta_fixed
+            else:
+                beta = self.beta_max - (self.beta_max - self.beta_min) * progress
+
+            if self.gamma_fixed is not None:
+                gamma = self.gamma_fixed
+            else:
+                gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
 
         # Determinar fase basada en progreso y fitness
         avg_fitness = np.mean([h.fitness() for h in self.population])
