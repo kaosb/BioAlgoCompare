@@ -377,11 +377,6 @@ class TestQCDVRPFitness:
         problem.dimension = 3
         problem.compute_distance_matrix()
 
-        orders = [
-            Order(0, (1, 0), 5, 0.0, 0.0, 60.0),
-            Order(1, (0, 1), 5, 0.0, 0.0, 60.0),
-        ]
-
         # Ruta con nodos validos primero, luego nodo invalido (999)
         # Para cubrir linea 408: necesitamos que prev_node o node esten fuera de rango
         # La condicion es: prev_node < shape[0] AND node < shape[0]
@@ -481,8 +476,6 @@ class TestQCDVRPRunSimulation:
         mock_algo_class = MagicMock(return_value=mock_algo_instance)
 
         # Interceptar _simulate_deliveries para que deje ordenes pendientes
-        original_sim_deliveries = sim._simulate_deliveries
-
         def partial_deliveries(store_id, routes, current_time):
             # No hacer nada: las ordenes quedan pendientes
             pass
