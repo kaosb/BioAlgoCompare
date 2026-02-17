@@ -188,11 +188,11 @@ class TestQCDVRPSimulator:
             break
 
 
-class TestHOFixedParams:
-    """Tests for HO with fixed alpha/beta parameters."""
+class TestHOLegacyParams:
+    """Tests for HO accepting legacy parameters (backward compatibility)."""
 
-    def test_fixed_params_accepted(self):
-        """HO should accept alpha_fixed and beta_fixed."""
+    def test_legacy_params_accepted(self):
+        """HO should accept alpha_fixed and beta_fixed without error."""
         from algorithms.ho import HO
 
         class SimpleProblem:
@@ -210,11 +210,12 @@ class TestHOFixedParams:
             alpha_fixed=0.5,
             beta_fixed=0.2,
         )
-        assert ho.alpha_fixed == 0.5
-        assert ho.beta_fixed == 0.2
+        # Legacy params are accepted but ignored (HO is parameter-free)
+        best = ho.execute()
+        assert best.fitness() >= 0
 
-    def test_fixed_vs_adaptive(self):
-        """HO with fixed params should behave differently from adaptive."""
+    def test_legacy_params_same_result(self):
+        """HO with/without legacy params should produce identical results (params are ignored)."""
         from algorithms.ho import HO
 
         class SimpleProblem:
@@ -225,7 +226,7 @@ class TestHOFixedParams:
 
         problem = SimpleProblem()
 
-        ho_fixed = HO(
+        ho_with = HO(
             problem,
             population_size=10,
             max_iterations=20,
@@ -233,16 +234,15 @@ class TestHOFixedParams:
             alpha_fixed=0.5,
             beta_fixed=0.2,
         )
-        best_fixed = ho_fixed.execute()
+        best_with = ho_with.execute()
 
-        ho_adaptive = HO(
+        ho_without = HO(
             problem,
             population_size=10,
             max_iterations=20,
             seed=42,
         )
-        best_adaptive = ho_adaptive.execute()
+        best_without = ho_without.execute()
 
-        # Both should produce valid results
-        assert best_fixed.fitness() >= 0
-        assert best_adaptive.fitness() >= 0
+        # Both should produce identical results (legacy params are ignored)
+        assert best_with.fitness() == best_without.fitness()
