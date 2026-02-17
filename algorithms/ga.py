@@ -16,9 +16,11 @@ Key concepts:
 References:
     Holland, J. H. (1975). Adaptation in natural and artificial systems.
     Goldberg, D. E. (1989). Genetic algorithms in search, optimization, and machine learning.
+    Bean, J. C. (1994). Genetic algorithms and random keys for sequencing and optimization.
+        ORSA Journal on Computing, 6(2), 154-160.
 
-This implementation uses order-based encoding suitable for VRP with specialized
-crossover and mutation operators that preserve valid routes.
+This implementation uses random-key encoding [0,1] for VRP with uniform crossover
+(Bean 1994) and swap mutation, suitable for permutation-decoded problems.
 """
 
 import numpy as np
@@ -60,8 +62,10 @@ class Chromosome(Individual):
 
     def crossover(self, other: 'Chromosome') -> Tuple['Chromosome', 'Chromosome']:
         """
-        Order Crossover (OX) for permutation representation.
-        Preserves relative order of cities from parents.
+        Uniform Crossover for random-key representation (Bean, 1994).
+
+        Each gene is independently inherited from one parent with equal
+        probability. This is the standard crossover for RKGA.
 
         Args:
             other: Another chromosome to crossover with
@@ -73,34 +77,16 @@ class Chromosome(Individual):
         offspring1 = Chromosome(self.dimension, self.problem, rng=self.rng)
         offspring2 = Chromosome(self.dimension, self.problem, rng=self.rng)
 
-        # Select crossover points
-        point1 = int(self.rng.integers(0, self.dimension - 1))
-        point2 = int(self.rng.integers(point1 + 1, self.dimension))
+        # Uniform crossover: for each gene, inherit from parent A or B
+        mask = self.rng.random(self.dimension) < 0.5
+        offspring1.position = np.where(mask, self.position, other.position)
+        offspring2.position = np.where(mask, other.position, self.position)
 
-        # Copy segment from parents
-        offspring1.position[point1:point2] = self.position[point1:point2]
-        offspring2.position[point1:point2] = other.position[point1:point2]
-
-        # Fill remaining positions preserving order
-        self._fill_offspring(offspring1.position, other.position, point1, point2)
-        self._fill_offspring(offspring2.position, self.position, point1, point2)
+        # Reset fitness cache
+        offspring1._fitness = None
+        offspring2._fitness = None
 
         return offspring1, offspring2
-
-    def _fill_offspring(self, offspring: np.ndarray, parent: np.ndarray,
-                       start: int, end: int) -> None:
-        """Fill remaining positions in offspring preserving order from parent."""
-        # Get values not in the copied segment
-        segment_values = set(offspring[start:end])
-        remaining_values = [v for v in parent if v not in segment_values]
-
-        # Fill positions before and after segment
-        fill_idx = 0
-        for i in range(self.dimension):
-            if i < start or i >= end:
-                if fill_idx < len(remaining_values):
-                    offspring[i] = remaining_values[fill_idx]
-                    fill_idx += 1
 
     def mutate(self, mutation_rate: float = 0.01) -> None:
         """
@@ -125,7 +111,7 @@ class GA(MetaheuristicAlgorithm):
 
     GA evolves a population of solutions using selection, crossover, and mutation
     operators inspired by natural evolution. This implementation uses tournament
-    selection and order crossover suitable for permutation-based problems.
+    selection and uniform crossover suitable for random-key encoded problems.
     """
 
     def __init__(self, problem: Any, population_size: int = 50,
@@ -176,13 +162,6 @@ class GA(MetaheuristicAlgorithm):
 
         self.convergence_curve.append(self.best_solution.fitness())
 
-        # Adaptive mutation rate
-        fitness_values = [ind.fitness() for ind in self.population]
-        if np.std(fitness_values) < 1.0:
-            self.mutation_rate = min(0.2, self.mutation_rate * 1.1)
-        else:
-            self.mutation_rate = max(0.01, self.mutation_rate * 0.95)
-
     def tournament_selection(self) -> Chromosome:
         """
         Tournament selection: randomly select k individuals and return the best.
@@ -217,7 +196,7 @@ class GA(MetaheuristicAlgorithm):
             if self.rng.random() < self.crossover_rate:
                 offspring1, offspring2 = parent1.crossover(parent2)
             else:
-                # No crossover, copy parents (without consuming RNG state)
+                # No crossover, copy parents
                 offspring1 = object.__new__(Chromosome)
                 offspring1.dimension = parent1.dimension
                 offspring1.problem = parent1.problem
