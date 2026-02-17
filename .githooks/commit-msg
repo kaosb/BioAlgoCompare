@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Hook commit-msg: ejecuta pre-commit framework si está disponible
+
+ARGS=(hook-impl --config=.pre-commit-config.yaml --hook-type=commit-msg)
+ARGS+=(--hook-dir "$(cd "$(dirname "$0")" && pwd)" -- "$@")
+
+if command -v pre-commit > /dev/null; then
+    exec pre-commit "${ARGS[@]}"
+fi
+
+exit 0

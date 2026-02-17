@@ -1,0 +1,72 @@
+#!/bin/bash
+# Git hook post-checkout para el proyecto BioAlgoCompare
+# Muestra recordatorios al cambiar de rama
+
+# Verificar si es un cambio de rama (no un checkout de archivo)
+# $1 = previous HEAD, $2 = new HEAD, $3 = 1 if branch checkout, 0 if file checkout
+if [[ "$3" == "1" ]]; then
+    NEW_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    
+    if [[ "$NEW_BRANCH" == "tesis" ]]; then
+        echo ""
+        echo "📚 ¡Bienvenido a la rama 'tesis'!"
+        echo ""
+        echo "En esta rama puedes:"
+        echo "  ✓ Modificar archivos en /tesis/"
+        echo "  ✓ Actualizar documentación de tesis"
+        echo "  ✓ Trabajar en LaTeX y presentaciones"
+        echo ""
+        echo "Recuerda:"
+        echo "  • Los cambios al código deben hacerse en 'develop'"
+        echo "  • Usa 'git checkout develop' para volver al código"
+        echo ""
+        
+        # Verificar si hay archivos de tesis
+        if [[ -d "tesis" ]]; then
+            TESIS_FILES=$(find tesis -type f | wc -l)
+            echo "📁 Directorio /tesis/ contiene $TESIS_FILES archivos"
+        fi
+        
+    elif [[ "$NEW_BRANCH" == "academic" ]]; then
+        echo ""
+        echo "🎓 ¡Bienvenido a la rama 'academic'!"
+        echo ""
+        echo "En esta rama puedes:"
+        echo "  ✓ Modificar papers en /academic/papers/"
+        echo "  ✓ Actualizar scripts de publicación"
+        echo "  ✓ Trabajar en material de conferencias"
+        echo ""
+        echo "Recuerda:"
+        echo "  • Los cambios al código deben hacerse en 'develop'"
+        echo "  • Usa 'git checkout develop' para volver al código"
+        echo ""
+        
+        # Verificar si hay archivos académicos
+        if [[ -d "academic" ]]; then
+            ACADEMIC_FILES=$(find academic -type f | wc -l)
+            echo "📁 Directorio /academic/ contiene $ACADEMIC_FILES archivos"
+        fi
+        
+    elif [[ "$NEW_BRANCH" == "develop" || "$NEW_BRANCH" == "main" || "$NEW_BRANCH" == "master" ]]; then
+        echo ""
+        echo "💻 Ahora en rama '$NEW_BRANCH' - Desarrollo de código"
+        echo ""
+        echo "En esta rama NO deberías tener archivos en /tesis/ ni /academic/"
+        
+        # Verificar si hay archivos de tesis que no deberían estar aquí
+        if [[ -d "tesis" ]] && [[ "$NEW_BRANCH" != "tesis" ]]; then
+            echo ""
+            echo "⚠️  Advertencia: Directorio /tesis/ encontrado en rama '$NEW_BRANCH'"
+            echo "   Este directorio solo debería existir en la rama 'tesis'"
+        fi
+        
+        # Verificar si hay archivos académicos que no deberían estar aquí
+        if [[ -d "academic" ]] && [[ "$NEW_BRANCH" != "academic" ]]; then
+            echo ""
+            echo "⚠️  Advertencia: Directorio /academic/ encontrado en rama '$NEW_BRANCH'"
+            echo "   Este directorio solo debería existir en la rama 'academic'"
+        fi
+    fi
+fi
+
+exit 0

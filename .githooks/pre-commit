@@ -1,0 +1,112 @@
+#!/bin/bash
+# Git hook pre-commit para el proyecto BioAlgoCompare
+# Previene que archivos de tesis/academic se commiteen en ramas incorrectas
+
+# Obtener la rama actual
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Si no estamos en la rama 'tesis' ni 'academic'
+if [[ "$CURRENT_BRANCH" != "tesis" ]] && [[ "$CURRENT_BRANCH" != "academic" ]]; then
+    # Verificar si hay archivos de tesis en el commit
+    TESIS_FILES=$(git diff --cached --name-only | grep "^tesis/")
+    
+    if [[ -n "$TESIS_FILES" ]]; then
+        echo "❌ Error: Archivos de tesis detectados en rama '$CURRENT_BRANCH'"
+        echo ""
+        echo "Los siguientes archivos solo pueden commitearse en la rama 'tesis':"
+        echo "$TESIS_FILES" | sed 's/^/  - /'
+        echo ""
+        echo "Para commitear estos archivos:"
+        echo "  1. git stash          (guardar cambios temporalmente)"
+        echo "  2. git checkout tesis (cambiar a rama tesis)"
+        echo "  3. git stash pop      (recuperar cambios)"
+        echo "  4. git add ...        (agregar archivos)"
+        echo "  5. git commit         (commitear en rama tesis)"
+        echo ""
+        exit 1
+    fi
+    
+    # Verificar si hay archivos academic en el commit
+    ACADEMIC_FILES=$(git diff --cached --name-only | grep "^academic/")
+    
+    if [[ -n "$ACADEMIC_FILES" ]]; then
+        echo "❌ Error: Archivos académicos detectados en rama '$CURRENT_BRANCH'"
+        echo ""
+        echo "Los siguientes archivos solo pueden commitearse en la rama 'academic':"
+        echo "$ACADEMIC_FILES" | sed 's/^/  - /'
+        echo ""
+        echo "Para commitear estos archivos:"
+        echo "  1. git stash             (guardar cambios temporalmente)"
+        echo "  2. git checkout academic (cambiar a rama academic)"
+        echo "  3. git stash pop         (recuperar cambios)"
+        echo "  4. git add ...           (agregar archivos)"
+        echo "  5. git commit            (commitear en rama academic)"
+        echo ""
+        exit 1
+    fi
+fi
+
+# Si estamos en la rama 'tesis', verificar que no se modifiquen archivos críticos del código
+if [[ "$CURRENT_BRANCH" == "tesis" ]]; then
+    # Lista de archivos/directorios que no deben modificarse en rama tesis
+    PROTECTED_PATHS=(
+        "algorithms/"
+        "problems/"
+        "utils/algorithm_factory.py"
+        "utils/benchmarking.py"
+        "scripts/analyze.py"
+    )
+    
+    for path in "${PROTECTED_PATHS[@]}"; do
+        MODIFIED=$(git diff --cached --name-only | grep "^$path")
+        if [[ -n "$MODIFIED" ]]; then
+            echo "⚠️  Advertencia: Modificando archivos de código en rama 'tesis'"
+            echo ""
+            echo "Los siguientes archivos críticos están siendo modificados:"
+            echo "$MODIFIED" | sed 's/^/  - /'
+            echo ""
+            echo "¿Estás seguro de que estos cambios deben estar en la rama 'tesis'?"
+            echo "Estos cambios normalmente deberían estar en 'develop'."
+            echo ""
+            read -p "¿Continuar con el commit? (s/n): " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+                exit 1
+            fi
+        fi
+    done
+fi
+
+# Si estamos en la rama 'academic', aplicar las mismas protecciones
+if [[ "$CURRENT_BRANCH" == "academic" ]]; then
+    # Lista de archivos/directorios que no deben modificarse en rama academic
+    PROTECTED_PATHS=(
+        "algorithms/"
+        "problems/"
+        "utils/algorithm_factory.py"
+        "utils/benchmarking.py"
+        "scripts/analyze.py"
+    )
+    
+    for path in "${PROTECTED_PATHS[@]}"; do
+        MODIFIED=$(git diff --cached --name-only | grep "^$path")
+        if [[ -n "$MODIFIED" ]]; then
+            echo "⚠️  Advertencia: Modificando archivos de código en rama 'academic'"
+            echo ""
+            echo "Los siguientes archivos críticos están siendo modificados:"
+            echo "$MODIFIED" | sed 's/^/  - /'
+            echo ""
+            echo "¿Estás seguro de que estos cambios deben estar en la rama 'academic'?"
+            echo "Estos cambios normalmente deberían estar en 'develop'."
+            echo ""
+            read -p "¿Continuar con el commit? (s/n): " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+                exit 1
+            fi
+        fi
+    done
+fi
+
+# Todo OK
+exit 0
