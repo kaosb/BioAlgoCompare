@@ -1,0 +1,41 @@
+#!/bin/bash
+# Git hook pre-push para el proyecto BioAlgoCompare
+# Verifica que no se pusheen archivos de tesis/academic en ramas incorrectas
+
+# Leer información del push
+while read local_ref local_sha remote_ref remote_sha; do
+    # Obtener nombre de la rama
+    branch_name=$(echo "$local_ref" | sed 's/refs\/heads\///')
+
+    # Si estamos pusheando develop o main
+    if [[ "$branch_name" == "develop" ]] || [[ "$branch_name" == "main" ]]; then
+        # Verificar si hay archivos de tesis/ o academic/ en los commits nuevos
+        if [[ "$remote_sha" == "0000000000000000000000000000000000000000" ]]; then
+            # Nueva rama, comparar con main
+            changed_files=$(git diff --name-only main.."$local_sha" 2>/dev/null)
+        else
+            changed_files=$(git diff --name-only "$remote_sha".."$local_sha" 2>/dev/null)
+        fi
+
+        tesis_files=$(echo "$changed_files" | grep "^tesis/" || true)
+        academic_files=$(echo "$changed_files" | grep "^academic/" || true)
+
+        if [[ -n "$tesis_files" ]]; then
+            echo "ERROR: Archivos de tesis/ detectados en push a '$branch_name':"
+            echo "$tesis_files" | sed 's/^/  - /'
+            echo ""
+            echo "Estos archivos solo deben estar en la rama 'tesis'."
+            exit 1
+        fi
+
+        if [[ -n "$academic_files" ]]; then
+            echo "ERROR: Archivos de academic/ detectados en push a '$branch_name':"
+            echo "$academic_files" | sed 's/^/  - /'
+            echo ""
+            echo "Estos archivos solo deben estar en la rama 'academic'."
+            exit 1
+        fi
+    fi
+done
+
+exit 0

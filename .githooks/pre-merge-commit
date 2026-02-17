@@ -1,0 +1,85 @@
+#!/bin/bash
+# Git hook pre-merge-commit para el proyecto BioAlgoCompare
+# Previene merges accidentales de ramas tesis/academic a develop/main
+
+# Obtener la rama actual
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Obtener la rama que se está intentando mergear
+# Git guarda esta info en MERGE_HEAD durante el merge
+if [ -f .git/MERGE_HEAD ]; then
+    MERGE_BRANCH=$(git name-rev --name-only $(cat .git/MERGE_HEAD) | sed 's/remotes\/origin\///')
+else
+    # Si no hay MERGE_HEAD, intentar obtener de los argumentos
+    MERGE_BRANCH=""
+fi
+
+# Función para prevenir merge
+prevent_merge() {
+    local from_branch=$1
+    local to_branch=$2
+    local dir_name=$3
+    
+    echo "❌ ERROR: Intento de merge prohibido"
+    echo ""
+    echo "No puedes hacer merge de la rama '$from_branch' a '$to_branch'."
+    echo "La rama '$from_branch' contiene archivos en /$dir_name/ que no deben"
+    echo "estar en la rama principal de desarrollo."
+    echo ""
+    echo "Opciones:"
+    echo "1. Si necesitas un archivo específico de '$from_branch':"
+    echo "   git checkout $from_branch -- path/to/specific/file"
+    echo "   # Luego mueve el archivo a una ubicación apropiada"
+    echo ""
+    echo "2. Si necesitas cambios de código de '$from_branch':"
+    echo "   - Los cambios de código deben hacerse en 'develop'"
+    echo "   - Usa cherry-pick para commits específicos"
+    echo ""
+    echo "3. Para cancelar este merge:"
+    echo "   git merge --abort"
+    echo ""
+    exit 1
+}
+
+# Verificar si estamos en develop/main/master
+if [[ "$CURRENT_BRANCH" == "develop" ]] || [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
+    
+    # Verificar si viene de rama tesis
+    if [[ "$MERGE_BRANCH" == *"tesis"* ]]; then
+        prevent_merge "tesis" "$CURRENT_BRANCH" "tesis"
+    fi
+    
+    # Verificar si viene de rama academic
+    if [[ "$MERGE_BRANCH" == *"academic"* ]]; then
+        prevent_merge "academic" "$CURRENT_BRANCH" "academic"
+    fi
+    
+    # Verificación adicional: buscar archivos problemáticos en el merge
+    # Obtener lista de archivos que vendrían en el merge
+    if [ -f .git/MERGE_HEAD ]; then
+        MERGE_FILES=$(git diff --name-only HEAD $(cat .git/MERGE_HEAD))
+        
+        # Verificar archivos de tesis
+        if echo "$MERGE_FILES" | grep -q "^tesis/"; then
+            echo "❌ ERROR: El merge incluiría archivos de /tesis/"
+            echo ""
+            echo "Archivos detectados:"
+            echo "$MERGE_FILES" | grep "^tesis/" | sed 's/^/  - /'
+            echo ""
+            prevent_merge "rama con archivos tesis" "$CURRENT_BRANCH" "tesis"
+        fi
+        
+        # Verificar archivos academic
+        if echo "$MERGE_FILES" | grep -q "^academic/"; then
+            echo "❌ ERROR: El merge incluiría archivos de /academic/"
+            echo ""
+            echo "Archivos detectados:"
+            echo "$MERGE_FILES" | grep "^academic/" | sed 's/^/  - /'
+            echo ""
+            prevent_merge "rama con archivos academic" "$CURRENT_BRANCH" "academic"
+        fi
+    fi
+fi
+
+# Si llegamos aquí, el merge está permitido
+exit 0
