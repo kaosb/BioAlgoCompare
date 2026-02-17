@@ -41,7 +41,7 @@ ALGORITHMS = {
         "params": {"alpha_fixed": 0.5, "beta_fixed": 0.2, "use_il": False},
     },
     "PSO": {"class": "pso", "params": {}},
-    "GA": {"class": "ga", "params": {}},
+    "GA": {"class": "ga", "params": {"crossover_rate": 0.9}},
     "SSA": {"class": "ssa", "params": {}},
     "GTO": {"class": "gto", "params": {}},
     "GWO": {"class": "gwo", "params": {}},
