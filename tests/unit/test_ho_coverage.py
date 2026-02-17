@@ -463,14 +463,7 @@ class TestSwapBalancing:
         # Build routes where max_load_idx == min_load_idx
         # Use single customer routes with same demand
         # Find a customer with known demand
-        customer1 = 1
-        customer2 = 2
-        d1 = demands[customer1]
-        d2 = demands[customer2]
-
-        # If demands are equal, max and min index will be the same -> early return
-        # If not, we need to construct routes carefully
-        # Let's find two customers with equal demands
+        # Find two customers with equal demands
         demand_to_customers = {}
         for i in range(1, len(demands)):
             d = demands[i]
