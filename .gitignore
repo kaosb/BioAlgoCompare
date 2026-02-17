@@ -50,17 +50,6 @@ logs/*.log
 *.log
 benchmark.log
 massive_benchmark.log
-analyze.log
-
-# Backup and temporary files
-*.backup_*
-*.pre_migration_*
-*.pyc.backup
-*.tmp
-*.temp
-*~
-.*.swp
-.*.swo
 analyze_massive.log
 analyze.log
 
@@ -87,9 +76,6 @@ results/**/*
 !results/massive_1000runs/massive_benchmark_summary.csv
 !results/statistical_analysis_1000runs/algorithm_comparison.csv
 !results/massive_1000runs/massive_benchmark_report.html
-
-# Database files
-*.db
 
 # Temporary files
 *.tmp
@@ -155,23 +141,9 @@ analyze.log
 benchmark.log
 massive_benchmark.log
 
-# Legacy code (for reference only)
-/legacy/
-
-# Temporary and experimental directories
-/temp/
-/experimental/
-/exports/
-
 # Archivos patch (ya aplicados)
 *.patch
 
-# Directorio de tesis (NO pertenece al repo publico)
-/tesis/
-tesis/
-
-# Propuesta de tesis (archivos privados)
-ref/propuesta_tesis*
 
 # Directorios de instalación
 *.egg-info/
