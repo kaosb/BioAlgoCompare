@@ -218,9 +218,9 @@ def analyze_results(results: Dict, instance_name: str) -> Dict:
 
     # Calcular área bajo la curva de convergencia (menor es mejor)
     auc_standard = [
-        np.trapz(curve) for curve in results["standard"]["convergence_curves"]
+        np.trapezoid(curve) for curve in results["standard"]["convergence_curves"]
     ]
-    auc_il = [np.trapz(curve) for curve in results["il"]["convergence_curves"]]
+    auc_il = [np.trapezoid(curve) for curve in results["il"]["convergence_curves"]]
 
     mean_auc_standard = np.mean(auc_standard)
     mean_auc_il = np.mean(auc_il)

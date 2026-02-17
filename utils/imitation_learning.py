@@ -360,7 +360,7 @@ class HOImitationLearning:
 
     def load(self, filepath: str):
         """Carga un modelo entrenado."""
-        checkpoint = torch.load(filepath, map_location=self.device)
+        checkpoint = torch.load(filepath, map_location=self.device, weights_only=False)
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.scaler = checkpoint["scaler"]
         self.training_history = checkpoint["training_history"]
