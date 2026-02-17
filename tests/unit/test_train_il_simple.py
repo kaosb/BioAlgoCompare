@@ -351,5 +351,156 @@ class TestTrainSimpleIL:
         assert y.shape == (50, 3)  # 3 parameters
 
 
+class TestTrainWithValidation:
+    """Tests para entrenamiento con validacion y analisis de resultados."""
+
+    @pytest.fixture
+    def train_val_data(self):
+        """Crea datasets de train y validacion."""
+        import pandas as pd
+        rng = np.random.RandomState(42)
+        n_train, n_val = 80, 20
+
+        def make_df(n):
+            return pd.DataFrame({
+                'n_customers': rng.randint(10, 50, n),
+                'n_depots': np.ones(n),
+                'avg_demand': rng.uniform(10, 30, n),
+                'demand_std': rng.uniform(1, 10, n),
+                'capacity': rng.randint(50, 200, n),
+                'area_span': rng.uniform(20, 100, n),
+                'density': rng.uniform(0.01, 0.1, n),
+                'iteration': rng.randint(0, 100, n),
+                'progress': rng.uniform(0, 1, n),
+                'best_fitness': rng.uniform(100, 1000, n),
+                'avg_fitness': rng.uniform(100, 1000, n),
+                'fitness_std': rng.uniform(10, 100, n),
+                'convergence_rate': rng.uniform(0, 0.1, n),
+                'stagnation_counter': rng.randint(0, 20, n),
+                'population_diversity': rng.uniform(0.1, 0.9, n),
+                'elite_ratio': rng.uniform(0.05, 0.2, n),
+                'improvement_rate': rng.uniform(0, 0.1, n),
+                'dynamic_orders': np.zeros(n),
+                'avg_delay': np.zeros(n),
+                'load_imbalance': rng.uniform(0, 0.5, n),
+                'alpha': rng.uniform(0.1, 0.9, n),
+                'beta': rng.uniform(0.2, 0.8, n),
+                'gamma': rng.uniform(0.3, 1.0, n),
+            })
+
+        return make_df(n_train), make_df(n_val)
+
+    def test_train_with_validation(self, train_val_data):
+        """Test entrenamiento con split de validacion."""
+        df_train, df_val = train_val_data
+        model = SimpleILModel(n_estimators=10, random_state=42)
+        results = model.train(df_train, df_val=df_val)
+
+        assert model.is_trained is True
+        for param in ['alpha', 'beta', 'gamma']:
+            assert 'val_mse' in results[param]
+            assert 'val_r2' in results[param]
+            assert results[param]['val_mse'] >= 0
+            assert isinstance(results[param]['val_r2'], float)
+
+    def test_analyze_training_results(self, train_val_data, capsys):
+        """Test que analyze_training_results no lanza excepciones."""
+        from utils.train_il_simple import analyze_training_results
+
+        df_train, df_val = train_val_data
+        model = SimpleILModel(n_estimators=10, random_state=42)
+        results = model.train(df_train, df_val=df_val)
+
+        analyze_training_results(results, df_train, df_val)
+
+        captured = capsys.readouterr()
+        assert "Training Results" in captured.out
+        assert "ALPHA" in captured.out
+        assert "BETA" in captured.out
+        assert "GAMMA" in captured.out
+        assert "Dataset Statistics" in captured.out
+        assert f"Training samples: {len(df_train)}" in captured.out
+        assert f"Validation samples: {len(df_val)}" in captured.out
+
+    def test_analyze_training_results_no_val(self, train_val_data, capsys):
+        """Test analyze_training_results sin datos de validacion."""
+        from utils.train_il_simple import analyze_training_results
+
+        df_train, _ = train_val_data
+        model = SimpleILModel(n_estimators=10, random_state=42)
+        results = model.train(df_train)
+
+        analyze_training_results(results, df_train, df_val=None)
+
+        captured = capsys.readouterr()
+        assert "Training Results" in captured.out
+        assert "Validation samples" not in captured.out
+
+
+class TestMainCLI:
+    """Tests para la funcion main() del CLI."""
+
+    def test_main_full_pipeline(self, tmp_path):
+        """Test pipeline completo: CSV -> train -> save model + report."""
+        import pandas as pd
+        import sys
+        from unittest.mock import patch
+        from utils.train_il_simple import main
+
+        rng = np.random.RandomState(42)
+        n = 50
+        df = pd.DataFrame({
+            'n_customers': rng.randint(10, 50, n),
+            'n_depots': np.ones(n),
+            'avg_demand': rng.uniform(10, 30, n),
+            'demand_std': rng.uniform(1, 10, n),
+            'capacity': rng.randint(50, 200, n),
+            'area_span': rng.uniform(20, 100, n),
+            'density': rng.uniform(0.01, 0.1, n),
+            'iteration': rng.randint(0, 100, n),
+            'progress': rng.uniform(0, 1, n),
+            'best_fitness': rng.uniform(100, 1000, n),
+            'avg_fitness': rng.uniform(100, 1000, n),
+            'fitness_std': rng.uniform(10, 100, n),
+            'convergence_rate': rng.uniform(0, 0.1, n),
+            'stagnation_counter': rng.randint(0, 20, n),
+            'population_diversity': rng.uniform(0.1, 0.9, n),
+            'elite_ratio': rng.uniform(0.05, 0.2, n),
+            'improvement_rate': rng.uniform(0, 0.1, n),
+            'dynamic_orders': np.zeros(n),
+            'avg_delay': np.zeros(n),
+            'load_imbalance': rng.uniform(0, 0.5, n),
+            'alpha': rng.uniform(0.1, 0.9, n),
+            'beta': rng.uniform(0.2, 0.8, n),
+            'gamma': rng.uniform(0.3, 1.0, n),
+        })
+
+        csv_path = str(tmp_path / "demos.csv")
+        model_path = str(tmp_path / "model.pkl")
+        df.to_csv(csv_path, index=False)
+
+        test_args = [
+            'train_il_simple.py',
+            '--demos', csv_path,
+            '--output', model_path,
+            '--n_estimators', '10',
+            '--seed', '42',
+        ]
+
+        with patch.object(sys, 'argv', test_args):
+            main()
+
+        assert os.path.exists(model_path)
+        report_path = str(tmp_path / "model.json")
+        assert os.path.exists(report_path)
+
+        import json
+        with open(report_path) as f:
+            report = json.load(f)
+        assert 'results' in report
+        assert 'n_train' in report
+        assert 'n_val' in report
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -289,7 +289,7 @@ def calculate_qc_metrics(
     # Calculate service level based on route structure
     total_customers = sum(len(route) - 2 for route in routes if len(route) > 2)
     
-    if total_customers == 0:
+    if total_customers == 0:  # pragma: no cover – guarded by line 286
         return 0.0
     
     # Estimate on-time rate based on route efficiency

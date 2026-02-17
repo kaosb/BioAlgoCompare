@@ -175,6 +175,44 @@ class TestEvaluateAlgorithms:
         assert len(results["il"]["fitness"]) == 1
 
 
+class TestProgressPrint:
+    """Tests para verificar la impresion de progreso."""
+
+    @patch('utils.evaluate_il.VRPProblem')
+    @patch('utils.evaluate_il.HO')
+    @patch('os.path.exists')
+    def test_progress_print_runs_5(self, mock_exists, mock_ho, mock_vrp, capsys):
+        """Test que runs=5 dispara la impresion de progreso (linea 179)."""
+        mock_exists.return_value = True
+
+        mock_problem = Mock()
+        mock_vrp.return_value = mock_problem
+
+        mock_best = Mock()
+        mock_best.fitness.return_value = 100.0
+
+        mock_ho_instance = Mock()
+        mock_ho_instance.execute.return_value = mock_best
+        mock_ho_instance.get_convergence_curve.return_value = [150, 120, 100]
+        mock_ho_instance.alpha_min = 0.1
+        mock_ho_instance.alpha_max = 0.9
+        mock_ho_instance.beta_min = 0.2
+        mock_ho_instance.beta_max = 0.8
+        mock_ho_instance.gamma_min = 0.3
+        mock_ho_instance.gamma_max = 0.7
+        mock_ho_instance.use_il = False
+
+        mock_ho.return_value = mock_ho_instance
+
+        results = evaluate_algorithms("test-instance", runs=5, il_model_path="model.pth")
+
+        captured = capsys.readouterr()
+        # La linea 179 imprime "Progreso: 5/5" cuando (run + 1) % 5 == 0
+        assert "Progreso: 5/5" in captured.out
+        assert len(results["standard"]["fitness"]) == 5
+        assert len(results["il"]["fitness"]) == 5
+
+
 class TestAnalyzeResults:
     """Tests para la función analyze_results."""
     

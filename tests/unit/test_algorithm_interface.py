@@ -375,5 +375,138 @@ class TestAlgorithmInterface:
             ), f"{algo_name} fitness increased during optimization"
 
 
+class TestBaseEdgeCases:
+    """Tests for base class edge cases and uncovered lines."""
+
+    @pytest.fixture
+    def vrp_problem(self):
+        """Create a simple VRP problem for testing."""
+        problem = VRPProblem()
+        problem.load_instance("P-n16-k8")
+        return problem
+
+    def test_base_raises_for_invalid_problem(self):
+        """base.py:76 - Pass an object without evaluate(), expect ValueError."""
+
+        class FakeProblem:
+            pass
+
+        with pytest.raises(ValueError, match="evaluate"):
+            # Use any concrete algorithm class to trigger the base __init__
+            ALGORITHMS["sho"](FakeProblem())
+
+    def test_get_execution_time(self, vrp_problem):
+        """base.py:115 - After execute(), execution_time should be > 0."""
+        algo = ALGORITHMS["sho"](vrp_problem, population_size=5, max_iterations=5, seed=42)
+        algo.execute()
+        exec_time = algo.get_execution_time()
+        assert isinstance(exec_time, float)
+        assert exec_time > 0
+
+    def test_summary_contains_best_fitness(self, vrp_problem):
+        """base.py:125 - After execute(), summary() returns dict with expected keys."""
+        algo = ALGORITHMS["sho"](vrp_problem, population_size=5, max_iterations=5, seed=42)
+        algo.execute()
+        result = algo.summary()
+        assert isinstance(result, dict)
+        assert "best_fitness" in result
+        assert "execution_time" in result
+        assert "convergence_curve" in result
+        assert result["best_fitness"] > 0
+        assert result["execution_time"] > 0
+
+
+class TestRRODefaults:
+    """Tests for RRO algorithm-specific parameter defaults."""
+
+    @pytest.fixture
+    def vrp_problem(self):
+        problem = VRPProblem()
+        problem.load_instance("P-n16-k8")
+        return problem
+
+    def test_rro_default_rpcpt_rleader(self, vrp_problem):
+        """rro.py:169,176 - Instantiate RRO with explicit Rpcpt/Rleader to cover else branches."""
+        from algorithms.rro import RRO
+
+        algo = RRO(vrp_problem, population_size=5, max_iterations=5, seed=42,
+                    Rpcpt=0.5, Rleader=0.3)
+        assert algo.Rpcpt == 0.5
+        assert algo.Rleader == 0.3
+
+
+class TestSMOConvergenceCurve:
+    """Tests for SMO convergence curve edge cases."""
+
+    @pytest.fixture
+    def vrp_problem(self):
+        problem = VRPProblem()
+        problem.load_instance("P-n16-k8")
+        return problem
+
+    def test_smo_convergence_curve_non_list(self, vrp_problem):
+        """smo.py:256 - Set convergence_curve to non-list, verify get_convergence_curve returns []."""
+        from algorithms.smo import SMO
+
+        algo = SMO(vrp_problem, population_size=5, max_iterations=5, seed=42)
+        algo.initialize_population()
+        # Force convergence_curve to a non-list value
+        algo.convergence_curve = "not_a_list"
+        result = algo.get_convergence_curve()
+        assert result == []
+
+
+class TestAHAEdgeCases:
+    """Tests for AHA algorithm-specific edge cases."""
+
+    @pytest.fixture
+    def vrp_problem(self):
+        problem = VRPProblem()
+        problem.load_instance("P-n16-k8")
+        return problem
+
+    def test_aha_fitness_with_objective_fn(self, vrp_problem):
+        """aha.py:42 - Create Hummingbird, call fitness(objective_function=fn) to trigger calculation."""
+        from algorithms.aha import Hummingbird
+
+        dim = vrp_problem.get_dimension()
+        rng = np.random.default_rng(42)
+        position = rng.uniform(0, 1, size=dim)
+        bounds = [(0, 1) for _ in range(dim)]
+        hb = Hummingbird(position, bounds, rng=rng)
+
+        # _fitness is None initially
+        assert hb._fitness is None
+
+        # Call fitness with objective_function to trigger line 42
+        result = hb.fitness(objective_function=vrp_problem.evaluate)
+        assert result is not None
+        assert isinstance(result, (int, float))
+        assert result > 0
+        # Subsequent call without objective_function returns cached value
+        assert hb.fitness() == result
+
+    def test_aha_recalc_none_fitness(self, vrp_problem):
+        """aha.py:223 - Set an individual's _fitness to None, trigger recalc in update_population."""
+        from algorithms.aha import AHA
+
+        algo = AHA(vrp_problem, population_size=5, max_iterations=5, seed=42)
+        algo.initialize_population()
+
+        # Verify all individuals have fitness
+        for ind in algo.population:
+            assert ind._fitness is not None
+
+        # Set one individual's _fitness to None to trigger recalculation at line 222-223
+        algo.population[1]._fitness = None
+
+        # update_population should recalculate the None fitness
+        algo.update_population()
+
+        # After update, all individuals should have valid fitness
+        for ind in algo.population:
+            assert ind._fitness is not None
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

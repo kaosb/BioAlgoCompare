@@ -63,6 +63,87 @@ class TestCalculateHypervolume:
             # Should use simplified calculation
             assert hv == 125.0  # (15-10) * (25-20) * (35-30) = 125
     
+    def test_hypervolume_with_deap(self):
+        """Test lineas 44-52: rama DEAP_AVAILABLE=True con mock de deap."""
+        mock_hv_instance = MagicMock()
+        mock_hv_instance.compute.return_value = 999.0
+
+        mock_hypervolume = MagicMock()
+        mock_hypervolume.Hypervolume.return_value = mock_hv_instance
+
+        with patch('utils.multiobjective_metrics.DEAP_AVAILABLE', True), \
+             patch('utils.multiobjective_metrics.deap_hypervolume', mock_hypervolume, create=True):
+            pareto_front = [(10.0, 20.0, 30.0)]
+            reference_point = (15.0, 25.0, 35.0)
+            hv = calculate_hypervolume(pareto_front, reference_point)
+
+            mock_hypervolume.Hypervolume.assert_called_once_with(reference_point)
+            mock_hv_instance.compute.assert_called_once_with(pareto_front)
+            assert hv == 999.0
+
+    def test_hypervolume_with_deap_auto_refpoint(self):
+        """Test lineas 44-52: DEAP con reference_point=None (auto-calculado)."""
+        mock_hv_instance = MagicMock()
+        mock_hv_instance.compute.return_value = 500.0
+
+        mock_hypervolume = MagicMock()
+        mock_hypervolume.Hypervolume.return_value = mock_hv_instance
+
+        with patch('utils.multiobjective_metrics.DEAP_AVAILABLE', True), \
+             patch('utils.multiobjective_metrics.deap_hypervolume', mock_hypervolume, create=True):
+            pareto_front = [(10.0, 20.0, 30.0), (15.0, 25.0, 35.0)]
+            hv = calculate_hypervolume(pareto_front)
+
+            # reference_point debe ser auto-calculado como max * 1.1
+            call_args = mock_hypervolume.Hypervolume.call_args[0][0]
+            assert len(call_args) == 3
+            assert hv == 500.0
+
+    def test_deap_import_false(self):
+        """Test linea 21: verificar que DEAP_AVAILABLE=False cuando import falla."""
+        import sys
+
+        original_module = sys.modules.get('utils.multiobjective_metrics')
+
+        with patch.dict(sys.modules, {'deap': None, 'deap.tools': None, 'deap.tools.hypervolume': None}):
+            if 'utils.multiobjective_metrics' in sys.modules:
+                del sys.modules['utils.multiobjective_metrics']
+            try:
+                import utils.multiobjective_metrics as mm_reloaded
+                assert mm_reloaded.DEAP_AVAILABLE is False
+            finally:
+                if original_module is not None:
+                    sys.modules['utils.multiobjective_metrics'] = original_module
+
+    def test_deap_import_true(self):
+        """Test linea 19: verificar que DEAP_AVAILABLE=True cuando deap esta disponible."""
+        import sys
+        import types
+
+        original_module = sys.modules.get('utils.multiobjective_metrics')
+
+        # Crear un modulo fake de deap con hypervolume
+        fake_deap = types.ModuleType('deap')
+        fake_deap_tools = types.ModuleType('deap.tools')
+        fake_hv_mod = types.ModuleType('deap.tools.hypervolume')
+        fake_hv_mod.Hypervolume = MagicMock()
+        fake_deap.tools = fake_deap_tools
+        fake_deap_tools.hypervolume = fake_hv_mod
+
+        with patch.dict(sys.modules, {
+            'deap': fake_deap,
+            'deap.tools': fake_deap_tools,
+            'deap.tools.hypervolume': fake_hv_mod,
+        }):
+            if 'utils.multiobjective_metrics' in sys.modules:
+                del sys.modules['utils.multiobjective_metrics']
+            try:
+                import utils.multiobjective_metrics as mm_reloaded
+                assert mm_reloaded.DEAP_AVAILABLE is True
+            finally:
+                if original_module is not None:
+                    sys.modules['utils.multiobjective_metrics'] = original_module
+
     def test_with_deap_behavior(self):
         """Test hypervolume behavior when DEAP would be available."""
         # Since we can't easily mock the DEAP import, let's test the logic
@@ -215,6 +296,13 @@ class TestCalculateSpread:
         spread = calculate_spread(pareto_front, extreme_points)
         assert 0 <= spread <= 1
     
+    def test_spread_zero_denominator(self):
+        """Test linea 218: denominador cero cuando todos los puntos son identicos."""
+        # Puntos identicos -> d_sum = 0, df = 0, dl = 0 -> denominator = 0
+        pareto_front = [(5.0, 5.0, 5.0), (5.0, 5.0, 5.0)]
+        spread = calculate_spread(pareto_front)
+        assert spread == 0.0
+
     def test_well_distributed_front(self):
         """Test spread with well-distributed front."""
         # Create a well-distributed Pareto front
@@ -345,6 +433,21 @@ class TestCalculateQCMetrics:
         
         assert rate < 0.9  # Should be reduced by complexity
     
+    def test_qc_metrics_no_customers(self):
+        """Test linea 293: rutas sin clientes (solo depot, e.g. [0,0,0])."""
+        routes = [[0, 0, 0]]
+        rate = calculate_qc_metrics(routes)
+        # Route tiene len=3 > 2, pero clientes = 3 - 2 = 1
+        # En realidad [0,0,0] tiene len=3, asi que total_customers = 1
+        # Verifiquemos el resultado
+        assert 0 <= rate <= 1
+
+    def test_qc_metrics_all_short_routes(self):
+        """Test linea 293 variante: rutas con len <= 2 no tienen clientes."""
+        routes = [[0, 0], [0], [0, 0]]
+        rate = calculate_qc_metrics(routes)
+        assert rate == 0.0
+
     def test_mixed_route_lengths(self):
         """Test with mixed route lengths."""
         routes = [

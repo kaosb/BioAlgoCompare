@@ -46,6 +46,28 @@ class TestGenerateSimpleState:
         assert state['best_fitness'] == 500  # min of fitness_history
 
 
+    def test_long_fitness_history(self):
+        """Test con fitness_history de 15+ elementos (cubre linea 62)."""
+        mock_problem = MagicMock()
+        mock_problem.dimension = 21
+        mock_problem.capacity = 100
+        mock_problem.demands = np.array([0] + [10] * 20)
+
+        # fitness_history con mas de 10 elementos para cubrir rama len > 10
+        fitness_history = [1000 - i * 50 for i in range(16)]  # 16 elementos
+
+        state = generate_simple_state(mock_problem, 50, 100, fitness_history)
+
+        # Con len(fitness_history) > 10, debe calcular convergence_rate
+        assert state['convergence_rate'] != 0
+        # fitness_std debe usar ultimos 10 (no el default 100)
+        assert state['fitness_std'] != 100
+        # stagnation_counter se calcula
+        assert 'stagnation_counter' in state
+        # best_fitness = min(fitness_history)
+        assert state['best_fitness'] == min(fitness_history)
+
+
 class TestExtractOptimalParams:
     """Tests for extract_optimal_params function."""
     
@@ -189,6 +211,17 @@ class TestGenerateDemonstrations:
         # Check algorithms
         assert set(demos['algorithm'].unique()).issubset({'pso', 'ga'})
 
+
+    @patch('utils.generate_simple_demos.VRPProblem')
+    def test_instance_load_error(self, mock_vrp_class):
+        """Test que un error al cargar instancia hace continue (lineas 112-114)."""
+        mock_vrp_class.side_effect = Exception("File not found")
+
+        demos = generate_demonstrations(['nonexistent-instance'], num_demos=10, seed=42)
+
+        # Con error de carga, debe hacer continue y retornar DataFrame vacio
+        assert isinstance(demos, pd.DataFrame)
+        assert len(demos) == 0
 
     def test_generate_demonstrations_seed_reproducibility(self):
         """Test that seed ensures reproducibility."""
