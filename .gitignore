@@ -144,9 +144,6 @@ massive_benchmark.log
 # Archivos patch (ya aplicados)
 *.patch
 
-# Directorio de tesis (mantenido solo localmente en rama tesis)
-/tesis/
-tesis/
 
 # Directorios de instalación
 *.egg-info/
