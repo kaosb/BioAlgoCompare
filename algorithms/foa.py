@@ -51,13 +51,15 @@ class Fossa(Individual):
         _fitness: Cached fitness value
     """
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         self.problem = problem
         self.dimension = problem.get_dimension()
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
         # Para problemas VRP, los límites son [0,1]
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
 
     def fitness(self):
@@ -103,22 +105,22 @@ class Fossa(Individual):
             return  # No movimiento si no hay mejores
 
         # Seleccionar un lemur aleatorio
-        lemur = random.choice(lemurs)
+        lemur = self.py_rng.choice(lemurs)
         x_new = self.position.copy()
 
         for j in range(dim):
-            random.random()
+            self.py_rng.random()
             if t <= max_iterations // 2:
                 # Exploración (Eq. 5)
-                I = random.choice([1, 2])
-                r_ij = random.random()
+                I = self.py_rng.choice([1, 2])
+                r_ij = self.py_rng.random()
                 xj_p1 = self.position[j] + r_ij * (
                     lemur.position[j] - I * self.position[j]
                 )
                 x_new[j] = np.clip(xj_p1, self.lower_bounds[j], self.upper_bounds[j])
             else:
                 # Explotación (Eq. 7)
-                r_ij = random.random()
+                r_ij = self.py_rng.random()
                 range_j = self.upper_bounds[j] - self.lower_bounds[j]
                 xj_p2 = self.position[j] + (1 - 2 * r_ij) * (range_j / t)
                 x_new[j] = np.clip(xj_p2, self.lower_bounds[j], self.upper_bounds[j])
@@ -148,16 +150,17 @@ class FOA(MetaheuristicAlgorithm):
         super().__init__(problem, population_size, max_iterations, seed)
 
     def initialize_population(self):
-        self.population = [Fossa(self.problem) for _ in range(self.population_size)]
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
+        self.population = [Fossa(self.problem, rng=self.rng, py_rng=self.py_rng) for _ in range(self.population_size)]
         self.population.sort(key=lambda x: x.fitness())
-        self.best_solution = Fossa(self.problem)
+        self.best_solution = object.__new__(Fossa)
+        self.best_solution.problem = self.problem
+        self.best_solution.dimension = self.population[0].dimension
+        self.best_solution.rng = self.rng
+        self.best_solution.py_rng = self.py_rng
+        self.best_solution.lower_bounds = self.population[0].lower_bounds
+        self.best_solution.upper_bounds = self.population[0].upper_bounds
+        self.best_solution._fitness = None
+        self.best_solution.position = None
         self.best_solution.copy(self.population[0])
         self.convergence_curve = [self.best_solution.fitness()]
 

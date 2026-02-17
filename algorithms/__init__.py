@@ -12,15 +12,18 @@ Available algorithms:
     - FGO/FSA: Flamingo Algorithm / Flamingo Search Algorithm
     - FOA: Fossa Optimization Algorithm
     - GTO: Gorilla Troops Optimizer
+    - GVOA: Griffon Vultures Optimization Algorithm
+    - GWO: Grey Wolf Optimizer
     - HHO: Harris Hawks Optimization
+    - HO: Hippopotamus Optimization
     - HOA/SHO: Hyena Optimization Algorithm / Spotted Hyena Optimizer
     - MRFO: Manta Ray Foraging Optimization
     - OPA: Orca Predator Algorithm
     - RRO: Raven Roosting Optimization
     - SMA: Slime Mould Algorithm
     - SMO: Starling Murmuration Optimizer
+    - SSA: Salp Swarm Algorithm
     - WOA: Whale Optimization Algorithm
-    - GVOA: Griffon Vultures Optimization Algorithm
 
 Example usage:
     >>> from algorithms import EWA
@@ -48,6 +51,7 @@ from .fsa import FSA, Flamingo as FlamingoFSA
 from .ga import GA, Chromosome
 from .gto import GTO, Gorilla
 from .gvoa import GVOA, Vulture
+from .gwo import GWO, Wolf
 from .hho import HHO, Hawk
 from .ho import HO, Hippopotamus
 from .mrfo import MRFO, MantaRay
@@ -57,6 +61,7 @@ from .rro import RRO, Raven
 from .sho import SHO, Hyena as HyenaSHO
 from .sma import SMA, SlimeMould
 from .smo import SMO, Starling
+from .ssa import SSA, Salp
 from .woa import WOA, Whale
 
 # Create algorithm registry for easy access
@@ -71,6 +76,7 @@ ALGORITHMS = {
     "ga": GA,
     "gto": GTO,
     "gvoa": GVOA,
+    "gwo": GWO,
     "hho": HHO,
     "ho": HO,
     "hoa": SHO,  # HOA is an alias for SHO
@@ -81,6 +87,7 @@ ALGORITHMS = {
     "sho": SHO,
     "sma": SMA,
     "smo": SMO,
+    "ssa": SSA,
     "woa": WOA,
 }
 
@@ -124,6 +131,7 @@ __all__ = [
     "GA",
     "GTO",
     "GVOA",
+    "GWO",
     "HHO",
     "HO",
     "MRFO",
@@ -133,6 +141,7 @@ __all__ = [
     "SHO",
     "SMA",
     "SMO",
+    "SSA",
     "WOA",
     # Individual classes
     "Hummingbird",
@@ -144,6 +153,7 @@ __all__ = [
     "FlamingoFSA",
     "Gorilla",
     "Vulture",
+    "Wolf",
     "Hawk",
     "MantaRay",
     "Orca",
@@ -151,6 +161,7 @@ __all__ = [
     "HyenaSHO",
     "SlimeMould",
     "Starling",
+    "Salp",
     "Whale",
     # Utilities
     "ALGORITHMS",

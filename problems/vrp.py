@@ -713,27 +713,37 @@ class VRPProblem:
 
         return new_routes
 
-    def random_solution(self) -> np.ndarray:
+    def random_solution(self, rng=None) -> np.ndarray:
         """
         Genera una solución aleatoria para el problema VRP.
+
+        Args:
+            rng: NumPy random generator instance (uses default if None)
 
         Returns:
             solution: Vector de valores continuos aleatorios en el rango [0,1]
         """
+        if rng is None:
+            rng = np.random.default_rng()
         dim = self.get_dimension()
-        return np.random.rand(dim)
+        return rng.random(dim)
 
-    def random_routes(self) -> List[List[int]]:
+    def random_routes(self, rng=None) -> List[List[int]]:
         """
         Genera una solución aleatoria en forma de rutas para el problema VRP.
         Usa una estrategia de construcción simplificada tipo Clarke-Wright.
 
+        Args:
+            rng: NumPy random generator instance (uses default if None)
+
         Returns:
             routes: Lista de rutas que respetan restricciones de capacidad
         """
+        if rng is None:
+            rng = np.random.default_rng()
         depot = self.depot_index
         customers = list(range(1, self.dimension))
-        np.random.shuffle(customers)
+        rng.shuffle(customers)
 
         routes: List[List[int]] = []
         current_route: List[int] = [depot]

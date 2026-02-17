@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Algorithms](https://img.shields.io/badge/algorithms-19-orange)](algorithms/)
+[![Algorithms](https://img.shields.io/badge/algorithms-21-orange)](algorithms/)
 [![Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)](tests/)
 [![Tests](https://img.shields.io/badge/tests-759%20passed-brightgreen)](tests/)
 
@@ -871,7 +871,7 @@ python scripts/tools/compare_cec_benchmarks.py
 
 ## 🧪 Algoritmos Implementados
 
-El proyecto implementa **19 algoritmos metaheurísticos únicos** (17 bioinspirados + 2 clásicos de comparación):
+El proyecto implementa **21 algoritmos metaheurísticos únicos** (19 bioinspirados + 2 clásicos de comparación):
 
 | Algoritmo | Nombre Completo | Año | Inspiración |
 |-----------|-----------------|-----|-------------|
@@ -892,6 +892,8 @@ El proyecto implementa **19 algoritmos metaheurísticos únicos** (17 bioinspira
 | **smo** | Starling Murmuration Optimizer | 2022 | Bandadas de estorninos |
 | **gvoa** | Griffon Vultures Optimization | 2025 | Vuelo termal de buitres |
 | **ho** | Hippopotamus Optimizer | 2024 | Comportamiento territorial |
+| **ssa** | Salp Swarm Algorithm | 2017 | Cadenas de salpas marinas |
+| **gwo** | Grey Wolf Optimizer | 2014 | Jerarquía de manada de lobos |
 | **pso** | Particle Swarm Optimization | 1995 | Movimiento de partículas (clásico) |
 | **ga** | Genetic Algorithm | 1975 | Evolución natural (clásico) |
 
@@ -1314,14 +1316,32 @@ Las contribuciones son bienvenidas. Por favor:
 
 Ver [Guía de Contribución](docs/development/contribution.md) para más detalles.
 
-## 📈 Estado del Proyecto
+## QC-DVRP: Simulador de Quick Commerce
 
-- ✅ 16 algoritmos implementados y probados
-- ✅ Sistema de benchmarking completo
-- ✅ Análisis estadístico riguroso
-- ✅ Documentación exhaustiva
-- 🚧 Integración con más problemas de optimización
-- 🚧 Interfaz web para visualización
+Ademas del VRP estatico, BioAlgoCompare incluye un simulador de eventos discretos para el **Problema de Enrutamiento Dinamico de Vehiculos en Quick Commerce (QC-DVRP)**:
+
+- Demanda estoc&aacute;stica (proceso Poisson)
+- Re-optimizaci&oacute;n peri&oacute;dica (Rolling Horizon)
+- M&uacute;ltiples micro-dep&oacute;sitos (dark stores)
+- Ventanas de tiempo estrictas (15-45 min)
+- M&eacute;tricas: ADT, DSR, WBI, Fitness Z
+
+```bash
+# Resultados completos del experimento QC-DVRP
+ls results/dvrp_full_lam5_rh300/
+# Ver README del experimento para detalles
+cat results/dvrp_full_lam5_rh300/README.md
+```
+
+Implementaci&oacute;n: `problems/qc_dvrp.py`. Documentaci&oacute;n: `results/dvrp_full_lam5_rh300/README.md`.
+
+## Estado del Proyecto
+
+- 21 algoritmos implementados y probados
+- Sistema de benchmarking completo (VRP est&aacute;tico + QC-DVRP din&aacute;mico)
+- An&aacute;lisis estad&iacute;stico riguroso (Friedman, Nemenyi, Wilcoxon, A12)
+- Documentaci&oacute;n exhaustiva
+- Resultados publicados en IWINAC 2026 (paper v9)
 
 ## 🔧 Solución de Problemas
 

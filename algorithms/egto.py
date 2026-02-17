@@ -42,19 +42,23 @@ from .base import Individual, MetaheuristicAlgorithm
 class EnhancedGorilla(Individual):
     """Class to represent an individual in the EGTO algorithm."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Initialize a gorilla with a random position.
 
         Args:
             problem: Problem instance to solve
+            rng: NumPy random generator instance
+            py_rng: stdlib random.Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
         # For VRP problems, bounds are [0,1]
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
 
     def fitness(self):
@@ -77,29 +81,29 @@ class EnhancedGorilla(Individual):
         P = 0.5
         CF = 0.5
         FADs = 0.2
-        random.random()
+        self.py_rng.random()
 
         if iteration < max_iterations / 3:
             # High speed (exploratory phase with Brownian motion)
-            RB = np.random.normal(0, 1, dim)
-            S = np.random.rand(dim) * self.position
+            RB = self.rng.normal(0, 1, dim)
+            S = self.rng.random(dim) * self.position
             delta = P * RB * S
             self.position += delta
 
         elif iteration < 2 * max_iterations / 3:
             # Medium speed (random mixing)
-            R = np.random.rand(dim)
+            R = self.rng.random(dim)
             S = R * (best.position - R * self.position)
             delta = P * CF * S
             self.position += delta
 
         else:
             # Low speed (predator behavior, random perturbation)
-            r1 = random.random()
+            r1 = self.py_rng.random()
             if r1 < FADs:
                 epsilon = 1e-8
-                U = np.random.normal(0, 1, dim)
-                V = np.random.normal(0, 1, dim)
+                U = self.rng.normal(0, 1, dim)
+                V = self.rng.normal(0, 1, dim)
                 beta = 1.5
                 sigma = (
                     math.gamma(1 + beta)
@@ -140,24 +144,25 @@ class EGTO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Initialize the gorilla population."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
 
         for _ in range(self.population_size):
-            gorilla = EnhancedGorilla(self.problem)
+            gorilla = EnhancedGorilla(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(gorilla)
 
         # Sort population by fitness
         self.population.sort(key=lambda x: x.fitness())
 
         # Save the best solution
-        self.best_solution = EnhancedGorilla(self.problem)
+        self.best_solution = object.__new__(EnhancedGorilla)
+        self.best_solution.problem = self.problem
+        self.best_solution.dimension = self.population[0].dimension
+        self.best_solution.rng = self.rng
+        self.best_solution.py_rng = self.py_rng
+        self.best_solution.lower_bounds = self.population[0].lower_bounds
+        self.best_solution.upper_bounds = self.population[0].upper_bounds
+        self.best_solution._fitness = None
+        self.best_solution.position = None
         self.best_solution.copy(self.population[0])
 
         # Initialize convergence curve

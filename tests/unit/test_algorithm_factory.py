@@ -86,11 +86,12 @@ class TestAlgorithmFactory:
         algo_hoa = create_algorithm("hoa", mock_problem)
         algo_sho = create_algorithm("sho", mock_problem)
         assert type(algo_hoa) == type(algo_sho)
-        
-        # FGO es alias de FSA
+
+    def test_fgo_is_separate_from_fsa(self, mock_problem):
+        """Test que FGO y FSA son algoritmos distintos."""
         algo_fgo = create_algorithm("fgo", mock_problem)
         algo_fsa = create_algorithm("fsa", mock_problem)
-        assert type(algo_fgo) == type(algo_fsa)
+        assert type(algo_fgo) != type(algo_fsa)
 
     def test_get_algorithm_info_valid(self):
         """Test obtener información de algoritmo válido."""
@@ -108,10 +109,13 @@ class TestAlgorithmFactory:
         info = get_algorithm_info("hoa")
         assert info["is_alias"] is True
         assert "HOA alias" in info["full_name"]
-        
+
+    def test_get_algorithm_info_fgo(self):
+        """Test obtener información de FGO (algoritmo primario)."""
         info = get_algorithm_info("fgo")
-        assert info["is_alias"] is True
-        assert "FGO alias" in info["full_name"]
+        assert info["is_alias"] is False
+        assert info["full_name"] == "Flamingo Optimization Algorithm"
+        assert info["year"] == 2021
 
     def test_get_algorithm_info_invalid(self):
         """Test obtener información de algoritmo inválido."""
@@ -123,13 +127,13 @@ class TestAlgorithmFactory:
     def test_list_algorithms_without_aliases(self):
         """Test listar algoritmos sin incluir aliases."""
         algos = list_algorithms(include_aliases=False)
-        
+
         assert isinstance(algos, dict)
         assert "hoa" not in algos
-        assert "fgo" not in algos
+        assert "fgo" in algos  # FGO is a primary algorithm, not an alias
         assert "ho" in algos
         assert "sho" in algos
-        
+
         # Verificar estructura de cada entrada
         for name, info in algos.items():
             assert "full_name" in info
@@ -140,21 +144,21 @@ class TestAlgorithmFactory:
     def test_list_algorithms_with_aliases(self):
         """Test listar algoritmos incluyendo aliases."""
         algos = list_algorithms(include_aliases=True)
-        
+
         assert "hoa" in algos
         assert "fgo" in algos
         assert algos["hoa"]["is_alias"] is True
-        assert algos["fgo"]["is_alias"] is True
+        assert algos["fgo"]["is_alias"] is False  # FGO is primary, not alias
 
     def test_list_algorithms_count(self):
         """Test contar algoritmos únicos."""
         algos_no_alias = list_algorithms(include_aliases=False)
         algos_with_alias = list_algorithms(include_aliases=True)
-        
-        # Debe haber 19 algoritmos únicos (17 bioinspirados + 2 clásicos)
-        assert len(algos_no_alias) == 19
-        # Con aliases debe haber 21 (19 + 2 aliases)
-        assert len(algos_with_alias) == 21
+
+        # 22 algoritmos primarios (19 bioinspirados + FGO + 2 clásicos)
+        assert len(algos_no_alias) == 22
+        # Con aliases debe haber 23 (22 + 1 alias HOA)
+        assert len(algos_with_alias) == 23
 
     def test_get_algorithm_by_year_single(self):
         """Test obtener algoritmos de un año específico."""

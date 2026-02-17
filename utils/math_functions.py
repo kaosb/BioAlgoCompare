@@ -9,35 +9,38 @@ import math
 from typing import Union, Optional
 
 
-def levy_flight(dim: int, beta: float = 1.5) -> np.ndarray:
+def levy_flight(dim: int, beta: float = 1.5, rng=None) -> np.ndarray:
     """Generate Lévy flight step vector.
-    
+
     Lévy flights are random walks with step-lengths having a probability
     distribution that is heavy-tailed. They are used in various optimization
     algorithms for exploration.
-    
+
     Args:
         dim: Dimension of the step vector
         beta: Power law index (default: 1.5)
-        
+        rng: NumPy random generator instance (uses global if None)
+
     Returns:
         np.ndarray: Lévy flight step vector of size dim
-        
+
     References:
         Mantegna, R. N. (1994). Fast, accurate algorithm for numerical
         simulation of Lévy stable stochastic processes.
     """
+    if rng is None:
+        rng = np.random.default_rng()
     # Calculate sigma using Mantegna's method
     sigma = (
         math.gamma(1 + beta)
         * math.sin(math.pi * beta / 2)
         / (math.gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))
     ) ** (1 / beta)
-    
+
     # Generate random samples
-    u = np.random.normal(0, sigma, dim)
-    v = np.random.normal(0, 1, dim)
-    
+    u = rng.normal(0, sigma, dim)
+    v = rng.normal(0, 1, dim)
+
     # Calculate Lévy flight step
     return u / (np.abs(v) ** (1 / beta))
 

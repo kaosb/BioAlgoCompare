@@ -38,18 +38,22 @@ from utils.math_functions import levy_flight
 class Hawk(Individual):
     """Clase para representar un individuo en el algoritmo HHO (Harris Hawks Optimization)."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa un halcón con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
-        self.energy = random.uniform(
+        self.energy = self.py_rng.uniform(
             -1, 1
         )  # Energía para el mecanismo de escape de la presa
 
@@ -75,25 +79,25 @@ class Hawk(Individual):
             LB, UB: Límites inferior y superior del dominio de búsqueda (arrays numpy).
         """
         dim = self.dimension
-        q = random.random()
+        q = self.py_rng.random()
         r1, r2, r3, r4 = (
-            random.random(),
-            random.random(),
-            random.random(),
-            random.random(),
+            self.py_rng.random(),
+            self.py_rng.random(),
+            self.py_rng.random(),
+            self.py_rng.random(),
         )
 
         # ------------------------- FASE DE EXPLORACIÓN -------------------------
         if abs(E) >= 1:
             if q >= 0.5:
-                X_rand = np.random.uniform(LB, UB, dim)
+                X_rand = self.rng.uniform(LB, UB, dim)
                 self.position = X_rand - r1 * np.abs(X_rand - 2 * r2 * self.position)
             else:
                 self.position = (best_hawk.position - Xm) - r3 * (LB + r4 * (UB - LB))
 
         # ------------------------- FASE DE EXPLOTACIÓN -------------------------
         else:
-            r = random.random()
+            r = self.py_rng.random()
             if r >= 0.5 and abs(E) >= 0.5:  # soft besiege
                 self.position = best_hawk.position - E * np.abs(
                     best_hawk.position - self.position
@@ -103,19 +107,19 @@ class Hawk(Individual):
                     best_hawk.position - self.position
                 ) / (np.abs(E) + 1e-8)
             elif r < 0.5 and abs(E) >= 0.5:  # soft besiege + rapid dives
-                J = 2 * (1 - random.random())
+                J = 2 * (1 - self.py_rng.random())
                 Y = (
                     best_hawk.position
                     - E * np.abs(J) * best_hawk.position
                     - self.position
                 )
-                Z = Y + random.random() * levy_flight(dim)
+                Z = Y + self.py_rng.random() * levy_flight(dim, rng=self.rng)
                 self.position = (
                     Y if self.problem.evaluate(Y) < self.problem.evaluate(Z) else Z
                 )
             else:  # hard besiege + rapid dives
                 Y = best_hawk.position - E * np.abs(best_hawk.position - self.position)
-                Z = Y + random.random() * levy_flight(dim)
+                Z = Y + self.py_rng.random() * levy_flight(dim, rng=self.rng)
                 self.position = (
                     Y if self.problem.evaluate(Y) < self.problem.evaluate(Z) else Z
                 )
@@ -157,16 +161,9 @@ class HHO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de halcones."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            hawk = Hawk(self.problem)
+            hawk = Hawk(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(hawk)
 
         # Encontrar el mejor halcón inicial
@@ -193,14 +190,20 @@ class HHO(MetaheuristicAlgorithm):
         for i in range(self.population_size):
             # No mover el mejor halcón
             if self.population[i] is not self.best_solution:
-                E0 = 2 * random.random() - 1
+                E0 = 2 * self.py_rng.random() - 1
                 E = 2 * (1 - current_iter / self.max_iterations) * E0
                 self.population[i].move(self.best_solution, E, Xm, LB, UB)
 
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
-                    hawk_copy = Hawk(self.problem)
-                    hawk_copy.copy(self.population[i])
+                    hawk_copy = object.__new__(Hawk)
+                    hawk_copy.problem = self.problem
+                    hawk_copy.dimension = self.population[i].dimension
+                    hawk_copy.rng = self.rng
+                    hawk_copy.py_rng = self.py_rng
+                    hawk_copy.energy = 0
+                    hawk_copy.position = np.copy(self.population[i].position)
+                    hawk_copy._fitness = self.population[i]._fitness
                     self.best_solution = hawk_copy
 
         # Registrar el mejor fitness en la curva de convergencia

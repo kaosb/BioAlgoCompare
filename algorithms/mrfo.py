@@ -36,16 +36,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class MantaRay(Individual):
     """Class to represent an individual in the MRFO (Manta Ray Foraging Optimization) algorithm."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Initialize a manta ray with a random position.
 
         Args:
             problem: Problem instance to solve
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         # For VRP problems, bounds are [0,1]
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
@@ -73,14 +77,14 @@ class MantaRay(Individual):
             T: Maximum number of iterations
             alpha: Spiral factor
         """
-        r = random.random()  # Random factor to select behavior
+        r = self.py_rng.random()  # Random factor to select behavior
         beta = (
             2 * math.exp(1 - (t / T)) * math.sin(2 * math.pi * r)
         )  # Controls the spiral
 
         if t / T < 0.5:  # First half: chain foraging
             for i in range(self.dimension):
-                r1 = random.random()
+                r1 = self.py_rng.random()
                 # Follow the best manta ray with spiral factor
                 self.position[i] = (
                     best_ray.position[i]
@@ -89,8 +93,8 @@ class MantaRay(Individual):
                 )
         else:  # Second half: cyclone foraging
             for i in range(self.dimension):
-                r2 = random.random()
-                if random.random() < 0.5:  # External spiral (moving away)
+                r2 = self.py_rng.random()
+                if self.py_rng.random() < 0.5:  # External spiral (moving away)
                     # Cyclone behavior
                     self.position[i] = best_ray.position[i] + alpha * math.exp(
                         beta * r2
@@ -101,7 +105,7 @@ class MantaRay(Individual):
                     # Depth exploration
                     self.position[i] = (
                         best_ray.position[i]
-                        + random.random() * (best_ray.position[i] - self.position[i])
+                        + self.py_rng.random() * (best_ray.position[i] - self.position[i])
                         + beta * r2
                     )
 
@@ -111,9 +115,9 @@ class MantaRay(Individual):
 
         # Optional phase: somersault foraging (at the end of each iteration or periodically)
         somersault_prob = 0.3  # probability of applying this step
-        if random.random() < somersault_prob:
+        if self.py_rng.random() < somersault_prob:
             for i in range(self.dimension):
-                self.position[i] += random.uniform(-1, 1) * abs(
+                self.position[i] += self.py_rng.uniform(-1, 1) * abs(
                     best_ray.position[i] - self.position[i]
                 )
 
@@ -150,16 +154,9 @@ class MRFO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Initialize the manta ray population."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            ray = MantaRay(self.problem)
+            ray = MantaRay(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(ray)
 
         # Find the best initial manta ray
@@ -190,8 +187,15 @@ class MRFO(MetaheuristicAlgorithm):
 
                 # Update best solution if necessary
                 if self.population[i].is_better_than(self.best_solution):
-                    ray_copy = MantaRay(self.problem)
-                    ray_copy.copy(self.population[i])
+                    ray_copy = object.__new__(MantaRay)
+                    ray_copy.problem = self.problem
+                    ray_copy.dimension = self.population[i].dimension
+                    ray_copy.rng = self.rng
+                    ray_copy.py_rng = self.py_rng
+                    ray_copy.position = np.copy(self.population[i].position)
+                    ray_copy._fitness = self.population[i]._fitness
+                    ray_copy.lower_bounds = self.population[i].lower_bounds
+                    ray_copy.upper_bounds = self.population[i].upper_bounds
                     self.best_solution = ray_copy
 
         # Record best fitness in convergence curve

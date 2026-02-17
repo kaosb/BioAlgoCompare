@@ -40,16 +40,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class Hyena(Individual):
     """Class to represent an individual in the SHO (Spotted Hyena Optimizer) algorithm."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Initialize a hyena with a random position.
 
         Args:
             problem: Problem instance to solve
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
 
     def fitness(self):
@@ -78,15 +82,15 @@ class Hyena(Individual):
         a = 2 - iteration * (2 / max_iterations)  # Linearly decreases from 2 to 0
 
         for i in range(self.dimension):
-            r1 = random.random()
-            r2 = random.random()
+            r1 = self.py_rng.random()
+            r2 = self.py_rng.random()
 
             A = 2 * a * r1 - a  # Coefficient vector
             C = 2 * r2  # Emphasis vector
 
             # Exploration/exploitation phase
             if abs(A) >= 1:  # Exploration
-                rand_index = random.randint(0, 2)
+                rand_index = self.py_rng.randint(0, 2)
                 if rand_index == 0:
                     D = abs(C * alpha.position[i] - self.position[i])
                     self.position[i] = alpha.position[i] - A * D
@@ -140,17 +144,10 @@ class SHO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Initialize the hyena population."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
 
         for _ in range(self.population_size):
-            hyena = Hyena(self.problem)
+            hyena = Hyena(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(hyena)
 
         # Sort population by fitness
@@ -165,8 +162,13 @@ class SHO(MetaheuristicAlgorithm):
             self.population[2] if len(self.population) > 2 else self.population[0]
         )
 
-        # Save the best solution
-        self.best_solution = Hyena(self.problem)
+        # Save the best solution (without consuming RNG state)
+        self.best_solution = object.__new__(Hyena)
+        self.best_solution.problem = self.problem
+        self.best_solution.dimension = self.alpha.dimension
+        self.best_solution.rng = self.rng
+        self.best_solution.py_rng = self.py_rng
+        self.best_solution._fitness = None
         self.best_solution.copy(self.alpha)
 
         # Initialize convergence curve

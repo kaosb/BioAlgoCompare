@@ -37,16 +37,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class Flamingo(Individual):
     """Clase para representar un individuo en el algoritmo FGO."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa un flamenco con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
         self.personal_best_position = self.position.copy()
         self.personal_best_fitness = float("inf")
@@ -88,11 +92,11 @@ class Flamingo(Individual):
             xbj = best.position[j]
 
             if mode == "forage":
-                G1 = np.random.normal(0, 1)
-                G2 = np.random.normal(0, 1)
-                ε1 = random.choice([-1, 1])
-                ε2 = random.choice([-1, 1])
-                K = np.random.chisquare(n)
+                G1 = self.rng.normal(0, 1)
+                G2 = self.rng.normal(0, 1)
+                ε1 = self.py_rng.choice([-1, 1])
+                ε2 = self.py_rng.choice([-1, 1])
+                K = self.rng.chisquare(n)
 
                 # Forrajeo: Eq. (2)
                 step = G1 * xbj + ε2 * xij
@@ -103,7 +107,7 @@ class Flamingo(Individual):
                 x_new[j] = xij + delta
 
             elif mode == "migrate":
-                ω = np.random.normal(0, n)
+                ω = self.rng.normal(0, n)
                 delta = ω * (xbj - xij)
 
                 # Migración: Eq. (3)
@@ -144,24 +148,25 @@ class FGO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de flamencos."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
 
         for _ in range(self.population_size):
-            flamingo = Flamingo(self.problem)
+            flamingo = Flamingo(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(flamingo)
 
         # Ordenar la población por fitness
         self.population.sort(key=lambda x: x.fitness())
 
         # Guardar la mejor solución
-        self.best_solution = Flamingo(self.problem)
+        self.best_solution = object.__new__(Flamingo)
+        self.best_solution.problem = self.problem
+        self.best_solution.dimension = self.population[0].dimension
+        self.best_solution.rng = self.rng
+        self.best_solution.py_rng = self.py_rng
+        self.best_solution._fitness = None
+        self.best_solution.position = None
+        self.best_solution.personal_best_position = None
+        self.best_solution.personal_best_fitness = float("inf")
         self.best_solution.copy(self.population[0])
 
         # Inicializar curva de convergencia
@@ -174,7 +179,7 @@ class FGO(MetaheuristicAlgorithm):
         MPb = int(0.1 * self.population_size)
         MPo = MPb
         MPr = int(
-            random.random() * self.population_size * (1 - MPb / self.population_size)
+            self.py_rng.random() * self.population_size * (1 - MPb / self.population_size)
         )
         MPt = self.population_size - MPo - MPr
 

@@ -36,16 +36,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class Whale(Individual):
     """Clase para representar un individuo en el algoritmo WOA (Whale Optimization Algorithm)."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa una ballena con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
 
     def fitness(self):
@@ -70,15 +74,15 @@ class Whale(Individual):
             a2: Parámetro de control para la espiral
             leader_type: Tipo de líder (0: mejor, 1: aleatorio)
         """
-        r1 = random.random()  # Número aleatorio en [0, 1]
-        r2 = random.random()  # Número aleatorio en [0, 1]
+        r1 = self.py_rng.random()  # Número aleatorio en [0, 1]
+        r2 = self.py_rng.random()  # Número aleatorio en [0, 1]
 
         A = 2 * a * r1 - a  # Parámetro de comportamiento
         C = 2 * r2  # Parámetro de ponderación
 
         # Seleccionar estrategia de movimiento
         p = (
-            random.random()
+            self.py_rng.random()
         )  # Probabilidad para seleccionar entre encogimiento o espiral
 
         if p < 0.5:  # Encogimiento (estrategia de exploración/explotación)
@@ -87,14 +91,14 @@ class Whale(Individual):
                     D = abs(C * best_whale.position[i] - self.position[i])
                     self.position[i] = best_whale.position[i] - A * D
             else:  # Exploración: moverse aleatoriamente
-                X_rand = np.random.uniform(0, 1, self.dimension)
+                X_rand = self.rng.uniform(0, 1, self.dimension)
                 for i in range(self.dimension):
                     D = abs(C * X_rand[i] - self.position[i])
                     self.position[i] = X_rand[i] - A * D
         else:  # Estrategia de espiral (movimiento en espiral alrededor de la presa)
             for i in range(self.dimension):
                 D = abs(best_whale.position[i] - self.position[i])
-                l = random.uniform(
+                l = self.py_rng.uniform(
                     -1, 1
                 )  # Parámetro aleatorio para definir la forma de la espiral
                 self.position[i] = (
@@ -140,16 +144,9 @@ class WOA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de ballenas."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            whale = Whale(self.problem)
+            whale = Whale(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(whale)
 
         # Encontrar la mejor ballena inicial
@@ -176,8 +173,13 @@ class WOA(MetaheuristicAlgorithm):
 
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
-                    whale_copy = Whale(self.problem)
-                    whale_copy.copy(self.population[i])
+                    whale_copy = object.__new__(Whale)
+                    whale_copy.problem = self.problem
+                    whale_copy.dimension = self.population[i].dimension
+                    whale_copy.rng = self.rng
+                    whale_copy.py_rng = self.py_rng
+                    whale_copy.position = np.copy(self.population[i].position)
+                    whale_copy._fitness = self.population[i]._fitness
                     self.best_solution = whale_copy
 
         # Registrar el mejor fitness en la curva de convergencia

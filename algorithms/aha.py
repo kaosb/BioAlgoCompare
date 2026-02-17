@@ -26,13 +26,15 @@ class Hummingbird(Individual):
         _fitness: Cached fitness value
     """
 
-    def __init__(self, position: np.ndarray, bounds: List[Tuple[float, float]]):
+    def __init__(self, position: np.ndarray, bounds: List[Tuple[float, float]], rng=None, py_rng=None):
         self.position = np.array(position, dtype=float)
         self.personal_best_position = self.position.copy()
         self._fitness = None
         self.bounds = bounds
         self.dimension = len(position)
         self.memory_table = set()
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
 
     def fitness(self, objective_function=None):
         """Calculate or return cached fitness value."""
@@ -69,29 +71,29 @@ class Hummingbird(Individual):
         Implements hummingbird movement according to flight type and foraging mode.
         """
         # Random selection of flight type: axial, diagonal or omnidirectional
-        flight_type = np.random.choice(["axial", "diagonal", "omnidirectional"])
+        flight_type = self.py_rng.choice(["axial", "diagonal", "omnidirectional"])
 
         # Random selection of foraging mode: guided, territorial, migratory
-        forage_mode = np.random.choice(["guided", "territorial", "migratory"])
+        forage_mode = self.py_rng.choice(["guided", "territorial", "migratory"])
 
         new_position = self.position.copy()
         dim = self.dimension
 
         if flight_type == "axial":
             # Movement in a single dimension (axis)
-            axis = np.random.randint(0, dim)
-            step = np.random.uniform(-1, 1)
+            axis = self.rng.integers(0, dim)
+            step = self.rng.uniform(-1, 1)
             direction = np.zeros(dim)
             direction[axis] = step
         elif flight_type == "diagonal":
             # Movement in a diagonal (subset of dimensions)
-            direction = np.random.uniform(-1, 1, size=dim)
+            direction = self.rng.uniform(-1, 1, size=dim)
             # To simulate diagonal, set some random zeros
-            zero_mask = np.random.rand(dim) < 0.5
+            zero_mask = self.rng.random(dim) < 0.5
             direction[zero_mask] = 0
         else:  # omnidirectional
             # Movement in any direction
-            direction = np.random.uniform(-1, 1, size=dim)
+            direction = self.rng.uniform(-1, 1, size=dim)
 
         # Normalize direction so step is proportional
         norm = np.linalg.norm(direction)
@@ -107,14 +109,14 @@ class Hummingbird(Individual):
             new_position = self.position + step_size * diff + step_size * direction
         elif forage_mode == "territorial":
             # Eq. 7: Local random perturbation
-            new_position = self.position + step_size * direction * np.random.uniform(
+            new_position = self.position + step_size * direction * self.rng.uniform(
                 -1, 1
             )
         else:  # migratory
             # Eq. 8: Towards a random distant individual
             other = self
             while other is self:
-                other = np.random.choice(population)
+                other = self.py_rng.choice(population)
             diff = other.position - self.position
             new_position = self.position + step_size * diff + step_size * direction
 
@@ -129,7 +131,7 @@ class Hummingbird(Individual):
         # Check if position is already in memory to avoid repetition
         if discretized_pos in memory_table:
             # If already visited, make small random movement to avoid stagnation
-            new_position += step_size * np.random.uniform(-1, 1, size=dim)
+            new_position += step_size * self.rng.uniform(-1, 1, size=dim)
             for i in range(dim):
                 low, high = self.bounds[i]
                 new_position[i] = np.clip(new_position[i], low, high)
@@ -152,7 +154,7 @@ class Hummingbird(Individual):
         """
         if other is None:
             # Create and return a new copy
-            new_copy = Hummingbird(self.position.copy(), self.bounds)
+            new_copy = Hummingbird(self.position.copy(), self.bounds, rng=self.rng, py_rng=self.py_rng)
             new_copy.personal_best_position = self.personal_best_position.copy()
             new_copy._fitness = self._fitness
             return new_copy
@@ -195,18 +197,14 @@ class AHA(MetaheuristicAlgorithm):
         self.convergence_curve = []
 
     def initialize_population(self):
-        # Set random seed if provided
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
         self.population = []
         # For VRP problem, we use domain [0,1] for each dimension
         dim = self.problem.get_dimension()
         bounds = [(0, 1) for _ in range(dim)]
 
         for _ in range(self.population_size):
-            position = np.random.uniform(0, 1, size=dim)
-            hummingbird = Hummingbird(position, bounds)
+            position = self.rng.uniform(0, 1, size=dim)
+            hummingbird = Hummingbird(position, bounds, rng=self.rng, py_rng=self.py_rng)
             discretized_pos = tuple(np.round(position, decimals=6))
             self.memory_table.add(discretized_pos)
             self.population.append(hummingbird)

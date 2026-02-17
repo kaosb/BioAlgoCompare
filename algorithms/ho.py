@@ -43,11 +43,17 @@ class Hippopotamus(Individual):
     - group_id: ID del grupo al que pertenece
     """
 
-    def __init__(self, problem):
-        """Inicializa un hipopótamo con posición aleatoria."""
+    def __init__(self, problem, rng=None):
+        """Inicializa un hipopótamo con posición aleatoria.
+
+        Args:
+            problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+        """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self.velocity = np.zeros(self.dimension)
         self.fitness_value = float("inf")
         self.is_leader = False
@@ -65,7 +71,7 @@ class Hippopotamus(Individual):
     def is_feasible(self) -> bool:
         """Verifica si la solución es factible."""
         if hasattr(self.problem, "is_valid"):
-            return self.problem.is_valid(self.position)
+            return bool(self.problem.is_valid(self.position))
         return True
 
     def copy(self, other: "Hippopotamus") -> None:
@@ -110,6 +116,9 @@ class HO(MetaheuristicAlgorithm):
         seed: int = None,
         use_il: bool = False,
         il_model_path: str = None,
+        alpha_fixed: float = None,
+        beta_fixed: float = None,
+        gamma_fixed: float = None,
     ):
         """
         Inicializa el algoritmo HO.
@@ -121,8 +130,16 @@ class HO(MetaheuristicAlgorithm):
             seed: Semilla para reproducibilidad
             use_il: Si usar Imitation Learning para parámetros dinámicos
             il_model_path: Ruta al modelo IL entrenado
+            alpha_fixed: Valor fijo de alpha (None = adaptativo)
+            beta_fixed: Valor fijo de beta (None = adaptativo)
+            gamma_fixed: Valor fijo de gamma (None = adaptativo)
         """
         super().__init__(problem, population_size, max_iterations, seed)
+
+        # Fixed parameters (for paper experiments)
+        self.alpha_fixed = alpha_fixed
+        self.beta_fixed = beta_fixed
+        self.gamma_fixed = gamma_fixed
 
         # Parámetros del algoritmo según el paper
         self.alpha_min = 0.1
@@ -175,16 +192,19 @@ class HO(MetaheuristicAlgorithm):
         self.population = []
 
         for _ in range(self.population_size):
-            hippo = Hippopotamus(self.problem)
+            hippo = Hippopotamus(self.problem, rng=self.rng)
             self.population.append(hippo)
 
             # Actualizar mejor global
             if self.global_best is None or hippo.fitness() < self.global_best.fitness():
-                self.global_best = Hippopotamus(self.problem)
+                self.global_best = object.__new__(Hippopotamus)
+                self.global_best.problem = self.problem
+                self.global_best.dimension = hippo.dimension
+                self.global_best.rng = self.rng
                 self.global_best.copy(hippo)
 
         self.best_solution = self.global_best
-        self.convergence_curve.append(self.global_best.fitness())
+        self.convergence_curve = [self.global_best.fitness()]
 
     def update_population(self) -> None:
         """
@@ -226,10 +246,21 @@ class HO(MetaheuristicAlgorithm):
                 beta = self.beta_max - (self.beta_max - self.beta_min) * progress
                 gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
         else:
-            # Actualizar parámetros adaptativos estándar
-            alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
-            beta = self.beta_max - (self.beta_max - self.beta_min) * progress
-            gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
+            # Use fixed parameters if provided, otherwise adaptive
+            if self.alpha_fixed is not None:
+                alpha = self.alpha_fixed
+            else:
+                alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
+
+            if self.beta_fixed is not None:
+                beta = self.beta_fixed
+            else:
+                beta = self.beta_max - (self.beta_max - self.beta_min) * progress
+
+            if self.gamma_fixed is not None:
+                gamma = self.gamma_fixed
+            else:
+                gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
 
         # Determinar fase basada en progreso y fitness
         avg_fitness = np.mean([h.fitness() for h in self.population])
@@ -274,7 +305,7 @@ class HO(MetaheuristicAlgorithm):
                 continue
 
             # Seleccionar líder aleatorio
-            leader = np.random.choice(self.leaders)
+            leader = self.py_rng.choice(self.leaders)
 
             # Actualizar posición continua
             new_position = hippo.position.copy()
@@ -285,7 +316,7 @@ class HO(MetaheuristicAlgorithm):
 
             # Movimiento hacia el mejor global
             global_direction = self.global_best.position - hippo.position
-            new_position += beta * np.random.rand() * global_direction
+            new_position += beta * self.rng.random() * global_direction
 
             # Asegurar límites [0, 1]
             new_position = np.clip(new_position, 0, 1)
@@ -295,7 +326,7 @@ class HO(MetaheuristicAlgorithm):
                 routes, _, _ = self.problem.decode_solution(new_position)
                 # Aplicar 2-opt a una ruta aleatoria
                 if routes and len(routes) > 0:
-                    route_idx = np.random.randint(len(routes))
+                    route_idx = self.rng.integers(len(routes))
                     if len(routes[route_idx]) > 3:  # Necesitamos al menos 4 nodos
                         improved_route = self._apply_2opt(routes[route_idx])
                         routes[route_idx] = improved_route
@@ -356,7 +387,7 @@ class HO(MetaheuristicAlgorithm):
         """
         for hippo in self.population:
             # Aplicar perturbación Levy
-            levy_step = levy_flight(hippo.dimension)
+            levy_step = levy_flight(hippo.dimension, rng=self.rng)
             perturbation = gamma * levy_step
 
             new_position = hippo.position + perturbation

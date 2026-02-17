@@ -40,12 +40,12 @@ class TestLevyFlight:
     
     def test_levy_flight_reproducibility(self):
         """Test reproducibility with seed."""
-        np.random.seed(42)
-        step1 = levy_flight(10)
-        
-        np.random.seed(42)
-        step2 = levy_flight(10)
-        
+        rng1 = np.random.default_rng(42)
+        step1 = levy_flight(10, rng=rng1)
+
+        rng2 = np.random.default_rng(42)
+        step2 = levy_flight(10, rng=rng2)
+
         assert np.allclose(step1, step2)
 
 

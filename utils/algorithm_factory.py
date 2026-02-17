@@ -28,6 +28,9 @@ from algorithms.gvoa import GVOA
 from algorithms.ho import HO
 from algorithms.pso import PSO
 from algorithms.ga import GA
+from algorithms.ssa import SSA
+from algorithms.gwo import GWO
+from algorithms.fgo import FGO
 
 
 # Algorithm registry: name -> (class, full_name, year)
@@ -50,12 +53,15 @@ ALGORITHMS: Dict[str, Tuple[Type[MetaheuristicAlgorithm], str, int]] = {
     "smo": (SMO, "Starling Murmuration Optimizer", 2022),
     "gvoa": (GVOA, "Griffon Vultures Optimization Algorithm", 2025),
     "ho": (HO, "Hippopotamus Optimization", 2024),
+    # Modern bio-inspired algorithms
+    "ssa": (SSA, "Salp Swarm Algorithm", 2017),
+    "gwo": (GWO, "Grey Wolf Optimizer", 2014),
+    "fgo": (FGO, "Flamingo Optimization Algorithm", 2021),
     # Classical algorithms for comparison
     "pso": (PSO, "Particle Swarm Optimization", 1995),
     "ga": (GA, "Genetic Algorithm", 1975),
     # Aliases for backward compatibility
     "hoa": (SHO, "Spotted Hyena Optimizer (HOA alias)", 2017),  # HOA = SHO
-    "fgo": (FSA, "Flamingo Search Algorithm (FGO alias)", 2021),  # FGO = FSA
 }
 
 
@@ -136,7 +142,7 @@ def get_algorithm_info(name: str) -> Dict[str, Any]:
         "full_name": full_name,
         "year": year,
         "module": algo_class.__module__,
-        "is_alias": name in ["hoa", "fgo"],
+        "is_alias": name in ["hoa"],
     }
 
 
@@ -153,14 +159,14 @@ def list_algorithms(include_aliases: bool = False) -> Dict[str, Dict[str, Any]]:
     result = {}
 
     for name, (algo_class, full_name, year) in ALGORITHMS.items():
-        if not include_aliases and name in ["hoa", "fgo"]:
+        if not include_aliases and name in ["hoa"]:
             continue
 
         result[name] = {
             "full_name": full_name,
             "year": year,
             "class_name": algo_class.__name__,
-            "is_alias": name in ["hoa", "fgo"],
+            "is_alias": name in ["hoa"],
         }
 
     return result
@@ -185,7 +191,7 @@ def get_algorithm_by_year(
     result = {}
 
     for name, (algo_class, full_name, year) in ALGORITHMS.items():
-        if name in ["hoa", "fgo"]:  # Skip aliases
+        if name in ["hoa"]:  # Skip aliases
             continue
 
         if start_year <= year <= end_year:
