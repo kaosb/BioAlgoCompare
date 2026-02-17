@@ -1,22 +1,15 @@
-<<<<<<< HEAD
-"""
-Backward compatibility module for VRPProblem.
-This module exports the VRPProblemV2 class as VRPProblem for backward compatibility.
-"""
-=======
 import numpy as np
 import pandas as pd
 import math
 import os
 from typing import List, Tuple, Dict, Set, Union, Optional, Any, cast
 from collections import Counter
->>>>>>> develop
 
-from .vrp_v2 import VRPProblemV2 as VRPProblem
+# Constantes para penalizaciones
+PENALTY_FACTOR = 1000.0  # Factor base de penalización
+PENALTY_CAP = PENALTY_FACTOR  # Penalización por exceso de capacidad
+PENALTY_MISSING = PENALTY_FACTOR * 10  # Penalización por nodos faltantes (mayor)
 
-<<<<<<< HEAD
-__all__ = ['VRPProblem']
-=======
 
 class VRPProblem:
     """Clase para representar y evaluar problemas de VRP (Vehicle Routing Problem).
@@ -910,4 +903,3 @@ class VRPProblem:
                 solution[customer - 1] = position / len(customer_sequence)
         
         return solution
->>>>>>> develop

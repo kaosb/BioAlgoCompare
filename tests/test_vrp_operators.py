@@ -1,9 +1,5 @@
 import pytest
 import numpy as np
-<<<<<<< HEAD
-from utils.vrp_operators import VRPOperators, calculate_route_distance, check_route_capacity, split_vrp
-from problems.vrp_v2 import VRPProblemV2
-=======
 from utils.operators import (
     VRPOperators,
     calculate_route_distance,
@@ -11,7 +7,6 @@ from utils.operators import (
     split_vrp,
 )
 from problems.vrp import VRPProblem
->>>>>>> develop
 import os
 
 # Ruta al directorio de datos de prueba

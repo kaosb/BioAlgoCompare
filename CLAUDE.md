@@ -84,7 +84,7 @@ El repositorio tiene hooks configurados para:
 
 ## Project Overview
 
-BioAlgoCompare is a platform for rigorous statistical evaluation of bio-inspired algorithms applied to the Vehicle Routing Problem (VRP). It implements 22 metaheuristic algorithms (1975-2025) with massive benchmarking capabilities (1000+ runs), advanced statistical analysis, and scientific visualizations.
+BioAlgoCompare is a platform for rigorous statistical evaluation of bio-inspired algorithms applied to the Vehicle Routing Problem (VRP). It implements 17 metaheuristic algorithms (2016-2025) with massive benchmarking capabilities (1000+ runs), advanced statistical analysis, and scientific visualizations.
 
 ## Key Commands
 
@@ -147,21 +147,17 @@ make -C docs/papers clean
 
 ## Architecture Overview
 
-### Algorithm Structure (Template Method Pattern)
+### Algorithm Structure
 All algorithms inherit from `MetaheuristicAlgorithm` (algorithms/base.py) and implement:
-- `initialize_population()`: Creates initial population, sets `self.best_solution` and `self.convergence_curve = [initial_fitness]`
-- `update_population()`: Algorithm-specific population update per iteration, appends to `convergence_curve`
-
-The base class provides the template method `execute()` which calls `initialize_population()` then loops `update_population()` for `max_iterations` times. Algorithms must NOT override `execute()`.
-
-`execute()` always returns an `Individual`. `get_convergence_curve()` returns a list of length `max_iterations + 1`.
+- `initialize_population()`: Creates initial solution population
+- `execute()`: Main optimization loop
+- `update_position()`: Algorithm-specific update logic
 
 Each algorithm also defines an `Individual` class inheriting from base `Individual` with:
 - `move()`: Individual movement logic specific to the algorithm
-- `fitness()`: Fitness evaluation (problem-dependent, not abstract)
-- `is_feasible()`: Feasibility check (must return native `bool`, not `np.bool_`)
-- `is_better_than()`: Comparison logic (default: minimization)
-- `copy()`: Clone individual state
+- `fitness()`: Fitness evaluation
+- `is_feasible()`: Feasibility check
+- `is_better_than()`: Comparison logic (minimization by default)
 
 ### Problem Encoding
 The VRP problem uses ordinal encoding:
@@ -217,8 +213,8 @@ The VRP problem uses ordinal encoding:
 
 ### Ruff Linter Settings (pyproject.toml)
 - Line length: 88 (Black compatible)
-- Excludes: scripts, utils/improved, utils/backup, legacy
-- Ignores: F401, E501, E741, E402
+- Excludes: legacy code
+- Ignores: F401, E501, E712, E741, F841, F823, E722, F811
 - Target: Python 3.8+
 
 ### Test Configuration (tox.ini)
@@ -237,31 +233,27 @@ The VRP problem uses ordinal encoding:
 ## Language Note
 While code is in English, some documentation and comments may be in Spanish as this is an academic research project. Maintain consistency within each file.
 
-## Recent Refactoring
+## Recent Refactoring (Sprint Estadístico v2)
 
-### Template Method Consolidation (Feb 2026)
-GA and PSO refactored to use the base class template method pattern. All algorithms now follow:
-- `initialize_population()` sets `convergence_curve = [initial_fitness]` + `best_solution`
-- `update_population()` appends to `convergence_curve`, updates `best_solution`
-- GVOA/GWO/RRO preserve global best for monotonic convergence
-- HO uses assignment (`convergence_curve = [...]`) instead of append in `initialize_population`
-- `is_feasible()` must return native `bool()`, not `np.bool_`
-- `execute()` always returns `Individual` (never tuple)
-- `benchmarking.py` simplified: no more tuple/Individual branching
+The project underwent a major refactoring to consolidate duplicate code and improve maintainability:
 
-### Sprint Estadístico v2
-1. **Unified CLI**: All functionality through `scripts/analyze.py` with subcommands:
-   - `run`, `benchmark`, `massive`, `stats`, `convert`, `analyze_csv`
+### Key Changes
+1. **Unified CLI**: All functionality now accessible through `scripts/analyze.py` with subcommands:
+   - `run`: Execute single algorithm runs
+   - `benchmark`: Run comparative benchmarks
+   - `massive`: Execute massive benchmarks with 1000+ runs
+   - `stats`: Perform advanced statistical analysis
+   - `convert`: Convert JSON results to CSV format
+   - `analyze_csv`: Analyze existing CSV results
 
 2. **Consolidated Modules**:
-   - `utils/statistical_analysis.py`: All statistical analysis
-   - `utils/benchmarking.py`: Unified benchmarking system
-   - `utils/algorithm_factory.py`: Centralized algorithm registry (22 primary + 1 alias HOA = 23 entries)
+   - `utils/statistical_analysis.py`: All statistical analysis functionality in one place
+   - `utils/benchmarking.py`: Unified benchmarking system with all features
+   - `utils/algorithm_factory.py`: Centralized algorithm registry and creation
 
 3. **Removed Duplicates**:
-   - Eliminated `utils/improved/`, duplicate scripts, consolidated statistical modules
+   - Eliminated `utils/improved/` directory and its contents
+   - Removed duplicate scripts (`run.py`, `run_massive.py`, `demo_benchmark.py`, etc.)
+   - Consolidated multiple statistical analysis modules into one
 
-### Algorithm Registries
-- `utils/algorithm_factory.py`: 22 primary algorithms + 1 alias (HOA -> SHO) = 23 entries
-- `algorithms/__init__.py`: 22 primary + 3 aliases (hoa, hyena, flamingo) = 25 entries
-- FGO is a primary algorithm (separate from FSA)
+4. **Algorithm Count**: Corrected from 18 to 17 unique algorithms (HOA and FGO are aliases)

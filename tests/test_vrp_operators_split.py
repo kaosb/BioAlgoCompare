@@ -10,13 +10,8 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # ruff: noqa: E402
-<<<<<<< HEAD
-from utils import vrp_operators
-from problems.vrp_v2 import VRPProblemV2
-=======
 from utils import operators as vrp_operators
 from problems.vrp import VRPProblem
->>>>>>> develop
 
 
 def test_vrp_split_method():

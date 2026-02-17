@@ -2,11 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import matplotlib.colors as mcolors
-from typing import List, Dict, Optional, Any
-from matplotlib.figure import Figure
 
 
-def plot_vrp_solution(problem: Any, routes: List[List[int]], title: Optional[str] = None) -> Figure:
+def plot_vrp_solution(problem, routes, title=None):
     """
     Visualiza una solución VRP.
 
@@ -14,9 +12,6 @@ def plot_vrp_solution(problem: Any, routes: List[List[int]], title: Optional[str
         problem: Instancia del problema VRP
         routes: Lista de rutas (cada ruta es una lista de índices de nodos)
         title: Título opcional para el gráfico
-        
-    Returns:
-        Figura de matplotlib
     """
     plt.figure(figsize=(10, 8))
 
@@ -56,19 +51,16 @@ def plot_vrp_solution(problem: Any, routes: List[List[int]], title: Optional[str
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.tight_layout()
 
-    return plt.gcf()
+    return plt
 
 
-def plot_convergence(convergence_curve: List[float], title: Optional[str] = None) -> Figure:
+def plot_convergence(convergence_curve, title=None):
     """
     Visualiza la curva de convergencia de un algoritmo.
 
     Args:
         convergence_curve: Lista de valores de fitness por iteración
         title: Título opcional para el gráfico
-        
-    Returns:
-        Figura de matplotlib
     """
     plt.figure(figsize=(10, 6))
 
@@ -85,19 +77,16 @@ def plot_convergence(convergence_curve: List[float], title: Optional[str] = None
     plt.grid(True, linestyle="--", alpha=0.7)
     plt.tight_layout()
 
-    return plt.gcf()
+    return plt
 
 
-def compare_algorithms(results_dict: Dict[str, List[float]], title: Optional[str] = None) -> Figure:
+def compare_algorithms(results_dict, title=None):
     """
     Compara las curvas de convergencia de varios algoritmos.
 
     Args:
         results_dict: Diccionario con nombres de algoritmos como claves y curvas de convergencia como valores
         title: Título opcional para el gráfico
-        
-    Returns:
-        Figura de matplotlib
     """
     plt.figure(figsize=(12, 8))
 
@@ -116,4 +105,4 @@ def compare_algorithms(results_dict: Dict[str, List[float]], title: Optional[str
     plt.legend()
     plt.tight_layout()
 
-    return plt.gcf()
+    return plt

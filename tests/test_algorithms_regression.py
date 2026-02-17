@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import os
-from problems.vrp_v2 import VRPProblemV2
+from problems.vrp import VRPProblem
 import importlib
 
 # Ruta al directorio de datos de prueba

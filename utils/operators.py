@@ -3,10 +3,6 @@ Operadores para algoritmos metaheurísticos y VRP.
 Incluye operadores genéricos (cruce, mutación) y específicos de VRP (Split, 2-opt, etc.).
 """
 import numpy as np
-<<<<<<< HEAD
-from typing import Any
-import numpy.typing as npt
-=======
 import random
 import math
 import matplotlib.pyplot as plt
@@ -15,11 +11,9 @@ import matplotlib.animation as animation
 from matplotlib.patches import FancyArrowPatch
 from matplotlib.collections import LineCollection
 import copy
->>>>>>> develop
 
 
-def sbx_crossover(parent1: npt.NDArray[np.float64], parent2: npt.NDArray[np.float64], 
-                  probability: float = 0.9, distribution_index: float = 15) -> npt.NDArray[np.float64]:
+def sbx_crossover(parent1, parent2, probability=0.9, distribution_index=15):
     """
     Cruce binario simulado (SBX).
 
@@ -66,8 +60,7 @@ def sbx_crossover(parent1: npt.NDArray[np.float64], parent2: npt.NDArray[np.floa
     return child
 
 
-def polynomial_mutation(solution: npt.NDArray[np.float64], probability: float = 0.1, 
-                       distribution_index: float = 20) -> npt.NDArray[np.float64]:
+def polynomial_mutation(solution, probability=0.1, distribution_index=20):
     """
     Mutación polinomial.
 
@@ -114,8 +107,7 @@ def polynomial_mutation(solution: npt.NDArray[np.float64], probability: float = 
     return mutated
 
 
-def repair_bounds(solution: npt.NDArray[np.float64], lb: float = 0.0, 
-                 ub: float = 1.0) -> npt.NDArray[np.float64]:
+def repair_bounds(solution, lb=0.0, ub=1.0):
     """
     Repara una solución para mantenerla dentro de los límites.
 
