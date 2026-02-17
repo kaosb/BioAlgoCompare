@@ -44,9 +44,9 @@ class Particle(Individual):
         self.pbest_position: np.ndarray = self.position.copy()
         self.pbest_fitness: float = float('inf')
         # PSO parameters
-        self.w = 0.729  # Inertia weight (constriction factor)
-        self.c1 = 1.49445  # Cognitive parameter
-        self.c2 = 1.49445  # Social parameter
+        self.w = 0.9  # Inertia weight (linearly decreasing, Shi & Eberhart 1998)
+        self.c1 = 2.0  # Cognitive parameter (Kennedy & Eberhart 1995)
+        self.c2 = 2.0  # Social parameter (Kennedy & Eberhart 1995)
 
     def fitness(self) -> float:
         """Calculate and cache fitness value."""
@@ -164,7 +164,12 @@ class PSO(MetaheuristicAlgorithm):
         """Update swarm positions for one iteration."""
         iteration = len(self.convergence_curve) - 1
 
-        # Move all particles
+        # Adaptive inertia weight (linearly decreasing 0.9 -> 0.4)
+        # Update BEFORE moving particles so first iteration uses correct w
+        for particle in self.population:
+            particle.w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
+
+        # Move all particles with updated w
         for particle in self.population:
             particle.update_velocity_position(self.gbest_position)
 
@@ -173,10 +178,6 @@ class PSO(MetaheuristicAlgorithm):
 
         # Track convergence
         self.convergence_curve.append(self.gbest_fitness)
-
-        # Adaptive inertia weight (linearly decreasing)
-        for particle in self.population:
-            particle.w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
 
         # Update best_solution
         best_particle = min(self.population, key=lambda p: p.fitness())
@@ -195,8 +196,8 @@ class PSO(MetaheuristicAlgorithm):
             'algorithm': 'PSO',
             'population_size': self.population_size,
             'max_iterations': self.max_iterations,
-            'inertia_weight': 0.729,
-            'c1': 1.49445,
-            'c2': 1.49445,
+            'inertia_weight': '0.9 -> 0.4',
+            'c1': 2.0,
+            'c2': 2.0,
             'seed': self.seed
         }
