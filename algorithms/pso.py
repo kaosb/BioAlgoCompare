@@ -102,8 +102,8 @@ class Particle(Individual):
 
         self.velocity = self.w * self.velocity + cognitive + social
 
-        # Velocity clamping to prevent explosion
-        v_max = 4.0  # Maximum velocity
+        # Velocity clamping (Engelbrecht recommends 10-20% of search range)
+        v_max = 0.2  # 20% of [0,1] range
         self.velocity = np.clip(self.velocity, -v_max, v_max)
 
         # Update position
@@ -199,5 +199,6 @@ class PSO(MetaheuristicAlgorithm):
             'inertia_weight': '0.9 -> 0.4',
             'c1': 2.0,
             'c2': 2.0,
+            'v_max': 0.2,
             'seed': self.seed
         }
