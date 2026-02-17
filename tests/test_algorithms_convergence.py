@@ -21,7 +21,7 @@ KNOWN_OPTIMA = {
 # Lista de algoritmos a probar para convergencia
 CONVERGENCE_ALGORITHMS = [
     "hho",  # Harris Hawks Optimization
-    "hoa",  # Hyena Optimization Algorithm
+    "sho",  # Spotted Hyena Optimizer (was hoa, which is just an alias)
 ]
 
 

@@ -85,41 +85,6 @@ def test_check_route_capacity(vrp_problem, sample_route):
     assert global_feasible == expected_feasibility
 
 
-@pytest.mark.skip(reason="Función no implementada en esta versión")
-def test_evaluate_solution(vrp_problem, sample_routes):
-    """Test que la evaluación de la solución funciona correctamente."""
-    pass
-
-
-@pytest.mark.skip(reason="Función no implementada en esta versión")
-def test_swap_nodes(vrp_problem, sample_route):
-    """Test que el operador de intercambio de nodos funciona correctamente."""
-    pass
-
-
-@pytest.mark.skip(reason="Función no implementada en esta versión")
-def test_two_opt_move(vrp_problem):
-    """Test que el operador 2-opt funciona correctamente."""
-    pass
-
-
-@pytest.mark.skip(reason="Función no implementada en esta versión")
-def test_relocate_node(vrp_problem):
-    """Test que el operador de reubicación de nodos funciona correctamente."""
-    pass
-
-
-@pytest.mark.skip(reason="Función no implementada en esta versión")
-def test_optimize_all_routes(vrp_problem, sample_routes):
-    """Test que la optimización de todas las rutas funciona correctamente."""
-    pass
-
-
-@pytest.mark.skip(reason="Función no implementada en esta versión")
-def test_repair_mechanism(vrp_problem):
-    """Test que el mecanismo de optimización entre rutas funciona."""
-    pass
-
 
 def test_split_vrp(vrp_problem):
     """Test que el algoritmo Split para VRP funciona correctamente."""
