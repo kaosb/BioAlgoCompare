@@ -21,7 +21,7 @@ import logging
 from pathlib import Path
 import multiprocessing as mp
 from math import sqrt
-from scipy import stats
+
 import sys
 
 # Añadir el directorio raíz del proyecto al path para poder importar los módulos
@@ -490,7 +490,7 @@ def benchmark(
 
             if len(df) >= 10:  # Need enough data for meaningful statistics
                 # Perform statistical analysis
-                stats_results = perform_statistical_analysis(
+                perform_statistical_analysis(
                     df,
                     output_dir=output_dir,
                     alpha=0.05,
@@ -945,7 +945,7 @@ def stats(csv, out):
         report_files.append(str(output_dir / "cd_diagram.png"))
 
     if report_files:
-        print(f"\nReport files:")
+        print("\nReport files:")
         for f in report_files:
             print(f"- {f}")
     print("-----------------------------------------")

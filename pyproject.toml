@@ -24,10 +24,6 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
-    "scripts",
-    "utils/improved",
-    "utils/backup",
-    "legacy"
 ]
 
 # Same as Black.
