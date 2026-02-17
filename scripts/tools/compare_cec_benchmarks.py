@@ -161,7 +161,6 @@ def analyze_ho_phases():
     }
 
     # Modificar temporalmente HO para tracking
-    original_execute = ho.execute
 
     def tracked_execute():
         for iteration in range(ho.max_iterations):
@@ -190,7 +189,7 @@ def analyze_ho_phases():
         return ho.best_individual
 
     ho.execute = tracked_execute
-    best = ho.execute()
+    ho.execute()
 
     # Visualizar distribución de fases
     plt.figure(figsize=(10, 6))

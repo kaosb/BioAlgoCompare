@@ -2,9 +2,9 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Algorithms](https://img.shields.io/badge/algorithms-21-orange)](algorithms/)
+[![Algorithms](https://img.shields.io/badge/algorithms-22-orange)](algorithms/)
 [![Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)](tests/)
-[![Tests](https://img.shields.io/badge/tests-759%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1236%20passed-brightgreen)](tests/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
 
@@ -178,14 +178,14 @@ python scripts/analyze.py massive \
 
 | Necesidad | Solución | Beneficio |
 |-----------|----------|-----------|
-| **🔬 Investigación Académica** | 17 algoritmos + análisis estadístico riguroso | Papers científicos con significancia estadística |
+| **🔬 Investigación Académica** | 22 algoritmos + análisis estadístico riguroso | Papers científicos con significancia estadística |
 | **⚡ Prototipado Rápido** | CLI intuitivo + ejemplos garantizados | De idea a resultados en 3 minutos |
 | **📊 Comparación de Algoritmos** | Benchmarking automático + visualizaciones | Decisiones informadas basadas en datos |
 | **🔄 Reproducibilidad** | Control de semillas + checkpointing | Experimentos 100% replicables |
 | **⚙️ Escalabilidad** | Paralelo + optimizado para 1000+ runs | Resultados robustos sin complejidad |
 
 ### 🚀 **Capacidades Principales**
-- ✅ **17 algoritmos bioinspirados** únicos (2016-2025) - Estado del arte
+- ✅ **22 algoritmos metaheurísticos** únicos (1975-2025) - Estado del arte
 - ✅ **Benchmarking masivo** con soporte para 1000+ ejecuciones automáticas
 - ✅ **Análisis estadístico riguroso**: Tests Friedman, Nemenyi (CD corregido), Wilcoxon, tamaños de efecto
 - ✅ **Ejecución paralela optimizada** para máximo rendimiento en multi-core
@@ -268,7 +268,7 @@ python scripts/analyze.py run --algorithm egto --instance E-n51-k5 --runs 10 --s
 
 ```bash
 python scripts/analyze.py run --algorithm all --instance P-n16-k8 --parallel
-# ⏱️ ~5 minutos (17 algoritmos), 📊 17 resultados, 💾 ~25KB
+# ⏱️ ~5 minutos (22 algoritmos), 📊 22 resultados, 💾 ~25KB
 ```
 
 ### Benchmarking Comparativo
@@ -311,7 +311,7 @@ python scripts/analyze.py massive \
     --resume \
     --iterations 300 \
     --population 50
-# ⏱️ ~3 horas (17 alg × 3 inst × 1000 runs), 📊 51,000 resultados, 💾 ~200MB
+# ⏱️ ~3 horas (22 alg × 3 inst × 1000 runs), 📊 66,000 resultados, 💾 ~200MB
 ```
 
 #### **Recuperación Automática (⏱️ Tiempo restante)**
@@ -523,7 +523,7 @@ python scripts/tools/compare_cec_benchmarks.py
 
 ## 🧪 Algoritmos Implementados
 
-El proyecto implementa **21 algoritmos metaheurísticos únicos** (19 bioinspirados + 2 clásicos de comparación):
+El proyecto implementa **22 algoritmos metaheurísticos únicos** (20 bioinspirados + 2 clásicos de comparación):
 
 | Algoritmo | Nombre Completo | Año | Inspiración |
 |-----------|-----------------|-----|-------------|
@@ -531,6 +531,7 @@ El proyecto implementa **21 algoritmos metaheurísticos únicos** (19 bioinspira
 | **apo** | Artificial Protozoa Optimizer | 2024 | División de protozoarios |
 | **egto** | Enhanced Gorilla Troops Optimization | 2024 | Comportamiento social mejorado |
 | **fsa** | Flamingo Search Algorithm | 2021 | Búsqueda de alimento |
+| **fgo** | Flamingo Optimization Algorithm | 2021 | Comportamiento de flamencos |
 | **foa** | Fossa Optimization Algorithm | 2024 | Estrategias de caza |
 | **woa** | Whale Optimization Algorithm | 2016 | Alimentación de ballenas |
 | **hho** | Harris Hawks Optimization | 2019 | Caza cooperativa |
@@ -549,7 +550,7 @@ El proyecto implementa **21 algoritmos metaheurísticos únicos** (19 bioinspira
 | **pso** | Particle Swarm Optimization | 1995 | Movimiento de partículas (clásico) |
 | **ga** | Genetic Algorithm | 1975 | Evolución natural (clásico) |
 
-**Nota**: Los alias `hoa` (→ `sho`) y `fgo` (→ `fsa`) están disponibles para compatibilidad.
+**Nota**: El alias `hoa` (→ `sho`) está disponible para compatibilidad.
 
 ### Detalles de Implementación HO
 
@@ -818,7 +819,7 @@ python tools/solomon/convert_solomon_format.py \
 BioAlgoCompare/
 ├── algorithms/          # Implementaciones de algoritmos
 │   ├── base.py         # Clases base abstractas
-│   └── *.py            # 16 algoritmos bioinspirados
+│   └── *.py            # 22 algoritmos metaheurísticos
 ├── data/
 │   └── vrp/            # Instancias CVRPLIB
 ├── docs/               # Documentación completa
@@ -879,15 +880,15 @@ pytest -m "not slow"
 pytest --cov-report=html --cov-report=term-missing
 ```
 
-### Estado Actual de Cobertura: **93%**
+### Estado Actual de Cobertura: **92%**
 
-#### Gaps de Cobertura a Resolver
+#### Gaps de Cobertura Principales
 
-1. `utils/algorithm_factory.py` (0%)
-2. `utils/evaluate_il.py` (0%)
-3. `utils/generate_demos.py` (0%)
-4. `utils/train_il.py` (0%)
-5. `problems/vrp.py` (92% - casos edge faltantes)
+1. `problems/vrptw.py` (44% - variante VRPTW experimental)
+2. `utils/train_il_simple.py` (54% - entrenamiento IL simplificado)
+3. `problems/qc_dvrp.py` (76% - simulador QC-DVRP)
+4. `algorithms/ho.py` (78% - ramas de parámetros adaptativos)
+5. `problems/vrp.py` (89% - casos edge de parsing)
 
 ## 📊 Opciones de Línea de Comandos
 
@@ -989,7 +990,7 @@ Implementaci&oacute;n: `problems/qc_dvrp.py`. Documentaci&oacute;n: `results/dvr
 
 ## Estado del Proyecto
 
-- 21 algoritmos implementados y probados
+- 22 algoritmos implementados y probados
 - Sistema de benchmarking completo (VRP est&aacute;tico + QC-DVRP din&aacute;mico)
 - An&aacute;lisis estad&iacute;stico riguroso (Friedman, Nemenyi, Wilcoxon, A12)
 - Documentaci&oacute;n exhaustiva
