@@ -1,59 +1,38 @@
 #!/bin/bash
 # Git hook pre-push para el proyecto BioAlgoCompare
-# Advierte sobre pushes potencialmente problemáticos
-
-# Colores para mensajes
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+# Verifica que no se pusheen archivos de tesis/academic en ramas incorrectas
 
 # Leer información del push
 while read local_ref local_sha remote_ref remote_sha; do
     # Obtener nombre de la rama
     branch_name=$(echo "$local_ref" | sed 's/refs\/heads\///')
-    
-    # Si estamos pusheando develop a origin
-    if [[ "$branch_name" == "develop" ]]; then
-        # Verificar si hay commits que vienen de tesis o academic
-        commits_from_tesis=$(git log --oneline "$remote_sha..$local_sha" --grep="tesis" -i)
-        commits_from_academic=$(git log --oneline "$remote_sha..$local_sha" --grep="academic\|CLEI" -i)
-        
-        if [[ -n "$commits_from_tesis" ]] || [[ -n "$commits_from_academic" ]]; then
-            echo -e "${YELLOW}⚠️  ADVERTENCIA: Detectados commits con referencias a tesis/academic${NC}"
-            echo ""
-            
-            if [[ -n "$commits_from_tesis" ]]; then
-                echo "Commits con referencias a 'tesis':"
-                echo "$commits_from_tesis"
-                echo ""
-            fi
-            
-            if [[ -n "$commits_from_academic" ]]; then
-                echo "Commits con referencias a 'academic/CLEI':"
-                echo "$commits_from_academic"
-                echo ""
-            fi
-            
-            echo "Estos commits podrían contener información que no debería estar en develop."
-            read -p "¿Continuar con el push? (s/n): " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Ss]$ ]]; then
-                exit 1
-            fi
+
+    # Si estamos pusheando develop o main
+    if [[ "$branch_name" == "develop" ]] || [[ "$branch_name" == "main" ]]; then
+        # Verificar si hay archivos de tesis/ o academic/ en los commits nuevos
+        if [[ "$remote_sha" == "0000000000000000000000000000000000000000" ]]; then
+            # Nueva rama, comparar con main
+            changed_files=$(git diff --name-only main.."$local_sha" 2>/dev/null)
+        else
+            changed_files=$(git diff --name-only "$remote_sha".."$local_sha" 2>/dev/null)
         fi
-    fi
-    
-    # Advertencia si se pushea rama tesis o academic
-    if [[ "$branch_name" == "tesis" ]] || [[ "$branch_name" == "academic" ]]; then
-        echo -e "${YELLOW}⚠️  ADVERTENCIA: Estás pusheando la rama '$branch_name'${NC}"
-        echo ""
-        echo "Esta rama contiene información personal/académica."
-        echo "¿Estás seguro de que quieres pushearla al repositorio remoto?"
-        echo ""
-        read -p "Continuar con push de rama '$branch_name'? (s/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Ss]$ ]]; then
+
+        tesis_files=$(echo "$changed_files" | grep "^tesis/" || true)
+        academic_files=$(echo "$changed_files" | grep "^academic/" || true)
+
+        if [[ -n "$tesis_files" ]]; then
+            echo "ERROR: Archivos de tesis/ detectados en push a '$branch_name':"
+            echo "$tesis_files" | sed 's/^/  - /'
+            echo ""
+            echo "Estos archivos solo deben estar en la rama 'tesis'."
+            exit 1
+        fi
+
+        if [[ -n "$academic_files" ]]; then
+            echo "ERROR: Archivos de academic/ detectados en push a '$branch_name':"
+            echo "$academic_files" | sed 's/^/  - /'
+            echo ""
+            echo "Estos archivos solo deben estar en la rama 'academic'."
             exit 1
         fi
     fi
