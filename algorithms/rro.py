@@ -215,5 +215,6 @@ class RRO(MetaheuristicAlgorithm):
 
         # Actualizar mejor solución global y registrar convergencia
         leader = min(self.population, key=lambda r: r.fitness())
-        self.best_solution = leader.copy()
+        if leader.fitness() < self.best_solution.fitness():
+            self.best_solution = leader.copy()
         self.convergence_curve.append(self.best_solution.fitness())

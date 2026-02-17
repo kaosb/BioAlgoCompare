@@ -141,6 +141,8 @@ class GWO(MetaheuristicAlgorithm):
         # a decreases linearly from 2 to 0 (Eq. 3.3)
         a = 2 - 2 * (t / T)
 
+        prev_best_fitness = self.alpha.fitness()
+
         for i in range(self.population_size):
             dim = self.population[i].dimension
 
@@ -179,7 +181,12 @@ class GWO(MetaheuristicAlgorithm):
             )
             self.population[i]._fitness = None
 
-        # Update hierarchy
+        # Update hierarchy and preserve global best
+        prev_alpha = self.alpha
         self._update_hierarchy()
+
+        if self.alpha.fitness() > prev_best_fitness:
+            self.alpha = prev_alpha
+            self.best_solution = self.alpha
 
         self.convergence_curve.append(self.alpha.fitness())

@@ -47,7 +47,7 @@ class Chromosome(Individual):
 
     def is_feasible(self) -> bool:
         """Check if chromosome represents a feasible solution."""
-        return self.problem.is_valid(self.position)
+        return bool(self.problem.is_valid(self.position))
 
     def copy(self, other: 'Chromosome') -> None:
         """Copy values from another chromosome."""
@@ -151,11 +151,7 @@ class GA(MetaheuristicAlgorithm):
         self.tournament_size = tournament_size
         self.elitism_size = elitism_size
 
-    def update_population(self) -> None:
-        """Update population (required by base class but handled in execute)."""
-        pass
-
-    def initialize_population(self) -> List[Chromosome]:
+    def initialize_population(self) -> None:
         """Initialize population with random chromosomes."""
         self.population = []
         for i in range(self.population_size):
@@ -165,7 +161,27 @@ class GA(MetaheuristicAlgorithm):
                 rng=self.rng,
             )
             self.population.append(chromosome)
-        return self.population
+
+        self.best_solution = min(self.population, key=lambda x: x.fitness())
+        self.convergence_curve = [self.best_solution.fitness()]
+
+    def update_population(self) -> None:
+        """Evolve population for one generation."""
+        self.population = self.evolve_population()
+
+        # Track best solution
+        current_best = min(self.population, key=lambda x: x.fitness())
+        if current_best.fitness() < self.best_solution.fitness():
+            self.best_solution = current_best
+
+        self.convergence_curve.append(self.best_solution.fitness())
+
+        # Adaptive mutation rate
+        fitness_values = [ind.fitness() for ind in self.population]
+        if np.std(fitness_values) < 1.0:
+            self.mutation_rate = min(0.2, self.mutation_rate * 1.1)
+        else:
+            self.mutation_rate = max(0.01, self.mutation_rate * 0.95)
 
     def tournament_selection(self) -> Chromosome:
         """
@@ -226,58 +242,6 @@ class GA(MetaheuristicAlgorithm):
                 new_population.append(offspring2)
 
         return new_population[:self.population_size]
-
-    def execute(self) -> Tuple[Any, float, List[float]]:
-        """
-        Execute Genetic Algorithm.
-
-        Returns:
-            Tuple of (best_solution, best_fitness, convergence_history)
-        """
-        # Initialize population
-        self.population = self.initialize_population()
-        self.convergence = []
-        self.convergence_curve = []  # Initialize convergence curve for base class compatibility
-
-        best_chromosome = min(self.population, key=lambda x: x.fitness())
-        best_fitness = best_chromosome.fitness()
-
-        # Evolution loop
-        for generation in range(self.max_iterations):
-            # Evolve population
-            self.population = self.evolve_population()
-
-            # Track best solution
-            current_best = min(self.population, key=lambda x: x.fitness())
-            if current_best.fitness() < best_fitness:
-                best_chromosome = current_best
-                best_fitness = current_best.fitness()
-
-            # Track convergence
-            self.convergence.append(best_fitness)
-            self.convergence_curve.append(best_fitness)  # Add to convergence curve
-
-            # Optional: Adaptive mutation rate
-            # Increase mutation if population is converging
-            fitness_values = [ind.fitness() for ind in self.population]
-            if np.std(fitness_values) < 1.0:  # Low diversity
-                self.mutation_rate = min(0.2, self.mutation_rate * 1.1)
-            else:
-                self.mutation_rate = max(0.01, self.mutation_rate * 0.95)
-
-        # Store best solution for base class compatibility
-        self.best_solution = best_chromosome
-
-        # Return best solution found
-        best_solution = self.problem.decode_solution(best_chromosome.position)
-        return best_solution[0], best_fitness, self.convergence
-
-    def run(self, iterations: int = None):
-        """Run GA and return best Individual (base class compatible)."""
-        if iterations is not None:
-            self.max_iterations = iterations
-        self.execute()
-        return self.best_solution
 
     def get_parameters(self) -> dict:
         """Get algorithm parameters for reporting."""

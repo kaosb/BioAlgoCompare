@@ -65,18 +65,9 @@ def _run_algo_task(params):
     best_solution = algo.execute()
     execution_time = time.time() - start_time
 
-    # Handle both object-based and tuple-based returns
-    if hasattr(best_solution, 'fitness'):
-        # Object with fitness() method (HO, HHO, etc.)
-        fitness_value = best_solution.fitness()
-        convergence_curve = algo.get_convergence_curve()
-    else:
-        # Tuple return (PSO, GA)
-        if isinstance(best_solution, tuple):
-            _, fitness_value, convergence_curve = best_solution
-        else:
-            raise ValueError("Unexpected return type from algorithm")
-    
+    fitness_value = best_solution.fitness()
+    convergence_curve = algo.get_convergence_curve()
+
     return fitness_value, execution_time, convergence_curve
 
 
@@ -331,17 +322,8 @@ def run_benchmark(
                     best_solution = algo.execute()
                     execution_time = time.time() - start_time
 
-                    # Handle both object-based and tuple-based returns
-                    if hasattr(best_solution, 'fitness'):
-                        # Object with fitness() method (HO, HHO, etc.)
-                        fitness_value = best_solution.fitness()
-                        convergence_curve = algo.get_convergence_curve()
-                    else:
-                        # Tuple return (PSO, GA)
-                        if isinstance(best_solution, tuple):
-                            _, fitness_value, convergence_curve = best_solution
-                        else:
-                            raise ValueError(f"Unexpected return type from {algo_name}")
+                    fitness_value = best_solution.fitness()
+                    convergence_curve = algo.get_convergence_curve()
 
                     benchmark_result.add_run(
                         fitness_value,

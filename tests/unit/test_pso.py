@@ -125,14 +125,15 @@ class TestPSO:
             max_iterations=5,
             seed=42
         )
-        
-        population = pso.initialize_population()
-        
-        assert len(population) == 10
-        assert all(isinstance(p, Particle) for p in population)
+
+        pso.initialize_population()
+
+        assert len(pso.population) == 10
+        assert all(isinstance(p, Particle) for p in pso.population)
         assert pso.gbest_fitness < float('inf')
         assert pso.gbest_position is not None
         assert len(pso.gbest_position) == 4  # dimension - 1
+        assert pso.best_solution is not None
     
     def test_pso_execution(self, small_vrp_problem):
         """Test full PSO execution."""
@@ -142,33 +143,39 @@ class TestPSO:
             max_iterations=10,
             seed=42
         )
-        
-        routes, fitness, convergence = pso.execute()
-        
-        # Check output format
-        assert isinstance(routes, list)
+
+        best = pso.execute()
+
+        # Check return type (Individual with fitness method)
+        assert hasattr(best, 'fitness')
+        fitness = best.fitness()
         assert isinstance(fitness, float)
+
+        # Check convergence curve (1 initial + 10 iterations = 11)
+        convergence = pso.get_convergence_curve()
         assert isinstance(convergence, list)
-        assert len(convergence) == 10
-        
-        # Check solution validity
+        assert len(convergence) == 11
+
+        # Check solution validity via decode
+        routes, _, _ = small_vrp_problem.decode_solution(best.position)
+        assert isinstance(routes, list)
         assert all(isinstance(route, list) for route in routes)
-        assert all(route[0] == 0 and route[-1] == 0 for route in routes)  # Start/end at depot
-        
+        assert all(route[0] == 0 and route[-1] == 0 for route in routes)
+
         # Check convergence (non-increasing)
         for i in range(1, len(convergence)):
-            assert convergence[i] <= convergence[i-1] + 1e-6  # Allow small numerical errors
+            assert convergence[i] <= convergence[i-1] + 1e-6
     
     def test_deterministic_behavior(self, small_vrp_problem):
         """Test PSO produces same results with same seed."""
         pso1 = PSO(small_vrp_problem, population_size=5, max_iterations=5, seed=42)
         pso2 = PSO(small_vrp_problem, population_size=5, max_iterations=5, seed=42)
-        
-        routes1, fitness1, conv1 = pso1.execute()
-        routes2, fitness2, conv2 = pso2.execute()
-        
-        assert fitness1 == fitness2
-        assert conv1 == conv2
+
+        best1 = pso1.execute()
+        best2 = pso2.execute()
+
+        assert best1.fitness() == best2.fitness()
+        assert pso1.get_convergence_curve() == pso2.get_convergence_curve()
     
     def test_different_seeds_different_results(self, small_vrp_problem):
         """Test PSO produces different results with different seeds."""

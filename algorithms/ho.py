@@ -71,7 +71,7 @@ class Hippopotamus(Individual):
     def is_feasible(self) -> bool:
         """Verifica si la solución es factible."""
         if hasattr(self.problem, "is_valid"):
-            return self.problem.is_valid(self.position)
+            return bool(self.problem.is_valid(self.position))
         return True
 
     def copy(self, other: "Hippopotamus") -> None:
@@ -204,7 +204,7 @@ class HO(MetaheuristicAlgorithm):
                 self.global_best.copy(hippo)
 
         self.best_solution = self.global_best
-        self.convergence_curve.append(self.global_best.fitness())
+        self.convergence_curve = [self.global_best.fitness()]
 
     def update_population(self) -> None:
         """

@@ -56,7 +56,7 @@ class Particle(Individual):
 
     def is_feasible(self) -> bool:
         """Check if particle position represents a feasible solution."""
-        return self.problem.is_valid(self.position)
+        return bool(self.problem.is_valid(self.position))
 
     def copy(self, other: 'Particle') -> None:
         """Copy values from another particle."""
@@ -141,11 +141,7 @@ class PSO(MetaheuristicAlgorithm):
         self.gbest_position: Optional[np.ndarray] = None
         self.gbest_fitness: float = float('inf')
 
-    def update_population(self) -> None:
-        """Update population (required by base class but handled in execute)."""
-        pass
-
-    def initialize_population(self) -> List[Particle]:
+    def initialize_population(self) -> None:
         """Initialize swarm of particles with random positions and velocities."""
         self.population = []
         for i in range(self.population_size):
@@ -161,7 +157,30 @@ class PSO(MetaheuristicAlgorithm):
                 self.gbest_fitness = particle.fitness()
                 self.gbest_position = particle.position.copy()
 
-        return self.population
+        self.best_solution = min(self.population, key=lambda p: p.fitness())
+        self.convergence_curve = [self.gbest_fitness]
+
+    def update_population(self) -> None:
+        """Update swarm positions for one iteration."""
+        iteration = len(self.convergence_curve) - 1
+
+        # Move all particles
+        for particle in self.population:
+            particle.update_velocity_position(self.gbest_position)
+
+        # Update global best
+        self.update_global_best()
+
+        # Track convergence
+        self.convergence_curve.append(self.gbest_fitness)
+
+        # Adaptive inertia weight (linearly decreasing)
+        for particle in self.population:
+            particle.w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
+
+        # Update best_solution
+        best_particle = min(self.population, key=lambda p: p.fitness())
+        self.best_solution = best_particle
 
     def update_global_best(self) -> None:
         """Update global best position based on all particles."""
@@ -169,52 +188,6 @@ class PSO(MetaheuristicAlgorithm):
             if particle.pbest_fitness < self.gbest_fitness:
                 self.gbest_fitness = particle.pbest_fitness
                 self.gbest_position = particle.pbest_position.copy()
-
-    def execute(self) -> Tuple[Any, float, List[float]]:
-        """
-        Execute PSO algorithm.
-
-        Returns:
-            Tuple of (best_solution, best_fitness, convergence_history)
-        """
-        # Initialize swarm
-        self.population = self.initialize_population()
-        self.convergence = []
-        self.convergence_curve = []  # Initialize convergence curve for base class compatibility
-        self.update_global_best()
-
-        # Main PSO loop
-        for iteration in range(self.max_iterations):
-            # Move all particles
-            for particle in self.population:
-                particle.update_velocity_position(self.gbest_position)
-
-            # Update global best
-            self.update_global_best()
-
-            # Track convergence
-            self.convergence.append(self.gbest_fitness)
-            self.convergence_curve.append(self.gbest_fitness)  # Add to convergence curve
-
-            # Optional: Adaptive parameters (linearly decreasing inertia)
-            for particle in self.population:
-                particle.w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
-
-        # Store best solution for base class compatibility
-        # Find the particle with the best fitness
-        best_particle = min(self.population, key=lambda p: p.fitness())
-        self.best_solution = best_particle
-
-        # Return best solution found
-        best_solution = self.problem.decode_solution(self.gbest_position)
-        return best_solution[0], self.gbest_fitness, self.convergence
-
-    def run(self, iterations: int = None):
-        """Run PSO and return best Individual (base class compatible)."""
-        if iterations is not None:
-            self.max_iterations = iterations
-        self.execute()
-        return self.best_solution
 
     def get_parameters(self) -> dict:
         """Get algorithm parameters for reporting."""
