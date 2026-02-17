@@ -152,7 +152,7 @@ class TestCheckRouteCapacity:
     
     def test_empty_route(self):
         """Test capacity check for empty route."""
-        assert check_route_capacity([], [10, 20, 30], 100) == True
+        assert check_route_capacity([], [10, 20, 30], 100) is True
     
     def test_route_within_capacity(self):
         """Test route within capacity."""
@@ -160,24 +160,24 @@ class TestCheckRouteCapacity:
         demands = [0, 10, 20, 15, 30, 40]  # Index 0 is depot
         capacity = 50
         # Total demand: 10 + 20 + 15 = 45 < 50 (depot not counted)
-        assert check_route_capacity(route, demands, capacity) == True
-    
+        assert check_route_capacity(route, demands, capacity) is True
+
     def test_route_exceeds_capacity(self):
         """Test route exceeding capacity."""
         route = [0, 1, 2, 3, 0]  # Route with depot at start and end
         demands = [0, 20, 25, 30]
         capacity = 50
         # Total demand: 20 + 25 + 30 = 75 > 50 (depot not counted)
-        assert check_route_capacity(route, demands, capacity) == False
-    
+        assert check_route_capacity(route, demands, capacity) is False
+
     def test_route_equals_capacity(self):
         """Test route exactly at capacity."""
         route = [0, 1, 2, 0]  # Route with depot
         demands = [0, 25, 25]
         capacity = 50
         # Total demand: 25 + 25 = 50
-        assert check_route_capacity(route, demands, capacity) == True
-    
+        assert check_route_capacity(route, demands, capacity) is True
+
     def test_depot_in_route(self):
         """Test route containing depot (index 0)."""
         route = [0, 1, 2, 0]  # Depot at start and end
@@ -185,7 +185,7 @@ class TestCheckRouteCapacity:
         capacity = 60
         # Should ignore depot (index 0)
         # Total demand: 20 + 30 = 50 < 60
-        assert check_route_capacity(route, demands, capacity) == True
+        assert check_route_capacity(route, demands, capacity) is True
 
 
 class TestCalculateRouteDistance:

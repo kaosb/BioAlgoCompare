@@ -325,9 +325,7 @@ class TestTrainSimpleIL:
     def test_data_preparation(self, mock_demo_data):
         """Test that train_simple_il prepares data correctly."""
         # We'll need to mock file loading since train_simple_il loads from file
-        # For now, let's test the model directly with prepared data
-        model = SimpleILModel()
-        
+        # For now, test data preparation directly
         # Extract features and labels from demos
         X_list = []
         y_list = []
