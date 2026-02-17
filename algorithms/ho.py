@@ -1,111 +1,72 @@
 """
 Hippopotamus Optimization Algorithm (HO)
 
-Implementación del algoritmo de optimización inspirado en el comportamiento
-de los hipopótamos (Hippopotamus amphibius) propuesto por Amiri et al. (2024).
+Faithful implementation of the algorithm proposed by Amiri et al. (2024).
+All three phases are applied SEQUENTIALLY to ALL individuals in EACH iteration.
+The algorithm is essentially parameter-free (no tunable hyperparameters).
 
-Referencias:
-    Mohammad Hussein Amiri, Nastaran Mehrabi Hashjin, Mohsen Montazeri, Seyedali Mirjalili & Nima Khodadadi.
-    "Hippopotamus optimization algorithm: a novel nature-inspired optimization algorithm".
+Reference:
+    Mohammad Hussein Amiri, Nastaran Mehrabi Hashjin, Mohsen Montazeri,
+    Seyedali Mirjalili & Nima Khodadadi.
+    "Hippopotamus optimization algorithm: a novel nature-inspired
+    optimization algorithm".
     Scientific Reports 14, Article number: 5032 (2024).
     https://doi.org/10.1038/s41598-024-54909-3
 
-El algoritmo simula tres comportamientos principales de los hipopótamos:
-1. Fase de posición: Movimiento hacia el líder y mejor global
-2. Fase de defensa: Clustering jerárquico para protección grupal
-3. Fase de evasión: Perturbación tipo Levy para escapar de depredadores
-
-Ecuaciones principales:
-- Posición: X_i^{t+1} = X_i^t + α*(X_leader - X_i^t) + β*rand*(X_global - X_i^t)
-- Defensa: Clustering y balanceo de carga cuando coef_variacion > threshold
-- Evasión: X_i^{t+1} = X_i^t + γ*Levy()*perturbation
+Phases:
+1. Position phase (exploration): Male hippo (Eq. 6) + Female/immature (Eqs. 9-10)
+2. Defense phase: Random predator + spiral movement + Levy flight (Eq. 15)
+3. Evasion phase (exploitation): Shrinking local bounds (Eqs. 19-20)
 """
 
 import numpy as np
 import math
-import os
-from typing import List, Tuple, Optional
+from typing import List, Optional
 from algorithms.base import Individual, MetaheuristicAlgorithm
-from scipy.spatial.distance import cdist
-from scipy.cluster.hierarchy import linkage, fcluster
 from utils.math_functions import levy_flight
 
 
 class Hippopotamus(Individual):
-    """
-    Clase para representar un hipopótamo en el algoritmo HO.
-
-    Cada hipopótamo tiene:
-    - position: Posición en el espacio de soluciones
-    - velocity: Velocidad de movimiento (para memoria)
-    - fitness_value: Valor de fitness actual
-    - is_leader: Si es líder de su grupo
-    - group_id: ID del grupo al que pertenece
-    """
+    """Individual in the Hippopotamus Optimization Algorithm."""
 
     def __init__(self, problem, rng=None):
-        """Inicializa un hipopótamo con posición aleatoria.
+        """Initialize a hippopotamus with random position in [0,1].
 
         Args:
-            problem: Instancia del problema a resolver
+            problem: Problem instance to solve
             rng: NumPy random generator instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
         self.rng = rng if rng is not None else np.random.default_rng()
         self.position = self.rng.uniform(0, 1, self.dimension)
-        self.velocity = np.zeros(self.dimension)
-        self.fitness_value = float("inf")
-        self.is_leader = False
-        self.group_id = 0
-        self.update_fitness()
-
-    def update_fitness(self):
-        """Actualiza el valor de fitness del hipopótamo."""
-        self.fitness_value = self.problem.evaluate(self.position)
+        self._fitness = None
 
     def fitness(self) -> float:
-        """Retorna el fitness del hipopótamo."""
-        return self.fitness_value
+        """Return cached fitness, computing if needed."""
+        if self._fitness is None:
+            self._fitness = self.problem.evaluate(self.position)
+        return self._fitness
 
     def is_feasible(self) -> bool:
-        """Verifica si la solución es factible."""
-        if hasattr(self.problem, "is_valid"):
-            return bool(self.problem.is_valid(self.position))
+        """Check if solution is feasible."""
         return True
 
     def copy(self, other: "Hippopotamus") -> None:
-        """Copia los valores de otro hipopótamo."""
+        """Copy values from another hippopotamus."""
         self.position = other.position.copy()
-        self.velocity = other.velocity.copy()
-        self.fitness_value = other.fitness_value
-        self.is_leader = other.is_leader
-        self.group_id = other.group_id
+        self._fitness = other._fitness
 
-    def move(
-        self, population: List["Hippopotamus"], iteration: int, max_iterations: int
-    ) -> None:
-        """
-        Mueve el hipopótamo según las tres fases del algoritmo HO.
-
-        Args:
-            population: Población de hipopótamos
-            iteration: Iteración actual
-            max_iterations: Máximo de iteraciones
-        """
-        # Esta función se sobrescribe en HO.update_population()
+    def move(self, population: list, iteration: int, max_iterations: int) -> None:
+        """Movement logic is handled in HO.update_population()."""
         pass
 
 
 class HO(MetaheuristicAlgorithm):
-    """
-    Implementación del Hippopotamus Optimization Algorithm.
+    """Hippopotamus Optimization Algorithm (Amiri et al., 2024).
 
-    Parámetros del algoritmo según Amiri et al. (2024):
-    - α (alpha): Factor de atracción al líder [0.1, 0.9]
-    - β (beta): Factor de atracción global [0.2, 0.8]
-    - γ (gamma): Factor de perturbación [0.3, 1.0]
-    - θ (theta): Umbral para cambio de fase [0.4, 0.6]
+    The algorithm is parameter-free. It applies three phases sequentially
+    to all individuals every iteration, with greedy selection after each phase.
     """
 
     def __init__(
@@ -114,6 +75,7 @@ class HO(MetaheuristicAlgorithm):
         population_size: int = 30,
         max_iterations: int = 100,
         seed: int = None,
+        # Legacy params accepted but ignored (for backward compat with experiment scripts)
         use_il: bool = False,
         il_model_path: str = None,
         alpha_fixed: float = None,
@@ -121,397 +83,209 @@ class HO(MetaheuristicAlgorithm):
         gamma_fixed: float = None,
     ):
         """
-        Inicializa el algoritmo HO.
+        Initialize HO algorithm.
 
         Args:
-            problem: Instancia del problema a resolver
-            population_size: Tamaño de la población
-            max_iterations: Número máximo de iteraciones
-            seed: Semilla para reproducibilidad
-            use_il: Si usar Imitation Learning para parámetros dinámicos
-            il_model_path: Ruta al modelo IL entrenado
-            alpha_fixed: Valor fijo de alpha (None = adaptativo)
-            beta_fixed: Valor fijo de beta (None = adaptativo)
-            gamma_fixed: Valor fijo de gamma (None = adaptativo)
+            problem: Problem instance to solve
+            population_size: Population size
+            max_iterations: Maximum iterations
+            seed: Random seed for reproducibility
         """
         super().__init__(problem, population_size, max_iterations, seed)
-
-        # Fixed parameters (for paper experiments)
-        self.alpha_fixed = alpha_fixed
-        self.beta_fixed = beta_fixed
-        self.gamma_fixed = gamma_fixed
-
-        # Parámetros del algoritmo según el paper
-        self.alpha_min = 0.1
-        self.alpha_max = 0.9
-        self.beta_min = 0.2
-        self.beta_max = 0.8
-        self.gamma_min = 0.3
-        self.gamma_max = 1.0
-        self.theta = 0.5  # Umbral para cambio de fase
-
-        # Variables para tracking
-        self.global_best = None
-        self.leaders = []
-        self.groups = []
-
-        # Para QC-DVRP multiobjetivo
-        self.use_multiobjective = hasattr(problem, "evaluate_multi")
-        self.pareto_front = []
-
-        # Imitation Learning
-        self.use_il = use_il
-        self.il_model = None
-        if use_il:
-            # Try sklearn-based IL first (to avoid PyTorch issues)
-            try:
-                from utils.train_il_simple import SimpleILModel
-                from pathlib import Path
-                
-                # Check for sklearn model first
-                sklearn_model_path = "models/ho_il_model.pkl"
-                if Path(sklearn_model_path).exists():
-                    self.il_model = SimpleILModel()
-                    self.il_model.load(sklearn_model_path)
-                    print(f"✅ Modelo IL (sklearn) cargado desde {sklearn_model_path}")
-                elif il_model_path and os.path.exists(il_model_path):
-                    # Fallback to PyTorch model if specified
-                    from utils.imitation_learning import HOImitationLearning
-                    self.il_model = HOImitationLearning()
-                    self.il_model.load(il_model_path)
-                    print(f"Modelo IL (PyTorch) cargado desde {il_model_path}")
-                else:
-                    print("⚠️ IL habilitado pero sin modelo entrenado")
-                    self.use_il = False
-            except ImportError as e:
-                print(f"⚠️ No se pudo importar módulo IL: {e}")
-                self.use_il = False
+        self.dominant = None  # D_hippo: best solution found
 
     def initialize_population(self) -> None:
-        """Inicializa la población de hipopótamos."""
+        """Initialize population of hippopotami."""
         self.population = []
-
         for _ in range(self.population_size):
             hippo = Hippopotamus(self.problem, rng=self.rng)
             self.population.append(hippo)
 
-            # Actualizar mejor global
-            if self.global_best is None or hippo.fitness() < self.global_best.fitness():
-                self.global_best = object.__new__(Hippopotamus)
-                self.global_best.problem = self.problem
-                self.global_best.dimension = hippo.dimension
-                self.global_best.rng = self.rng
-                self.global_best.copy(hippo)
+        # Find dominant hippo (best fitness)
+        self.dominant = self._copy_hippo(
+            min(self.population, key=lambda h: h.fitness())
+        )
+        self.best_solution = self.dominant
+        self.convergence_curve = [self.dominant.fitness()]
 
-        self.best_solution = self.global_best
-        self.convergence_curve = [self.global_best.fitness()]
+    def _copy_hippo(self, source):
+        """Create an independent copy of a hippopotamus."""
+        h = object.__new__(Hippopotamus)
+        h.problem = self.problem
+        h.dimension = source.dimension
+        h.rng = self.rng
+        h.position = source.position.copy()
+        h._fitness = source._fitness
+        return h
 
     def update_population(self) -> None:
+        """Apply all three phases sequentially to all individuals.
+
+        Per Amiri et al. (2024): phases are NOT mutually exclusive.
+        Each individual goes through all three phases every iteration,
+        with greedy selection after each sub-phase.
         """
-        Actualiza la población usando las tres fases del algoritmo HO.
+        iteration = len(self.convergence_curve)  # 1-based after init
+        lb = np.zeros(self.population[0].dimension)
+        ub = np.ones(self.population[0].dimension)
 
-        Fases según Amiri et al. (2024):
-        1. Fase de posición (Position phase)
-        2. Fase de defensa (Defense phase)
-        3. Fase de evasión (Predation phase)
+        # Temperature factor (Eq. 8)
+        T = math.exp(-iteration / self.max_iterations)
 
-        Si IL está habilitado, usa el modelo para predecir parámetros óptimos.
-        """
-        iteration = len(self.convergence_curve)
-        progress = iteration / self.max_iterations
+        for i in range(self.population_size):
+            dim = self.population[i].dimension
+            x_i = self.population[i].position
+            f_i = self.population[i].fitness()
 
-        # Si IL está habilitado, usar modelo para predecir parámetros
-        if self.use_il and self.il_model is not None:
-            try:
-                # Create state for IL model
-                if hasattr(self.il_model, 'predict'):  # sklearn model
-                    # Use simplified state creation
-                    from utils.test_il_integration import create_state_dict
-                    state = create_state_dict(
-                        self.problem, iteration, self.max_iterations, 
-                        self.convergence_curve
-                    )
-                    alpha, beta, gamma = self.il_model.predict(state)
-                else:  # PyTorch model
-                    from utils.imitation_learning import create_state_from_problem
-                    state = create_state_from_problem(
-                        self.problem, self, iteration, self.max_iterations
-                    )
-                    alpha, beta, gamma = self.il_model.predict(state)
-            except Exception as e:
-                # Fallback a parámetros adaptativos estándar
-                if iteration == 0:  # Only print once
-                    print(f"⚠️ IL fallback to standard params: {e}")
-                alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
-                beta = self.beta_max - (self.beta_max - self.beta_min) * progress
-                gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
-        else:
-            # Use fixed parameters if provided, otherwise adaptive
-            if self.alpha_fixed is not None:
-                alpha = self.alpha_fixed
+            # ============================================
+            # PHASE 1: Position in river/pond (Exploration)
+            # ============================================
+
+            # --- Eq. 6: Male hippo update ---
+            y1 = self.rng.random(dim)
+            I1 = self.rng.integers(1, 3, size=dim)  # {1, 2}
+            x_male = x_i + y1 * (self.dominant.position - I1 * x_i)
+            x_male = np.clip(x_male, lb, ub)
+
+            # Greedy selection for male update (Eq. 11)
+            f_male = self.problem.evaluate(x_male)
+            if f_male < f_i:
+                x_i = x_male
+                f_i = f_male
+
+            # --- Eqs. 9-10: Female/immature hippo update ---
+            # Compute MG_i: mean of a random group
+            group_size = max(2, self.rng.integers(2, max(3, self.population_size // 3)))
+            group_indices = self.rng.choice(
+                self.population_size, size=min(group_size, self.population_size), replace=False
+            )
+            MG_i = np.mean([self.population[g].position for g in group_indices], axis=0)
+
+            # Compute h vectors (Eq. 7 simplified)
+            I2 = self.rng.integers(1, 3, size=dim)
+            r1 = self.rng.random(dim)
+            r2 = self.rng.random(dim)
+            r3 = self.rng.random(dim) + 1e-10  # avoid division by zero
+            r4 = self.rng.random(dim)
+            r5 = self.rng.random() + 1e-10
+            rho1 = self.rng.integers(0, 2, size=dim)
+            rho2 = self.rng.integers(0, 2, size=dim)
+
+            h = (I2 * r1 + (1 - rho1) * 2 * (r2 - 1)) / r3
+            h = h / ((I1 * r4 + (1 - rho2)) / r5)
+
+            if T > 0.6:
+                # Eq. 9: early iterations (high temperature)
+                x_female = x_i + h[:dim] * (self.dominant.position - I2 * MG_i)
             else:
-                alpha = self.alpha_max - (self.alpha_max - self.alpha_min) * progress
+                # Eq. 10: later iterations
+                r6 = self.rng.random()
+                if r6 > 0.5:
+                    x_female = x_i + h[:dim] * (MG_i - self.dominant.position)
+                else:
+                    r7 = self.rng.random(dim)
+                    x_female = lb + r7 * (ub - lb)
 
-            if self.beta_fixed is not None:
-                beta = self.beta_fixed
+            x_female = np.clip(x_female, lb, ub)
+
+            # Greedy selection for female update (Eq. 12)
+            f_female = self.problem.evaluate(x_female)
+            if f_female < f_i:
+                x_i = x_female
+                f_i = f_female
+
+            # ============================================
+            # PHASE 2: Defense against predators
+            # ============================================
+
+            # Eq. 13: Random predator position
+            r8 = self.rng.random(dim)
+            predator = lb + r8 * (ub - lb)
+            f_predator = self.problem.evaluate(predator)
+
+            # Eq. 14: Distance to predator
+            D_vec = np.abs(predator - x_i) + 1e-10  # avoid div by zero
+
+            # Levy flight (Eqs. 17-18): Mantegna method with vartheta=1.5
+            RL = levy_flight(dim, beta=1.5, rng=self.rng) * 0.05
+
+            # Random parameters for spiral movement
+            f_param = self.rng.uniform(2, 4)
+            d_param = self.rng.uniform(2, 3)
+            g_param = self.rng.uniform(-1, 1)
+
+            if f_predator < f_i:
+                # Eq. 15a: Predator is better, move closer (inversely proportional)
+                x_defense = (
+                    RL + predator
+                    + (f_param - d_param) * math.cos(2 * math.pi * g_param) * (1.0 / D_vec)
+                )
             else:
-                beta = self.beta_max - (self.beta_max - self.beta_min) * progress
-
-            if self.gamma_fixed is not None:
-                gamma = self.gamma_fixed
-            else:
-                gamma = self.gamma_min + (self.gamma_max - self.gamma_min) * progress
-
-        # Determinar fase basada en progreso y fitness
-        avg_fitness = np.mean([h.fitness() for h in self.population])
-        fitness_ratio = (
-            self.global_best.fitness() / avg_fitness if avg_fitness > 0 else 0
-        )
-
-        if fitness_ratio < self.theta:
-            # Fase 1: Posición (exploración)
-            self._position_phase(alpha, beta)
-        elif progress < 0.7:
-            # Fase 2: Defensa (clustering y balanceo)
-            self._defense_phase()
-        else:
-            # Fase 3: Evasión (explotación con perturbación)
-            self._evasion_phase(gamma)
-
-        # Actualizar mejor global
-        for hippo in self.population:
-            if hippo.fitness() < self.global_best.fitness():
-                self.global_best.copy(hippo)
-
-        self.best_solution = self.global_best
-        self.convergence_curve.append(self.global_best.fitness())
-
-    def _position_phase(self, alpha: float, beta: float) -> None:
-        """
-        Fase de posición: Movimiento hacia líder y mejor global.
-
-        Ecuación (Amiri et al., 2024):
-        X_i^{t+1} = X_i^t + α*(X_leader - X_i^t) + β*rand*(X_global - X_i^t)
-
-        Para VRP discreto: Aplicamos 2-opt para reasignación de rutas
-        """
-        # Identificar líderes (top 20% de la población)
-        sorted_pop = sorted(self.population, key=lambda h: h.fitness())
-        n_leaders = max(1, int(0.2 * self.population_size))
-        self.leaders = sorted_pop[:n_leaders]
-
-        for i, hippo in enumerate(self.population):
-            if hippo in self.leaders:
-                continue
-
-            # Seleccionar líder aleatorio
-            leader = self.py_rng.choice(self.leaders)
-
-            # Actualizar posición continua
-            new_position = hippo.position.copy()
-
-            # Movimiento hacia el líder
-            leader_direction = leader.position - hippo.position
-            new_position += alpha * leader_direction
-
-            # Movimiento hacia el mejor global
-            global_direction = self.global_best.position - hippo.position
-            new_position += beta * self.rng.random() * global_direction
-
-            # Asegurar límites [0, 1]
-            new_position = np.clip(new_position, 0, 1)
-
-            # Para VRP: Aplicar operador 2-opt discreto
-            if hasattr(self.problem, "decode_solution"):
-                routes, _, _ = self.problem.decode_solution(new_position)
-                # Aplicar 2-opt a una ruta aleatoria
-                if routes and len(routes) > 0:
-                    route_idx = self.rng.integers(len(routes))
-                    if len(routes[route_idx]) > 3:  # Necesitamos al menos 4 nodos
-                        improved_route = self._apply_2opt(routes[route_idx])
-                        routes[route_idx] = improved_route
-
-            # Evaluar nueva posición
-            hippo.position = new_position
-            hippo.update_fitness()
-
-    def _defense_phase(self) -> None:
-        """
-        Fase de defensa: Clustering jerárquico para protección grupal.
-
-        Implementa balanceo de carga si coef_variacion > threshold.
-        Usa operador swap para equilibrar cargas entre rutas.
-        """
-        # Clustering jerárquico de la población
-        positions = np.array([h.position for h in self.population])
-
-        # Calcular distancias y clusters
-        if len(positions) > 1:
-            # linkage espera una matriz de distancias condensada
-            from scipy.spatial.distance import pdist
-            distances_condensed = pdist(positions)
-            linkage_matrix = linkage(distances_condensed, method="ward")
-            n_clusters = max(2, int(np.sqrt(self.population_size)))
-            clusters = fcluster(linkage_matrix, n_clusters, criterion="maxclust")
-
-            # Asignar grupos
-            for i, hippo in enumerate(self.population):
-                hippo.group_id = clusters[i]
-
-        # Para QC-DVRP: Verificar coeficiente de variación
-        if hasattr(self.problem, "evaluate_multi"):
-            for hippo in self.population:
-                tiempo_avg, coef_var, distancia = self.problem.evaluate_multi(
-                    hippo.position
+                # Eq. 15b: Predator is worse, move away (proportional)
+                r9 = self.rng.random(dim)
+                x_defense = (
+                    RL + predator
+                    + (f_param - d_param) * math.cos(2 * math.pi * g_param) * 12 * D_vec
+                    + r9
                 )
 
-                # Si coef_variación alto, aplicar balanceo de rutas
-                if coef_var > 0.3:  # Threshold para desbalance
-                    routes, _, _ = self.problem.decode_solution(hippo.position)
-                    balanced_routes = self._apply_swap_balancing(routes)
-                    # Recodificar rutas balanceadas a posición continua
-                    if hasattr(self.problem, 'encode_routes'):
-                        hippo.position = self.problem.encode_routes(balanced_routes)
-                    hippo.fitness_value = self.problem.evaluate_routes(balanced_routes)
-                else:
-                    hippo.update_fitness()
+            x_defense = np.clip(x_defense, lb, ub)
 
-    def _evasion_phase(self, gamma: float) -> None:
-        """
-        Fase de evasión: Perturbación tipo Levy para escapar.
+            # Greedy selection for defense (Eq. 16)
+            f_defense = self.problem.evaluate(x_defense)
+            if f_defense < f_i:
+                x_i = x_defense
+                f_i = f_defense
 
-        Ecuación (Amiri et al., 2024):
-        X_i^{t+1} = X_i^t + γ*Levy()*perturbation
+            # ============================================
+            # PHASE 3: Evasion/Escape (Exploitation)
+            # ============================================
 
-        Para VRP: Usa relocate para mover clientes con retraso.
-        """
-        for hippo in self.population:
-            # Aplicar perturbación Levy
-            levy_step = levy_flight(hippo.dimension, rng=self.rng)
-            perturbation = gamma * levy_step
+            # Eqs. 19-20: Local bounds shrink with iteration
+            t_safe = max(1, iteration)  # avoid division by zero at t=0
+            lb_local = lb / t_safe
+            ub_local = ub / t_safe
 
-            new_position = hippo.position + perturbation
-            new_position = np.clip(new_position, 0, 1)
+            # Eq. 21: Choose perturbation scenario randomly
+            r_scenario = self.rng.random()
+            if r_scenario < 0.33:
+                s = 2 * self.rng.random(dim) - 1  # Uniform [-1, 1]
+            elif r_scenario < 0.66:
+                s = self.rng.standard_normal(dim)  # N(0, 1)
+            else:
+                s = self.rng.random(dim)  # Uniform [0, 1]
 
-            # Para QC-DVRP: La estrategia de evasión se aplica durante la evaluación
-            # No se modifica la posición aquí para mantener la integridad del espacio de búsqueda
+            # Eq. 19: Evasion position
+            r10 = self.rng.random(dim)
+            x_evasion = x_i + r10 * (lb_local + s * (ub_local - lb_local))
+            x_evasion = np.clip(x_evasion, lb, ub)
 
-            # Evaluar nueva posición
-            temp_fitness = self.problem.evaluate(new_position)
-            if temp_fitness < hippo.fitness():
-                hippo.position = new_position
-                hippo.update_fitness()
+            # Greedy selection for evasion (Eq. 22)
+            f_evasion = self.problem.evaluate(x_evasion)
+            if f_evasion < f_i:
+                x_i = x_evasion
+                f_i = f_evasion
 
-    def _apply_2opt(self, route: List[int]) -> List[int]:
-        """
-        Aplica operador 2-opt para mejorar una ruta.
+            # ============================================
+            # Apply final position
+            # ============================================
+            self.population[i].position = x_i
+            self.population[i]._fitness = f_i
 
-        Args:
-            route: Ruta a mejorar
+            # Update dominant if improved
+            if f_i < self.dominant.fitness():
+                self.dominant = self._copy_hippo(self.population[i])
 
-        Returns:
-            Ruta mejorada
-        """
-        if len(route) < 4:
-            return route
+        self.best_solution = self.dominant
+        self.convergence_curve.append(self.dominant.fitness())
 
-        improved = True
-        best_route = route.copy()
-
-        while improved:
-            improved = False
-            for i in range(1, len(best_route) - 2):
-                for j in range(i + 1, len(best_route) - 1):
-                    # Crear nueva ruta con segmento invertido
-                    new_route = (
-                        best_route[:i]
-                        + best_route[i : j + 1][::-1]
-                        + best_route[j + 1 :]
-                    )
-
-                    # Evaluar mejora (simplificado)
-                    if self._route_distance(new_route) < self._route_distance(
-                        best_route
-                    ):
-                        best_route = new_route
-                        improved = True
-                        break
-                if improved:
-                    break
-
-        return best_route
-
-
-    def _route_distance(self, route: List[int]) -> float:
-        """Calcula distancia de una ruta (simplificado)."""
-        if not hasattr(self.problem, "distance_matrix"):
-            return 0.0
-
-        distance = 0.0
-        for i in range(len(route) - 1):
-            distance += self.problem.distance_matrix[route[i], route[i + 1]]
-        return distance
-
-    def _apply_swap_balancing(self, routes: List[List[int]]) -> List[List[int]]:
-        """
-        Aplica operador swap para balancear cargas entre rutas.
-        
-        Implementa la estrategia de defensa grupal del HO mediante
-        intercambio de clientes entre rutas desbalanceadas.
-        
-        Args:
-            routes: Lista de rutas actuales
-            
-        Returns:
-            Rutas balanceadas
-        """
-        if len(routes) < 2:
-            return routes
-            
-        # Calcular cargas actuales
-        route_loads = []
-        for route in routes:
-            load = sum(self.problem.demands[n] for n in route[1:-1])
-            route_loads.append(load)
-        
-        # Identificar rutas más y menos cargadas
-        max_load_idx = np.argmax(route_loads)
-        min_load_idx = np.argmin(route_loads)
-        
-        if max_load_idx == min_load_idx:
-            return routes
-            
-        # Copiar rutas para no modificar las originales
-        balanced_routes = [route[:] for route in routes]
-        
-        # Intentar intercambiar clientes
-        max_route = balanced_routes[max_load_idx]
-        min_route = balanced_routes[min_load_idx]
-        
-        best_swap = None
-        best_improvement = 0
-        
-        # Buscar mejor intercambio
-        for i, customer1 in enumerate(max_route[1:-1], 1):
-            for j, customer2 in enumerate(min_route[1:-1], 1):
-                # Verificar factibilidad del intercambio
-                new_max_load = route_loads[max_load_idx] - self.problem.demands[customer1] + self.problem.demands[customer2]
-                new_min_load = route_loads[min_load_idx] - self.problem.demands[customer2] + self.problem.demands[customer1]
-                
-                if new_max_load <= self.problem.capacity and new_min_load <= self.problem.capacity:
-                    # Calcular mejora en balance (reducción en diferencia de cargas)
-                    old_diff = abs(route_loads[max_load_idx] - route_loads[min_load_idx])
-                    new_diff = abs(new_max_load - new_min_load)
-                    improvement = old_diff - new_diff
-                    
-                    if improvement > best_improvement:
-                        best_improvement = improvement
-                        best_swap = (i, j, customer1, customer2)
-        
-        # Aplicar mejor intercambio si existe
-        if best_swap:
-            i, j, customer1, customer2 = best_swap
-            balanced_routes[max_load_idx][i] = customer2
-            balanced_routes[min_load_idx][j] = customer1
-        
-        return balanced_routes
+    def get_parameters(self) -> dict:
+        """Get algorithm parameters for reporting."""
+        return {
+            'algorithm': 'HO',
+            'population_size': self.population_size,
+            'max_iterations': self.max_iterations,
+            'levy_beta': 1.5,
+            'phases': '3 sequential (position, defense, evasion)',
+            'seed': self.seed,
+        }

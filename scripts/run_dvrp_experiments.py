@@ -36,10 +36,7 @@ from utils.benchmarking import DVRPBenchmarkResult
 
 # Paper configuration (Section 4)
 ALGORITHMS = {
-    "HO": {
-        "class": "ho",
-        "params": {"alpha_fixed": 0.5, "beta_fixed": 0.2, "use_il": False},
-    },
+    "HO": {"class": "ho", "params": {}},
     "PSO": {"class": "pso", "params": {}},
     "GA": {"class": "ga", "params": {"crossover_rate": 0.9}},
     "SSA": {"class": "ssa", "params": {}},
