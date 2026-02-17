@@ -124,9 +124,11 @@ class SSA(MetaheuristicAlgorithm):
     def update_population(self):
         """Update the salp swarm positions.
 
-        Leader salp (index 0) moves towards food source.
-        Follower salps (indices 1..N-1) follow their predecessor.
-        c1 decays exponentially: c1 = 2 * exp(-(4t/T)^2)
+        Leader salps (first half) move towards food source (Eq. 3.1).
+        Follower salps (second half) follow their predecessor (Eq. 3.4).
+        c1 decays exponentially: c1 = 2 * exp(-(4t/T)^2) (Eq. 3.2).
+
+        Per Mirjalili et al. (2017) MATLAB code: first N/2 salps are leaders.
         """
         t = len(self.convergence_curve)
         T = self.max_iterations
@@ -138,8 +140,10 @@ class SSA(MetaheuristicAlgorithm):
         ub = self.food_position.upper_bounds
         food_pos = self.food_position.position
 
+        n_leaders = self.population_size // 2
+
         for i in range(self.population_size):
-            if i == 0:
+            if i < n_leaders:
                 # Leader salp update (Eq. 3.1)
                 c2 = self.rng.random(self.population[i].dimension)
                 c3 = self.rng.random(self.population[i].dimension)
