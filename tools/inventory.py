@@ -371,4 +371,25 @@ def generate_inventory_report(files_info, imports_map, module_list, data_usages)
     return "\n".join(report)
 
 
+def main():
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print(f"Escaneando repositorio en: {repo_root}")
 
+    files_info, imports_map, module_list = scan_repository(repo_root)
+    data_usages = detect_data_usage(files_info)
+
+    # Generar reporte en Markdown
+    report = generate_inventory_report(
+        files_info, imports_map, module_list, data_usages
+    )
+
+    # Guardar reporte
+    report_path = os.path.join(repo_root, "docs", "technical", "inventory_report.md")
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write(report)
+
+    print(f"Reporte de inventario generado en: {report_path}")
+
+
+if __name__ == "__main__":
+    main()

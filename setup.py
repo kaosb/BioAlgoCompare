@@ -1,21 +1,32 @@
-"""
-Setup script para BioAlgoCompare
-"""
-
 from setuptools import setup, find_packages
-
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
 
 setup(
     name="bioalgocompare",
-    version="2.0.0",
+    version="1.0.0",
+    description="Plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados",
     author="BioAlgoCompare Team",
-    description="Framework para algoritmos bio-inspirados aplicados a VRP",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/bioalgocompare",
+    author_email="contact@bioalgocompare.org",
     packages=find_packages(),
+    install_requires=[
+        "numpy>=1.20.0",
+        "pandas>=1.3.0",
+        "matplotlib>=3.4.0",
+        "scipy>=1.7.0",
+        "tqdm>=4.62.0",
+        "click>=8.0.0",
+        "seaborn>=0.11.0",
+        "statsmodels>=0.13.0",
+        "scikit-posthocs>=0.7.0",
+        "jinja2>=3.0.0",
+        "scikit-learn>=1.0.0",
+        "tabulate>=0.9.0",
+    ],
+    entry_points={
+        "console_scripts": [
+            "bioalgo=scripts.analyze:cli",
+        ],
+    },
+    python_requires=">=3.8",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -25,40 +36,5 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
     ],
-    python_requires=">=3.8",
-    install_requires=[
-        "click>=8.0",
-        "numpy>=1.20",
-        "pandas>=1.3",
-        "matplotlib>=3.4",
-        "seaborn>=0.11",
-        "scipy>=1.7",
-        "tqdm>=4.62",
-    ],
-    extras_require={
-        "dev": [
-            "pytest>=6.2",
-            "pytest-cov>=2.12",
-            "black>=21.6",
-            "flake8>=3.9",
-            "mypy>=0.910",
-        ],
-        "dashboard": [
-            "dash>=2.0",
-            "plotly>=5.3",
-        ],
-    },
-    entry_points={
-        "console_scripts": [
-            "bioalgocompare=bioalgocompare:cli",
-            "bioalgo=scripts.cli.analyze:main",
-            "bioalgo-plugins=scripts.tools.manage_plugins:main",
-        ],
-    },
-    include_package_data=True,
-    package_data={
-        "": ["*.md", "*.txt", "*.yml", "*.yaml"],
-    },
 )
