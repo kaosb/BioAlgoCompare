@@ -36,6 +36,18 @@ pdflatex docs/papers/paper_extended/main.tex
 
 - **Extended Paper**: Extended analysis with additional experiments and detailed results. Uses the extarticle document class with a two-column layout.
 
+## IWINAC 2026 Paper (QC-DVRP)
+
+Paper basado en los resultados del simulador QC-DVRP de este repositorio:
+
+- **Titulo:** "Hippopotamus Optimization Algorithm Applied to Dynamic Vehicle Routing in Quick Commerce"
+- **Autores:** Felipe Gonzalez, Rodrigo Olivares (Universidad de Valparaiso)
+- **Formato:** Springer LNCS
+- **Datos:** `results/dvrp_full_lam5_rh300/` (30 runs x 6 algoritmos)
+- **Tablas LaTeX:** `results/dvrp_full_lam5_rh300/tables_v9/`
+- **Source LaTeX:** Externo (directorio de tesis, no incluido en este repo)
+- **Version:** v9 (Feb 2026) — incluye Nemenyi post-hoc, Fitness Z, boxplot DSR
+
 ## Notes
 
 The papers reference figures stored in the main `figures/` directory at the repository root. The bibliography is managed through `docs/references.bib` which is linked from the repository root.
