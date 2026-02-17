@@ -25,17 +25,21 @@ class Vulture(Individual):
         personal_best_fitness: Best fitness value found
     """
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa un buitre con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
         # Continuous VRP representation in range [0,1]
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self.personal_best_position = np.copy(self.position)
         # Evaluate initial fitness and set personal best fitness
         self._fitness = None
@@ -52,8 +56,12 @@ class Vulture(Individual):
         return bool(self.problem.is_valid(self.position))
 
     def copy(self):
-        """Crea una copia del buitre actual."""
-        new_vulture = Vulture(self.problem)
+        """Crea una copia del buitre actual (sin consumir estado del RNG)."""
+        new_vulture = object.__new__(Vulture)
+        new_vulture.problem = self.problem
+        new_vulture.dimension = self.dimension
+        new_vulture.rng = self.rng
+        new_vulture.py_rng = self.py_rng
         new_vulture.position = copy.deepcopy(self.position)
         new_vulture.personal_best_position = copy.deepcopy(self.personal_best_position)
         new_vulture._fitness = self._fitness
@@ -83,8 +91,8 @@ class Vulture(Individual):
         # Adaptación temporal (decrece con las iteraciones)
         decay = 1 - (it / max_it)
         # Vectores aleatorios
-        r1 = np.random.random(self.dimension)
-        r2 = np.random.random(self.dimension)
+        r1 = self.rng.random(self.dimension)
+        r2 = self.rng.random(self.dimension)
 
         # Posición inicial para calcular el movimiento
         new_position = np.copy(self.position)
@@ -95,7 +103,7 @@ class Vulture(Individual):
             new_position = (
                 self.position
                 + decay * r1 * (leader_pos - self.position)
-                + r * r2 * (np.random.random(self.dimension) - 0.5)
+                + r * r2 * (self.rng.random(self.dimension) - 0.5)
             )
 
         elif (
@@ -105,7 +113,7 @@ class Vulture(Individual):
         ):
             # Fase 2: Forrajeo grupal
             # Seleccionar una posición aleatoria informada
-            target_pos = random.choice(informed_positions)
+            target_pos = self.py_rng.choice(informed_positions)
             # Mover hacia esa posición con influencia del líder
             new_position = (
                 self.position
@@ -117,31 +125,31 @@ class Vulture(Individual):
             # Fase 3: Búsqueda independiente
             # Perturbación local con probabilidad adaptativa
             a = 2 * decay  # Parámetro que decrece con el tiempo
-            if random.random() < 0.5:
+            if self.py_rng.random() < 0.5:
                 # Leve perturbación en una dimensión aleatoria
-                idx = random.randrange(self.dimension)
+                idx = self.py_rng.randrange(self.dimension)
                 new_position[idx] = np.clip(
-                    new_position[idx] + a * (random.random() - 0.5), 0, 1
+                    new_position[idx] + a * (self.py_rng.random() - 0.5), 0, 1
                 )
             else:
                 # Perturbación aleatoria en todas las dimensiones
                 new_position = self.position + a * (
-                    np.random.random(self.dimension) - 0.5
+                    self.rng.random(self.dimension) - 0.5
                 )
 
         elif phase == "scouting":
             # Fase 4: Exploración cerca del carroñeo (líder)
             # Exploración adaptativa alrededor del líder
             radius = max(0.1, decay) * r  # Radio que decrece con el tiempo
-            if random.random() < 0.5:
+            if self.py_rng.random() < 0.5:
                 # Exploración cercana al líder
                 new_position = leader_pos + radius * (
-                    np.random.random(self.dimension) - 0.5
+                    self.rng.random(self.dimension) - 0.5
                 )
             else:
                 # Exploración alejada del líder
                 new_position = leader_pos + (1 + radius) * (
-                    np.random.random(self.dimension) - 0.5
+                    self.rng.random(self.dimension) - 0.5
                 )
 
         # Asegurar que la nueva posición está en el rango [0,1]
@@ -153,7 +161,7 @@ class Vulture(Individual):
             curr_fit = self.fitness()
             # dynamic acceptance probability decreases over iterations
             r_eff = r * (1 - it / max_it)
-            if new_fit < curr_fit or random.random() < r_eff:
+            if new_fit < curr_fit or self.py_rng.random() < r_eff:
                 self.position = new_position
                 self._fitness = new_fit  # Ya calculado
 
@@ -186,13 +194,9 @@ class GVOA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de buitres."""
-        # reproducibility
-        if hasattr(self, "seed") and self.seed is not None:
-            random.seed(self.seed)
-            np.random.seed(self.seed)
         self.population = []
         for _ in range(self.population_size):
-            v = Vulture(self.problem)
+            v = Vulture(self.problem, rng=self.rng, py_rng=self.py_rng)
             v._fitness = v.fitness()
             v.personal_best_fitness = v._fitness
             self.population.append(v)

@@ -39,16 +39,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class Earthworm(Individual):
     """Clase para representar un individuo en el algoritmo EWA (Earthworm Algorithm)."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa un gusano de tierra con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib random.Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
 
     def fitness(self):
@@ -84,13 +88,13 @@ class Earthworm(Individual):
         u12 = np.copy(self.position)
         u22 = np.copy(best_worm.position)
         for k in range(self.dimension):
-            if random.random() > 0.5:
+            if self.py_rng.random() > 0.5:
                 u12[k] = self.position[k]
                 u22[k] = best_worm.position[k]
             else:
                 u12[k] = best_worm.position[k]
                 u22[k] = self.position[k]
-        u2 = u12 if random.random() < 0.5 else u22
+        u2 = u12 if self.py_rng.random() < 0.5 else u22
 
         # Suma ponderada
         beta_t = beta * (gamma**generation)
@@ -98,7 +102,7 @@ class Earthworm(Individual):
 
         # Mutación Cauchy
         W = np.mean([self.position[k] for k in range(self.dimension)])
-        C_d = np.random.standard_cauchy(size=self.dimension)
+        C_d = self.rng.standard_cauchy(size=self.dimension)
         u_final = u_prime + W * C_d
 
         # Clip
@@ -136,16 +140,9 @@ class EWA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de gusanos de tierra."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            worm = Earthworm(self.problem)
+            worm = Earthworm(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(worm)
 
         # Encontrar el mejor gusano inicial
@@ -170,8 +167,13 @@ class EWA(MetaheuristicAlgorithm):
 
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
-                    worm_copy = Earthworm(self.problem)
-                    worm_copy.copy(self.population[i])
+                    worm_copy = object.__new__(Earthworm)
+                    worm_copy.problem = self.problem
+                    worm_copy.dimension = self.population[i].dimension
+                    worm_copy.rng = self.rng
+                    worm_copy.py_rng = self.py_rng
+                    worm_copy.position = np.copy(self.population[i].position)
+                    worm_copy._fitness = self.population[i]._fitness
                     self.best_solution = worm_copy
 
         # 2. Registrar convergencia

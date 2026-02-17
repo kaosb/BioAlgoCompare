@@ -49,13 +49,15 @@ class Protozoa(Individual):
         _fitness: Cached fitness value
     """
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         self.problem = problem
         self.dimension = problem.get_dimension()
         # Para problemas VRP, los límites son [0,1]
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
 
     def fitness(self):
@@ -96,34 +98,34 @@ class Protozoa(Individual):
         i = population.index(self)
 
         # Probabilidades dinámicas
-        pf = pf_max * random.random()
+        pf = pf_max * self.py_rng.random()
         pah = 0.5 * (1 + math.cos((iteration / max_iterations) * math.pi))
         pdr = 0.5 * (1 + math.cos(((ps - i) / ps) * math.pi))
 
         # Dormancia o reproducción
-        if random.random() < pf:
-            if random.random() < pdr:
+        if self.py_rng.random() < pf:
+            if self.py_rng.random() < pdr:
                 # Dormancia - Eq. 11
-                self.position = self.lower_bounds + np.random.rand(dim) * (
+                self.position = self.lower_bounds + self.rng.random(dim) * (
                     self.upper_bounds - self.lower_bounds
                 )
             else:
                 # Reproducción - Eq. 13
                 Mr = np.zeros(dim)
-                idxs = np.random.permutation(dim)[: math.ceil(dim * random.random())]
+                idxs = self.rng.permutation(dim)[: math.ceil(dim * self.py_rng.random())]
                 Mr[idxs] = 1
-                delta = np.random.rand(dim) * (
+                delta = self.rng.random(dim) * (
                     self.lower_bounds
-                    + np.random.rand(dim) * (self.upper_bounds - self.lower_bounds)
+                    + self.rng.random(dim) * (self.upper_bounds - self.lower_bounds)
                 )
-                self.position = self.position + random.choice([-1, 1]) * delta * Mr
+                self.position = self.position + self.py_rng.choice([-1, 1]) * delta * Mr
         else:
             Mf = np.zeros(dim)
-            idxs = np.random.permutation(dim)[: math.ceil(dim * i / ps)]
+            idxs = self.rng.permutation(dim)[: math.ceil(dim * i / ps)]
             Mf[idxs] = 1
-            if random.random() < pah:
+            if self.py_rng.random() < pah:
                 # Autotrofia - Eq. 1
-                j = random.randint(0, ps - 1)
+                j = self.py_rng.randint(0, ps - 1)
                 neighbor_plus = population[min(i + 1, ps - 1)].position
                 neighbor_minus = population[max(i - 1, 0)].position
                 wa = math.exp(
@@ -135,7 +137,7 @@ class Protozoa(Individual):
                     - self.position
                     + (wa * (neighbor_minus - neighbor_plus))
                 ) / npairs
-                f = random.random() * (
+                f = self.py_rng.random() * (
                     1 + math.cos((iteration / max_iterations) * math.pi)
                 )
                 self.position = self.position + f * delta * Mf
@@ -149,14 +151,14 @@ class Protozoa(Individual):
                 )
                 Xnear = (
                     1
-                    + random.choice([-1, 1])
-                    * random.random()
+                    + self.py_rng.choice([-1, 1])
+                    * self.py_rng.random()
                     * (1 - iteration / max_iterations)
                 ) * self.position
                 delta = (
                     Xnear - self.position + (wh * (neighbor_minus - neighbor_plus))
                 ) / npairs
-                f = random.random() * (
+                f = self.py_rng.random() * (
                     1 + math.cos((iteration / max_iterations) * math.pi)
                 )
                 self.position = self.position + f * delta * Mf
@@ -197,19 +199,20 @@ class APO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de protozoos."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            protozoa = Protozoa(self.problem)
+            protozoa = Protozoa(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(protozoa)
         self.population.sort(key=lambda x: x.fitness())
-        self.best_solution = Protozoa(self.problem)
+        self.best_solution = object.__new__(Protozoa)
+        self.best_solution.problem = self.problem
+        self.best_solution.dimension = self.population[0].dimension
+        self.best_solution.rng = self.rng
+        self.best_solution.py_rng = self.py_rng
+        self.best_solution.lower_bounds = self.population[0].lower_bounds
+        self.best_solution.upper_bounds = self.population[0].upper_bounds
+        self.best_solution._fitness = None
+        self.best_solution.position = None
         self.best_solution.copy(self.population[0])
         self.convergence_curve = [self.best_solution.fitness()]
 

@@ -24,16 +24,20 @@ class Starling(Individual):
         personal_best_fitness: Best fitness value found
     """
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Initialize a starling for the SMO algorithm.
 
         Args:
             problem: Problem instance to solve
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
         # Generate random solution - continuous representation
-        self.position = self.problem.random_solution()
+        self.position = self.problem.random_solution(rng=self.rng)
         self.personal_best_position = copy.deepcopy(self.position)
         self._fitness = None
         self.personal_best_fitness = None
@@ -49,8 +53,11 @@ class Starling(Individual):
         return bool(self.problem.is_valid(self.position))
 
     def copy(self):
-        """Create a copy of the current starling."""
-        new_starling = Starling(self.problem)
+        """Create a copy of the current starling (without consuming RNG state)."""
+        new_starling = object.__new__(Starling)
+        new_starling.problem = self.problem
+        new_starling.rng = self.rng
+        new_starling.py_rng = self.py_rng
         new_starling.position = copy.deepcopy(self.position)
         new_starling.personal_best_position = copy.deepcopy(self.personal_best_position)
         new_starling._fitness = self._fitness
@@ -75,7 +82,7 @@ class Starling(Individual):
             # Apply different behaviors according to strategy
             if behavior_type == "separating":
                 # More random exploration
-                r = np.random.random(new_position.shape)
+                r = self.rng.random(new_position.shape)
                 new_position = new_position + decay * coef * (2 * r - 1)
             elif behavior_type == "diving":
                 # Exploitation towards best solution (smaller movement)
@@ -88,7 +95,7 @@ class Starling(Individual):
                     )
                 else:
                     # Small perturbation if no best information available
-                    r = np.random.random(new_position.shape)
+                    r = self.rng.random(new_position.shape)
                     new_position = new_position + decay * coef * 0.1 * (2 * r - 1)
             elif behavior_type == "whirling":
                 # Intermediate movement - combination of exploration and exploitation
@@ -96,15 +103,15 @@ class Starling(Individual):
                     hasattr(best_position, "shape")
                     and best_position.shape == new_position.shape
                 ):
-                    r1 = np.random.random(new_position.shape)
-                    r2 = np.random.random(new_position.shape)
+                    r1 = self.rng.random(new_position.shape)
+                    r2 = self.rng.random(new_position.shape)
                     new_position = new_position + decay * coef * (
                         r1 * (best_position - new_position)
-                        + r2 * 0.1 * (2 * np.random.random(new_position.shape) - 1)
+                        + r2 * 0.1 * (2 * self.rng.random(new_position.shape) - 1)
                     )
                 else:
                     # Random movement if no best information available
-                    r = np.random.random(new_position.shape)
+                    r = self.rng.random(new_position.shape)
                     new_position = new_position + decay * coef * 0.5 * (2 * r - 1)
 
             # Ensure position is within bounds [0,1]
@@ -113,7 +120,7 @@ class Starling(Individual):
             # In case of error, apply small perturbation
             new_position = (
                 self.position
-                + np.random.uniform(-0.05, 0.05, self.position.shape) * decay
+                + self.rng.uniform(-0.05, 0.05, self.position.shape) * decay
             )
             new_position = np.clip(new_position, 0, 1)
 
@@ -123,7 +130,7 @@ class Starling(Individual):
             curr_fit = self.fitness()
 
             # Accept if improved or with small probability (Metropolis criterion)
-            if new_fit < curr_fit or random.random() < 0.1 * decay:
+            if new_fit < curr_fit or self.py_rng.random() < 0.1 * decay:
                 self.position = new_position
                 self._fitness = new_fit
 
@@ -160,18 +167,13 @@ class SMO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Initialize the starling population."""
-        # Initialize seed if available
-        if self.seed is not None:
-            random.seed(self.seed)
-            np.random.seed(self.seed)
-
         # Reset convergence_curve
         self.convergence_curve = []
 
         # Initialize starling population
         self.population = []
         for _ in range(self.population_size):
-            s = Starling(self.problem)
+            s = Starling(self.problem, rng=self.rng, py_rng=self.py_rng)
             s._fitness = s.fitness()
             s.personal_best_fitness = s._fitness
             self.population.append(s)

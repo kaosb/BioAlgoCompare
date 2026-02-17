@@ -40,10 +40,12 @@ from algorithms.base import Individual, MetaheuristicAlgorithm
 class Orca(Individual):
     """An orca (VRP solution) with route-based representation."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, routes=None, demands=None, capacity=None, distance_matrix=None, rng=None, py_rng=None):
         self.problem = problem
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
         # Initialize with random routes directly
-        self.position = self.problem.random_routes()
+        self.position = self.problem.random_routes(rng=self.rng)
         self._fitness = None
         self.personal_best_position = copy.deepcopy(self.position)
         self.personal_best_fitness = self.fitness()
@@ -102,10 +104,10 @@ class Orca(Individual):
         non_empty = [r for r in routes if len(r) > 2]  # Routes with at least one customer
         if len(non_empty) < 2:
             return
-        r1, r2 = random.sample(non_empty, 2)
+        r1, r2 = self.py_rng.sample(non_empty, 2)
         # Choose random customers (excluding depot at start and end)
-        i = random.randrange(1, len(r1) - 1) if len(r1) > 2 else 1
-        j = random.randrange(1, len(r2) - 1) if len(r2) > 2 else 1
+        i = self.py_rng.randrange(1, len(r1) - 1) if len(r1) > 2 else 1
+        j = self.py_rng.randrange(1, len(r2) - 1) if len(r2) > 2 else 1
         r1[i], r2[j] = r2[j], r1[i]
 
     def _two_opt(self, route):
@@ -113,8 +115,8 @@ class Orca(Individual):
         if len(route) < 4:  # Route must have at least 2 customers
             return
         # Choose two positions within the route (excluding depot)
-        i = random.randrange(1, len(route) - 2)
-        k = random.randrange(i + 1, len(route) - 1)
+        i = self.py_rng.randrange(1, len(route) - 2)
+        k = self.py_rng.randrange(i + 1, len(route) - 1)
         # Reverse the segment between i and k
         route[i : k + 1] = list(reversed(route[i : k + 1]))
 
@@ -129,8 +131,8 @@ class Orca(Individual):
             return  # No routes with customers
 
         # Choose source route and customer to move
-        src = random.choice(src_candidates)
-        idx = random.randrange(1, len(src) - 1)  # Choose a customer (not depot)
+        src = self.py_rng.choice(src_candidates)
+        idx = self.py_rng.randrange(1, len(src) - 1)  # Choose a customer (not depot)
         cust = src.pop(idx)
 
         # If source route only has depots left, remove it
@@ -153,8 +155,8 @@ class Orca(Individual):
             return
 
         # Insert into destination route
-        dst = random.choice(dst_candidates)
-        insert_pos = random.randrange(
+        dst = self.py_rng.choice(dst_candidates)
+        insert_pos = self.py_rng.randrange(
             1, len(dst)
         )  # Position after initial depot
         dst.insert(insert_pos, cust)
@@ -176,7 +178,7 @@ class Orca(Individual):
             self._random_swap(new_pos)
             candidates_2opt = [r for r in new_pos if len(r) >= 4]
             if candidates_2opt:
-                route_for_2opt = random.choice(candidates_2opt)
+                route_for_2opt = self.py_rng.choice(candidates_2opt)
                 self._two_opt(route_for_2opt)
         else:  # Attack phase (exploitation)
             self._relocate(new_pos, g_best)
@@ -193,7 +195,7 @@ class Orca(Individual):
         new_fit = self.problem.evaluate_routes(new_pos)
 
         # Update if improved or according to acceptance probability
-        if new_fit < self.fitness() or random.random() < accept_prob:
+        if new_fit < self.fitness() or self.py_rng.random() < accept_prob:
             self.position = new_pos
             self._fitness = new_fit
             # Update personal best position if applicable
@@ -219,11 +221,7 @@ class OPA(MetaheuristicAlgorithm):
 
     def initialize_population(self) -> None:
         """Initialize the orca population with random solutions."""
-        if self.seed is not None:
-            random.seed(self.seed)
-            np.random.seed(self.seed)
-
-        self.population = [Orca(self.problem) for _ in range(self.population_size)]
+        self.population = [Orca(self.problem, rng=self.rng, py_rng=self.py_rng) for _ in range(self.population_size)]
         self.best_solution = min(self.population, key=lambda o: o.fitness()).copy()
         self.convergence_curve = [self.best_solution.fitness()]
         self.current_iter = 0

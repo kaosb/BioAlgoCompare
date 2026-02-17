@@ -37,16 +37,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class SlimeMould(Individual):
     """Clase para representar un individuo en el algoritmo SMA (Slime Mould Algorithm)."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa un moho del limo con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
         self.weight = 0.0  # Peso para el movimiento
 
@@ -82,19 +86,19 @@ class SlimeMould(Individual):
         S_i = self.fitness()
         p = math.tanh(abs((S_i - DF) / (bF - wF + epsilon)))
 
-        r = random.random()
+        r = self.py_rng.random()
         # Evitar domain error en atanh
         atanh_arg = -t / max_t + 1
         atanh_arg = max(-0.999, min(0.999, atanh_arg))  # Clamp to avoid domain error
-        a = math.atanh(atanh_arg)
-        vb = np.random.uniform(-a, a, size=dim)
-        vc = np.random.uniform(-1, 1, size=dim) * (1 - t / max_t)
+        a = abs(math.atanh(atanh_arg))
+        vb = self.rng.uniform(-a, a, size=dim) if a > 1e-10 else np.zeros(dim)
+        vc = self.rng.uniform(-1, 1, size=dim) * (1 - t / max_t)
 
-        if random.random() < z:
-            self.position = np.random.uniform(0, 1, size=dim)
+        if self.py_rng.random() < z:
+            self.position = self.rng.uniform(0, 1, size=dim)
         else:
             if r < p:
-                A, B = random.sample(population, 2)
+                A, B = self.py_rng.sample(population, 2)
                 X_A = A.position
                 X_B = B.position
                 self.position = best_mould.position + vb * self.weight * (X_A - X_B)
@@ -137,16 +141,9 @@ class SMA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de mohos."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            mould = SlimeMould(self.problem)
+            mould = SlimeMould(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(mould)
 
         # Encontrar el mejor moho inicial
@@ -172,7 +169,7 @@ class SMA(MetaheuristicAlgorithm):
 
         for i, mould in enumerate(self.population):
             S_i = fitness_values[i]
-            rand_coeff = random.random()
+            rand_coeff = self.py_rng.random()
             if S_i <= med:
                 mould.weight = 1 + rand_coeff * math.log(
                     (bF - S_i) / (bF - wF + epsilon) + 1
@@ -208,8 +205,14 @@ class SMA(MetaheuristicAlgorithm):
 
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
-                    mould_copy = SlimeMould(self.problem)
-                    mould_copy.copy(self.population[i])
+                    mould_copy = object.__new__(SlimeMould)
+                    mould_copy.problem = self.problem
+                    mould_copy.dimension = self.population[i].dimension
+                    mould_copy.rng = self.rng
+                    mould_copy.py_rng = self.py_rng
+                    mould_copy.weight = self.population[i].weight
+                    mould_copy.position = np.copy(self.population[i].position)
+                    mould_copy._fitness = self.population[i]._fitness
                     self.best_solution = mould_copy
 
         # Registrar el mejor fitness en la curva de convergencia

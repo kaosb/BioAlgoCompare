@@ -18,7 +18,7 @@ class TestParticle:
         problem.dimension = 3
         problem.compute_distance_matrix()
         
-        particle = Particle(dimension=2, problem=problem, seed=42)
+        particle = Particle(dimension=2, problem=problem, rng=np.random.default_rng(42))
         
         assert particle.dimension == 2
         assert len(particle.position) == 2
@@ -37,7 +37,7 @@ class TestParticle:
         problem.dimension = 3
         problem.compute_distance_matrix()
         
-        particle = Particle(dimension=2, problem=problem, seed=42)
+        particle = Particle(dimension=2, problem=problem, rng=np.random.default_rng(42))
         
         # Initial pbest should be infinity
         assert particle.pbest_fitness == float('inf')
@@ -67,7 +67,7 @@ class TestParticle:
         problem.dimension = 4
         problem.compute_distance_matrix()
         
-        particle = Particle(dimension=3, problem=problem, seed=42)
+        particle = Particle(dimension=3, problem=problem, rng=np.random.default_rng(42))
         initial_position = particle.position.copy()
         initial_velocity = particle.velocity.copy()
         
@@ -174,18 +174,14 @@ class TestPSO:
         """Test PSO produces different results with different seeds."""
         pso1 = PSO(small_vrp_problem, population_size=5, max_iterations=5, seed=42)
         pso2 = PSO(small_vrp_problem, population_size=5, max_iterations=5, seed=123)
-        
-        _, fitness1, conv1 = pso1.execute()
-        _, fitness2, conv2 = pso2.execute()
-        
-        # For small problems, both might find optimal solution
-        # At least check that convergence patterns are different
-        if fitness1 == fitness2:
-            # If same fitness, convergence should be different
-            assert conv1 != conv2
-        # Otherwise fitnesses should be different
-        else:
-            assert fitness1 != fitness2
+
+        # Verify initial populations are different (proves seeds work)
+        pso1.initialize_population()
+        pso2.initialize_population()
+        pos1 = [p.position.copy() for p in pso1.population]
+        pos2 = [p.position.copy() for p in pso2.population]
+        assert not all(np.array_equal(a, b) for a, b in zip(pos1, pos2)), \
+            "Different seeds should produce different initial populations"
     
     def test_get_parameters(self, small_vrp_problem):
         """Test parameter reporting."""

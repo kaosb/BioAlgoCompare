@@ -14,16 +14,18 @@ class Raven(Individual):
     Representa un cuervo en RRO.
     """
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None):
         """
         Inicializa un cuervo con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self.personal_best_position = np.copy(self.position)
         self._fitness = None
         self._personal_best_fitness = None
@@ -53,8 +55,13 @@ class Raven(Individual):
         )
 
     def copy(self):
-        """Crea una copia del individuo."""
-        new = Raven(self.problem)
+        """Crea una copia del individuo (sin consumir estado del RNG)."""
+        new = object.__new__(Raven)
+        new.problem = self.problem
+        new.dimension = self.dimension
+        new.rng = self.rng
+        new.lower_bounds = self.lower_bounds
+        new.upper_bounds = self.upper_bounds
         new.position = np.copy(self.position)
         new.personal_best_position = np.copy(self.personal_best_position)
         new._fitness = self._fitness
@@ -75,7 +82,7 @@ class Raven(Individual):
             if np.linalg.norm(direction) > 1e-12:
                 direction = direction / np.linalg.norm(direction)
             # Aleatoriedad en la dirección
-            noisy_direction = direction + np.random.normal(0, 0.1, size=dim)
+            noisy_direction = direction + self.rng.normal(0, 0.1, size=dim)
             noisy_direction = noisy_direction / (
                 np.linalg.norm(noisy_direction) + 1e-12
             )
@@ -88,9 +95,9 @@ class Raven(Individual):
             improved = False
             for _ in range(Npcpt):
                 # Percepción aleatoria en una bola de radio Rpcpt
-                rand_dir = np.random.normal(0, 1, size=dim)
+                rand_dir = self.rng.normal(0, 1, size=dim)
                 rand_dir = rand_dir / (np.linalg.norm(rand_dir) + 1e-12)
-                radius = np.random.uniform(0, Rpcpt)
+                radius = self.rng.uniform(0, Rpcpt)
                 percept_pos = curr_pos + rand_dir * radius
                 percept_pos = np.clip(percept_pos, self.lower_bounds, self.upper_bounds)
                 fit = self.problem.evaluate(percept_pos)
@@ -99,7 +106,7 @@ class Raven(Individual):
                     best_pos = np.copy(percept_pos)
                     improved = True
             # Si alguna percepción mejoró el personal_best, considerar parar
-            if improved and np.random.uniform() < Pstop:
+            if improved and self.rng.uniform() < Pstop:
                 curr_pos = np.copy(best_pos)
                 break
             curr_pos = np.copy(next_pos)
@@ -176,16 +183,9 @@ class RRO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de cuervos."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            raven = Raven(self.problem)
+            raven = Raven(self.problem, rng=self.rng)
             self.population.append(raven)
 
         # Inicializar mejor solución y curva de convergencia
@@ -200,11 +200,11 @@ class RRO(MetaheuristicAlgorithm):
         leader_pos = np.copy(leader.position)
 
         for idx, raven in enumerate(self.population):
-            if np.random.uniform() < self.Percfollow:
+            if self.rng.uniform() < self.Percfollow:
                 # Seguir al líder con perturbación dentro de bola de radio Rleader
-                rand_dir = np.random.normal(0, 1, size=self.D)
+                rand_dir = self.rng.normal(0, 1, size=self.D)
                 rand_dir = rand_dir / (np.linalg.norm(rand_dir) + 1e-12)
-                radius = np.random.uniform(0, self.Rleader)
+                radius = self.rng.uniform(0, self.Rleader)
                 target_pos = leader_pos + rand_dir * radius
                 target_pos = np.clip(target_pos, 0, 1)  # Límites para VRP [0,1]
             else:

@@ -35,16 +35,18 @@ from .base import Individual, MetaheuristicAlgorithm
 class Salp(Individual):
     """Individual in the Salp Swarm Algorithm."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None):
         """
         Initialize a salp with random position.
 
         Args:
             problem: Problem instance to solve
+            rng: NumPy random generator instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
@@ -98,11 +100,7 @@ class SSA(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Initialize the salp swarm."""
-        if self.seed is not None:
-            random.seed(self.seed)
-            np.random.seed(self.seed)
-
-        self.population = [Salp(self.problem) for _ in range(self.population_size)]
+        self.population = [Salp(self.problem, rng=self.rng) for _ in range(self.population_size)]
 
         # Identify food source (best salp)
         self.best_solution = self.population[0]
@@ -111,7 +109,14 @@ class SSA(MetaheuristicAlgorithm):
                 self.best_solution = self.population[i]
 
         # Store a copy of the best solution as food position
-        self.food_position = Salp(self.problem)
+        self.food_position = object.__new__(Salp)
+        self.food_position.problem = self.problem
+        self.food_position.dimension = self.best_solution.dimension
+        self.food_position.rng = self.rng
+        self.food_position.lower_bounds = self.best_solution.lower_bounds
+        self.food_position.upper_bounds = self.best_solution.upper_bounds
+        self.food_position._fitness = None
+        self.food_position.position = None
         self.food_position.copy(self.best_solution)
 
         self.convergence_curve = [self.best_solution.fitness()]
@@ -136,8 +141,8 @@ class SSA(MetaheuristicAlgorithm):
         for i in range(self.population_size):
             if i == 0:
                 # Leader salp update (Eq. 3.1)
-                c2 = np.random.rand(self.population[i].dimension)
-                c3 = np.random.rand(self.population[i].dimension)
+                c2 = self.rng.random(self.population[i].dimension)
+                c3 = self.rng.random(self.population[i].dimension)
 
                 # Where c3 >= 0.5: move towards food; else: move away
                 new_position = np.where(

@@ -39,16 +39,20 @@ from .base import Individual, MetaheuristicAlgorithm
 class Gorilla(Individual):
     """Clase para representar un individuo en el algoritmo GTO (Gorilla Troops Optimization)."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None, py_rng=None):
         """
         Inicializa un gorila con una posición aleatoria.
 
         Args:
             problem: Instancia del problema a resolver
+            rng: NumPy random generator instance
+            py_rng: stdlib Random instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.py_rng = py_rng if py_rng is not None else random.Random()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
         # Para problemas VRP, los límites son [0,1]
         self.lower_bounds = np.zeros(self.dimension)
@@ -88,37 +92,37 @@ class Gorilla(Individual):
         """
         dim = self.dimension
         # --- Operadores de exploración (Ecuación 1) ---
-        if random.random() < p:
+        if self.py_rng.random() < p:
             # Exploración: migración a lugar desconocido
-            r1 = np.random.rand(dim)
+            r1 = self.rng.random(dim)
             self.position = (
                 self.lower_bounds + (self.upper_bounds - self.lower_bounds) * r1
             )
-        elif random.random() >= 0.5 and population is not None:
+        elif self.py_rng.random() >= 0.5 and population is not None:
             # Exploración: moverse hacia otro gorila
-            Xr = random.choice(population).position
+            Xr = self.py_rng.choice(population).position
             self.position = self.position + C * (Xr - self.position)
         else:
             # Exploración: migración hacia un lugar conocido
-            H = (np.random.uniform(-C, C, dim)) * self.position
-            self.position = (self.upper_bounds - self.lower_bounds) * np.random.rand(
+            H = (self.rng.uniform(-C, C, dim)) * self.position
+            self.position = (self.upper_bounds - self.lower_bounds) * self.rng.random(
                 dim
             ) + self.lower_bounds
             self.position = self.position + L * H
 
         # --- Transición a explotación si corresponde ---
         if C < W:
-            if random.random() < 0.5 and population is not None:
+            if self.py_rng.random() < 0.5 and population is not None:
                 # Seguir al silverback (Eq. 7)
                 M = np.mean([g.position for g in population], axis=0)
                 self.position = L * (M - self.position) + best_gorilla.position
             else:
                 # Competencia por hembras (Eq. 10)
-                Q = 2 * random.random() - 1
+                Q = 2 * self.py_rng.random() - 1
                 E = (
-                    np.random.rand(dim)
-                    if random.random() >= 0.5
-                    else np.random.randn(dim)
+                    self.rng.random(dim)
+                    if self.py_rng.random() >= 0.5
+                    else self.rng.standard_normal(dim)
                 )
                 A = beta * E
                 self.position = (
@@ -166,16 +170,9 @@ class GTO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Inicializa la población de gorilas."""
-        # Set random seed if provided
-
-        if self.seed is not None:
-            random.seed(self.seed)
-
-            np.random.seed(self.seed)
-
         self.population = []
         for _ in range(self.population_size):
-            gorilla = Gorilla(self.problem)
+            gorilla = Gorilla(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(gorilla)
 
         # Encontrar el mejor gorila inicial
@@ -190,9 +187,9 @@ class GTO(MetaheuristicAlgorithm):
     def update_population(self):
         """Actualiza la población en cada iteración."""
         t = len(self.convergence_curve)
-        F = math.cos(2 * math.pi * random.random()) + 1
+        F = math.cos(2 * math.pi * self.py_rng.random()) + 1
         C = F * (1 - t / self.max_iterations)
-        l = random.uniform(-1, 1)
+        l = self.py_rng.uniform(-1, 1)
         L = C * l
 
         # Ajustar el factor de explotación basado en la iteración actual
@@ -218,18 +215,18 @@ class GTO(MetaheuristicAlgorithm):
                 )
 
                 # Comportamiento social: interacción entre gorilas
-                if random.random() < self.social_factor:
+                if self.py_rng.random() < self.social_factor:
                     # Seleccionar otro gorila aleatoriamente
-                    other_idx = random.randint(0, self.population_size - 1)
+                    other_idx = self.py_rng.randint(0, self.population_size - 1)
                     while other_idx == i:
-                        other_idx = random.randint(0, self.population_size - 1)
+                        other_idx = self.py_rng.randint(0, self.population_size - 1)
 
                     # Aprendizaje social
                     for j in range(self.population[i].dimension):
-                        if random.random() < 0.3:  # Probabilidad de aprendizaje
+                        if self.py_rng.random() < 0.3:  # Probabilidad de aprendizaje
                             self.population[i].position[j] = self.population[
                                 i
-                            ].position[j] + random.random() * (
+                            ].position[j] + self.py_rng.random() * (
                                 self.population[other_idx].position[j]
                                 - self.population[i].position[j]
                             )
@@ -242,8 +239,15 @@ class GTO(MetaheuristicAlgorithm):
 
                 # Actualizar mejor solución si es necesario
                 if self.population[i].is_better_than(self.best_solution):
-                    gorilla_copy = Gorilla(self.problem)
-                    gorilla_copy.copy(self.population[i])
+                    gorilla_copy = object.__new__(Gorilla)
+                    gorilla_copy.problem = self.problem
+                    gorilla_copy.dimension = self.population[i].dimension
+                    gorilla_copy.rng = self.rng
+                    gorilla_copy.py_rng = self.py_rng
+                    gorilla_copy.position = np.copy(self.population[i].position)
+                    gorilla_copy._fitness = self.population[i]._fitness
+                    gorilla_copy.lower_bounds = self.population[i].lower_bounds
+                    gorilla_copy.upper_bounds = self.population[i].upper_bounds
                     self.best_solution = gorilla_copy
 
         # Registrar el mejor fitness en la curva de convergencia

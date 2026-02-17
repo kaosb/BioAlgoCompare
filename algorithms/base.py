@@ -1,8 +1,9 @@
 import time
 import random
+from typing import List, Dict, Optional
+
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import List, Dict
 
 
 class Individual(ABC):
@@ -51,7 +52,7 @@ class MetaheuristicAlgorithm(ABC):
         problem,
         population_size: int = 30,
         max_iterations: int = 100,
-        seed: int = None,
+        seed: Optional[int] = None,
     ):
         """
         Inicializa el algoritmo metaheurístico.
@@ -84,10 +85,9 @@ class MetaheuristicAlgorithm(ABC):
         self.end_time = 0
         self.convergence_curve = []
 
-        # Establecer semilla para reproducibilidad
-        if seed is not None:
-            random.seed(seed)
-            np.random.seed(seed)
+        # Generadores de números aleatorios por instancia (no globales)
+        self.rng = np.random.default_rng(seed)
+        self.py_rng = random.Random(seed)
 
     @abstractmethod
     def initialize_population(self) -> None:

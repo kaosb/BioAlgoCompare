@@ -33,16 +33,18 @@ from .base import Individual, MetaheuristicAlgorithm
 class Wolf(Individual):
     """Individual in the Grey Wolf Optimizer."""
 
-    def __init__(self, problem):
+    def __init__(self, problem, rng=None):
         """
         Initialize a wolf with random position.
 
         Args:
             problem: Problem instance to solve
+            rng: NumPy random generator instance
         """
         self.problem = problem
         self.dimension = problem.get_dimension()
-        self.position = np.random.uniform(0, 1, self.dimension)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
@@ -98,11 +100,7 @@ class GWO(MetaheuristicAlgorithm):
 
     def initialize_population(self):
         """Initialize the wolf pack and identify alpha, beta, delta."""
-        if self.seed is not None:
-            random.seed(self.seed)
-            np.random.seed(self.seed)
-
-        self.population = [Wolf(self.problem) for _ in range(self.population_size)]
+        self.population = [Wolf(self.problem, rng=self.rng) for _ in range(self.population_size)]
 
         # Sort by fitness to find alpha, beta, delta
         self._update_hierarchy()
@@ -113,15 +111,21 @@ class GWO(MetaheuristicAlgorithm):
         """Update alpha, beta, delta wolves (3 best solutions)."""
         sorted_pop = sorted(self.population, key=lambda w: w.fitness())
 
-        # Create copies to preserve best solutions
-        self.alpha = Wolf(self.problem)
-        self.alpha.copy(sorted_pop[0])
+        # Create copies to preserve best solutions (without consuming RNG)
+        def _copy_wolf(source):
+            w = object.__new__(Wolf)
+            w.problem = source.problem
+            w.dimension = source.dimension
+            w.rng = self.rng
+            w.position = np.copy(source.position)
+            w._fitness = source._fitness
+            w.lower_bounds = source.lower_bounds
+            w.upper_bounds = source.upper_bounds
+            return w
 
-        self.beta = Wolf(self.problem)
-        self.beta.copy(sorted_pop[1] if len(sorted_pop) > 1 else sorted_pop[0])
-
-        self.delta = Wolf(self.problem)
-        self.delta.copy(sorted_pop[2] if len(sorted_pop) > 2 else sorted_pop[0])
+        self.alpha = _copy_wolf(sorted_pop[0])
+        self.beta = _copy_wolf(sorted_pop[1] if len(sorted_pop) > 1 else sorted_pop[0])
+        self.delta = _copy_wolf(sorted_pop[2] if len(sorted_pop) > 2 else sorted_pop[0])
 
         self.best_solution = self.alpha
 
@@ -141,24 +145,24 @@ class GWO(MetaheuristicAlgorithm):
             dim = self.population[i].dimension
 
             # Encircling alpha (Eqs. 3.5-3.6)
-            r1 = np.random.rand(dim)
-            r2 = np.random.rand(dim)
+            r1 = self.rng.random(dim)
+            r2 = self.rng.random(dim)
             A1 = 2 * a * r1 - a
             C1 = 2 * r2
             D_alpha = np.abs(C1 * self.alpha.position - self.population[i].position)
             X1 = self.alpha.position - A1 * D_alpha
 
             # Encircling beta
-            r1 = np.random.rand(dim)
-            r2 = np.random.rand(dim)
+            r1 = self.rng.random(dim)
+            r2 = self.rng.random(dim)
             A2 = 2 * a * r1 - a
             C2 = 2 * r2
             D_beta = np.abs(C2 * self.beta.position - self.population[i].position)
             X2 = self.beta.position - A2 * D_beta
 
             # Encircling delta
-            r1 = np.random.rand(dim)
-            r2 = np.random.rand(dim)
+            r1 = self.rng.random(dim)
+            r2 = self.rng.random(dim)
             A3 = 2 * a * r1 - a
             C3 = 2 * r2
             D_delta = np.abs(C3 * self.delta.position - self.population[i].position)
