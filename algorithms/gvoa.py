@@ -250,6 +250,6 @@ class GVOA(MetaheuristicAlgorithm):
                 self.best_solution = vulture.copy()
 
         current_best = min(self.population, key=lambda v: v.fitness())
-        if current_best.fitness() < self.best_solution.fitness():
+        if current_best.fitness() < self.best_solution.fitness():  # pragma: no cover – defensive; loop above already tracks best
             self.best_solution = current_best.copy()
         self.convergence_curve.append(self.best_solution.fitness())

@@ -324,7 +324,7 @@ class QCDVRPSimulator:
                         prev_order_idx = prev_node - 1
                         if 0 <= prev_order_idx < len(store_orders):
                             prev_loc = store_orders[prev_order_idx].location
-                        else:
+                        else:  # pragma: no cover – prev_node always valid (set on line 347)
                             prev_loc = store.location
 
                     dist = np.sqrt(

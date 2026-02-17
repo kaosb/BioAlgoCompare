@@ -857,3 +857,122 @@ class TestVRPEvasionContinueRoute:
         
         # Debe procesar correctamente incluso con ruta vacía
         assert len(new_routes) == 2
+
+
+class TestVRPDistanceMatrixScipyFallback:
+    """Tests para el fallback manual cuando scipy no está disponible."""
+
+    def test_distance_matrix_scipy_fallback(self):
+        """Patch sys.modules para que scipy.spatial falle al importar,
+        luego verifica que compute_distance_matrix use el fallback manual."""
+        import importlib
+        import problems.vrp as vrp_module
+
+        problem = VRPProblem(seed=42)
+        problem.nodes = [(0, 0), (3, 4), (6, 8)]
+
+        # Forzar que la importación de scipy.spatial.distance lance ImportError
+        original_import = __builtins__.__import__ if hasattr(__builtins__, '__import__') else __import__
+
+        def patched_import(name, *args, **kwargs):
+            if name == "scipy.spatial" or name.startswith("scipy.spatial"):
+                raise ImportError("mocked scipy unavailable")
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=patched_import):
+            problem.compute_distance_matrix()
+
+        # Verificar que la matriz se calculó correctamente con el fallback manual
+        assert problem.distance_matrix.shape == (3, 3)
+        np.testing.assert_almost_equal(problem.distance_matrix[0, 1], 5.0)
+        np.testing.assert_almost_equal(problem.distance_matrix[0, 2], 10.0)
+        np.testing.assert_almost_equal(problem.distance_matrix[1, 2], 5.0)
+        # Diagonal debe ser 0
+        for i in range(3):
+            assert problem.distance_matrix[i, i] == 0.0
+
+
+class TestVRPEvaluateRoutesInvalidIndex:
+    """Tests para penalización con nodos inválidos en evaluate_multi."""
+
+    def test_evaluate_routes_invalid_index(self):
+        """Rutas con un nodo fuera de rango (999) deben recibir penalización de 1000."""
+        problem = VRPProblem(seed=42)
+        problem.dimension = 4
+        problem.depot_index = 0
+        problem.capacity = 100
+        problem.demands = [0, 10, 15, 5]
+        problem.avg_speed = 40.0
+        problem.service_time = 5.0
+        problem.distance_matrix = np.ones((4, 4)) * 10
+        np.fill_diagonal(problem.distance_matrix, 0)
+
+        # Ruta con nodo inválido 999
+        routes_invalid = [[0, 1, 999, 0]]
+        # Ruta equivalente sin nodo inválido
+        routes_valid = [[0, 1, 2, 0]]
+
+        # evaluate_multi calcula distancia; el nodo 999 recibe penalización de 1000.0
+        _, _, dist_invalid = problem.evaluate_multi(routes_invalid)
+        _, _, dist_valid = problem.evaluate_multi(routes_valid)
+
+        # La distancia con nodo inválido debe ser significativamente mayor
+        assert dist_invalid > dist_valid
+        # La penalización por nodo inválido aporta al menos 1000.0 extra
+        assert dist_invalid - dist_valid >= 1000.0
+
+
+class TestVRPEvasionStrategyReturns:
+    """Tests para la estrategia de evasión cuando hay retrasos sobre el umbral."""
+
+    def test_evasion_strategy_returns(self):
+        """Rutas con delay > threshold deben activar la estrategia de evasión
+        y retornar rutas modificadas (o las originales si no hay mejor opción)."""
+        problem = VRPProblem(seed=42)
+        problem.dimension = 5
+        problem.depot_index = 0
+        problem.capacity = 50
+        problem.demands = [0, 5, 5, 5, 5]
+        problem.distance_matrix = np.ones((5, 5)) * 100  # Distancias largas -> retraso
+        np.fill_diagonal(problem.distance_matrix, 0)
+        problem.avg_speed = 10.0  # Velocidad baja para generar retraso
+        problem.service_time = 20.0  # Servicio largo para generar retraso
+
+        # Ruta larga con muchos clientes que genera delay
+        routes = [[0, 1, 2, 3, 0], [0, 4, 0]]
+
+        # Umbral bajo para asegurar que hay retrasos
+        new_routes = problem.apply_evasion_strategy(routes, delay_threshold=5.0)
+
+        assert isinstance(new_routes, list)
+        assert len(new_routes) == len(routes)
+        # Todos los clientes deben seguir presentes
+        all_customers_before = set()
+        for r in routes:
+            all_customers_before.update(r[1:-1])
+        all_customers_after = set()
+        for r in new_routes:
+            all_customers_after.update(r[1:-1])
+        assert all_customers_before == all_customers_after
+
+    def test_evasion_strategy_short_route_skip(self):
+        """Cubre vrp.py:666 – ruta corta (len<=2) en delayed_routes hace continue."""
+        problem = VRPProblem(seed=42)
+        problem.dimension = 3
+        problem.depot_index = 0
+        problem.capacity = 50
+        problem.demands = [0, 5, 5]
+        problem.distance_matrix = np.ones((3, 3)) * 100
+        np.fill_diagonal(problem.distance_matrix, 0)
+        problem.avg_speed = 10.0
+        problem.service_time = 20.0
+
+        # Solo rutas cortas: ambas con len<=2, time=0
+        # Con threshold negativo (-1), 0 > -1 = True -> ambas en delayed_routes
+        # Ambas hacen continue en línea 666
+        routes = [[0, 0], [0, 0]]
+
+        new_routes = problem.apply_evasion_strategy(routes, delay_threshold=-1)
+
+        assert isinstance(new_routes, list)
+        assert new_routes == [[0, 0], [0, 0]]

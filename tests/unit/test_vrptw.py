@@ -436,5 +436,57 @@ class TestVRPTWInfoMethods:
             assert window_width == 20.0
 
 
+class TestVRPTWInconsistentTimeWindows:
+    """Tests para ventanas de tiempo inconsistentes."""
+
+    def test_inconsistent_time_windows_length(self, tmp_path):
+        """Cuando time_windows tiene menos entradas que dimension,
+        load_time_windows debe llamar a _set_default_time_windows."""
+        # Crear archivo Solomon con solo 2 entradas CUSTOMER pero DIMENSION=4
+        solomon_content = (
+            "TEST\n"
+            "\n"
+            "VEHICLE\n"
+            "NUMBER     CAPACITY\n"
+            "  5         100\n"
+            "\n"
+            "CUSTOMER\n"
+            "CUST NO.   XCOORD.   YCOORD.    DEMAND   READY TIME   DUE DATE   SERVICE TIME\n"
+            "    0      40        50        0        0          1236        0\n"
+            "    1      45        68        10       10         100         90\n"
+            "\n"
+            "NAME : TEST\n"
+            "DIMENSION : 4\n"
+            "CAPACITY : 100\n"
+            "NODE_COORD_SECTION\n"
+            "0 40.0 50.0\n"
+            "1 45.0 68.0\n"
+            "2 42.0 66.0\n"
+            "3 38.0 70.0\n"
+            "DEMAND_SECTION\n"
+            "0 0\n"
+            "1 10\n"
+            "2 20\n"
+            "3 30\n"
+            "DEPOT_SECTION\n"
+            "0\n"
+            "-1\n"
+            "EOF\n"
+        )
+        filepath = tmp_path / "test_inconsistent.vrp"
+        filepath.write_text(solomon_content)
+
+        problem = VRPTWProblem(instance_path=str(filepath))
+
+        # Dado que solo hay 2 entradas CUSTOMER pero dimension=4,
+        # load_time_windows detecta inconsistencia y usa defaults
+        assert len(problem.ready_times) == problem.dimension
+        assert len(problem.due_dates) == problem.dimension
+        assert len(problem.service_times) == problem.dimension
+        # Defaults: all ready_times = 0, all due_dates = time_limit
+        assert all(rt == 0.0 for rt in problem.ready_times)
+        assert all(dd == problem.time_limit for dd in problem.due_dates)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
