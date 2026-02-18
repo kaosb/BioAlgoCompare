@@ -295,37 +295,27 @@ class TestCreateStateFromProblem:
 
 
 class TestHOWithIL:
-    """Tests para HO con IL integrado."""
+    """Tests para HO con IL (legacy: IL fue removido, params aceptados pero ignorados)."""
 
     def test_ho_with_il_initialization(self):
-        """Test inicialización de HO con IL."""
+        """HO accepts use_il param for backward compatibility but ignores it."""
         problem = VRPProblem(seed=42)
 
         # Sin IL
         ho1 = HO(problem, use_il=False)
-        assert ho1.use_il is False
-        assert ho1.il_model is None
+        # Legacy params are accepted but not stored
+        assert ho1 is not None
 
-        # Con IL - si existe modelo lo carga, si no se desactiva
+        # Con IL flag - accepted but ignored (HO is parameter-free)
         ho2 = HO(problem, use_il=True)
-        # El comportamiento depende de si existe models/ho_il_model.pkl
-        assert isinstance(ho2.use_il, bool)
+        assert ho2 is not None
 
-        # Con IL y modelo válido (simulado)
-        with tempfile.NamedTemporaryFile(suffix=".pth", delete=False) as f:
-            # Crear modelo dummy
-            il = HOImitationLearning()
-            il.save(f.name)
-
-            # Verificar que el modelo se puede especificar
-            # No usamos ho3 porque puede fallar la carga por compatibilidad
-            HO(problem, use_il=True, il_model_path=f.name)
-
-            os.unlink(f.name)
+        # Con IL y model path - accepted but ignored
+        ho3 = HO(problem, use_il=True, il_model_path="/fake/path")
+        assert ho3 is not None
 
     def test_ho_parameter_adaptation_with_il(self):
-        """Test adaptación de parámetros con IL."""
-        # Este test verifica que HO puede ejecutarse con IL habilitado
+        """HO with/without IL flag produces identical results (IL is ignored)."""
         problem = VRPProblem(seed=42)
         problem.nodes = [(0, 0), (5, 0), (0, 5), (5, 5)]
         problem.demands = [0, 5, 5, 5]
@@ -333,19 +323,16 @@ class TestHOWithIL:
         problem.dimension = 4
         problem.compute_distance_matrix()
 
-        # Ejecutar HO estándar
         ho_standard = HO(problem, population_size=5, max_iterations=10, seed=42)
         ho_standard.execute()
         fitness_standard = ho_standard.best_solution.fitness()
 
-        # Ejecutar HO con IL (sin modelo entrenado, usa fallback)
         ho_il = HO(problem, population_size=5, max_iterations=10, seed=42, use_il=True)
         ho_il.execute()
         fitness_il = ho_il.best_solution.fitness()
 
-        # Ambos deberían funcionar
-        assert fitness_standard > 0
-        assert fitness_il > 0
+        # Both should produce identical results (IL is ignored)
+        assert fitness_standard == fitness_il
 
 
 def test_il_improves_convergence():

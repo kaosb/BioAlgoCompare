@@ -5,10 +5,10 @@ metaheuristic algorithm that simulates the social behavior of gorilla troops.
 
 The algorithm models five main behaviors:
 1. Migration to unknown places (exploration)
-2. Moving towards other gorillas (exploitation)
-3. Following the silverback (leader)
-4. Competition for adult females
-5. Migration to known locations
+2. Migration to known locations (exploration)
+3. Moving towards other gorillas (exploration)
+4. Following the silverback (exploitation)
+5. Competition for adult females (exploitation)
 
 Reference:
     Abdollahzadeh, B., Gharehchopogh, F. S., & Mirjalili, S. (2021).
@@ -37,14 +37,14 @@ from .base import Individual, MetaheuristicAlgorithm
 
 
 class Gorilla(Individual):
-    """Clase para representar un individuo en el algoritmo GTO (Gorilla Troops Optimization)."""
+    """Individual in the Gorilla Troops Optimizer."""
 
     def __init__(self, problem, rng=None, py_rng=None):
         """
-        Inicializa un gorila con una posición aleatoria.
+        Initialize a gorilla with a random position.
 
         Args:
-            problem: Instancia del problema a resolver
+            problem: Problem instance to solve
             rng: NumPy random generator instance
             py_rng: stdlib Random instance
         """
@@ -54,201 +54,172 @@ class Gorilla(Individual):
         self.py_rng = py_rng if py_rng is not None else random.Random()
         self.position = self.rng.uniform(0, 1, self.dimension)
         self._fitness = None
-        # Para problemas VRP, los límites son [0,1]
         self.lower_bounds = np.zeros(self.dimension)
         self.upper_bounds = np.ones(self.dimension)
 
     def fitness(self):
-        """Calcula el fitness del individuo."""
+        """Calculate the fitness of this gorilla."""
         if self._fitness is None:
             self._fitness = self.problem.evaluate(self.position)
         return self._fitness
 
     def is_feasible(self):
-        """Verifica si el individuo representa una solución factible."""
-        return (
-            True  # En VRP todas las soluciones son factibles con nuestro decodificador
-        )
+        """Check if the solution is feasible."""
+        return True
 
-    def move(
-        self, best_gorilla, C, L, W, beta, p, iteration, max_iter, population=None
-    ):
-        """Update the gorilla's position based on GTO behaviors.
-
-        Implements five main behaviors: migration to unknown places, moving
-        towards other gorillas, following the silverback, competition for
-        females, and migration to known locations.
-
-        Args:
-            best_gorilla: Position of the silverback (best solution)
-            C: Parameter C for exploration/exploitation balance
-            L: Parameter L for step size control
-            W: Threshold W for transition between exploration and exploitation
-            beta: Parameter beta for competition behavior
-            p: Probability parameter for exploration
-            iteration: Current iteration number
-            max_iter: Maximum number of iterations
-            population: List of all gorillas (optional)
-        """
-        dim = self.dimension
-        # --- Operadores de exploración (Ecuación 1) ---
-        if self.py_rng.random() < p:
-            # Exploración: migración a lugar desconocido
-            r1 = self.rng.random(dim)
-            self.position = (
-                self.lower_bounds + (self.upper_bounds - self.lower_bounds) * r1
-            )
-        elif self.py_rng.random() >= 0.5 and population is not None:
-            # Exploración: moverse hacia otro gorila
-            Xr = self.py_rng.choice(population).position
-            self.position = self.position + C * (Xr - self.position)
-        else:
-            # Exploración: migración hacia un lugar conocido
-            H = (self.rng.uniform(-C, C, dim)) * self.position
-            self.position = (self.upper_bounds - self.lower_bounds) * self.rng.random(
-                dim
-            ) + self.lower_bounds
-            self.position = self.position + L * H
-
-        # --- Transición a explotación si corresponde ---
-        if C < W:
-            if self.py_rng.random() < 0.5 and population is not None:
-                # Seguir al silverback (Eq. 7)
-                M = np.mean([g.position for g in population], axis=0)
-                self.position = L * (M - self.position) + best_gorilla.position
-            else:
-                # Competencia por hembras (Eq. 10)
-                Q = 2 * self.py_rng.random() - 1
-                E = (
-                    self.rng.random(dim)
-                    if self.py_rng.random() >= 0.5
-                    else self.rng.standard_normal(dim)
-                )
-                A = beta * E
-                self.position = (
-                    best_gorilla.position
-                    - Q * (best_gorilla.position - self.position) * A
-                )
-
-        # Clipping
-        self.position = np.clip(self.position, self.lower_bounds, self.upper_bounds)
-        self._fitness = None
+    def move(self, population, iteration, max_iterations):
+        """Movement logic (handled in GTO.update_population)."""
+        pass
 
     def copy(self, other):
-        """
-        Copia los valores de otro individuo a este.
-
-        Args:
-            other: Otro individuo (Gorilla)
-        """
+        """Copy values from another gorilla."""
         self.position = np.copy(other.position)
         self._fitness = other._fitness
 
 
 class GTO(MetaheuristicAlgorithm):
-    """Implementación del algoritmo de optimización de tropas de gorilas (Gorilla Troops Optimization)."""
+    """Gorilla Troops Optimizer (Abdollahzadeh et al., 2021).
+
+    Implements the five behaviors of gorilla troops for optimization:
+    exploration via migration and group movement, exploitation via
+    silverback following and female competition.
+    """
 
     def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
         """
-        Inicializa el algoritmo GTO.
+        Initialize GTO.
 
         Args:
-            problem: Instancia del problema
-            population_size: Tamaño de la población
-            max_iterations: Número máximo de iteraciones
-            seed: Semilla para reproducibilidad
+            problem: Problem instance
+            population_size: Population size
+            max_iterations: Maximum iterations
+            seed: Random seed for reproducibility
         """
         super().__init__(problem, population_size, max_iterations, seed)
         self.convergence_curve = []
-        self.exploitation_factor = (
-            0.5  # Factor para balancear exploración y explotación
-        )
-        self.social_factor = 0.2  # Factor para aprendizaje social
+        # Parameters from original paper
         self.beta = 3
         self.p = 0.03
         self.W = 0.8
 
     def initialize_population(self):
-        """Inicializa la población de gorilas."""
+        """Initialize the gorilla population."""
         self.population = []
         for _ in range(self.population_size):
             gorilla = Gorilla(self.problem, rng=self.rng, py_rng=self.py_rng)
             self.population.append(gorilla)
 
-        # Encontrar el mejor gorila inicial
+        # Find the initial silverback (best solution)
         self.best_solution = self.population[0]
         for i in range(1, self.population_size):
             if self.population[i].is_better_than(self.best_solution):
                 self.best_solution = self.population[i]
 
-        # Initialize convergence curve with initial best fitness
+        # Store a copy of the silverback
+        self._update_silverback(self.best_solution)
         self.convergence_curve = [self.best_solution.fitness()]
 
+    def _update_silverback(self, source):
+        """Create a copy of the silverback from a source gorilla."""
+        sb = object.__new__(Gorilla)
+        sb.problem = self.problem
+        sb.dimension = source.dimension
+        sb.rng = self.rng
+        sb.py_rng = self.py_rng
+        sb.position = np.copy(source.position)
+        sb._fitness = source._fitness
+        sb.lower_bounds = source.lower_bounds
+        sb.upper_bounds = source.upper_bounds
+        self.best_solution = sb
+
     def update_population(self):
-        """Actualiza la población en cada iteración."""
+        """Update gorilla positions per MATLAB reference (Abdollahzadeh 2021).
+
+        Parameters:
+            F = cos(2*rand) + 1  (NOT cos(2*pi*rand))
+            a = F * (1 - t/T)
+            C = a * (2*rand - 1)
+        """
         t = len(self.convergence_curve)
-        F = math.cos(2 * math.pi * self.py_rng.random()) + 1
-        C = F * (1 - t / self.max_iterations)
-        l = self.py_rng.uniform(-1, 1)
-        L = C * l
+        lb = np.zeros(self.population[0].dimension)
+        ub = np.ones(self.population[0].dimension)
+        dim = self.population[0].dimension
 
-        # Ajustar el factor de explotación basado en la iteración actual
-        self.exploitation_factor = 0.5 - 0.3 * (
-            len(self.convergence_curve) / self.max_iterations
-        )
+        # Eq. 3: F = cos(2*rand) + 1 (MATLAB: cos(2*rand)+1)
+        F = math.cos(2 * self.py_rng.random()) + 1
+        # Eq. 2: a = F * (1 - t/T)
+        a = F * (1 - t / self.max_iterations)
+        # Eq. 4: C = a * (2*rand - 1), i.e. l in [-1,1]
+        C = a * (2 * self.py_rng.random() - 1)
 
-        # Actualizar cada gorila
+        silverback = self.best_solution
+
         for i in range(self.population_size):
-            # No mover el mejor gorila
-            if self.population[i] is not self.best_solution:
-                # Movimiento principal siguiendo al líder
-                self.population[i].move(
-                    self.best_solution,
-                    C,
-                    L,
-                    self.W,
-                    self.beta,
-                    self.p,
-                    t,
-                    self.max_iterations,
-                    self.population,
-                )
+            new_position = self.population[i].position.copy()
+            old_fitness = self.population[i].fitness()
 
-                # Comportamiento social: interacción entre gorilas
-                if self.py_rng.random() < self.social_factor:
-                    # Seleccionar otro gorila aleatoriamente
-                    other_idx = self.py_rng.randint(0, self.population_size - 1)
-                    while other_idx == i:
-                        other_idx = self.py_rng.randint(0, self.population_size - 1)
+            # --- Exploration phase (a >= W) ---
+            if abs(a) >= self.W:
+                if self.py_rng.random() < self.p:
+                    # Eq. 1: Migration to unknown place
+                    r1 = self.rng.random(dim)
+                    new_position = lb + (ub - lb) * r1
 
-                    # Aprendizaje social
-                    for j in range(self.population[i].dimension):
-                        if self.py_rng.random() < 0.3:  # Probabilidad de aprendizaje
-                            self.population[i].position[j] = self.population[
-                                i
-                            ].position[j] + self.py_rng.random() * (
-                                self.population[other_idx].position[j]
-                                - self.population[i].position[j]
-                            )
-
-                    # Asegurar valores en rango [0, 1]
-                    self.population[i].position = np.clip(
-                        self.population[i].position, 0, 1
+                elif self.py_rng.random() >= 0.5:
+                    # Eq. 6: Moving towards another gorilla
+                    Xr = self.py_rng.choice(self.population).position
+                    Z = self.rng.uniform(-a, a, dim)
+                    H = Z * self.population[i].position  # Eq. 5
+                    new_position = (
+                        self.population[i].position
+                        - C * (C * (self.population[i].position - Xr)
+                               + self.rng.random(dim) * (self.population[i].position - Xr))
                     )
-                    self.population[i]._fitness = None
+                else:
+                    # Migration to known location
+                    Z = self.rng.uniform(-a, a, dim)
+                    H = Z * self.population[i].position  # Eq. 5
+                    new_position = (
+                        (ub - lb) * self.rng.random(dim) + lb
+                    ) + C * H
 
-                # Actualizar mejor solución si es necesario
-                if self.population[i].is_better_than(self.best_solution):
-                    gorilla_copy = object.__new__(Gorilla)
-                    gorilla_copy.problem = self.problem
-                    gorilla_copy.dimension = self.population[i].dimension
-                    gorilla_copy.rng = self.rng
-                    gorilla_copy.py_rng = self.py_rng
-                    gorilla_copy.position = np.copy(self.population[i].position)
-                    gorilla_copy._fitness = self.population[i]._fitness
-                    gorilla_copy.lower_bounds = self.population[i].lower_bounds
-                    gorilla_copy.upper_bounds = self.population[i].upper_bounds
-                    self.best_solution = gorilla_copy
+            # --- Exploitation phase (a < W) ---
+            else:
+                if self.py_rng.random() >= 0.5:
+                    # Eq. 7: Following the silverback
+                    g = 2 ** C
+                    M = np.mean([gor.position for gor in self.population], axis=0)
+                    delta = (np.abs(M) ** g) ** (1.0 / g) if g != 0 else np.abs(M)
+                    new_position = (
+                        C * delta * (self.population[i].position - silverback.position)
+                        + self.population[i].position
+                    )
+                else:
+                    # Eqs. 10-13: Competition for adult females
+                    Q = 2 * self.py_rng.random() - 1
+                    if self.py_rng.random() >= 0.5:
+                        E = self.rng.random(dim)
+                    else:
+                        E = self.rng.standard_normal(dim)
+                    A = self.beta * E
+                    new_position = (
+                        silverback.position
+                        - (silverback.position * Q - self.population[i].position * Q) * A
+                    )
 
-        # Registrar el mejor fitness en la curva de convergencia
+            # Clip to bounds
+            new_position = np.clip(new_position, lb, ub)
+
+            # Greedy selection
+            new_fitness = self.problem.evaluate(new_position)
+            if new_fitness < old_fitness:
+                self.population[i].position = new_position
+                self.population[i]._fitness = new_fitness
+            # else: keep current position (already set)
+
+            # Update silverback if improved
+            if self.population[i].fitness() < silverback.fitness():
+                self._update_silverback(self.population[i])
+                silverback = self.best_solution
+
         self.convergence_curve.append(self.best_solution.fitness())

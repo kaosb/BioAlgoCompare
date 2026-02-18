@@ -204,7 +204,7 @@ class TestPSO:
         assert params['algorithm'] == 'PSO'
         assert params['population_size'] == 20
         assert params['max_iterations'] == 50
-        assert params['inertia_weight'] == 0.729
-        assert params['c1'] == 1.49445
-        assert params['c2'] == 1.49445
+        assert params['inertia_weight'] == '0.9 -> 0.4'
+        assert params['c1'] == 2.0
+        assert params['c2'] == 2.0
         assert params['seed'] == 42
