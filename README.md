@@ -3,8 +3,8 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Algorithms](https://img.shields.io/badge/algorithms-22-orange)](algorithms/)
-[![Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen)](tests/)
-[![Tests](https://img.shields.io/badge/tests-1236%20passed-brightgreen)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1324%20passed-brightgreen)](tests/)
 
 Plataforma de evaluación estadística rigurosa para algoritmos metaheurísticos bioinspirados aplicados al Vehicle Routing Problem (VRP). Implementa benchmarking masivo con análisis estadístico avanzado siguiendo las mejores prácticas de investigación reproducible.
 
@@ -554,13 +554,13 @@ El proyecto implementa **22 algoritmos metaheurísticos únicos** (20 bioinspira
 
 ### Detalles de Implementación HO
 
-El Hippopotamus Optimizer implementa tres fases comportamentales:
+El Hippopotamus Optimizer (Amiri et al., 2024) implementa tres fases secuenciales sin hiperparámetros específicos (parameter-free):
 
-1. **Fase de Posición**: Exploración del espacio de búsqueda
-2. **Fase de Defensa**: Intensificación territorial con parámetro α
-3. **Fase de Evasión**: Escape de óptimos locales con parámetro γ
+1. **Fase 1 (Posición en río)**: Exploración basada en posición dominante
+2. **Fase 2 (Defensa contra depredadores)**: Explotación territorial
+3. **Fase 3 (Evasión)**: Diversificación mediante caminata aleatoria
 
-Parámetros: α ∈ [0.1, 0.9], β ∈ [0.2, 0.8], γ ∈ [0.3, 1.0]
+La implementación sigue fielmente el paper original y el código MATLAB de referencia.
 
 ## 🚀 Características Avanzadas
 
@@ -819,7 +819,7 @@ python tools/solomon/convert_solomon_format.py \
 BioAlgoCompare/
 ├── algorithms/          # Implementaciones de algoritmos
 │   ├── base.py         # Clases base abstractas
-│   └── *.py            # 22 algoritmos metaheurísticos
+│   └── *.py            # 22 algoritmos metaheuristicos
 ├── data/
 │   └── vrp/            # Instancias CVRPLIB
 ├── docs/               # Documentación completa
@@ -880,15 +880,9 @@ pytest -m "not slow"
 pytest --cov-report=html --cov-report=term-missing
 ```
 
-### Estado Actual de Cobertura: **92%**
+### Estado Actual de Cobertura: **99%**
 
-#### Gaps de Cobertura Principales
-
-1. `problems/vrptw.py` (44% - variante VRPTW experimental)
-2. `utils/train_il_simple.py` (54% - entrenamiento IL simplificado)
-3. `problems/qc_dvrp.py` (76% - simulador QC-DVRP)
-4. `algorithms/ho.py` (78% - ramas de parámetros adaptativos)
-5. `problems/vrp.py` (89% - casos edge de parsing)
+1324 tests pasando. Cobertura medida con pytest-cov sobre algorithms/, problems/, utils/ y scripts/.
 
 ## 📊 Opciones de Línea de Comandos
 
@@ -973,28 +967,29 @@ Ver [Guía de Contribución](docs/development/contribution.md) para más detalle
 
 Ademas del VRP estatico, BioAlgoCompare incluye un simulador de eventos discretos para el **Problema de Enrutamiento Dinamico de Vehiculos en Quick Commerce (QC-DVRP)**:
 
-- Demanda estoc&aacute;stica (proceso Poisson)
-- Re-optimizaci&oacute;n peri&oacute;dica (Rolling Horizon)
-- M&uacute;ltiples micro-dep&oacute;sitos (dark stores)
+- Demanda estocastica (proceso Poisson, lambda=5.0)
+- Re-optimizacion periodica (Rolling Horizon, ventanas de 5 min)
+- Multiples micro-depositos (dark stores)
 - Ventanas de tiempo estrictas (15-45 min)
-- M&eacute;tricas: ADT, DSR, WBI, Fitness Z
+- Metricas: ADT, DSR, WBI, Fitness Z
 
 ```bash
-# Resultados completos del experimento QC-DVRP
-ls results/dvrp_full_lam5_rh300/
-# Ver README del experimento para detalles
-cat results/dvrp_full_lam5_rh300/README.md
+# Ejecutar experimento QC-DVRP
+python scripts/run_dvrp_experiments.py
+
+# Resultados v11 (implementaciones fieles)
+ls results/dvrp_v11_faithful/
 ```
 
-Implementaci&oacute;n: `problems/qc_dvrp.py`. Documentaci&oacute;n: `results/dvrp_full_lam5_rh300/README.md`.
+Implementacion: `problems/qc_dvrp.py`. Script de experimentos: `scripts/run_dvrp_experiments.py`.
 
 ## Estado del Proyecto
 
-- 22 algoritmos implementados y probados
-- Sistema de benchmarking completo (VRP est&aacute;tico + QC-DVRP din&aacute;mico)
-- An&aacute;lisis estad&iacute;stico riguroso (Friedman, Nemenyi, Wilcoxon, A12)
-- Documentaci&oacute;n exhaustiva
-- Resultados publicados en IWINAC 2026 (paper v9)
+- 22 algoritmos implementados y probados (6 auditados contra papers originales y codigo MATLAB)
+- Sistema de benchmarking completo (VRP estatico + QC-DVRP dinamico)
+- Analisis estadistico riguroso (Friedman, Nemenyi, Wilcoxon, A12)
+- 1324 tests, 99% cobertura
+- Paper IWINAC 2026 (v11) basado en resultados de este framework
 
 ## 🔧 Solución de Problemas
 
@@ -1144,21 +1139,14 @@ Si encuentras un bug, incluye:
 
 ### Citar Este Trabajo
 
-Si utilizas BioAlgoCompare en tu investigación:
+Si utilizas BioAlgoCompare en tu investigacion:
 
 ```bibtex
-@inproceedings{bioalgocompare2025,
-  title={A Comprehensive Evaluation of Bio-inspired Algorithms for Vehicle Routing Problems},
-  author={[Tu Nombre]},
-  booktitle={Proceedings of International Conference},
-  year={2025}
-}
-
-@software{bioalgocompare2025,
-  title={BioAlgoCompare: A Comprehensive Platform for Bio-inspired Algorithm Evaluation},
-  author={[Tu Nombre]},
-  year={2025},
-  url={https://github.com/username/BioAlgoCompare}
+@software{gonzalez2026bioalgocompare,
+  title={BioAlgoCompare: A Platform for Bio-inspired Algorithm Evaluation on Vehicle Routing Problems},
+  author={Gonzalez, Felipe},
+  year={2026},
+  url={https://github.com/kaosb/BioAlgoCompare}
 }
 ```
 
