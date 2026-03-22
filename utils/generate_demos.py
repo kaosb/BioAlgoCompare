@@ -78,27 +78,26 @@ def _restore_ho_state(ho, state):
 
 
 def _evaluate_params(ho, alpha, beta, gamma, eval_iters):
-    """Run HO for eval_iters with fixed (α, β, γ), return final best fitness."""
-    # Temporarily override _get_il_params to return fixed values
-    original_use_il = ho.use_il
-    original_il_model = ho.il_model
-    ho.use_il = False  # Disable IL model prediction
+    """Run HO for eval_iters with fixed (α, β, γ), return final best fitness.
 
-    # Monkey-patch _get_il_params for this evaluation
-    ho._fixed_params = (alpha, beta, gamma)
+    Replaces _get_il_params entirely with a lambda that returns fixed params,
+    bypassing the use_il check. This ensures the candidate params are actually
+    applied during update_population().
+    """
+    # Save original method (bound to instance)
     original_get = ho._get_il_params
-    ho._get_il_params = lambda iteration: ho._fixed_params
+
+    # Replace method entirely — do NOT touch use_il, as the lambda bypasses it
+    fixed = (float(alpha), float(beta), float(gamma))
+    ho._get_il_params = lambda iteration: fixed
 
     for _ in range(eval_iters):
         ho.update_population()
 
     best_fitness = ho.dominant.fitness()
 
-    # Restore
+    # Restore original method
     ho._get_il_params = original_get
-    ho.use_il = original_use_il
-    ho.il_model = original_il_model
-    del ho._fixed_params
 
     return best_fitness
 
