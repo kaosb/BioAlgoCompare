@@ -72,18 +72,38 @@ python utils/train_il.py --dataset results/demos_ho_il.csv --epochs 100 --batch-
 python utils/evaluate_il.py --instances P-n16-k8,E-n22-k4 --runs 30 --model models/ho_il_model.pth
 ```
 
-## Next Steps
-1. Generate real demonstrations on Solomon RC101-RC108 instances
-2. Train production IL model with extensive dataset
-3. Fine-tune hyperparameters for specific problem classes
-4. Integrate with massive benchmarking framework
-5. Publish results comparing HO vs HO+IL performance
+## Integration into HO (March 2026)
 
-## Technical Achievement
-- Successfully bridged modern ML techniques with metaheuristic optimization
-- Maintained backwards compatibility
-- Achieved high code quality (passes all ruff checks)
-- Comprehensive documentation and testing
-- Ready for production experiments
+On 2026-03-21, IL was fully integrated into `algorithms/ho.py`:
+
+### How IL Parameters Are Applied
+- **alpha** (0.1-0.9): Scales `y1` in Phase 1 male update (exploration intensity)
+- **beta** (0.2-0.8): Scales `h` vector in Phase 1 female update (adaptation strength)
+- **gamma** (0.3-1.0): Scales Levy flight amplitude and spiral params in Phase 2,
+  controls shrinking speed in Phase 3
+
+### Design Decisions
+- **Multiplicative modulation**: params default to 1.0 when IL is off (neutral)
+- **Backward-compatible**: `HO(use_il=False)` produces identical results to original
+- **Verified**: No regression on P-n16-k8 with seed=42
+- **History tracking**: `get_il_params_history()` records all predictions for analysis
+
+### Usage
+```python
+ho_il = HO(problem, use_il=True, il_model_path="models/ho_il_model.pkl")
+result = ho_il.execute()
+params_df = pd.DataFrame(ho_il.get_il_params_history())
+```
+
+### Added to `run_dvrp_experiments.py`
+- "HO+IL" entry in ALGORITHMS dict for CLEI 2026 paper experiments
+
+## Next Steps
+1. Generate real demonstrations with PSO/GA on VRP instances
+2. Retrain model with real demonstrations (current model uses synthetic data)
+3. Run full experiment: 30 runs x 7 algorithms (HO, HO+IL, PSO, GA, SSA, GTO, GWO)
+4. Statistical analysis: Friedman + Nemenyi + Wilcoxon HO vs HO+IL
+5. Write CLEI 2026 paper (10 pages IEEE, Spanish)
+6. Extend to Biomimetics (MDPI) journal paper
 
 The integration provides a foundation for adaptive metaheuristics that learn from experience, advancing the state-of-the-art in bio-inspired optimization for dynamic VRP applications.

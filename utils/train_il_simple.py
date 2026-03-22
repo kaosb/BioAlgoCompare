@@ -124,7 +124,7 @@ class SimpleILModel:
             self.scaler = data['scaler']
             self.feature_names = data['feature_names']
             self.is_trained = data['is_trained']
-        print(f"Model loaded from {filepath}")
+        # Suppress repeated load messages in batch experiments
 
 
 def analyze_training_results(results, df_train, df_val=None):

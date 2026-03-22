@@ -5,6 +5,11 @@ Faithful implementation of the algorithm proposed by Amiri et al. (2024).
 All three phases are applied SEQUENTIALLY to ALL individuals in EACH iteration.
 The algorithm is essentially parameter-free (no tunable hyperparameters).
 
+Supports optional Imitation Learning (IL) for adaptive parameter control:
+when use_il=True, a trained model predicts dynamic parameters (alpha, beta, gamma)
+at each iteration based on the current optimization state, enabling adaptive
+exploration-exploitation balance.
+
 Reference:
     Mohammad Hussein Amiri, Nastaran Mehrabi Hashjin, Mohsen Montazeri,
     Seyedali Mirjalili & Nima Khodadadi.
@@ -65,8 +70,12 @@ class Hippopotamus(Individual):
 class HO(MetaheuristicAlgorithm):
     """Hippopotamus Optimization Algorithm (Amiri et al., 2024).
 
-    The algorithm is parameter-free. It applies three phases sequentially
-    to all individuals every iteration, with greedy selection after each phase.
+    The algorithm is parameter-free by default. It applies three phases
+    sequentially to all individuals every iteration, with greedy selection
+    after each phase.
+
+    When use_il=True, an Imitation Learning model predicts adaptive parameters
+    (alpha, beta, gamma) at each iteration to control exploration-exploitation.
     """
 
     def __init__(
@@ -75,12 +84,8 @@ class HO(MetaheuristicAlgorithm):
         population_size: int = 30,
         max_iterations: int = 100,
         seed: int = None,
-        # Legacy params accepted but ignored (for backward compat with experiment scripts)
         use_il: bool = False,
         il_model_path: str = None,
-        alpha_fixed: float = None,
-        beta_fixed: float = None,
-        gamma_fixed: float = None,
     ):
         """
         Initialize HO algorithm.
@@ -90,9 +95,27 @@ class HO(MetaheuristicAlgorithm):
             population_size: Population size
             max_iterations: Maximum iterations
             seed: Random seed for reproducibility
+            use_il: Enable Imitation Learning for adaptive parameters
+            il_model_path: Path to trained IL model (.pkl)
         """
         super().__init__(problem, population_size, max_iterations, seed)
         self.dominant = None  # D_hippo: best solution found
+        self.use_il = use_il
+        self.il_model = None
+        self._il_params_history = []  # Track predicted params for analysis
+        self._il_fallback_count = 0  # Count fallbacks to detect silent failures
+
+        if self.use_il and il_model_path:
+            try:
+                from utils.train_il_simple import SimpleILModel
+                self.il_model = SimpleILModel()
+                self.il_model.load(il_model_path)
+                if not self.il_model.is_trained:
+                    raise ValueError("Model loaded but not trained")
+            except Exception as e:
+                import warnings
+                warnings.warn(f"Could not load IL model: {e}. Running without IL.")
+                self.use_il = False
 
     def initialize_population(self) -> None:
         """Initialize population of hippopotami."""
@@ -118,12 +141,62 @@ class HO(MetaheuristicAlgorithm):
         h._fitness = source._fitness
         return h
 
+    def _get_il_params(self, iteration: int) -> tuple:
+        """Predict IL parameters or return defaults.
+
+        Returns:
+            Tuple (alpha, beta, gamma) where:
+            - alpha in [0.1, 0.9]: scales attraction to dominant in Phase 1
+            - beta in [0.2, 0.8]: scales female/immature adaptation in Phase 1
+            - gamma in [0.3, 1.0]: scales perturbation amplitude in Phases 2-3
+        """
+        if not self.use_il or self.il_model is None:
+            return 1.0, 1.0, 1.0  # Neutral: no modification to original HO
+
+        try:
+            from utils.imitation_learning import create_state_from_problem
+            state = create_state_from_problem(
+                self.problem, self, iteration, self.max_iterations
+            )
+            # Validate feature alignment on first call
+            if iteration <= 1 and self.il_model.feature_names is not None:
+                missing = set(self.il_model.feature_names) - set(state.keys())
+                if missing:
+                    import warnings
+                    warnings.warn(
+                        f"IL feature mismatch: model expects {missing} "
+                        f"not in state. Using 0 for missing features."
+                    )
+
+            alpha, beta, gamma = self.il_model.predict(state)
+            self._il_params_history.append({
+                'iteration': iteration,
+                'alpha': float(alpha),
+                'beta': float(beta),
+                'gamma': float(gamma),
+            })
+            return alpha, beta, gamma
+        except Exception as e:
+            self._il_fallback_count += 1
+            if self._il_fallback_count == 1:
+                import warnings
+                warnings.warn(
+                    f"IL prediction failed at iteration {iteration}: {e}. "
+                    f"Falling back to neutral params (1.0, 1.0, 1.0)."
+                )
+            return 1.0, 1.0, 1.0
+
     def update_population(self) -> None:
         """Apply all three phases sequentially to all individuals.
 
         Per Amiri et al. (2024): phases are NOT mutually exclusive.
         Each individual goes through all three phases every iteration,
         with greedy selection after each sub-phase.
+
+        When IL is active, alpha/beta/gamma modulate the phase behaviors:
+        - alpha: exploration intensity in male update (Phase 1)
+        - beta: female adaptation strength (Phase 1)
+        - gamma: perturbation amplitude in defense/evasion (Phases 2-3)
         """
         iteration = len(self.convergence_curve)  # 1-based after init
         lb = np.zeros(self.population[0].dimension)
@@ -131,6 +204,9 @@ class HO(MetaheuristicAlgorithm):
 
         # Temperature factor (Eq. 8)
         T = math.exp(-iteration / self.max_iterations)
+
+        # IL adaptive parameters (neutral 1.0 if IL disabled)
+        alpha, beta, gamma = self._get_il_params(iteration)
 
         for i in range(self.population_size):
             dim = self.population[i].dimension
@@ -142,7 +218,8 @@ class HO(MetaheuristicAlgorithm):
             # ============================================
 
             # --- Eq. 6: Male hippo update ---
-            y1 = self.rng.random(dim)
+            # alpha modulates exploration intensity toward dominant
+            y1 = self.rng.random(dim) * alpha
             I1 = self.rng.integers(1, 3, size=dim)  # {1, 2}
             x_male = x_i + y1 * (self.dominant.position - I1 * x_i)
             x_male = np.clip(x_male, lb, ub)
@@ -173,6 +250,8 @@ class HO(MetaheuristicAlgorithm):
 
             h = (I2 * r1 + (1 - rho1) * 2 * (r2 - 1)) / r3
             h = h / ((I1 * r4 + (1 - rho2)) / r5)
+            # beta modulates female/immature adaptation strength
+            h = h * beta
 
             if T > 0.6:
                 # Eq. 9: early iterations (high temperature)
@@ -207,11 +286,12 @@ class HO(MetaheuristicAlgorithm):
             D_vec = np.abs(predator - x_i) + 1e-10  # avoid div by zero
 
             # Levy flight (Eqs. 17-18): Mantegna method with vartheta=1.5
-            RL = levy_flight(dim, beta=1.5, rng=self.rng) * 0.05
+            # gamma modulates perturbation amplitude
+            RL = levy_flight(dim, beta=1.5, rng=self.rng) * 0.05 * gamma
 
             # Random parameters for spiral movement
-            f_param = self.rng.uniform(2, 4)
-            d_param = self.rng.uniform(2, 3)
+            f_param = self.rng.uniform(2, 4) * gamma
+            d_param = self.rng.uniform(2, 3) * gamma
             g_param = self.rng.uniform(-1, 1)
 
             if f_predator < f_i:
@@ -242,7 +322,10 @@ class HO(MetaheuristicAlgorithm):
             # ============================================
 
             # Eqs. 19-20: Local bounds shrink with iteration
-            t_safe = max(1, iteration)  # avoid division by zero at t=0
+            # gamma modulates bounds: high gamma → smaller t_safe → wider local
+            # bounds → more exploration. Consistent with Phase 2 where high gamma
+            # also increases perturbation amplitude.
+            t_safe = max(1, iteration) * (1.0 / gamma)
             lb_local = lb / t_safe
             ub_local = ub / t_safe
 
@@ -281,11 +364,30 @@ class HO(MetaheuristicAlgorithm):
 
     def get_parameters(self) -> dict:
         """Get algorithm parameters for reporting."""
-        return {
-            'algorithm': 'HO',
+        params = {
+            'algorithm': 'HO+IL' if self.use_il else 'HO',
             'population_size': self.population_size,
             'max_iterations': self.max_iterations,
             'levy_beta': 1.5,
             'phases': '3 sequential (position, defense, evasion)',
             'seed': self.seed,
+            'use_il': self.use_il,
         }
+        if self.use_il:
+            params['il_model'] = 'SimpleILModel (RandomForest)'
+            params['il_params'] = 'alpha (attraction), beta (adaptation), gamma (perturbation)'
+            params['il_fallback_count'] = self._il_fallback_count
+            if self._il_fallback_count > 0:
+                fallback_pct = (self._il_fallback_count / max(1, self.max_iterations)) * 100
+                params['il_fallback_pct'] = f"{fallback_pct:.1f}%"
+                if fallback_pct > 10:
+                    import warnings
+                    warnings.warn(
+                        f"IL fallback rate {fallback_pct:.1f}% exceeds 10%. "
+                        f"Results may not reflect IL behavior."
+                    )
+        return params
+
+    def get_il_params_history(self) -> list:
+        """Return history of IL-predicted parameters for analysis."""
+        return self._il_params_history

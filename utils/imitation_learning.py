@@ -446,28 +446,52 @@ def create_state_from_problem(
         state["convergence_rate"] = 0
         state["stagnation_counter"] = 0
 
-    # Diversidad poblacional (simplificado)
+    # Diversidad poblacional (vectorizado para eficiencia)
     if hasattr(algorithm, "population") and len(algorithm.population) > 1:
-        positions = [ind.position for ind in algorithm.population]
-        avg_distance = 0
-        count = 0
-        for i in range(len(positions)):
-            for j in range(i + 1, len(positions)):
-                avg_distance += np.linalg.norm(positions[i] - positions[j])
-                count += 1
-        state["population_diversity"] = avg_distance / count if count > 0 else 0
+        positions = np.array([ind.position for ind in algorithm.population])
+        # Sample-based diversity for large populations (avoid O(n^2))
+        n_pop = len(positions)
+        if n_pop > 30:
+            # Sample 30 individuals for diversity estimation
+            sample_idx = np.random.choice(n_pop, size=30, replace=False)
+            positions_sample = positions[sample_idx]
+        else:
+            positions_sample = positions
+        # Vectorized pairwise distances
+        diffs = positions_sample[:, None, :] - positions_sample[None, :, :]
+        distances = np.linalg.norm(diffs, axis=2)
+        triu_idx = np.triu_indices(len(positions_sample), k=1)
+        state["population_diversity"] = float(np.mean(distances[triu_idx])) if len(triu_idx[0]) > 0 else 0
     else:
         state["population_diversity"] = 0.5
 
-    # Características dinámicas
+    # Características dinámicas (real values when available)
     state["dynamic_orders"] = (
         len(problem.dynamic_orders) if hasattr(problem, "dynamic_orders") else 0
     )
-    state["avg_delay"] = 0  # Placeholder
-    state["load_imbalance"] = 0  # Placeholder
+    state["avg_delay"] = (
+        float(np.mean(problem.delays)) if hasattr(problem, "delays") and len(getattr(problem, "delays", [])) > 0 else 0
+    )
+    state["load_imbalance"] = (
+        float(np.std(problem.vehicle_loads)) if hasattr(problem, "vehicle_loads") and len(getattr(problem, "vehicle_loads", [])) > 0 else 0
+    )
 
-    # Ratio de elite
-    state["elite_ratio"] = 0.1
-    state["improvement_rate"] = state["convergence_rate"]
+    # Elite ratio: fraction of population within 10% of best fitness
+    if hasattr(algorithm, "population") and algorithm.population:
+        fitness_values = [ind.fitness() for ind in algorithm.population]
+        best = min(fitness_values)
+        threshold = best * 1.10 if best > 0 else best - abs(best) * 0.10
+        elite_count = sum(1 for f in fitness_values if f <= threshold)
+        state["elite_ratio"] = elite_count / len(fitness_values)
+    else:
+        state["elite_ratio"] = 0.1
+
+    # Improvement rate: relative improvement over last 5 iterations
+    if hasattr(algorithm, "convergence_curve") and len(algorithm.convergence_curve) > 5:
+        old_fit = algorithm.convergence_curve[-5]
+        new_fit = algorithm.convergence_curve[-1]
+        state["improvement_rate"] = (old_fit - new_fit) / (old_fit + 1e-10)
+    else:
+        state["improvement_rate"] = state.get("convergence_rate", 0)
 
     return state

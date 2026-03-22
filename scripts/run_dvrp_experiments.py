@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Run QC-DVRP experiments for the IWINAC 2026 paper.
+"""Run QC-DVRP experiments for IWINAC 2026 / CLEI 2026 papers.
 
-Executes 6 metaheuristic algorithms on the Quick Commerce Dynamic VRP
+Executes metaheuristic algorithms on the Quick Commerce Dynamic VRP
 simulation with rolling horizon re-optimization.
 
-Algorithms (as per paper Section 4):
-    - HO: Hippopotamus Optimization (alpha=0.5, beta=0.2, no IL)
+Algorithms:
+    - HO: Hippopotamus Optimization (parameter-free, Amiri et al. 2024)
+    - HO+IL: HO with Imitation Learning adaptive parameters
     - PSO: Particle Swarm Optimization
     - GA: Genetic Algorithm
     - SSA: Salp Swarm Algorithm
@@ -35,8 +36,14 @@ from utils.algorithm_factory import create_algorithm, get_algorithm_class
 from utils.benchmarking import DVRPBenchmarkResult
 
 # Paper configuration (Section 4)
+IL_MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "ho_il_model.pkl")
+
 ALGORITHMS = {
     "HO": {"class": "ho", "params": {}},
+    "HO+IL": {"class": "ho", "params": {
+        "use_il": True,
+        "il_model_path": IL_MODEL_PATH,
+    }},
     "PSO": {"class": "pso", "params": {}},
     "GA": {"class": "ga", "params": {"crossover_rate": 0.9}},
     "SSA": {"class": "ssa", "params": {}},
