@@ -44,10 +44,14 @@ class Wolf(Individual):
         self.problem = problem
         self.dimension = problem.get_dimension()
         self.rng = rng if rng is not None else np.random.default_rng()
-        self.position = self.rng.uniform(0, 1, self.dimension)
+        # Read bounds from the problem when available; default to [0, 1]
+        # (e.g. random-key VRP) when the problem does not expose them.
+        lo = getattr(problem, "get_lower_bounds", lambda: np.zeros(self.dimension))()
+        hi = getattr(problem, "get_upper_bounds", lambda: np.ones(self.dimension))()
+        self.lower_bounds = np.asarray(lo, dtype=float)
+        self.upper_bounds = np.asarray(hi, dtype=float)
+        self.position = self.rng.uniform(self.lower_bounds, self.upper_bounds, self.dimension)
         self._fitness = None
-        self.lower_bounds = np.zeros(self.dimension)
-        self.upper_bounds = np.ones(self.dimension)
 
     def fitness(self):
         """Calculate the fitness of this wolf."""

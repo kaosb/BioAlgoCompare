@@ -36,7 +36,13 @@ class Hippopotamus(Individual):
         self.problem = problem
         self.dimension = problem.get_dimension()
         self.rng = rng if rng is not None else np.random.default_rng()
-        self.position = self.rng.uniform(0, 1, self.dimension)
+        # Read bounds from the problem when available; default to [0, 1]
+        # (e.g. random-key VRP) when the problem does not expose them.
+        lo = getattr(problem, "get_lower_bounds", lambda: np.zeros(self.dimension))()
+        hi = getattr(problem, "get_upper_bounds", lambda: np.ones(self.dimension))()
+        self.lower_bounds = np.asarray(lo, dtype=float)
+        self.upper_bounds = np.asarray(hi, dtype=float)
+        self.position = self.rng.uniform(self.lower_bounds, self.upper_bounds, self.dimension)
         self._fitness = None
 
     def fitness(self) -> float:
@@ -155,8 +161,10 @@ class HO(MetaheuristicAlgorithm):
         iteration = len(self.convergence_curve)  # 1-based after init
         N = self.population_size
         dim = self.population[0].dimension
-        lb = np.zeros(dim)
-        ub = np.ones(dim)
+        # Use the problem's bounds (default [0, 1] for random-key VRP),
+        # taken from any individual (all share the same bounds).
+        lb = getattr(self.population[0], "lower_bounds", np.zeros(dim))
+        ub = getattr(self.population[0], "upper_bounds", np.ones(dim))
 
         # Dominant = global best from previous iteration (fixed across phases).
         D = self.dominant.position
@@ -283,6 +291,13 @@ class HO(MetaheuristicAlgorithm):
 
         self.best_solution = self.dominant
         self.convergence_curve.append(self.dominant.fitness())
+
+    @property
+    def evals_per_iteration(self) -> int:
+        """Function evaluations charged per update_population() call (~3*N):
+        first half ~2 (X_P1+X_P2), second half ~2 (predator+defense), all 1
+        (escape)."""
+        return 3 * self.population_size
 
     def get_parameters(self) -> dict:
         params = {

@@ -28,18 +28,29 @@ from algorithms.base import MetaheuristicAlgorithm, Individual
 class Particle(Individual):
     """Particle in PSO algorithm with velocity and memory of personal best."""
 
-    def __init__(self, dimension: int, problem: Any, rng=None):
+    def __init__(self, dimension: int, problem: Any, rng=None,
+                 lower_bounds=None, upper_bounds=None):
         # Initialize basic attributes
         self.dimension = dimension
         self.problem = problem
         self.rng = rng if rng is not None else np.random.default_rng()
 
+        # Bounds: default to [0, 1] (e.g. random-key VRP) when not provided.
+        if lower_bounds is None:
+            lower_bounds = np.zeros(dimension)
+        if upper_bounds is None:
+            upper_bounds = np.ones(dimension)
+        self.lower_bounds = np.asarray(lower_bounds, dtype=float)
+        self.upper_bounds = np.asarray(upper_bounds, dtype=float)
+
         # Initialize position and fitness
-        self.position = self.rng.random(dimension)
+        self.position = self.rng.uniform(self.lower_bounds, self.upper_bounds, dimension)
         self._fitness = None
 
-        # Initialize velocity for each dimension
-        self.velocity: np.ndarray = self.rng.uniform(-1, 1, dimension)
+        # Velocity clamp at 20% of the per-dimension search range.
+        self.v_max = 0.2 * (self.upper_bounds - self.lower_bounds)
+        # Initialize velocity within +/- v_max for each dimension.
+        self.velocity: np.ndarray = self.rng.uniform(-self.v_max, self.v_max, dimension)
         # Personal best position and fitness
         self.pbest_position: np.ndarray = self.position.copy()
         self.pbest_fitness: float = float('inf')
@@ -102,15 +113,15 @@ class Particle(Individual):
 
         self.velocity = self.w * self.velocity + cognitive + social
 
-        # Velocity clamping (Engelbrecht recommends 10-20% of search range)
-        v_max = 0.2  # 20% of [0,1] range
-        self.velocity = np.clip(self.velocity, -v_max, v_max)
+        # Velocity clamping (Engelbrecht recommends 10-20% of search range),
+        # vectorial over the per-dimension v_max.
+        self.velocity = np.clip(self.velocity, -self.v_max, self.v_max)
 
         # Update position
         self.position = self.position + self.velocity
 
-        # Ensure position stays within bounds [0, 1]
-        self.position = np.clip(self.position, 0, 1)
+        # Ensure position stays within problem bounds.
+        self.position = np.clip(self.position, self.lower_bounds, self.upper_bounds)
 
         # Evaluate new position
         self._fitness = None  # Reset fitness cache
@@ -144,11 +155,16 @@ class PSO(MetaheuristicAlgorithm):
     def initialize_population(self) -> None:
         """Initialize swarm of particles with random positions and velocities."""
         self.population = []
+        dim = self.problem.get_dimension()
+        lo = getattr(self.problem, "get_lower_bounds", lambda: np.zeros(dim))()
+        hi = getattr(self.problem, "get_upper_bounds", lambda: np.ones(dim))()
         for i in range(self.population_size):
             particle = Particle(
-                dimension=self.problem.get_dimension(),
+                dimension=dim,
                 problem=self.problem,
                 rng=self.rng,
+                lower_bounds=lo,
+                upper_bounds=hi,
             )
             self.population.append(particle)
 

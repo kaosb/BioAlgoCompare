@@ -31,14 +31,23 @@ from algorithms.base import MetaheuristicAlgorithm, Individual
 class Chromosome(Individual):
     """Chromosome (individual) in Genetic Algorithm representing a VRP solution."""
 
-    def __init__(self, dimension: int, problem: Any, rng=None):
+    def __init__(self, dimension: int, problem: Any, rng=None,
+                 lower_bounds=None, upper_bounds=None):
         # Initialize basic attributes
         self.dimension = dimension
         self.problem = problem
         self.rng = rng if rng is not None else np.random.default_rng()
 
+        # Bounds: default to [0, 1] (e.g. random-key VRP) when not provided.
+        if lower_bounds is None:
+            lower_bounds = np.zeros(dimension)
+        if upper_bounds is None:
+            upper_bounds = np.ones(dimension)
+        self.lower_bounds = np.asarray(lower_bounds, dtype=float)
+        self.upper_bounds = np.asarray(upper_bounds, dtype=float)
+
         # Initialize position (genes) and fitness
-        self.position = self.rng.random(dimension)
+        self.position = self.rng.uniform(self.lower_bounds, self.upper_bounds, dimension)
         self._fitness = None
 
     def fitness(self) -> float:
@@ -140,11 +149,16 @@ class GA(MetaheuristicAlgorithm):
     def initialize_population(self) -> None:
         """Initialize population with random chromosomes."""
         self.population = []
+        dim = self.problem.get_dimension()
+        lo = getattr(self.problem, "get_lower_bounds", lambda: np.zeros(dim))()
+        hi = getattr(self.problem, "get_upper_bounds", lambda: np.ones(dim))()
         for i in range(self.population_size):
             chromosome = Chromosome(
-                dimension=self.problem.get_dimension(),
+                dimension=dim,
                 problem=self.problem,
                 rng=self.rng,
+                lower_bounds=lo,
+                upper_bounds=hi,
             )
             self.population.append(chromosome)
 
