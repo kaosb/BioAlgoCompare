@@ -40,6 +40,8 @@ from algorithms.ho import HO  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
 from algorithms.ga import GA  # noqa: E402
 from algorithms.gwo import GWO  # noqa: E402
+from algorithms.de import DE  # noqa: E402
+from algorithms.aco import ACO  # noqa: E402
 
 OUT_DIR = os.path.join(_REPO_ROOT, "results", "cec_poc")
 
@@ -55,9 +57,9 @@ N_JOBS = 8
 
 # Algorithm registry (name -> class). Worker resolves the class by name to keep
 # pickled payloads small and robust across the process boundary.
-ALGOS = {"HO": HO, "PSO": PSO, "GA": GA, "GWO": GWO}
+ALGOS = {"HO": HO, "PSO": PSO, "GA": GA, "GWO": GWO, "DE": DE, "ACO": ACO}
 REFERENCE = "HO"
-COMPETITORS = ["PSO", "GA", "GWO"]
+COMPETITORS = ["PSO", "GA", "GWO", "DE", "ACO"]
 
 
 def _worker(args):
