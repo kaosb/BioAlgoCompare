@@ -44,15 +44,18 @@ from scripts.cec_harness.run_cell import run_cell, cell_id  # noqa: E402
 from scripts.cec_harness.build_rankings import build_rankings  # noqa: E402
 from scripts.cec_harness import stats as st  # noqa: E402
 
-# In-repo faithful algorithms.
+# In-repo faithful algorithms (classical paradigms / baselines).
 from algorithms.ho import HO  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
 from algorithms.ga import GA  # noqa: E402
 from algorithms.gwo import GWO  # noqa: E402
 from algorithms.de import DE  # noqa: E402
 from algorithms.aco import ACO  # noqa: E402
-# Validated modern roster (mealpy).
-from algorithms.mealpy_adapter import MEALPY_ROSTER  # noqa: E402
+# CEC winners / top performers (faithful C++ via minionpy).
+from algorithms.minion_adapter import MINION_ROSTER  # noqa: E402
+# mealpy roster is also available (algorithms.mealpy_adapter.MEALPY_ROSTER) but
+# minionpy provides faithful C++ versions of the same DE-family + the actual CEC
+# winners, so production uses minionpy to avoid redundant implementations.
 
 # ---------------------------------------------------------------------------
 # Protocol configuration
@@ -75,16 +78,26 @@ DIM_OF = {
 }
 DIM_SETS = ["10", "50"]
 
-# Roster: 11 algorithms (6 in-repo + 5 modern).
+# Roster: 18 algorithms covering diverse paradigms, incl. actual CEC winners
+# (protocol Sec 3: "include recent CEC winners; avoid only weak competitors").
+#   Classical / baseline (in-repo): HO, PSO, GA, GWO, DE, ACO
+#   DE-family + CEC winners (minionpy C++): L-SHADE, JADE, jSO, NL-SHADE-RSP,
+#       L-SRTDE (CEC2024 winner), j2020, ARRDE, AGSK, IMODE, LSHADE-cnEpSin
+#   Evolution strategies (minionpy): CMA-ES, BIPOP-aCMAES
 ALGOS = {
     "HO": HO, "PSO": PSO, "GA": GA, "GWO": GWO, "DE": DE, "ACO": ACO,
-    "L-SHADE": MEALPY_ROSTER["L-SHADE"], "SHADE": MEALPY_ROSTER["SHADE"],
-    "JADE": MEALPY_ROSTER["JADE"], "SADE": MEALPY_ROSTER["SADE"],
-    "GSKA": MEALPY_ROSTER["GSKA"],
+    "L-SHADE": MINION_ROSTER["L-SHADE"], "JADE": MINION_ROSTER["JADE"],
+    "jSO": MINION_ROSTER["jSO"], "NL-SHADE-RSP": MINION_ROSTER["NL-SHADE-RSP"],
+    "L-SRTDE": MINION_ROSTER["L-SRTDE"], "j2020": MINION_ROSTER["j2020"],
+    "ARRDE": MINION_ROSTER["ARRDE"], "AGSK": MINION_ROSTER["AGSK"],
+    "IMODE": MINION_ROSTER["IMODE"],
+    "LSHADE-cnEpSin": MINION_ROSTER["LSHADE-cnEpSin"],
+    "CMA-ES": MINION_ROSTER["CMA-ES"], "BIPOP-aCMAES": MINION_ROSTER["BIPOP-aCMAES"],
 }
 ALGO_NAMES = list(ALGOS)
-# Reference for Wilcoxon better/equal/worse (the "proposed" slot; swappable).
-REFERENCE = "DE"
+# Reference for Wilcoxon better/equal/worse: provisional = the strongest current
+# SOTA (CEC2024 winner). Swap to the "proposed" (IL-augmented) algorithm later.
+REFERENCE = "L-SRTDE"
 
 # Author-recommended single config: fixed population across all experiments.
 POP_SIZE = int(os.environ.get("POP_SIZE", "100"))
@@ -94,7 +107,7 @@ N_REPS = int(os.environ.get("N_REPS", "51"))
 if os.environ.get("PROTOCOL_SMOKE") == "1":
     PROBLEMS = [("CEC2014", 1), ("CEC2014", 4), ("CEC2017", 1),
                 ("CEC2017", 3), ("CEC2022", 1), ("CEC2022", 5)]
-    ALGOS = {k: ALGOS[k] for k in ["DE", "PSO", "L-SHADE", "HO"]}
+    ALGOS = {k: ALGOS[k] for k in ["DE", "HO", "L-SRTDE", "CMA-ES"]}
     ALGO_NAMES = list(ALGOS)
     OUT_DIR = os.path.join(_REPO_ROOT, "results", "cec_protocol_smoke")
     RAW_DIR = os.path.join(OUT_DIR, "raw")
