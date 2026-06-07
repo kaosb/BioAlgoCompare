@@ -138,7 +138,8 @@ class PSO(MetaheuristicAlgorithm):
     """
 
     def __init__(self, problem: Any, population_size: int = 30,
-                 max_iterations: int = 100, seed: int = None):
+                 max_iterations: int = 100, seed: int = None,
+                 use_il: bool = False, il_model: Any = None):
         """
         Initialize PSO algorithm.
 
@@ -147,10 +148,27 @@ class PSO(MetaheuristicAlgorithm):
             population_size: Number of particles in the swarm
             max_iterations: Maximum number of iterations
             seed: Random seed for reproducibility
+            use_il / il_model: hooks for Imitation-Learning modulation of the
+                control parameters (w, c1, c2). Neutral by default.
         """
         super().__init__(problem, population_size, max_iterations, seed)
         self.gbest_position: Optional[np.ndarray] = None
         self.gbest_fitness: float = float('inf')
+        self.use_il = use_il
+        self.il_model = il_model
+        # Author-recommended base values (Shi-Eberhart / Kennedy-Eberhart).
+        self.base_c1 = 2.0
+        self.base_c2 = 2.0
+
+    def _get_il_params(self, iteration: int) -> tuple:
+        """Return (w_factor, c1_factor, c2_factor) multipliers; neutral (1,1,1)."""
+        if not self.use_il or self.il_model is None:
+            return 1.0, 1.0, 1.0
+        try:
+            wf, c1f, c2f = self.il_model.predict(self, iteration)
+            return float(wf), float(c1f), float(c2f)
+        except Exception:
+            return 1.0, 1.0, 1.0
 
     def initialize_population(self) -> None:
         """Initialize swarm of particles with random positions and velocities."""
@@ -180,10 +198,16 @@ class PSO(MetaheuristicAlgorithm):
         """Update swarm positions for one iteration."""
         iteration = len(self.convergence_curve) - 1
 
-        # Adaptive inertia weight (linearly decreasing 0.9 -> 0.4)
-        # Update BEFORE moving particles so first iteration uses correct w
+        # IL modulation of control parameters (neutral by default).
+        w_f, c1_f, c2_f = self._get_il_params(iteration)
+
+        # Adaptive inertia weight (linearly decreasing 0.9 -> 0.4), then modulate.
+        # Update BEFORE moving particles so first iteration uses correct w.
+        base_w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
         for particle in self.population:
-            particle.w = 0.9 - (0.9 - 0.4) * iteration / self.max_iterations
+            particle.w = base_w * w_f
+            particle.c1 = self.base_c1 * c1_f
+            particle.c2 = self.base_c2 * c2_f
 
         # Move all particles with updated w
         for particle in self.population:

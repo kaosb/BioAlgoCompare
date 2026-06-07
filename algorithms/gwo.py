@@ -86,7 +86,8 @@ class GWO(MetaheuristicAlgorithm):
     controlling the transition from exploration to exploitation.
     """
 
-    def __init__(self, problem, population_size=30, max_iterations=100, seed=None):
+    def __init__(self, problem, population_size=30, max_iterations=100, seed=None,
+                 use_il=False, il_model=None):
         """
         Initialize GWO.
 
@@ -95,12 +96,25 @@ class GWO(MetaheuristicAlgorithm):
             population_size: Wolf pack size
             max_iterations: Maximum iterations
             seed: Random seed for reproducibility
+            use_il / il_model: hooks for Imitation-Learning modulation of the
+                control coefficient ``a``. Neutral by default.
         """
         super().__init__(problem, population_size, max_iterations, seed)
         self.convergence_curve = []
+        self.use_il = use_il
+        self.il_model = il_model
         self.alpha = None  # Best wolf
         self.beta = None   # Second best
         self.delta = None  # Third best
+
+    def _get_il_params(self, iteration):
+        """Return a 1-tuple (a_factor,) for the control coefficient; neutral (1.0,)."""
+        if not self.use_il or self.il_model is None:
+            return (1.0,)
+        try:
+            return (float(self.il_model.predict(self, iteration)),)
+        except Exception:
+            return (1.0,)
 
     def initialize_population(self):
         """Initialize the wolf pack and identify alpha, beta, delta."""
@@ -142,8 +156,11 @@ class GWO(MetaheuristicAlgorithm):
         t = len(self.convergence_curve)
         T = self.max_iterations
 
-        # a decreases linearly from 2 to 0 (Eq. 3.3)
-        a = 2 - 2 * (t / T)
+        # IL modulation of the control coefficient (neutral by default).
+        (a_factor,) = self._get_il_params(t)
+
+        # a decreases linearly from 2 to 0 (Eq. 3.3), then modulate.
+        a = (2 - 2 * (t / T)) * a_factor
 
         prev_best_fitness = self.alpha.fitness()
 

@@ -32,17 +32,25 @@ if _REPO_ROOT not in sys.path:
 from problems.continuous.cec_problem import CECProblem  # noqa: E402
 from algorithms.de import DE  # noqa: E402
 from algorithms.aco import ACO  # noqa: E402
+from algorithms.pso import PSO  # noqa: E402
+from algorithms.gwo import GWO  # noqa: E402
 from algorithms.ho import HO  # noqa: E402
 from algorithms.de_oracle import DEOracle  # noqa: E402
 from algorithms.aco_oracle import ACOOracle  # noqa: E402
+from algorithms.pso_oracle import PSOOracle  # noqa: E402
+from algorithms.gwo_oracle import GWOOracle  # noqa: E402
 from algorithms.ho_oracle import HOOracle  # noqa: E402
 
 OUT_DIR = os.path.join(_REPO_ROOT, "results", "oracle_screen")
 
-# Algorithms with their (oracle, base) classes and parameter-space provenance.
+# Fixed-parameter classical algorithms = the real IL candidates (per the
+# positioning doc: modern adaptive DEs already self-tune, so little IL margin).
+# HO kept as an invented-parameter reference.
 ORACLES = {
-    "DE":  (DEOracle,  DE,  "real (F, CR) -- Storn-Price; adapted by JADE/SHADE"),
-    "ACO": (ACOOracle, ACO, "real (xi, q) -- Socha-Dorigo"),
+    "PSO": (PSOOracle, PSO, "real (w, c1, c2) -- Kennedy-Eberhart (FIXED)"),
+    "GWO": (GWOOracle, GWO, "real (a coeff) -- Mirjalili (FIXED schedule)"),
+    "DE":  (DEOracle,  DE,  "real (F, CR) -- Storn-Price (FIXED)"),
+    "ACO": (ACOOracle, ACO, "real (xi, q) -- Socha-Dorigo (FIXED)"),
     "HO":  (HOOracle,  HO,  "INVENTED (alpha, beta, gamma) -- not in Amiri 2024"),
 }
 
