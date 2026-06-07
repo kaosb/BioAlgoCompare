@@ -92,7 +92,10 @@ ALGOS = {
     "ARRDE": MINION_ROSTER["ARRDE"], "AGSK": MINION_ROSTER["AGSK"],
     "IMODE": MINION_ROSTER["IMODE"],
     "LSHADE-cnEpSin": MINION_ROSTER["LSHADE-cnEpSin"],
-    "CMA-ES": MINION_ROSTER["CMA-ES"], "BIPOP-aCMAES": MINION_ROSTER["BIPOP-aCMAES"],
+    "CMA-ES": MINION_ROSTER["CMA-ES"],
+    # NOTE: BIPOP-aCMAES excluded -- its restart scheme hangs in minionpy at low
+    # MaxFES (e.g. CEC2014 F12 50D @5e3 never returns). CMA-ES covers the ES
+    # family. Re-add only if the upstream hang is resolved.
 }
 ALGO_NAMES = list(ALGOS)
 # Reference for Wilcoxon better/equal/worse: provisional = the strongest current
