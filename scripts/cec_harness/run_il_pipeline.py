@@ -41,8 +41,16 @@ if _REPO_ROOT not in sys.path:
 from problems.continuous.cec_problem import CECProblem, run_with_fes  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
 from algorithms.de import DE  # noqa: E402
+from algorithms.ga import GA  # noqa: E402
+from algorithms.gwo import GWO  # noqa: E402
+from algorithms.aco import ACO  # noqa: E402
+from algorithms.ho import HO  # noqa: E402
 from algorithms.pso_oracle import PSOOracle  # noqa: E402
 from algorithms.de_oracle import DEOracle  # noqa: E402
+from algorithms.ga_oracle import GAOracle  # noqa: E402
+from algorithms.gwo_oracle import GWOOracle  # noqa: E402
+from algorithms.aco_oracle import ACOOracle  # noqa: E402
+from algorithms.ho_oracle_mixin import HOOracleM  # noqa: E402
 from utils.bc_policy import BCPolicy  # noqa: E402
 
 OUT = os.path.join(_REPO_ROOT, "results", "il_pipeline")
@@ -51,9 +59,16 @@ MODEL_DIR = os.path.join(_REPO_ROOT, "models")
 EVAL_DIR = os.path.join(OUT, "eval")
 
 # --- experimental configuration --------------------------------------------
+# The 5 classical algorithms Rodrigo named (GA, DE, ACO, PSO, GWO) + HO as the
+# invented-parameter reference (expected neutral-to-negative). PSO/DE results
+# are cached from the first run (stages are resumable by file).
 TARGETS = {
     "PSO": {"base": PSO, "oracle": PSOOracle, "n_outputs": 3},
     "DE":  {"base": DE,  "oracle": DEOracle,  "n_outputs": 2},
+    "GA":  {"base": GA,  "oracle": GAOracle,  "n_outputs": 2},
+    "GWO": {"base": GWO, "oracle": GWOOracle, "n_outputs": 1},
+    "ACO": {"base": ACO, "oracle": ACOOracle, "n_outputs": 2},
+    "HO":  {"base": HO,  "oracle": HOOracleM, "n_outputs": 3},
 }
 # TRAIN: all of CEC2014 at 10D. TEST: all of CEC2017 + CEC2022 at 10D.
 TRAIN_FUNCS = [("CEC2014", f) for f in range(1, 31)]

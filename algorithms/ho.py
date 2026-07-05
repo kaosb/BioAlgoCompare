@@ -78,15 +78,18 @@ class HO(MetaheuristicAlgorithm):
         seed: int = None,
         use_il: bool = False,
         il_model_path: str = None,
+        il_model=None,
     ):
         super().__init__(problem, population_size, max_iterations, seed)
         self.dominant = None  # D_hippo / Xbest: global best so far
         self.use_il = use_il
-        self.il_model = None
+        # A pre-loaded model object (e.g. utils/bc_policy.BCPolicy) takes
+        # precedence over il_model_path (legacy SimpleILModel loading).
+        self.il_model = il_model
         self._il_params_history = []
         self._il_fallback_count = 0
 
-        if self.use_il and il_model_path:
+        if self.use_il and self.il_model is None and il_model_path:
             try:
                 from utils.train_il_simple import SimpleILModel
                 self.il_model = SimpleILModel()
@@ -121,6 +124,20 @@ class HO(MetaheuristicAlgorithm):
         """Predict IL parameters (alpha, beta, gamma) or return neutral (1,1,1)."""
         if not self.use_il or self.il_model is None:
             return 1.0, 1.0, 1.0
+
+        # New-style policy (utils/bc_policy.BCPolicy): predict(algo, iteration)
+        # -> factor tuple. Detected by its n_outputs attribute.
+        if hasattr(self.il_model, "n_outputs"):
+            try:
+                alpha, beta, gamma = self.il_model.predict(self, iteration)
+                self._il_params_history.append({
+                    'iteration': iteration,
+                    'alpha': float(alpha), 'beta': float(beta), 'gamma': float(gamma),
+                })
+                return float(alpha), float(beta), float(gamma)
+            except Exception:
+                self._il_fallback_count += 1
+                return 1.0, 1.0, 1.0
 
         try:
             from utils.imitation_learning import create_state_from_problem

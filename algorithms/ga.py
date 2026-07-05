@@ -126,7 +126,8 @@ class GA(MetaheuristicAlgorithm):
     def __init__(self, problem: Any, population_size: int = 50,
                  max_iterations: int = 100, seed: int = None,
                  crossover_rate: float = 0.8, mutation_rate: float = 0.1,
-                 tournament_size: int = 3, elitism_size: int = 2):
+                 tournament_size: int = 3, elitism_size: int = 2,
+                 use_il: bool = False, il_model: Any = None):
         """
         Initialize Genetic Algorithm.
 
@@ -145,6 +146,21 @@ class GA(MetaheuristicAlgorithm):
         self.mutation_rate = mutation_rate
         self.tournament_size = tournament_size
         self.elitism_size = elitism_size
+        # IL hooks: multiplicative modulation of (crossover_rate, mutation_rate).
+        self.use_il = use_il
+        self.il_model = il_model
+        self.base_crossover_rate = float(crossover_rate)
+        self.base_mutation_rate = float(mutation_rate)
+
+    def _get_il_params(self, iteration: int) -> tuple:
+        """Return (cx_factor, mut_factor) multipliers; neutral (1.0, 1.0)."""
+        if not self.use_il or self.il_model is None:
+            return 1.0, 1.0
+        try:
+            cxf, mutf = self.il_model.predict(self, iteration)
+            return float(cxf), float(mutf)
+        except Exception:
+            return 1.0, 1.0
 
     def initialize_population(self) -> None:
         """Initialize population with random chromosomes."""
@@ -167,6 +183,13 @@ class GA(MetaheuristicAlgorithm):
 
     def update_population(self) -> None:
         """Evolve population for one generation."""
+        # IL modulation of control parameters (neutral by default). Rates are
+        # probabilities, so clip to [0, 1] after applying the factors.
+        iteration = len(self.convergence_curve) - 1
+        cxf, mutf = self._get_il_params(iteration)
+        self.crossover_rate = float(np.clip(self.base_crossover_rate * cxf, 0.0, 1.0))
+        self.mutation_rate = float(np.clip(self.base_mutation_rate * mutf, 0.0, 1.0))
+
         self.population = self.evolve_population()
 
         # Track best solution

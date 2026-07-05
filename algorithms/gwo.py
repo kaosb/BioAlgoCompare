@@ -112,7 +112,10 @@ class GWO(MetaheuristicAlgorithm):
         if not self.use_il or self.il_model is None:
             return (1.0,)
         try:
-            return (float(self.il_model.predict(self, iteration)),)
+            out = self.il_model.predict(self, iteration)
+            if isinstance(out, (tuple, list, np.ndarray)):
+                out = out[0]
+            return (float(out),)
         except Exception:
             return (1.0,)
 
