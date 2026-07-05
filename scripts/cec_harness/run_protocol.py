@@ -53,6 +53,8 @@ from algorithms.de import DE  # noqa: E402
 from algorithms.aco import ACO  # noqa: E402
 # CEC winners / top performers (faithful C++ via minionpy).
 from algorithms.minion_adapter import MINION_ROSTER  # noqa: E402
+# The PROPOSED algorithm: DE augmented with the trained IL (BC) policy.
+from algorithms.de_il import DEIL  # noqa: E402
 # mealpy roster is also available (algorithms.mealpy_adapter.MEALPY_ROSTER) but
 # minionpy provides faithful C++ versions of the same DE-family + the actual CEC
 # winners, so production uses minionpy to avoid redundant implementations.
@@ -86,6 +88,7 @@ DIM_SETS = ["10", "50"]
 #   Evolution strategies (minionpy): CMA-ES, BIPOP-aCMAES
 ALGOS = {
     "HO": HO, "PSO": PSO, "GA": GA, "GWO": GWO, "DE": DE, "ACO": ACO,
+    "DE-IL": DEIL,  # <-- the PROPOSED algorithm (DE + trained BC policy)
     "L-SHADE": MINION_ROSTER["L-SHADE"], "JADE": MINION_ROSTER["JADE"],
     "jSO": MINION_ROSTER["jSO"], "NL-SHADE-RSP": MINION_ROSTER["NL-SHADE-RSP"],
     "L-SRTDE": MINION_ROSTER["L-SRTDE"], "j2020": MINION_ROSTER["j2020"],
@@ -98,9 +101,10 @@ ALGOS = {
     # family. Re-add only if the upstream hang is resolved.
 }
 ALGO_NAMES = list(ALGOS)
-# Reference for Wilcoxon better/equal/worse: provisional = the strongest current
-# SOTA (CEC2024 winner). Swap to the "proposed" (IL-augmented) algorithm later.
-REFERENCE = "L-SRTDE"
+# Reference for Wilcoxon better/equal/worse: the PROPOSED algorithm, per the
+# protocol ("proposed vs each competitor"). The policy inside DE-IL was trained
+# on CEC2014 10D demos only; 50D runs are declared extrapolation.
+REFERENCE = "DE-IL"
 
 # Author-recommended single config: fixed population across all experiments.
 POP_SIZE = int(os.environ.get("POP_SIZE", "100"))

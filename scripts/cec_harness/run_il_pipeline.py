@@ -79,9 +79,14 @@ POP = 30
 DEMO_ITERS = 100          # oracle decisions per demo run
 DEMO_SEEDS = [11, 22, 33]  # 3 independent demo runs per function
 N_EVAL_ROBUST = 3          # robust oracle samples (anti-clairvoyance)
-EVAL_MAXFES = 5000         # test budget (protocol low-FES level)
+EVAL_MAXFES = int(os.environ.get("EVAL_MAXFES", "5000"))  # test budget
 EVAL_SEEDS = list(range(2000, 2051))  # 51 paired seeds
 N_JOBS = int(os.environ.get("N_JOBS", "8"))
+
+# Budget-specific eval dir: the SAME trained policies (CEC2014/5e3-regime
+# demos) are evaluated at other budgets as a generalization test.
+if EVAL_MAXFES != 5000:
+    EVAL_DIR = os.path.join(OUT, f"eval_fes{EVAL_MAXFES}")
 
 
 # --- stage 1: demo generation ----------------------------------------------
@@ -226,9 +231,10 @@ def stage_report():
         print(f"  Wilcoxon B/E/W: {bett} / {eq} / {wors}")
         print(f"  mean rel. improvement:   {mean_rel*100:+.2f}%")
         print(f"  median rel. improvement: {med_rel*100:+.2f}%")
-    with open(os.path.join(OUT, "il_ood_report.json"), "w") as fh:
+    suffix = "" if EVAL_MAXFES == 5000 else f"_fes{EVAL_MAXFES}"
+    with open(os.path.join(OUT, f"il_ood_report{suffix}.json"), "w") as fh:
         json.dump(out, fh, indent=2)
-    print(f"\nsaved {OUT}/il_ood_report.json")
+    print(f"\nsaved {OUT}/il_ood_report{suffix}.json")
     print("=" * 72)
     return out
 
