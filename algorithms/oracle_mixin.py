@@ -73,11 +73,12 @@ class OracleMixin:
         "problem", "rng", "py_rng", "il_model",
         "_in_rollout", "_fixed_params", "oracle_log",
         "oracle_lookahead", "n_eval_samples", "record_oracle",
+        "record_demos", "demo_log",
     })
 
     def __init__(self, *args, oracle_lookahead: int = 1,
                  n_eval_samples: int = 1, record_oracle: bool = True,
-                 **kwargs):
+                 record_demos: bool = False, **kwargs):
         # The oracle does not use a learned model; strip IL kwargs the factory
         # may pass through.
         kwargs.pop("use_il", None)
@@ -92,10 +93,12 @@ class OracleMixin:
         self.oracle_lookahead = int(oracle_lookahead)
         self.n_eval_samples = int(n_eval_samples)
         self.record_oracle = bool(record_oracle)
+        self.record_demos = bool(record_demos)
 
         self._in_rollout = False
         self._fixed_params = self.IL_NEUTRAL
         self.oracle_log = []  # per-iteration diagnostic records
+        self.demo_log = []    # (state features -> oracle action) demonstrations
 
     # --- generic state snapshot / restore ---------------------------------
     def _snapshot(self) -> dict:
@@ -178,6 +181,16 @@ class OracleMixin:
         if self._in_rollout:
             return self._fixed_params
 
+        # Capture clairvoyance-free state features BEFORE deciding, so each
+        # oracle decision doubles as an IL demonstration (features -> action).
+        demo_features = None
+        if getattr(self, "record_demos", False):
+            try:
+                from utils.state_features import compute_state_features
+                demo_features = compute_state_features(self, iteration)
+            except Exception:
+                demo_features = None
+
         snap = self._snapshot()
         self._in_rollout = True
         try:
@@ -214,7 +227,18 @@ class OracleMixin:
 
         # Apply whichever is better for the forward run (the oracle is allowed
         # to fall back to neutral if no grid point improves on it).
-        return best_params if best_robust < neutral_robust else self.IL_NEUTRAL
+        chosen = best_params if best_robust < neutral_robust else self.IL_NEUTRAL
+
+        # Log the demonstration: state features -> chosen action (incl. the
+        # neutral fallback, so the policy also learns WHEN not to modulate).
+        if demo_features is not None:
+            self.demo_log.append({
+                "features": demo_features.tolist(),
+                "action": tuple(float(x) for x in chosen),
+                "gain": float(neutral_robust - best_robust),
+            })
+
+        return chosen
 
     # --- aggregate report -------------------------------------------------
     def get_oracle_summary(self) -> dict:
