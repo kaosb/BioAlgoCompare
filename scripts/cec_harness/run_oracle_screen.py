@@ -34,11 +34,13 @@ from algorithms.de import DE  # noqa: E402
 from algorithms.aco import ACO  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
 from algorithms.gwo import GWO  # noqa: E402
+from algorithms.ga import GA  # noqa: E402
 from algorithms.ho import HO  # noqa: E402
 from algorithms.de_oracle import DEOracle  # noqa: E402
 from algorithms.aco_oracle import ACOOracle  # noqa: E402
 from algorithms.pso_oracle import PSOOracle  # noqa: E402
 from algorithms.gwo_oracle import GWOOracle  # noqa: E402
+from algorithms.ga_oracle import GAOracle  # noqa: E402
 from algorithms.ho_oracle import HOOracle  # noqa: E402
 
 OUT_DIR = os.path.join(_REPO_ROOT, "results", "oracle_screen")
@@ -51,6 +53,7 @@ ORACLES = {
     "GWO": (GWOOracle, GWO, "real (a coeff) -- Mirjalili (FIXED schedule)"),
     "DE":  (DEOracle,  DE,  "real (F, CR) -- Storn-Price (FIXED)"),
     "ACO": (ACOOracle, ACO, "real (xi, q) -- Socha-Dorigo (FIXED)"),
+    "GA":  (GAOracle,  GA,  "real (crossover, mutation rate) -- RKGA (FIXED)"),
     "HO":  (HOOracle,  HO,  "INVENTED (alpha, beta, gamma) -- not in Amiri 2024"),
 }
 
