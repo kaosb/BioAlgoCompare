@@ -36,11 +36,19 @@ _CLIP_LO, _CLIP_HI = 0.6, 1.4
 
 
 class BCPolicy:
-    """Multi-output BC regressor: state features -> modulation factors."""
+    """Multi-output BC regressor: state features -> actions.
 
-    def __init__(self, n_outputs: int, seed: int = 0):
+    Actions may be multiplicative factors (default clip hull [0.6, 1.4]) or
+    absolute parameter values (pass explicit clip_lo/clip_hi, e.g. the
+    demonstrated hull of an expert's (F, CR) trajectory).
+    """
+
+    def __init__(self, n_outputs: int, seed: int = 0,
+                 clip_lo: float = _CLIP_LO, clip_hi: float = _CLIP_HI):
         self.n_outputs = int(n_outputs)
         self.seed = int(seed)
+        self.clip_lo = float(clip_lo)
+        self.clip_hi = float(clip_hi)
         self.model = RandomForestRegressor(
             n_estimators=200, min_samples_leaf=5, random_state=seed, n_jobs=1
         )
@@ -60,15 +68,17 @@ class BCPolicy:
 
     @classmethod
     def train_from_demo_files(cls, paths: List[str], n_outputs: int,
-                              seed: int = 0) -> "BCPolicy":
-        """Train from JSON demo files produced by OracleMixin.demo_log."""
+                              seed: int = 0, clip_lo: float = _CLIP_LO,
+                              clip_hi: float = _CLIP_HI) -> "BCPolicy":
+        """Train from JSON demo files (OracleMixin.demo_log or teacher logs)."""
         feats, acts = [], []
         for p in paths:
             with open(p) as fh:
                 for rec in json.load(fh):
                     feats.append(rec["features"])
                     acts.append(rec["action"])
-        policy = cls(n_outputs=n_outputs, seed=seed)
+        policy = cls(n_outputs=n_outputs, seed=seed,
+                     clip_lo=clip_lo, clip_hi=clip_hi)
         policy.fit(feats, acts)
         return policy
 
@@ -77,7 +87,9 @@ class BCPolicy:
         """Return the modulation factor tuple for the algorithm's state."""
         x = compute_state_features(algo, iteration).reshape(1, -1)
         y = self.model.predict(x)[0]
-        y = np.clip(np.atleast_1d(y), _CLIP_LO, _CLIP_HI)
+        lo = getattr(self, "clip_lo", _CLIP_LO)
+        hi = getattr(self, "clip_hi", _CLIP_HI)
+        y = np.clip(np.atleast_1d(y), lo, hi)
         return tuple(float(v) for v in y)
 
     # --- persistence ---------------------------------------------------------
