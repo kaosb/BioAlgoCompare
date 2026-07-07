@@ -57,8 +57,14 @@ ORACLES = {
     "HO":  (HOOracle,  HO,  "INVENTED (alpha, beta, gamma) -- not in Amiri 2024"),
 }
 
-# Small, representative CEC2022 subset: unimodal, multimodal, hybrid, composition.
-FUNCS = [1, 3, 5, 8]
+# Screening suite/functions. IMPORTANT (audit finding C2): screening must be
+# performed on TRAIN functions only (CEC2014 = the demo suite), never on the
+# held-out test suites, so the "a-priori" claim stays clean. Representative
+# CEC2014 subset: F1 unimodal (rotated), F4 multimodal, F17 hybrid, F23
+# composition. Override via env SCREEN_SUITE / SCREEN_FUNCS.
+SUITE = os.environ.get("SCREEN_SUITE", "CEC2014")
+_f = os.environ.get("SCREEN_FUNCS")
+FUNCS = [int(x) for x in _f.split(",")] if _f else [1, 4, 17, 23]
 DIMS = [10]
 POP = 20
 ITERS = 20
@@ -79,7 +85,7 @@ def _one_seed(oracle_cls, base_cls, fnum, dim, seed):
         the committed trajectory. HIGH VARIANCE at a single seed; reported only
         averaged across seeds, with std, as a secondary view.
     """
-    prob = CECProblem("CEC2022", fnum, dim)
+    prob = CECProblem(SUITE, fnum, dim)
     oracle = oracle_cls(problem=prob, population_size=POP, max_iterations=ITERS,
                         seed=seed, n_eval_samples=N_EVAL_ROBUST,
                         oracle_lookahead=1)
@@ -122,7 +128,7 @@ def main():
     records = []
     print("=" * 72)
     print("ORACLE SCREEN -- achievable parameter-modulation ceiling")
-    print(f"CEC2022 F{FUNCS} x {DIMS}D | pop={POP} iters={ITERS} | "
+    print(f"{SUITE} F{FUNCS} x {DIMS}D | pop={POP} iters={ITERS} | "
           f"robust n_eval={N_EVAL_ROBUST} | seeds={SEEDS}")
     print("=" * 72)
 
@@ -151,9 +157,10 @@ def main():
                    "n_eval_robust": N_EVAL_ROBUST, "seeds": SEEDS},
         "records": records, "wall_clock_s": wall,
     }
-    with open(os.path.join(OUT_DIR, "oracle_screen.json"), "w") as fh:
+    out_name = f"oracle_screen_{SUITE.lower()}.json" if SUITE != "CEC2022" else "oracle_screen.json"
+    with open(os.path.join(OUT_DIR, out_name), "w") as fh:
         json.dump(out, fh, indent=2)
-    print(f"\n--- wall-clock {wall:.1f}s | saved {OUT_DIR}/oracle_screen.json ---")
+    print(f"\n--- wall-clock {wall:.1f}s | saved {OUT_DIR}/{out_name} ---")
     print("INTERPRETATION: robust ceiling > 0 => learnable margin (IL may help).")
     print("                robust ~0 => algorithm robust to modulation (IL cannot).")
     print("                small EVPI => the robust number is not clairvoyant.")
