@@ -1,18 +1,24 @@
 """
-Imitation Learning Module for Dynamic HO Parameters
+Imitation Learning Module for Dynamic HO Parameters — LEGACY / DEPRECATED
 
-Este módulo implementa aprendizaje por imitación para adaptar dinámicamente
-los parámetros del algoritmo Hippopotamus Optimization (α, β, γ) basándose
-en demostraciones de algoritmos óptimos (GA, PSO).
+*** ADVERTENCIA DE INTEGRIDAD (saneado 8 Jul 2026) ***
+Este módulo pertenece al enfoque HO+IL original, REFUTADO y auditado. NO usar
+para nuevo trabajo; el estudio riguroso vive en algorithms/hindsight_oracle.py
+y utils/bc_policy.py (ver tesis-mia/gestion_proyecto/AUDITORIA_IMPLEMENTACION_IL.md).
+Problemas conocidos de este enfoque:
+  - La referencia que antes se citaba aquí ("Barros & Everett 2023, Imitation
+    Learning for Metaheuristic Optimization") NO EXISTE — era fabricada. Eliminada.
+  - HO (Amiri et al. 2024, Sci. Rep. 14:5032) es PARAMETER-FREE: los parámetros
+    (α, β, γ) y sus rangos son una augmentación INVENTADA, no están en el paper
+    (esos rangos corresponden a otros algoritmos, p.ej. Firefly, en la tabla
+    comparativa de Amiri 2024).
+  - El "experto" de las demostraciones (utils/generate_simple_demos.py) son
+    fórmulas analíticas escritas a mano, no un experto real → no es imitation
+    learning legítimo.
+Referencias reales verificadas: tesis-mia/gestion_proyecto/REFERENCIAS_IL_VERIFICADAS.bib
 
-Referencias:
-    - Barros & Everett (2023): "Imitation Learning for Metaheuristic Optimization"
-    - Amiri et al. (2024): Rangos de parámetros HO [α∈0.1-0.9, β∈0.2-0.8, γ∈0.3-1.0]
-
-Arquitectura:
-    - Red neuronal de 3 capas (64 → 128 → 64 → 3)
-    - Input: estado de instancia (características VRP + iteración)
-    - Output: parámetros α, β, γ normalizados a sus rangos
+Arquitectura (histórica): red de 3 capas (64 → 128 → 64 → 3); input = estado de
+instancia; output = α, β, γ normalizados.
 """
 
 import torch

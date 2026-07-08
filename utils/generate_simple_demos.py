@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """
-Simple Demo Generation for IL Training
-======================================
+Simple Demo Generation for IL Training — LEGACY / DEPRECATED (NO USAR)
 
-Generates demonstrations without PyTorch dependency.
+*** ADVERTENCIA DE INTEGRIDAD (saneado 8 Jul 2026) ***
+Las "demostraciones expertas" que produce extract_optimal_params() son FÓRMULAS
+ANALÍTICAS ESCRITAS A MANO (rampas/triángulos/senos etiquetadas "PSO-inspired"/
+"GA-inspired"), NO derivadas de ejecutar PSO ni GA. Por tanto NO constituyen un
+experto legítimo de imitation learning (ver
+tesis-mia/gestion_proyecto/AUDITORIA_IMPLEMENTACION_IL.md). Este script pertenece
+al enfoque HO+IL refutado y NO es usado por el estudio CEC actual. El experto
+legítimo (oráculo por hindsight/optimal-control) está en
+algorithms/hindsight_oracle.py. Conservado solo por trazabilidad histórica.
+
+(Original) Generates demonstrations without PyTorch dependency.
 """
 
 import argparse
