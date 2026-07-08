@@ -271,13 +271,20 @@ def main():
     return summary
 
 
-def _wilcoxon_manual(cells, max_fes):
-    """Wilcoxon better/equal/worse: REFERENCE vs each competitor, paired across
-    the problems in ``cells`` by mean best error (51-run mean per cell)."""
+def _wilcoxon_manual(cells, max_fes, alpha=0.05):
+    """Wilcoxon signed-rank better/equal/worse: REFERENCE vs each competitor.
+
+    Runs the ACTUAL paired Wilcoxon test over the n_reps best_errors of
+    reference vs competitor for EACH problem (as Rodrigo's protocol requires:
+    "statistically superior/equivalent/inferior"). Direction from the median of
+    each side (rank-consistent); a problem counts as better/worse only if
+    p < alpha, else equal. Uses the raw per-cell best_errors already stored
+    (no re-run). Cells passed in are already filtered to one config scope.
+    """
     from scipy.stats import wilcoxon as _wx
     by_algo = {}
     for c in cells:
-        by_algo.setdefault(c["algo"], {})[(c["suite"], c["fnum"])] = c["mean"]
+        by_algo.setdefault(c["algo"], {})[(c["suite"], c["fnum"])] = c
     if REFERENCE not in by_algo:
         return {}
     ref = by_algo[REFERENCE]
@@ -288,13 +295,23 @@ def _wilcoxon_manual(cells, max_fes):
         probs = sorted(set(ref) & set(by_algo[comp]))
         better = equal = worse = 0
         for p in probs:
-            a, b = ref[p], by_algo[comp][p]
-            if abs(a - b) <= 1e-8:
+            x = np.asarray(ref[p]["best_errors"], dtype=float)
+            y = np.asarray(by_algo[comp][p]["best_errors"], dtype=float)
+            diff = x - y
+            if np.allclose(diff, 0.0, atol=1e-12):
                 equal += 1
-            elif a < b:
-                better += 1
+                continue
+            try:
+                _, pval = _wx(x, y, zero_method="wilcox", alternative="two-sided")
+            except ValueError:
+                pval = 1.0
+            if pval < alpha:
+                if float(np.median(x)) < float(np.median(y)):
+                    better += 1
+                else:
+                    worse += 1
             else:
-                worse += 1
+                equal += 1
         out[comp] = {"better": better, "equal": equal, "worse": worse,
                      "n_problems": len(probs)}
     return out
