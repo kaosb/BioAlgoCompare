@@ -47,8 +47,9 @@ class BCPolicy:
                  clip_lo: float = _CLIP_LO, clip_hi: float = _CLIP_HI):
         self.n_outputs = int(n_outputs)
         self.seed = int(seed)
-        self.clip_lo = float(clip_lo)
-        self.clip_hi = float(clip_hi)
+        # clip bounds may be scalar (shared hull) or per-output array.
+        self.clip_lo = np.asarray(clip_lo, float) if np.ndim(clip_lo) else float(clip_lo)
+        self.clip_hi = np.asarray(clip_hi, float) if np.ndim(clip_hi) else float(clip_hi)
         self.model = RandomForestRegressor(
             n_estimators=200, min_samples_leaf=5, random_state=seed, n_jobs=1
         )
@@ -84,12 +85,16 @@ class BCPolicy:
 
     # --- inference (the il_model hook) --------------------------------------
     def predict(self, algo: Any, iteration: int):
-        """Return the modulation factor tuple for the algorithm's state."""
+        """Return the action tuple for the algorithm's state.
+
+        clip_lo/clip_hi may be scalars (shared hull) or per-output arrays
+        (independent hull per action dimension, e.g. separate F and CR ranges).
+        """
         x = compute_state_features(algo, iteration).reshape(1, -1)
-        y = self.model.predict(x)[0]
+        y = np.atleast_1d(self.model.predict(x)[0])
         lo = getattr(self, "clip_lo", _CLIP_LO)
         hi = getattr(self, "clip_hi", _CLIP_HI)
-        y = np.clip(np.atleast_1d(y), lo, hi)
+        y = np.clip(y, lo, hi)
         return tuple(float(v) for v in y)
 
     # --- persistence ---------------------------------------------------------

@@ -189,7 +189,10 @@ def stage_train():
     for p in paths:
         acts += [r["action"] for r in json.load(open(p))]
     acts = np.array(acts)
-    lo, hi = float(acts.min()), float(acts.max())
+    # Per-dimension demonstrated hull (independent F and CR ranges), not a
+    # shared scalar hull (remediation from the implementation audit).
+    lo = acts.min(axis=0)
+    hi = acts.max(axis=0)
     policy = BCPolicy.train_from_demo_files(paths, n_outputs=2, seed=0,
                                             clip_lo=lo, clip_hi=hi)
     policy.save(MODEL_PATH)
