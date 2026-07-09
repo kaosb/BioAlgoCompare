@@ -82,9 +82,14 @@ class Chromosome(Individual):
         Returns:
             Tuple of two offspring chromosomes
         """
-        # Create offspring
-        offspring1 = Chromosome(self.dimension, self.problem, rng=self.rng)
-        offspring2 = Chromosome(self.dimension, self.problem, rng=self.rng)
+        # Create offspring inheriting the parents' bounds (required for correct
+        # random-key mutation under non-[0,1] domains, e.g. CEC's [-100, 100]).
+        offspring1 = Chromosome(self.dimension, self.problem, rng=self.rng,
+                                lower_bounds=self.lower_bounds,
+                                upper_bounds=self.upper_bounds)
+        offspring2 = Chromosome(self.dimension, self.problem, rng=self.rng,
+                                lower_bounds=self.lower_bounds,
+                                upper_bounds=self.upper_bounds)
 
         # Uniform crossover: for each gene, inherit from parent A or B
         mask = self.rng.random(self.dimension) < 0.5
@@ -99,16 +104,21 @@ class Chromosome(Individual):
 
     def mutate(self, mutation_rate: float = 0.01) -> None:
         """
-        Apply mutation using swap mutation (exchange two random positions).
+        Canonical random-key mutation (Bean 1994): each gene is, with
+        probability ``mutation_rate``, re-sampled uniformly at random within its
+        [lower, upper] bound. This replaces the previous swap mutation, which
+        only permuted existing keys; uniform re-sampling is the standard
+        random-key operator and is coherent with the continuous [lb, ub]
+        encoding used here.
 
         Args:
-            mutation_rate: Probability of mutation for each gene
+            mutation_rate: Probability of re-sampling each gene.
         """
-        for i in range(self.dimension):
-            if self.rng.random() < mutation_rate:
-                # Swap with another random position
-                j = int(self.rng.integers(0, self.dimension))
-                self.position[i], self.position[j] = self.position[j], self.position[i]
+        mask = self.rng.random(self.dimension) < mutation_rate
+        if mask.any():
+            fresh = self.rng.uniform(self.lower_bounds, self.upper_bounds,
+                                     self.dimension)
+            self.position = np.where(mask, fresh, self.position)
 
         # Reset fitness cache after mutation
         self._fitness = None
@@ -233,12 +243,15 @@ class GA(MetaheuristicAlgorithm):
             if self.rng.random() < self.crossover_rate:
                 offspring1, offspring2 = parent1.crossover(parent2)
             else:
-                # No crossover, copy parents
+                # No crossover, copy parents (inherit bounds too, needed by the
+                # random-key mutation operator).
                 offspring1 = object.__new__(Chromosome)
                 offspring1.dimension = parent1.dimension
                 offspring1.problem = parent1.problem
                 offspring1.rng = self.rng
                 offspring1.position = parent1.position.copy()
+                offspring1.lower_bounds = parent1.lower_bounds
+                offspring1.upper_bounds = parent1.upper_bounds
                 offspring1._fitness = None
 
                 offspring2 = object.__new__(Chromosome)
@@ -246,6 +259,8 @@ class GA(MetaheuristicAlgorithm):
                 offspring2.problem = parent2.problem
                 offspring2.rng = self.rng
                 offspring2.position = parent2.position.copy()
+                offspring2.lower_bounds = parent2.lower_bounds
+                offspring2.upper_bounds = parent2.upper_bounds
                 offspring2._fitness = None
 
             # Mutation

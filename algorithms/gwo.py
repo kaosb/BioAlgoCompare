@@ -106,6 +106,7 @@ class GWO(MetaheuristicAlgorithm):
         self.alpha = None  # Best wolf
         self.beta = None   # Second best
         self.delta = None  # Third best
+        self._best_so_far = None  # best-seen wolf, for the convergence curve only
 
     def _get_il_params(self, iteration):
         """Return a 1-tuple (a_factor,) for the control coefficient; neutral (1.0,)."""
@@ -128,27 +129,31 @@ class GWO(MetaheuristicAlgorithm):
 
         self.convergence_curve = [self.alpha.fitness()]
 
+    def _copy_wolf(self, source):
+        """Snapshot a wolf (without consuming RNG)."""
+        w = object.__new__(Wolf)
+        w.problem = source.problem
+        w.dimension = source.dimension
+        w.rng = self.rng
+        w.position = np.copy(source.position)
+        w._fitness = source._fitness
+        w.lower_bounds = source.lower_bounds
+        w.upper_bounds = source.upper_bounds
+        return w
+
     def _update_hierarchy(self):
-        """Update alpha, beta, delta wolves (3 best solutions)."""
+        """Update alpha, beta, delta wolves = current 3 best (canonical GWO)."""
         sorted_pop = sorted(self.population, key=lambda w: w.fitness())
+        self.alpha = self._copy_wolf(sorted_pop[0])
+        self.beta = self._copy_wolf(sorted_pop[1] if len(sorted_pop) > 1 else sorted_pop[0])
+        self.delta = self._copy_wolf(sorted_pop[2] if len(sorted_pop) > 2 else sorted_pop[0])
 
-        # Create copies to preserve best solutions (without consuming RNG)
-        def _copy_wolf(source):
-            w = object.__new__(Wolf)
-            w.problem = source.problem
-            w.dimension = source.dimension
-            w.rng = self.rng
-            w.position = np.copy(source.position)
-            w._fitness = source._fitness
-            w.lower_bounds = source.lower_bounds
-            w.upper_bounds = source.upper_bounds
-            return w
-
-        self.alpha = _copy_wolf(sorted_pop[0])
-        self.beta = _copy_wolf(sorted_pop[1] if len(sorted_pop) > 1 else sorted_pop[0])
-        self.delta = _copy_wolf(sorted_pop[2] if len(sorted_pop) > 2 else sorted_pop[0])
-
-        self.best_solution = self.alpha
+        # Track best-so-far only for reporting (monotone convergence curve);
+        # the search DYNAMICS use the current alpha, per Mirjalili 2014.
+        if self._best_so_far is None or \
+                self.alpha.fitness() < self._best_so_far.fitness():
+            self._best_so_far = self._copy_wolf(self.alpha)
+        self.best_solution = self._best_so_far
 
     def update_population(self):
         """Update the wolf pack positions.
@@ -164,8 +169,10 @@ class GWO(MetaheuristicAlgorithm):
 
         # a decreases linearly from 2 to 0 (Eq. 3.3), then modulate.
         a = (2 - 2 * (t / T)) * a_factor
-
-        prev_best_fitness = self.alpha.fitness()
+        # NOTE: canonical GWO (Mirjalili 2014) does NOT preserve the previous
+        # alpha across iterations; the omega wolves are guided by the CURRENT
+        # 3 best. The best-so-far is tracked separately in _update_hierarchy
+        # only for the reported convergence curve.
 
         for i in range(self.population_size):
             dim = self.population[i].dimension
@@ -205,12 +212,8 @@ class GWO(MetaheuristicAlgorithm):
             )
             self.population[i]._fitness = None
 
-        # Update hierarchy and preserve global best
-        prev_alpha = self.alpha
+        # Canonical GWO: re-select alpha/beta/delta = current 3 best (no elitist
+        # restoration of the previous alpha). _update_hierarchy also tracks the
+        # best-so-far for the reported (monotone) convergence curve.
         self._update_hierarchy()
-
-        if self.alpha.fitness() > prev_best_fitness:
-            self.alpha = prev_alpha
-            self.best_solution = self.alpha
-
-        self.convergence_curve.append(self.alpha.fitness())
+        self.convergence_curve.append(self._best_so_far.fitness())
