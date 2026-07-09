@@ -1133,9 +1133,8 @@ Si encuentras un bug, incluye:
    - Comparación con baselines establecidos
    - Métricas VRP estándar utilizadas
 
-3. **Barros, T. D., & Everett, J. W. (2023)**. "Imitation Learning for Metaheuristic Optimization". *arXiv preprint*.
-   - Base para integración IL con HO
-   - Arquitectura de red neuronal
+3. **Osa, T., Pajarinen, J., Neumann, G., Bagnell, J. A., Abbeel, P., & Peters, J. (2018)**. "An Algorithmic Perspective on Imitation Learning". *Foundations and Trends in Robotics*, 7(1-2), 1-179.
+   - Marco de referencia para Imitation Learning (behavioral cloning, apprenticeship learning)
 
 ### Citar Este Trabajo
 

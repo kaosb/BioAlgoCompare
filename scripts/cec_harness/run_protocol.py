@@ -44,6 +44,15 @@ from scripts.cec_harness.run_cell import run_cell, cell_id  # noqa: E402
 from scripts.cec_harness.build_rankings import build_rankings  # noqa: E402
 from scripts.cec_harness import stats as st  # noqa: E402
 
+
+def _provenance():
+    """Best-effort provenance record; never break a finished run over it."""
+    try:
+        from utils.provenance import provenance
+        return provenance()
+    except Exception as exc:  # pragma: no cover
+        return {"error": f"provenance unavailable: {exc}"}
+
 # In-repo faithful algorithms (classical paradigms / baselines).
 from algorithms.ho import HO  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
@@ -263,6 +272,7 @@ def main():
         "rankings": rankings,
         "friedman_shaffer": fr_sh,
         "wilcoxon_bew": wilcoxon,
+        "provenance": _provenance(),
     }
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(os.path.join(OUT_DIR, "protocol_summary.json"), "w") as fh:

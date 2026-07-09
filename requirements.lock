@@ -1,0 +1,13 @@
+# requirements.lock — versiones exactas verificadas (meta-audit C3, 8 Jul 2026)
+# Python 3.12.5 · macOS-26.5.2-arm64-arm-64bit
+# Generado desde el entorno que produjo los resultados del paper.
+# Estas versiones DEBEN respetarse para reproducir los numeros exactos
+# (minionpy encapsula los competidores CEC C++; sklearn fija el RF de BC).
+
+numpy==1.26.0
+scipy==1.16.3
+scikit-learn==1.8.0
+minionpy==1.4.0
+mealpy==3.0.3
+opfunu==1.0.1
+cma==4.4.4

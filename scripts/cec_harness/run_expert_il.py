@@ -60,16 +60,16 @@ N_JOBS = int(os.environ.get("N_JOBS", "8"))
 
 
 # --- policy adapters (module-level: workers rebuild from names) -------------
-class AbsoluteToFactor:
-    """Adapt an absolute-(F,CR) policy to DE's multiplicative-factor hook."""
-    n_outputs = 2
+# AbsoluteToFactor now lives in utils.bc_policy so algorithms/de_il.py (the
+# protocol variant) and this pipeline share one contract. Re-exported here so
+# any pickles/workers referencing the old module path still resolve.
+from utils.bc_policy import AbsoluteToFactor as _AbsoluteToFactor  # noqa: E402
 
+
+class AbsoluteToFactor(_AbsoluteToFactor):
+    """Thin subclass fixing the pipeline's BASE_F/BASE_CR (backwards compat)."""
     def __init__(self, policy):
-        self.policy = policy
-
-    def predict(self, algo, iteration):
-        f_abs, cr_abs = self.policy.predict(algo, iteration)
-        return (f_abs / BASE_F, cr_abs / BASE_CR)
+        super().__init__(policy, base_f=BASE_F, base_cr=BASE_CR)
 
 
 class StaticFCR:
@@ -357,6 +357,12 @@ def stage_report():
                   f"-> {'OK' if ok else 'FAIL'}")
             confirmed &= ok
     print(f"\n  H {'CONFIRMADA' if confirmed else 'REFUTADA (para esta operacionalizacion)'}")
+    out["_verdict"] = {"H_confirmada": bool(confirmed)}
+    try:
+        from utils.provenance import provenance
+        out["_provenance"] = provenance()
+    except Exception as exc:  # pragma: no cover
+        out["_provenance"] = {"error": f"provenance unavailable: {exc}"}
     with open(os.path.join(OUT, "expert_il_report.json"), "w") as fh:
         json.dump(out, fh, indent=2)
     print(f"\nsaved {OUT}/expert_il_report.json")

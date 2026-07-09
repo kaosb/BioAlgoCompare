@@ -77,6 +77,19 @@ results/**/*
 !results/statistical_analysis_1000runs/algorithm_comparison.csv
 !results/massive_1000runs/massive_benchmark_report.html
 
+# --- summaries que respaldan afirmaciones del paper IL x CEC (meta-audit C3) ---
+# Se versionan los RESUMENES (con provenance), no las celdas raw ni los .pkl.
+# Los modelos (incl. de_il_jade 458MB) se regeneran via scripts/cec_harness/
+# (ver REPRODUCIBILITY.md); su binario no entra al repo.
+!results/cec_protocol/
+!results/cec_protocol/protocol_summary.json
+!results/expert_il/
+!results/expert_il/expert_il_report.json
+!results/expert_il/static_best.json
+!results/expert_il/teacher_mean.json
+!results/constructo/
+!results/constructo/constructo_K.json
+
 # Temporary files
 *.tmp
 *.backup_*

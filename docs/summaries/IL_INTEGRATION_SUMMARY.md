@@ -55,7 +55,7 @@ Successfully integrated Imitation Learning (IL) for dynamic parameter adaptation
 
 ## Scientific Rigor
 - Citations:
-  - Barros & Everett (2023): "Imitation Learning for Metaheuristic Optimization"
+  - Osa et al. (2018): "An Algorithmic Perspective on Imitation Learning" (Found. Trends Robotics)
   - Amiri et al. (2024): HO parameter ranges
 - Reproducibility: All components use seed=42
 - Statistical validation framework included

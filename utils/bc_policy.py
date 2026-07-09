@@ -111,3 +111,30 @@ class BCPolicy:
     def feature_importances(self) -> dict:
         return dict(zip(FEATURE_NAMES,
                         (float(v) for v in self.model.feature_importances_)))
+
+
+class AbsoluteToFactor:
+    """Adapt an absolute-(F, CR) policy to DE's multiplicative-factor hook.
+
+    The legitimate expert policy (BC of a JADE teacher / hindsight oracle)
+    predicts ABSOLUTE (F, CR) values along the demonstrated hull. DE's IL hook,
+    however, expects MULTIPLICATIVE factors applied over its base (F, CR):
+    ``F_eff = base_F * mF``. This adapter closes that contract gap by dividing
+    the absolute prediction by the base, so a policy predicting F=0.5 with
+    base_F=0.8 yields the factor 0.625 → F_eff = 0.8 * 0.625 = 0.5.
+
+    Without this adapter, feeding an absolute-(F,CR) policy straight into DE's
+    hook double-applies the base (0.8 * 0.5 = 0.4) and silently corrupts the
+    semantics. Keep this at module level so multiprocessing workers can rebuild
+    it by name.
+    """
+    n_outputs = 2
+
+    def __init__(self, policy, base_f: float = 0.8, base_cr: float = 0.9):
+        self.policy = policy
+        self.base_f = float(base_f)
+        self.base_cr = float(base_cr)
+
+    def predict(self, algo, iteration):
+        f_abs, cr_abs = self.policy.predict(algo, iteration)
+        return (f_abs / self.base_f, cr_abs / self.base_cr)
