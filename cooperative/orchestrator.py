@@ -16,6 +16,8 @@ Conditions (see DISENO):
   C3 gated         -> gate.enabled = True  (proposed)
 """
 
+import math
+
 import numpy as np
 
 from problems.continuous.cec_problem import BudgetExhausted
@@ -39,10 +41,26 @@ class CooperativeRunner:
         self.gate = TransferGate(enabled=gate_enabled, memory=self.memory)
         self.seed = int(seed)
 
+        # FES-fairness / correct schedule (meta-audit fix, jul 2026): each solver
+        # gets its FAIR share of the shared budget B (B/N) and a max_iterations
+        # COHERENT with that share. Passing max_iterations=1e9 pinned PSO's inertia
+        # schedule (base_w = 0.9 - 0.5*iter/max_iterations) at ~0.9 forever, so
+        # PSO-in-cooperation never switched to exploitation -> it was crippled
+        # regardless of transfer (verified: ~220x worse). The isolated baseline
+        # went through run_with_fes, which set this correctly; cooperation did not.
+        n = max(1, len(solver_specs))
+        budget_per_solver = getattr(shared_problem, "max_fes", None)
+        if budget_per_solver is not None:
+            budget_per_solver = budget_per_solver / n
+
         self.solvers = []
         for i, (name, cls, kwargs) in enumerate(solver_specs):
             kw = dict(kwargs)
             kw.setdefault("seed", self.seed + i)
+            if budget_per_solver is not None:
+                pop = int(kw.get("population_size", 30))
+                epi = max(1, pop)  # per-iteration evals (structural transfer aside)
+                kw["max_iterations"] = max(1, math.ceil(budget_per_solver / epi))
             solver = cls(shared_problem, **kw)
             solver.initialize_population()
             self.solvers.append({"name": name, "solver": solver})
