@@ -1,0 +1,111 @@
+{
+  "config": {
+    "funcs": [
+      1,
+      4,
+      6,
+      9,
+      15,
+      22
+    ],
+    "dim": 10,
+    "budget": 5000,
+    "runs": 15,
+    "pop": 30,
+    "transfer_every": 500,
+    "solvers": [
+      "DE",
+      "PSO"
+    ]
+  },
+  "results": {
+    "F1": {
+      "C0_DE_median": 692291.1384904138,
+      "C0_PSO_median": 275048.2429373939,
+      "C0_bestiso_median": 262884.9170644727,
+      "C2_nogate_median": 4208337.348242616,
+      "C3_gated_median": 4493625.640626472,
+      "gate_accepted": 139,
+      "gate_rejected": 131,
+      "C3_beats_bestiso": false,
+      "C3_beats_C2": false
+    },
+    "F4": {
+      "C0_DE_median": 40.85318681134987,
+      "C0_PSO_median": 34.78138671439041,
+      "C0_bestiso_median": 34.780434333378935,
+      "C2_nogate_median": 43.29978759659758,
+      "C3_gated_median": 45.08922898753934,
+      "gate_accepted": 173,
+      "gate_rejected": 97,
+      "C3_beats_bestiso": false,
+      "C3_beats_C2": false
+    },
+    "F6": {
+      "C0_DE_median": 7.181378082264246,
+      "C0_PSO_median": 1.2349464990157912,
+      "C0_bestiso_median": 1.2349464990157912,
+      "C2_nogate_median": 5.780987818791118,
+      "C3_gated_median": 5.8160730074220055,
+      "gate_accepted": 188,
+      "gate_rejected": 82,
+      "C3_beats_bestiso": false,
+      "C3_beats_C2": false
+    },
+    "F9": {
+      "C0_DE_median": 53.248127443189105,
+      "C0_PSO_median": 16.25781464236013,
+      "C0_bestiso_median": 16.25781464236013,
+      "C2_nogate_median": 53.461456923205105,
+      "C3_gated_median": 57.222469170030195,
+      "gate_accepted": 187,
+      "gate_rejected": 83,
+      "C3_beats_bestiso": false,
+      "C3_beats_C2": false
+    },
+    "F15": {
+      "C0_DE_median": 5.717317635804193,
+      "C0_PSO_median": 3.2364679092420374,
+      "C0_bestiso_median": 3.2364679092420374,
+      "C2_nogate_median": 8.38364674723357,
+      "C3_gated_median": 8.929868663311936,
+      "gate_accepted": 159,
+      "gate_rejected": 111,
+      "C3_beats_bestiso": false,
+      "C3_beats_C2": false
+    },
+    "F22": {
+      "C0_DE_median": 0.0,
+      "C0_PSO_median": 38.47453372897053,
+      "C0_bestiso_median": 0.0,
+      "C2_nogate_median": 2.401628757992057,
+      "C3_gated_median": 20.05819235505942,
+      "gate_accepted": 92,
+      "gate_rejected": 178,
+      "C3_beats_bestiso": false,
+      "C3_beats_C2": false
+    }
+  },
+  "summary": {
+    "n_funcs": 6,
+    "C3_beats_bestiso": 0,
+    "C3_beats_C2": 0
+  },
+  "provenance": {
+    "git_commit": "9e4b6f2e45c59e4414ed3d7581e16cee1b34448d",
+    "git_dirty": false,
+    "timestamp_utc": "2026-07-14T21:05:46.337987+00:00",
+    "python_version": "3.12.5",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "hostname": "stormbreaker-5.local",
+    "package_versions": {
+      "numpy": "1.26.0",
+      "scipy": "1.16.3",
+      "scikit-learn": "1.8.0",
+      "minionpy": "1.4.0",
+      "mealpy": "3.0.3",
+      "opfunu": "1.0.1",
+      "cma": "4.4.4"
+    }
+  }
+}

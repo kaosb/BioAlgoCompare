@@ -89,6 +89,8 @@ results/**/*
 !results/expert_il/teacher_mean.json
 !results/constructo/
 !results/constructo/constructo_K.json
+!results/cooperative/
+!results/cooperative/pilot_C0C2C3.json
 
 # Temporary files
 *.tmp
