@@ -56,7 +56,11 @@ class CooperativeRunner:
         self.solvers = []
         for i, (name, cls, kwargs) in enumerate(solver_specs):
             kw = dict(kwargs)
-            kw.setdefault("seed", self.seed + i)
+            # CRN (pre-registro §2.6): each solver-in-cooperation uses the SAME
+            # seed as its isolated counterpart, so paired contrasts (DE-coop vs
+            # DE-iso, PSO-coop vs PSO-iso) share common random numbers. The old
+            # self.seed + i broke the pairing for the second solver.
+            kw.setdefault("seed", self.seed)
             if budget_per_solver is not None:
                 pop = int(kw.get("population_size", 30))
                 epi = max(1, pop)  # per-iteration evals (structural transfer aside)
