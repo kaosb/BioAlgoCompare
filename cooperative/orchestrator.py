@@ -27,19 +27,30 @@ from cooperative.transfer_memory import TransferMemory
 
 class CooperativeRunner:
     def __init__(self, shared_problem, solver_specs, transfer_every=500,
-                 gate_enabled=True, seed=0):
+                 gate_enabled=True, seed=0, transfer_mode="structural",
+                 intent_mode="source"):
         """
         shared_problem : a FESLimitProblem shared by all solvers (defines B).
         solver_specs   : list of (name, solver_cls, kwargs). Each solver is built
                          on ``shared_problem`` so they share the FES counter.
         transfer_every : FES between control points.
         gate_enabled   : False -> C2 ablation; True -> C3 proposed.
+        transfer_mode  : 'structural' (elite injection, 1 FES/transfer) or
+                         'parametric' (functional-intent regime, 0 FES).
+        intent_mode    : parametric only. 'source' = intent extracted from the
+                         source state (the proposed mechanism); 'random' = ABL
+                         ablation (random intent, no source knowledge);
+                         'adversarial' = CTRL+ positive control (guaranteed-
+                         harmful preset; tests that gate/rollback DETECTS it).
         """
         self.problem = shared_problem
         self.transfer_every = int(transfer_every)
         self.memory = TransferMemory()
         self.gate = TransferGate(enabled=gate_enabled, memory=self.memory)
         self.seed = int(seed)
+        self.transfer_mode = str(transfer_mode)
+        self.intent_mode = str(intent_mode)
+        self._rng = np.random.default_rng(self.seed + 777_000)  # intent ABL only
 
         # FES-fairness / correct schedule (meta-audit fix, jul 2026): each solver
         # gets its FAIR share of the shared budget B (B/N) and a max_iterations
@@ -70,7 +81,22 @@ class CooperativeRunner:
             self.solvers.append({"name": name, "solver": solver})
 
         self.stats = {"proposed": 0, "accepted": 0, "rejected": 0,
-                      "transfers": []}
+                      "rolled_back": 0, "kept": 0, "transfers": []}
+
+        # Parametric mode: attach a RegimeController per solver through the
+        # existing il_model hook (multiplicative factors; neutral==base algo).
+        # 0 FES: only reads evaluated state and writes multipliers.
+        self._controllers = {}
+        self._pending = {}   # target name -> commit record (deferred effect)
+        if self.transfer_mode == "parametric":
+            from cooperative.functional_intent import RegimeController, PRESETS
+            for e in self.solvers:
+                key = (e["name"] if e["name"] in PRESETS
+                       else type(e["solver"]).__name__)
+                ctrl = RegimeController(key)
+                e["solver"].use_il = True
+                e["solver"].il_model = ctrl
+                self._controllers[e["name"]] = ctrl
 
     # --- structural transfer: inject source elite into target ---------------
     @staticmethod
@@ -133,19 +159,87 @@ class CooperativeRunner:
                     {"src": src["name"], "tgt": tgt["name"],
                      "applied": allow, "effect": effect})
 
+    # --- parametric control point: commit/rollback of functional intents ----
+    def _propose_intent(self, src_solver):
+        """Intent per intent_mode: source (mechanism) / random (ABL) /
+        adversarial (CTRL+, guaranteed-harmful preset)."""
+        from cooperative.functional_intent import (classify_intent, INTENSIFY,
+                                                   DIVERSIFY, ADVERSARIAL)
+        if self.intent_mode == "adversarial":
+            return ADVERSARIAL
+        if self.intent_mode == "random":
+            return self._rng.choice([INTENSIFY, DIVERSIFY, None])
+        return classify_intent(src_solver)
+
+    def _control_point_parametric(self):
+        """Finalize pending commits (deferred effect, 0 FES), then propose new
+        intents through the gate.
+
+        Effect of a committed regime = incumbent error at NEXT control point vs
+        at commit: if the target did not improve at all under the regime, the
+        commit is ROLLED BACK (controller resets to neutral) and the triple is
+        recorded harmful (positive effect) so the gate's memory can veto it.
+        """
+        n = len(self.solvers)
+        if n < 2:
+            return
+        # (1) finalize pending commits
+        for tgt_name, rec in list(self._pending.items()):
+            tgt = next(e for e in self.solvers if e["name"] == tgt_name)
+            err_now = self._target_error(tgt["solver"])
+            improvement = rec["err_at_commit"] - err_now
+            effect = -improvement          # >0 = harmful (no/negative progress)
+            if improvement <= 0.0:
+                self._controllers[tgt_name].reset()      # rollback
+                self.stats["rolled_back"] += 1
+            else:
+                self.stats["kept"] += 1
+            self.memory.record_triple(rec["src"], tgt_name, rec["intent"],
+                                      effect)
+            self.stats["transfers"].append(
+                {"src": rec["src"], "tgt": tgt_name, "intent": rec["intent"],
+                 "applied": True, "effect": float(effect),
+                 "rolled_back": bool(improvement <= 0.0)})
+            del self._pending[tgt_name]
+        # (2) propose new intents (a target holds at most one pending commit)
+        for a in range(n):
+            for b in range(n):
+                if a == b:
+                    continue
+                src, tgt = self.solvers[a], self.solvers[b]
+                if tgt["name"] in self._pending:
+                    continue
+                intent = self._propose_intent(src["solver"])
+                self.stats["proposed"] += 1
+                allow = self.gate.allows_parametric(
+                    src["name"], tgt["name"],
+                    src["solver"].convergence_curve,
+                    tgt["solver"].convergence_curve, intent)
+                if allow and intent is not None:
+                    self._controllers[tgt["name"]].set_intent(intent)
+                    self._pending[tgt["name"]] = {
+                        "src": src["name"], "intent": intent,
+                        "err_at_commit": self._target_error(tgt["solver"]),
+                    }
+                    self.stats["accepted"] += 1
+                else:
+                    self.stats["rejected"] += 1
+
     # --- main loop ----------------------------------------------------------
     def run(self):
         """Round-robin steps under the shared budget; transfer at control points.
 
         Returns the global best (min over solvers) and per-solver results.
         """
+        cp = (self._control_point_parametric
+              if self.transfer_mode == "parametric" else self._control_point)
         next_cp = self.transfer_every
         try:
             while True:
                 for entry in self.solvers:
                     entry["solver"].update_population()
                 if self.problem.fes >= next_cp:
-                    self._control_point()
+                    cp()
                     next_cp += self.transfer_every
         except BudgetExhausted:
             pass
@@ -160,6 +254,6 @@ class CooperativeRunner:
             "fes_used": int(self.problem.fes),
             "transfer_stats": {k: v for k, v in self.stats.items()
                                if k != "transfers"},
-            "usefulness": {f"{s}->{t}": v for (s, t), v
+            "usefulness": {"->".join(k): v for k, v
                            in self.memory.usefulness_matrix().items()},
         }

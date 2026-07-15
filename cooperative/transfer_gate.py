@@ -52,3 +52,37 @@ class TransferGate:
                 source_name, target_name):
             return False
         return True
+
+    def allows_parametric(self, source_name: str, target_name: str,
+                          source_curve, target_curve, intent: str) -> bool:
+        """Gate for parametric (functional-intent) transfers.
+
+        Conditions (pre-registro v2, frozen):
+          (1) SOURCE HEALTH — the source must be improving (a stagnating source
+              has nothing to teach; operationalizes the IL 'no signal' lesson).
+          (2) TARGET CONDITION — the target must be stagnating (a target that is
+              improving should not be perturbed).
+          (3) HISTORY — the (source, target, intent) triple must not be flagged
+              harmful by the rollback memory.
+        ``enabled=False`` = C2p ablation (always allow).
+        """
+        if not self.enabled:
+            return True
+        if intent is None:
+            return False
+        # (1) source health: improvement over the stagnation window
+        w = self.stagnation_window
+        if len(source_curve) > w:
+            prev, now = source_curve[-(w + 1)], source_curve[-1]
+            if (prev - now) <= 1e-12 * (abs(prev) + 1e-12):
+                return False
+        else:
+            return False
+        # (2) target stagnating
+        if not self._is_stagnating(target_curve):
+            return False
+        # (3) triple not flagged harmful
+        if self.memory is not None and self.memory.is_harmful_triple(
+                source_name, target_name, intent):
+            return False
+        return True

@@ -49,3 +49,28 @@ class TransferMemory:
     def usefulness_matrix(self) -> Dict[Tuple[str, str], float]:
         """Mean observed effect per pair (for reporting the source->target map)."""
         return {k: (sum(v) / len(v)) for k, v in self._effects.items() if v}
+
+    # --- parametric (triple-keyed) channel -----------------------------------
+    # Parametric transfers are attributed per (source, target, intent): a regime
+    # that harms DE need not harm GA. Effects come from the orchestrator's
+    # deferred commit/rollback measurement (0 FES).
+
+    def record_triple(self, source: str, target: str, intent: str,
+                      effect: float) -> None:
+        hist = self._effects[(source, target, intent)]
+        hist.append(float(effect))
+        if len(hist) > self._recency:
+            del hist[0]
+        self.records.append({
+            "source": source, "target": target, "intent": intent,
+            "applied": True, "effect": float(effect),
+        })
+
+    def is_harmful_triple(self, source: str, target: str, intent: str,
+                          min_obs: int = 2) -> bool:
+        """True if recent commits of this (source, target, intent) were rolled
+        back / harmful on average (mean effect > 0)."""
+        hist = self._effects.get((source, target, intent), [])
+        if len(hist) < min_obs:
+            return False
+        return (sum(hist) / len(hist)) > 0.0
