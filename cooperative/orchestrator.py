@@ -244,16 +244,33 @@ class CooperativeRunner:
         except BudgetExhausted:
             pass
 
-        best = min((e["solver"].best_solution for e in self.solvers),
-                   key=lambda s: s.fitness())
+        # Read each solver's best WITHOUT re-evaluating: the budget is exhausted,
+        # so calling ind.fitness() on a cache-invalidated individual would charge
+        # one more FES and raise BudgetExhausted here (outside the guarded loop).
+        # The known best fitness is the cached value or the last convergence point.
+        per_solver = {e["name"]: self._safe_best_fitness(e["solver"])
+                      for e in self.solvers}
+        best_name = min(per_solver, key=per_solver.get)
+        best = next(e["solver"].best_solution for e in self.solvers
+                    if e["name"] == best_name)
         return {
-            "best_fitness": float(best.fitness()),
+            "best_fitness": float(per_solver[best_name]),
             "best_position": np.asarray(best.position, dtype=float),
-            "per_solver": {e["name"]: float(e["solver"].best_solution.fitness())
-                           for e in self.solvers},
+            "per_solver": per_solver,
             "fes_used": int(self.problem.fes),
             "transfer_stats": {k: v for k, v in self.stats.items()
                                if k != "transfers"},
             "usefulness": {"->".join(k): v for k, v
                            in self.memory.usefulness_matrix().items()},
         }
+
+    @staticmethod
+    def _safe_best_fitness(solver):
+        """Best fitness of a solver without re-evaluating (budget-safe)."""
+        ind = solver.best_solution
+        cached = getattr(ind, "_fitness", None)
+        if cached is not None:
+            return float(cached)
+        if getattr(solver, "convergence_curve", None):
+            return float(solver.convergence_curve[-1])
+        return float("inf")
