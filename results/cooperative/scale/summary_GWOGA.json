@@ -1,0 +1,115 @@
+{
+  "pair": "GWO+GA",
+  "sbs": "GWO",
+  "dim": 10,
+  "runs": 51,
+  "levels": {
+    "5000": {
+      "n_funcs": 70,
+      "contrasts": {
+        "C2p_vs_C1div": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 1,
+          "n_funcs": 70
+        },
+        "C3p_vs_C2p": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "C3p_vs_ABL": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "CTRLg_vs_CTRLn": {
+          "A_sig_wins": 29,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "C3p_vs_C0SBS": {
+          "A_sig_wins": 21,
+          "A_sig_losses": 1,
+          "n_funcs": 70
+        }
+      }
+    },
+    "50000": {
+      "n_funcs": 70,
+      "contrasts": {
+        "C2p_vs_C1div": {
+          "A_sig_wins": 1,
+          "A_sig_losses": 1,
+          "n_funcs": 70
+        },
+        "C3p_vs_C2p": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "C3p_vs_ABL": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "CTRLg_vs_CTRLn": {
+          "A_sig_wins": 49,
+          "A_sig_losses": 2,
+          "n_funcs": 70
+        },
+        "C3p_vs_C0SBS": {
+          "A_sig_wins": 62,
+          "A_sig_losses": 1,
+          "n_funcs": 70
+        }
+      }
+    },
+    "500000": {
+      "n_funcs": 69,
+      "contrasts": {
+        "C2p_vs_C1div": {
+          "A_sig_wins": 30,
+          "A_sig_losses": 0,
+          "n_funcs": 69
+        },
+        "C3p_vs_C2p": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 69
+        },
+        "C3p_vs_ABL": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 69
+        },
+        "CTRLg_vs_CTRLn": {
+          "A_sig_wins": 49,
+          "A_sig_losses": 3,
+          "n_funcs": 69
+        },
+        "C3p_vs_C0SBS": {
+          "A_sig_wins": 62,
+          "A_sig_losses": 0,
+          "n_funcs": 69
+        }
+      }
+    }
+  },
+  "provenance": {
+    "git_commit": "5e084a8dfc7eeff9ec43a0dfeaa103e137489731",
+    "git_dirty": false,
+    "timestamp_utc": "2026-07-18T22:40:27.070118+00:00",
+    "python_version": "3.12.5",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "hostname": "stormbreaker-5.local",
+    "package_versions": {
+      "numpy": "1.26.0",
+      "scipy": "1.16.3",
+      "scikit-learn": "1.8.0",
+      "minionpy": "1.4.0",
+      "mealpy": "3.0.3",
+      "opfunu": "1.0.1",
+      "cma": "4.4.4"
+    }
+  }
+}

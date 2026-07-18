@@ -201,3 +201,5 @@ CLEI*.zip
 !results/cooperative/complementarity_screen.json
 !results/cooperative/parametric_ladder.json
 !results/cooperative/parametric_ladder_*.json
+!results/cooperative/scale/
+!results/cooperative/scale/summary_*.json
