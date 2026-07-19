@@ -203,3 +203,5 @@ CLEI*.zip
 !results/cooperative/parametric_ladder_*.json
 !results/cooperative/scale/
 !results/cooperative/scale/summary_*.json
+!results/cooperative/e5_discriminant.json
+!results/cooperative/e1_action_space.json

@@ -1,0 +1,360 @@
+{
+  "config": {
+    "pair": "DE+GA",
+    "budget": 5000,
+    "runs": 31,
+    "funcs": [
+      1,
+      4,
+      6,
+      9,
+      15,
+      23
+    ],
+    "seed0": 8000,
+    "note": "metrica de efecto = mediana poblacional (fix 18 Jul)"
+  },
+  "contrasts": {
+    "C3p_vs_C2p": {
+      "wins": 6,
+      "losses": 0,
+      "n": 6
+    },
+    "C3p_vs_C1div": {
+      "wins": 1,
+      "losses": 0,
+      "n": 6
+    },
+    "C2p_vs_C1div": {
+      "wins": 0,
+      "losses": 6,
+      "n": 6
+    },
+    "CTRLg_vs_CTRLn": {
+      "wins": 0,
+      "losses": 0,
+      "n": 6
+    },
+    "MODg_vs_MODn": {
+      "wins": 1,
+      "losses": 1,
+      "n": 6
+    },
+    "MODn_vs_C1div": {
+      "wins": 3,
+      "losses": 1,
+      "n": 6
+    }
+  },
+  "veto_totals": {
+    "C2p": 148,
+    "C3p": 18,
+    "CTRLn": 186,
+    "CTRLg": 89,
+    "MODn": 179,
+    "MODg": 67
+  },
+  "gate_info": {
+    "F1": {
+      "C2p": {
+        "accepted": 291,
+        "rejected": 267,
+        "rolled_back": 102,
+        "vetoed": 25
+      },
+      "C3p": {
+        "accepted": 135,
+        "rejected": 423,
+        "rolled_back": 59,
+        "vetoed": 5
+      },
+      "CTRLn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 283,
+        "vetoed": 31
+      },
+      "CTRLg": {
+        "accepted": 100,
+        "rejected": 458,
+        "rolled_back": 33,
+        "vetoed": 13
+      },
+      "MODn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 181,
+        "vetoed": 31
+      },
+      "MODg": {
+        "accepted": 115,
+        "rejected": 443,
+        "rolled_back": 37,
+        "vetoed": 7
+      }
+    },
+    "F4": {
+      "C2p": {
+        "accepted": 312,
+        "rejected": 246,
+        "rolled_back": 82,
+        "vetoed": 29
+      },
+      "C3p": {
+        "accepted": 110,
+        "rejected": 448,
+        "rolled_back": 24,
+        "vetoed": 2
+      },
+      "CTRLn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 248,
+        "vetoed": 31
+      },
+      "CTRLg": {
+        "accepted": 92,
+        "rejected": 466,
+        "rolled_back": 33,
+        "vetoed": 12
+      },
+      "MODn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 134,
+        "vetoed": 30
+      },
+      "MODg": {
+        "accepted": 88,
+        "rejected": 470,
+        "rolled_back": 26,
+        "vetoed": 11
+      }
+    },
+    "F6": {
+      "C2p": {
+        "accepted": 207,
+        "rejected": 351,
+        "rolled_back": 106,
+        "vetoed": 15
+      },
+      "C3p": {
+        "accepted": 127,
+        "rejected": 431,
+        "rolled_back": 63,
+        "vetoed": 4
+      },
+      "CTRLn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 277,
+        "vetoed": 31
+      },
+      "CTRLg": {
+        "accepted": 119,
+        "rejected": 439,
+        "rolled_back": 57,
+        "vetoed": 20
+      },
+      "MODn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 206,
+        "vetoed": 27
+      },
+      "MODg": {
+        "accepted": 116,
+        "rejected": 442,
+        "rolled_back": 42,
+        "vetoed": 17
+      }
+    },
+    "F9": {
+      "C2p": {
+        "accepted": 210,
+        "rejected": 348,
+        "rolled_back": 104,
+        "vetoed": 26
+      },
+      "C3p": {
+        "accepted": 112,
+        "rejected": 446,
+        "rolled_back": 64,
+        "vetoed": 5
+      },
+      "CTRLn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 317,
+        "vetoed": 31
+      },
+      "CTRLg": {
+        "accepted": 113,
+        "rejected": 445,
+        "rolled_back": 53,
+        "vetoed": 14
+      },
+      "MODn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 270,
+        "vetoed": 30
+      },
+      "MODg": {
+        "accepted": 108,
+        "rejected": 450,
+        "rolled_back": 44,
+        "vetoed": 8
+      }
+    },
+    "F15": {
+      "C2p": {
+        "accepted": 299,
+        "rejected": 259,
+        "rolled_back": 82,
+        "vetoed": 25
+      },
+      "C3p": {
+        "accepted": 113,
+        "rejected": 445,
+        "rolled_back": 35,
+        "vetoed": 2
+      },
+      "CTRLn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 275,
+        "vetoed": 31
+      },
+      "CTRLg": {
+        "accepted": 98,
+        "rejected": 460,
+        "rolled_back": 47,
+        "vetoed": 19
+      },
+      "MODn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 160,
+        "vetoed": 31
+      },
+      "MODg": {
+        "accepted": 103,
+        "rejected": 455,
+        "rolled_back": 39,
+        "vetoed": 14
+      }
+    },
+    "F23": {
+      "C2p": {
+        "accepted": 309,
+        "rejected": 249,
+        "rolled_back": 78,
+        "vetoed": 28
+      },
+      "C3p": {
+        "accepted": 99,
+        "rejected": 459,
+        "rolled_back": 12,
+        "vetoed": 0
+      },
+      "CTRLn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 245,
+        "vetoed": 31
+      },
+      "CTRLg": {
+        "accepted": 85,
+        "rejected": 473,
+        "rolled_back": 29,
+        "vetoed": 11
+      },
+      "MODn": {
+        "accepted": 558,
+        "rejected": 0,
+        "rolled_back": 91,
+        "vetoed": 30
+      },
+      "MODg": {
+        "accepted": 86,
+        "rejected": 472,
+        "rolled_back": 17,
+        "vetoed": 10
+      }
+    }
+  },
+  "raw_medians": {
+    "F1": {
+      "C1_div": 3608259.1915338985,
+      "C2p": 6810762.337240518,
+      "C3p": 2123416.772680883,
+      "CTRLn": 4321052.374113913,
+      "CTRLg": 3152426.894983362,
+      "MODn": 3949394.751328286,
+      "MODg": 3608259.1915338985
+    },
+    "F4": {
+      "C1_div": 49.07267482120881,
+      "C2p": 65.46177036115739,
+      "C3p": 44.225232114164385,
+      "CTRLn": 49.511764676946825,
+      "CTRLg": 44.256309847028774,
+      "MODn": 37.99993225664957,
+      "MODg": 41.14448809352626
+    },
+    "F6": {
+      "C1_div": 5.247752516218952,
+      "C2p": 6.456977308186083,
+      "C3p": 5.342992994919086,
+      "CTRLn": 5.545690034039239,
+      "CTRLg": 5.168128611980478,
+      "MODn": 4.912293500257647,
+      "MODg": 4.789385383278045
+    },
+    "F9": {
+      "C1_div": 26.41380231853566,
+      "C2p": 30.834329845343177,
+      "C3p": 28.404334457526375,
+      "CTRLn": 29.62025996724242,
+      "CTRLg": 25.646058505118503,
+      "MODn": 40.42053359845988,
+      "MODg": 26.312454686732735
+    },
+    "F15": {
+      "C1_div": 6.63824697113705,
+      "C2p": 10.97278784687478,
+      "C3p": 5.195650585973681,
+      "CTRLn": 4.364954657055705,
+      "CTRLg": 4.536528213357542,
+      "MODn": 3.94667927486762,
+      "MODg": 4.108716792708492
+    },
+    "F23": {
+      "C1_div": 245.2640615627106,
+      "C2p": 251.20556570798863,
+      "C3p": 243.04268248736435,
+      "CTRLn": 243.78071622029256,
+      "CTRLg": 243.92611353357552,
+      "MODn": 242.27261773776945,
+      "MODg": 242.32388412959563
+    }
+  },
+  "provenance": {
+    "git_commit": "da78b6013523bc0fd7a718dfc35daf5c0bb486fe",
+    "git_dirty": false,
+    "timestamp_utc": "2026-07-19T00:14:52.611852+00:00",
+    "python_version": "3.12.5",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "hostname": "stormbreaker-5.local",
+    "package_versions": {
+      "numpy": "1.26.0",
+      "scipy": "1.16.3",
+      "scikit-learn": "1.8.0",
+      "minionpy": "1.4.0",
+      "mealpy": "3.0.3",
+      "opfunu": "1.0.1",
+      "cma": "4.4.4"
+    }
+  }
+}
