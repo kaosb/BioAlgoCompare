@@ -127,6 +127,22 @@ class CooperativeRunner:
     def _target_error(self, solver):
         return float(solver.best_solution.fitness())
 
+    def _target_median(self, solver):
+        """Median CACHED fitness of the population (0 FES; harm-sensitive).
+
+        Meta-audit fix (18 Jul 2026): the memory effect was measured on
+        best_solution.fitness(), which is MONOTONE non-increasing, so recorded
+        effects were <= 0 ALWAYS and is_harmful_pair/triple never fired (dead
+        code, verified empirically: 24/24 effects = 0.0 under maximally harmful
+        transfer). The population median CAN worsen, making harm measurable.
+        Only cached values are read (no re-evaluation -> no FES charged).
+        """
+        vals = [ind._fitness for ind in solver.population
+                if getattr(ind, "_fitness", None) is not None]
+        if not vals:
+            return self._target_error(solver)
+        return float(np.median(vals))
+
     # --- control point: propose + gate transfers across all ordered pairs ---
     def _control_point(self):
         n = len(self.solvers)
@@ -145,14 +161,16 @@ class CooperativeRunner:
                 self.stats["proposed"] += 1
                 allow = self.gate.allows(src["name"], tgt["name"], cand_fit,
                                          tgt_fits, curve)
-                err_before = self._target_error(tgt_solver)
+                # harm-sensitive metric (population median), NOT the monotone
+                # incumbent (meta-audit fix: incumbent gave effect<=0 always).
+                med_before = self._target_median(tgt_solver)
                 if allow:
                     self._inject(tgt_solver, cand.position)
                     self.stats["accepted"] += 1
                 else:
                     self.stats["rejected"] += 1
-                err_after = self._target_error(tgt_solver)
-                effect = (err_after - err_before) if allow else None
+                med_after = self._target_median(tgt_solver)
+                effect = (med_after - med_before) if allow else None
                 self.memory.record(src["name"], tgt["name"],
                                    {"cand_fit": cand_fit}, allow, effect)
                 self.stats["transfers"].append(
@@ -164,9 +182,12 @@ class CooperativeRunner:
         """Intent per intent_mode: source (mechanism) / random (ABL) /
         adversarial (CTRL+, guaranteed-harmful preset)."""
         from cooperative.functional_intent import (classify_intent, INTENSIFY,
-                                                   DIVERSIFY, ADVERSARIAL)
+                                                   DIVERSIFY, ADVERSARIAL,
+                                                   MODERATE)
         if self.intent_mode == "adversarial":
             return ADVERSARIAL
+        if self.intent_mode == "moderate":
+            return MODERATE      # E4: subtle harm — does the gate discriminate?
         if self.intent_mode == "random":
             return self._rng.choice([INTENSIFY, DIVERSIFY, None])
         return classify_intent(src_solver)
@@ -188,7 +209,11 @@ class CooperativeRunner:
             tgt = next(e for e in self.solvers if e["name"] == tgt_name)
             err_now = self._target_error(tgt["solver"])
             improvement = rec["err_at_commit"] - err_now
-            effect = -improvement          # >0 = harmful (no/negative progress)
+            # Rollback decision keeps the stop-loss semantics (incumbent-based).
+            # The MEMORY effect uses the harm-sensitive population median
+            # (meta-audit fix): med_now - med_at_commit > 0 = the regime harmed.
+            med_now = self._target_median(tgt["solver"])
+            effect = med_now - rec.get("med_at_commit", med_now)
             if improvement <= 0.0:
                 self._controllers[tgt_name].reset()      # rollback
                 self.stats["rolled_back"] += 1
@@ -220,6 +245,7 @@ class CooperativeRunner:
                     self._pending[tgt["name"]] = {
                         "src": src["name"], "intent": intent,
                         "err_at_commit": self._target_error(tgt["solver"]),
+                        "med_at_commit": self._target_median(tgt["solver"]),
                     }
                     self.stats["accepted"] += 1
                 else:

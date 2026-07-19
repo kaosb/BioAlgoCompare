@@ -24,22 +24,24 @@ import numpy as np
 
 INTENSIFY = "INTENSIFY"
 DIVERSIFY = "DIVERSIFY"
-ADVERSARIAL = "ADVERSARIAL"   # CTRL+ only
+ADVERSARIAL = "ADVERSARIAL"   # CTRL+ only (catastrophic, sanity test)
+MODERATE = "MODERATE"         # E4: mildly suboptimal, NOT freezing — tests
+                              # whether the gate discriminates SUBTLE harm
 
 # Multiplicative presets per solver class name, per intent (frozen).
 # Contracts: DE (mF, mCR) | PSO (w_f, c1_f, c2_f) | GWO (a_f,) |
 #            GA (cx_f, mut_f) | ACO (xi_f, q_f)
 PRESETS = {
     "DE":  {INTENSIFY: (0.65, 1.10), DIVERSIFY: (1.35, 0.60),
-            ADVERSARIAL: (0.10, 0.05)},
+            ADVERSARIAL: (0.10, 0.05), MODERATE: (0.45, 0.55)},
     "PSO": {INTENSIFY: (0.70, 0.80, 1.30), DIVERSIFY: (1.20, 1.30, 0.70),
-            ADVERSARIAL: (1.60, 0.10, 0.10)},
+            ADVERSARIAL: (1.60, 0.10, 0.10), MODERATE: (1.15, 1.10, 0.85)},
     "GWO": {INTENSIFY: (0.50,), DIVERSIFY: (1.50,),
-            ADVERSARIAL: (2.50,)},
+            ADVERSARIAL: (2.50,), MODERATE: (1.70,)},
     "GA":  {INTENSIFY: (1.10, 0.40), DIVERSIFY: (0.90, 2.50),
-            ADVERSARIAL: (0.05, 8.00)},
+            ADVERSARIAL: (0.05, 8.00), MODERATE: (0.70, 2.80)},
     "ACO": {INTENSIFY: (0.70, 0.50), DIVERSIFY: (1.30, 1.80),
-            ADVERSARIAL: (3.00, 6.00)},
+            ADVERSARIAL: (3.00, 6.00), MODERATE: (1.60, 2.20)},
 }
 
 # classify_intent thresholds (frozen)
