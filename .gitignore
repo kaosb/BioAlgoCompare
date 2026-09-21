@@ -1,0 +1,193 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Results and logs
+results/*.png
+results/*.csv
+logs/
+logs/*.log
+*.log
+benchmark.log
+massive_benchmark.log
+analyze_massive.log
+analyze.log
+
+# Testing and coverage
+.coverage
+.coverage.*
+coverage.xml
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+htmlcov/
+
+# Resultados masivos y temporales
+results/massive_*/checkpoints/
+results/*_parallel_info.json
+results/analysis_*
+results/statistical_analysis_*
+results/benchmark_*
+*.json.gz
+
+# Excluir todos los resultados pero incluir los resumenes importantes
+results/**/*
+!results/massive_1000runs/massive_benchmark_summary.csv
+!results/statistical_analysis_1000runs/algorithm_comparison.csv
+!results/massive_1000runs/massive_benchmark_report.html
+
+# --- resúmenes versionados del estudio IL x CEC (resultados invalidados, D16) ---
+# Se versionan los RESUMENES (con provenance), no las celdas raw ni los .pkl.
+# Los modelos (incl. de_il_jade 458MB) se regeneran via scripts/cec_harness/
+# (ver REPRODUCIBILITY.md); su binario no entra al repo.
+!results/cec_protocol/
+!results/cec_protocol/protocol_summary.json
+!results/expert_il/
+!results/expert_il/expert_il_report.json
+!results/expert_il/static_best.json
+!results/expert_il/teacher_mean.json
+!results/constructo/
+!results/constructo/constructo_K.json
+!results/cooperative/
+!results/cooperative/pilot_C0C2C3.json
+
+# Temporary files
+*.tmp
+*.backup_*
+*.save
+*.orig
+*.rej
+
+# Directorios de backup
+backup/
+*/backup/
+**/backup/
+algorithms/backup/.coverage*
+data/vrp/Solomon/converted/
+
+# temp LaTeX
+*.save
+paper.pdf
+
+# — LaTeX build files —
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.synctex(busy)
+*.synctex.gz(busy)
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*_fixed.*
+*_minimal.*
+*.bak
+texput.*
+*~
+
+# PDFs de compilación (ignora todos salvo versiones finales)
+*.pdf
+
+# Runtime logs
+experiment_log.txt
+
+# Archivos temporales y de sistema
+.DS_Store
+._.DS_Store
+*.coverage*
+analyze.log
+benchmark.log
+massive_benchmark.log
+
+# Archivos patch (ya aplicados)
+*.patch
+
+# Directorios de instalación
+*.egg-info/
+bioalgocompare.egg-info/
+
+# Archivos de checkpoint
+*.pkl
+*.pkl.gz
+checkpoint.pkl
+
+# Directorios temporales de resultados
+results/test_*/
+results/validation_*/
+
+# Archivos HTML de cobertura
+**/coverage_html/
+htmlcov/
+
+# Archivos de salida temporales
+ho_phase_analysis.png
+cec2017_comparison_results.csv
+*.png
+!figures/*.png
+!docs/**/*.png
+
+!results/cooperative/pilot_C0C2C3_BUGGED_maxiter.json
+!results/cooperative/ladder_C1.json
+!results/cooperative/complementarity_screen.json
+!results/cooperative/parametric_ladder.json
+!results/cooperative/parametric_ladder_*.json
+!results/cooperative/scale/
+!results/cooperative/scale/summary_*.json
+!results/cooperative/e5_discriminant.json
+!results/cooperative/e1_action_space.json
+!results/cooperative/stoploss_ablation.json
+!results/cooperative/stoploss_ablation_conadmision.json
+!results/cooperative/scale_v2_memfix/
+!results/cooperative/scale_v2_memfix/summary_*.json
+!results/cooperative/scale_dt500/
+!results/cooperative/scale_dt500/summary_*.json

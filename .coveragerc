@@ -1,0 +1,18 @@
+[run]
+omit =
+    scripts/*
+    utils/improved/*
+    utils/statistical_analysis.py
+    utils/benchmarking.py
+    utils/fixed_method.py
+    utils/html_generator.py
+    utils/modify_statistical_analysis.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError

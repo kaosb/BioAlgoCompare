@@ -1,0 +1,85 @@
+{
+  "pair": "PSO+ACO",
+  "sbs": "ACO",
+  "dim": 10,
+  "runs": 51,
+  "levels": {
+    "5000": {
+      "n_funcs": 70,
+      "contrasts": {
+        "C2p_vs_C1div": {
+          "A_sig_wins": 10,
+          "A_sig_losses": 20,
+          "n_funcs": 70
+        },
+        "C3p_vs_C2p": {
+          "A_sig_wins": 6,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "C3p_vs_ABL": {
+          "A_sig_wins": 1,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "CTRLg_vs_CTRLn": {
+          "A_sig_wins": 59,
+          "A_sig_losses": 2,
+          "n_funcs": 70
+        },
+        "C3p_vs_C0SBS": {
+          "A_sig_wins": 9,
+          "A_sig_losses": 11,
+          "n_funcs": 70
+        }
+      }
+    },
+    "50000": {
+      "n_funcs": 70,
+      "contrasts": {
+        "C2p_vs_C1div": {
+          "A_sig_wins": 4,
+          "A_sig_losses": 18,
+          "n_funcs": 70
+        },
+        "C3p_vs_C2p": {
+          "A_sig_wins": 1,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "C3p_vs_ABL": {
+          "A_sig_wins": 0,
+          "A_sig_losses": 0,
+          "n_funcs": 70
+        },
+        "CTRLg_vs_CTRLn": {
+          "A_sig_wins": 58,
+          "A_sig_losses": 2,
+          "n_funcs": 70
+        },
+        "C3p_vs_C0SBS": {
+          "A_sig_wins": 27,
+          "A_sig_losses": 8,
+          "n_funcs": 70
+        }
+      }
+    }
+  },
+  "provenance": {
+    "git_commit": "5e084a8dfc7eeff9ec43a0dfeaa103e137489731",
+    "git_dirty": false,
+    "timestamp_utc": "2026-07-18T22:40:27.752808+00:00",
+    "python_version": "3.12.5",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "hostname": "stormbreaker-5.local",
+    "package_versions": {
+      "numpy": "1.26.0",
+      "scipy": "1.16.3",
+      "scikit-learn": "1.8.0",
+      "minionpy": "1.4.0",
+      "mealpy": "3.0.3",
+      "opfunu": "1.0.1",
+      "cma": "4.4.4"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "training_date": "2026-03-21T20:42:23.236401",
+  "n_train": 320,
+  "n_val": 80,
+  "results": {
+    "alpha": {
+      "train_mse": 0.007885732640151275,
+      "train_r2": 0.8536221627111413,
+      "feature_importance": {
+        "n_customers": 0.0011805869301735605,
+        "n_depots": 0.0,
+        "avg_demand": 0.0016923551007685903,
+        "demand_std": 0.0012413463392979027,
+        "capacity": 0.015602484899584143,
+        "area_span": 0.0013161192057109057,
+        "density": 0.0035990548231468965,
+        "iteration": 0.042531591843710206,
+        "progress": 0.04246344403233749,
+        "best_fitness": 0.16937123228587359,
+        "avg_fitness": 0.16827225568935766,
+        "fitness_std": 0.17778269243303035,
+        "convergence_rate": 0.0377741952941722,
+        "stagnation_counter": 0.09482961422174425,
+        "population_diversity": 0.20761965864174378,
+        "dynamic_orders": 0.0,
+        "avg_delay": 0.0,
+        "load_imbalance": 0.0,
+        "elite_ratio": 0.0,
+        "improvement_rate": 0.034723368259348554
+      },
+      "val_mse": 0.06825636815224682,
+      "val_r2": -0.3023789656266094
+    },
+    "beta": {
+      "train_mse": 0.005027123750076666,
+      "train_r2": 0.8436356309839836,
+      "feature_importance": {
+        "n_customers": 0.0024038105990866177,
+        "n_depots": 0.0,
+        "avg_demand": 0.001861407197467042,
+        "demand_std": 0.0022135893155773496,
+        "capacity": 0.0033089439355016804,
+        "area_span": 0.003659448769571384,
+        "density": 0.004301451925565249,
+        "iteration": 0.0562598693564672,
+        "progress": 0.05119961967868592,
+        "best_fitness": 0.13256524907507622,
+        "avg_fitness": 0.14328675882642408,
+        "fitness_std": 0.18526902361977893,
+        "convergence_rate": 0.049272089674405245,
+        "stagnation_counter": 0.09610649527418993,
+        "population_diversity": 0.22309027851406518,
+        "dynamic_orders": 0.0,
+        "avg_delay": 0.0,
+        "load_imbalance": 0.0,
+        "elite_ratio": 0.0,
+        "improvement_rate": 0.04520196423813784
+      },
+      "val_mse": 0.03203291703670095,
+      "val_r2": -0.15995991071479354
+    },
+    "gamma": {
+      "train_mse": 0.006580469484368741,
+      "train_r2": 0.841337212868169,
+      "feature_importance": {
+        "n_customers": 0.001474975062925426,
+        "n_depots": 0.0,
+        "avg_demand": 0.0020983807440078297,
+        "demand_std": 0.0015637659183197962,
+        "capacity": 0.0024945938904621812,
+        "area_span": 0.003634718812970154,
+        "density": 0.004600246167927949,
+        "iteration": 0.04792783824590835,
+        "progress": 0.041506540707386824,
+        "best_fitness": 0.14535355141778075,
+        "avg_fitness": 0.16378117627788452,
+        "fitness_std": 0.202645993456355,
+        "convergence_rate": 0.04586624132071626,
+        "stagnation_counter": 0.08932937838221999,
+        "population_diversity": 0.2069549114496811,
+        "dynamic_orders": 0.0,
+        "avg_delay": 0.0,
+        "load_imbalance": 0.0,
+        "elite_ratio": 0.0,
+        "improvement_rate": 0.04076768814545395
+      },
+      "val_mse": 0.03730238860347982,
+      "val_r2": 0.021255992925571898
+    }
+  },
+  "args": {
+    "demos": "data/demos/ho_demos_real.csv",
+    "output": "models/ho_il_model_v2.pkl",
+    "test_split": 0.2,
+    "n_estimators": 100,
+    "seed": 42
+  }
+}

@@ -1,0 +1,216 @@
+{
+ "config": {
+  "pairs": [
+   "GWO+GA",
+   "DE+GA",
+   "PSO+ACO"
+  ],
+  "funcs": [
+   1,
+   4,
+   6,
+   9,
+   15,
+   23
+  ],
+  "dim": 10,
+  "pop": 30,
+  "runs": 51,
+  "level": 5000,
+  "transfer_every": 500,
+  "seed0": 5000,
+  "arms": [
+   "CTRLg (rollback)",
+   "CTRLg_noRB (sin rollback)"
+  ]
+ },
+ "sanity_bitmatch": {
+  "GWO+GA": false,
+  "DE+GA": false,
+  "PSO+ACO": true
+ },
+ "per_pair": {
+  "GWO+GA": {
+   "funcs": {
+    "F1": {
+     "median_CTRLn": 4269020.677324649,
+     "median_noRB": 4496718.3379402775,
+     "p": 0.4405215911492053,
+     "rank_biserial": 0.16129032258064516,
+     "bitmatch_hist": false,
+     "p_holm": 0.4405215911492053
+    },
+    "F4": {
+     "median_CTRLn": 37.18938548774173,
+     "median_noRB": 37.002853628643265,
+     "p": 0.15585067474311434,
+     "rank_biserial": 0.2513842746400886,
+     "bitmatch_hist": false,
+     "p_holm": 0.432938036629968
+    },
+    "F6": {
+     "median_CTRLn": 4.09016381629624,
+     "median_noRB": 3.423939609615104,
+     "p": 0.0019454699491209643,
+     "rank_biserial": -0.5304347826086957,
+     "bitmatch_hist": false,
+     "p_holm": 0.009727349745604822
+    },
+    "F9": {
+     "median_CTRLn": 14.712555154132701,
+     "median_noRB": 20.029818599131204,
+     "p": 0.0009983393445953807,
+     "rank_biserial": 0.5696969696969697,
+     "bitmatch_hist": false,
+     "p_holm": 0.0059900360675722835
+    },
+    "F15": {
+     "median_CTRLn": 3.3348545403709977,
+     "median_noRB": 3.4927333071764224,
+     "p": 0.10733727053148487,
+     "rank_biserial": 0.26700680272108845,
+     "bitmatch_hist": false,
+     "p_holm": 0.4293490821259395
+    },
+    "F23": {
+     "median_CTRLn": 242.3493833858115,
+     "median_noRB": 242.2872190728217,
+     "p": 0.144312678876656,
+     "rank_biserial": -0.34782608695652173,
+     "bitmatch_hist": false,
+     "p_holm": 0.432938036629968
+    }
+   },
+   "stoploss_wins": 1,
+   "stoploss_losses": 1,
+   "n_funcs": 6
+  },
+  "DE+GA": {
+   "funcs": {
+    "F1": {
+     "median_CTRLn": 2729679.062062927,
+     "median_noRB": 3627394.659983269,
+     "p": 0.08686008151624075,
+     "rank_biserial": 0.5384615384615384,
+     "bitmatch_hist": false,
+     "p_holm": 0.1737201630324815
+    },
+    "F4": {
+     "median_CTRLn": 39.302207880756896,
+     "median_noRB": 45.118565285503564,
+     "p": 0.0009815397525216685,
+     "rank_biserial": 1.0,
+     "bitmatch_hist": false,
+     "p_holm": 0.003926159010086674
+    },
+    "F6": {
+     "median_CTRLn": 5.0955388377644795,
+     "median_noRB": 5.552711544294311,
+     "p": 8.857457687863549e-05,
+     "rank_biserial": 1.0,
+     "bitmatch_hist": false,
+     "p_holm": 0.000531447461271813
+    },
+    "F9": {
+     "median_CTRLn": 26.792613876603582,
+     "median_noRB": 27.939532615574876,
+     "p": 0.0002136700043906972,
+     "rank_biserial": 0.968421052631579,
+     "bitmatch_hist": false,
+     "p_holm": 0.001068350021953486
+    },
+    "F15": {
+     "median_CTRLn": 4.48905968905251,
+     "median_noRB": 4.56333822074339,
+     "p": 0.17295491798842066,
+     "rank_biserial": 0.6190476190476191,
+     "bitmatch_hist": false,
+     "p_holm": 0.1737201630324815
+    },
+    "F23": {
+     "median_CTRLn": 243.73388489590388,
+     "median_noRB": 244.10172713487827,
+     "p": 0.007685794055213263,
+     "rank_biserial": 1.0,
+     "bitmatch_hist": false,
+     "p_holm": 0.023057382165639788
+    }
+   },
+   "stoploss_wins": 4,
+   "stoploss_losses": 0,
+   "n_funcs": 6
+  },
+  "PSO+ACO": {
+   "funcs": {
+    "F1": {
+     "median_CTRLn": 273166.9953270023,
+     "median_noRB": 293987.9870387404,
+     "p": 0.017960477526078763,
+     "rank_biserial": 1.0,
+     "bitmatch_hist": true,
+     "p_holm": 0.10776286515647257
+    },
+    "F4": {
+     "median_CTRLn": 34.78027988744532,
+     "median_noRB": 34.78027988744532,
+     "p": 0.28504940740261275,
+     "rank_biserial": 0.6666666666666666,
+     "bitmatch_hist": true,
+     "p_holm": 0.7179496236644858
+    },
+    "F6": {
+     "median_CTRLn": 1.3097205034424633,
+     "median_noRB": 1.3097205034424633,
+     "p": 0.06788915486182899,
+     "rank_biserial": 1.0,
+     "bitmatch_hist": true,
+     "p_holm": 0.33944577430914497
+    },
+    "F9": {
+     "median_CTRLn": 16.918882650874934,
+     "median_noRB": 17.91011677036431,
+     "p": 0.23931654122149526,
+     "rank_biserial": 0.38461538461538464,
+     "bitmatch_hist": true,
+     "p_holm": 0.7179496236644858
+    },
+    "F15": {
+     "median_CTRLn": 2.4659529335119714,
+     "median_noRB": 2.587591688299426,
+     "p": 0.6271697535393987,
+     "rank_biserial": -0.11333333333333333,
+     "bitmatch_hist": true,
+     "p_holm": 0.7179496236644858
+    },
+    "F23": {
+     "median_CTRLn": 242.22837986536888,
+     "median_noRB": 242.2283798705821,
+     "p": 0.06788915486182899,
+     "rank_biserial": 1.0,
+     "bitmatch_hist": true,
+     "p_holm": 0.33944577430914497
+    }
+   },
+   "stoploss_wins": 0,
+   "stoploss_losses": 0,
+   "n_funcs": 6
+  }
+ },
+ "provenance": {
+  "git_commit": "027fd10e5f59cf84f2fcf981f8f4033ee033f2e4",
+  "git_dirty": true,
+  "timestamp_utc": "2026-08-16T22:55:26.448059+00:00",
+  "python_version": "3.12.13",
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "hostname": "neuromancer",
+  "package_versions": {
+   "numpy": "1.26.0",
+   "scipy": "1.16.3",
+   "scikit-learn": "not-installed",
+   "minionpy": "not-installed",
+   "mealpy": "not-installed",
+   "opfunu": "1.0.1",
+   "cma": "not-installed"
+  }
+ }
+}

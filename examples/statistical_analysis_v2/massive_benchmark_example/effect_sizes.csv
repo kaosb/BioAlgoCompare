@@ -1,0 +1,9 @@
+Algorithm,A12,A12_interpretation,Cliff_delta,Cliff_interpretation,Is_best
+SMO,0.76,large,0.52,large,False
+AHA,0.74,large,0.48,large,False
+FOA,0.72,large,0.44,medium,False
+HHO,0.68,medium,0.36,medium,False
+SMA,0.6,small,0.2,small,False
+GTO,0.56,small,0.12,negligible,False
+GVOA,0.52,negligible,0.04,negligible,False
+WOA,0.5,negligible,0.0,negligible,True

@@ -1,0 +1,216 @@
+{
+ "config": {
+  "pairs": [
+   "GWO+GA",
+   "DE+GA",
+   "PSO+ACO"
+  ],
+  "funcs": [
+   1,
+   4,
+   6,
+   9,
+   15,
+   23
+  ],
+  "dim": 10,
+  "pop": 30,
+  "runs": 51,
+  "level": 5000,
+  "transfer_every": 500,
+  "seed0": 5000,
+  "arms": [
+   "CTRLn (rollback)",
+   "CTRLn_noRB (sin rollback)"
+  ]
+ },
+ "sanity_bitmatch": {
+  "GWO+GA": true,
+  "DE+GA": true,
+  "PSO+ACO": true
+ },
+ "per_pair": {
+  "GWO+GA": {
+   "funcs": {
+    "F1": {
+     "median_CTRLn": 12151476.836432576,
+     "median_noRB": 12151476.836432576,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F4": {
+     "median_CTRLn": 38.36364955146877,
+     "median_noRB": 38.36364955146877,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F6": {
+     "median_CTRLn": 4.900680995733978,
+     "median_noRB": 4.900680995733978,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F9": {
+     "median_CTRLn": 18.27269233560014,
+     "median_noRB": 18.27269233560014,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F15": {
+     "median_CTRLn": 3.2454546915234914,
+     "median_noRB": 3.2454546915234914,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F23": {
+     "median_CTRLn": 242.39874815046687,
+     "median_noRB": 242.39874815046687,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    }
+   },
+   "stoploss_wins": 0,
+   "stoploss_losses": 0,
+   "n_funcs": 6
+  },
+  "DE+GA": {
+   "funcs": {
+    "F1": {
+     "median_CTRLn": 4015450.271731062,
+     "median_noRB": 4015450.271731062,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F4": {
+     "median_CTRLn": 46.366821307322084,
+     "median_noRB": 46.366821307322084,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F6": {
+     "median_CTRLn": 5.732663384070975,
+     "median_noRB": 5.732663384070975,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F9": {
+     "median_CTRLn": 29.202561929998524,
+     "median_noRB": 29.202561929998524,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F15": {
+     "median_CTRLn": 4.265702694800666,
+     "median_noRB": 4.265702694800666,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F23": {
+     "median_CTRLn": 244.296430630156,
+     "median_noRB": 244.296430630156,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    }
+   },
+   "stoploss_wins": 0,
+   "stoploss_losses": 0,
+   "n_funcs": 6
+  },
+  "PSO+ACO": {
+   "funcs": {
+    "F1": {
+     "median_CTRLn": 6317618.464938245,
+     "median_noRB": 6317618.464938245,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F4": {
+     "median_CTRLn": 35.962542328433585,
+     "median_noRB": 35.962542328433585,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F6": {
+     "median_CTRLn": 4.303867451208589,
+     "median_noRB": 4.303867451208589,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F9": {
+     "median_CTRLn": 31.32857792083587,
+     "median_noRB": 31.32857792083587,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F15": {
+     "median_CTRLn": 2.941323757119335,
+     "median_noRB": 2.941323757119335,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    },
+    "F23": {
+     "median_CTRLn": 249.4567083961565,
+     "median_noRB": 249.4567083961565,
+     "p": 1.0,
+     "rank_biserial": 0.0,
+     "bitmatch_hist": true,
+     "p_holm": 1.0
+    }
+   },
+   "stoploss_wins": 0,
+   "stoploss_losses": 0,
+   "n_funcs": 6
+  }
+ },
+ "provenance": {
+  "git_commit": "027fd10e5f59cf84f2fcf981f8f4033ee033f2e4",
+  "git_dirty": true,
+  "timestamp_utc": "2026-08-16T22:47:30.244918+00:00",
+  "python_version": "3.12.13",
+  "platform": "macOS-26.6.1-arm64-arm-64bit",
+  "hostname": "neuromancer",
+  "package_versions": {
+   "numpy": "1.26.0",
+   "scipy": "1.16.3",
+   "scikit-learn": "not-installed",
+   "minionpy": "not-installed",
+   "mealpy": "not-installed",
+   "opfunu": "1.0.1",
+   "cma": "not-installed"
+  }
+ }
+}
