@@ -277,7 +277,10 @@ class CooperativeRunner:
                     next_cp += self.transfer_every
         except BudgetExhausted:
             pass
+        return self._finish()
 
+    def _finish(self):
+        """Resultado final sin re-evaluar (compartido por los candidatos de Fase 2)."""
         # Read each solver's best WITHOUT re-evaluating: the budget is exhausted,
         # so calling ind.fitness() on a cache-invalidated individual would charge
         # one more FES and raise BudgetExhausted here (outside the guarded loop).

@@ -119,18 +119,31 @@ class RegimeController:
     neutral. The orchestrator owns commit/rollback bookkeeping.
     """
 
-    def __init__(self, solver_key: str):
-        if solver_key not in PRESETS:
+    def __init__(self, solver_key: str, presets: dict | None = None):
+        # presets=None -> PRESETS (campaña v11, comportamiento histórico intacto).
+        # Fase 2 (enmienda v0.3) pasa PRESETS_V2 (vocabulario acotado), opcionalmente
+        # extendido con una clave "BENIGN" (control positivo de transferencia benigna).
+        table = presets if presets is not None else PRESETS
+        if solver_key not in table:
             raise KeyError(f"no parametric presets for solver '{solver_key}'")
         self.solver_key = solver_key
-        self.n_outputs = len(PRESETS[solver_key][INTENSIFY])
+        self._presets = table[solver_key]
+        self.n_outputs = len(self._presets[INTENSIFY])
         self._neutral = tuple(1.0 for _ in range(self.n_outputs))
         self._active = self._neutral
         self.intent = None
 
     def set_intent(self, intent: str) -> None:
-        self._active = PRESETS[self.solver_key][intent]
+        self._active = tuple(self._presets[intent])
         self.intent = intent
+
+    def set_factors(self, factors) -> None:
+        """Régimen explícito (no del vocabulario), p.ej. control benigno."""
+        factors = tuple(float(f) for f in factors)
+        if len(factors) != self.n_outputs:
+            raise ValueError(f"{self.solver_key}: esperaba {self.n_outputs} factores")
+        self._active = factors
+        self.intent = "EXPLICIT"
 
     def reset(self) -> None:
         self._active = self._neutral

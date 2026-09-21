@@ -129,6 +129,28 @@ def _greedy_clairvoyant(ca, cb):
     return min(ea, eb)
 
 
+def _greedy_relative(ca, cb):
+    """(2c, EXPLORATORIO — no pre-registrado en v0.2): conmutación clarividente
+    por MEJORA RELATIVA (prev-cur)/prev, la señal que H1 nombra; evita que las
+    escalas de error distintas de cada solver dominen la elección."""
+    K = len(ca); ia = ib = 0
+    def rgain(c, i):
+        if i >= len(c):
+            return -float("inf")
+        if i == 0:
+            return float("inf")
+        prev, cur = c[i - 1], c[i]
+        return (prev - cur) / (abs(prev) + 1e-12)
+    for _ in range(K):
+        if ia >= K:  ib += 1; continue
+        if ib >= K:  ia += 1; continue
+        if rgain(ca, ia) >= rgain(cb, ib): ia += 1
+        else: ib += 1
+    ea = ca[ia - 1] if ia > 0 else float("inf")
+    eb = cb[ib - 1] if ib > 0 else float("inf")
+    return min(ea, eb)
+
+
 def cota_oraculo():
     out = {}
     for pdir, (A, B, levels) in PAIRS.items():
@@ -138,7 +160,7 @@ def cota_oraculo():
             if not ca_all or not cb_all or not cells:
                 out[f"{pdir}_{lv}"] = {"status": "sin_curvas (diferido/en curso)"}
                 continue
-            rows_g, rows_s, bitm = [], [], []
+            rows_g, rows_s, rows_r, bitm = [], [], [], []
             for name, c in cells.items():
                 if name not in ca_all or name not in cb_all:
                     continue
@@ -146,13 +168,16 @@ def cota_oraculo():
                 bitm.append((CA.get("bitmatch_hist"), CB.get("bitmatch_hist")))
                 g = [_greedy_clairvoyant(CA["curves"][r], CB["curves"][r]) for r in range(c["runs"])]
                 s = [_static_opt(CA["curves"][r], CB["curves"][r]) for r in range(c["runs"])]
+                rl = [_greedy_relative(CA["curves"][r], CB["curves"][r]) for r in range(c["runs"])]
                 rows_g.append((g, c["errors"]["C1_div"]))
                 rows_s.append((s, c["errors"]["C1_div"]))
-            tg, ts = contrast_table(rows_g), contrast_table(rows_s)
-            tg["pass"] = bool(tg["wins"] >= TH["wins_min"] and tg["median_r"] >= TH["median_r_min"])
-            ts["pass"] = bool(ts["wins"] >= TH["wins_min"] and ts["median_r"] >= TH["median_r_min"])
+                rows_r.append((rl, c["errors"]["C1_div"]))
+            tg, ts, tr = contrast_table(rows_g), contrast_table(rows_s), contrast_table(rows_r)
+            for t in (tg, ts, tr):
+                t["pass"] = bool(t["wins"] >= TH["wins_min"] and t["median_r"] >= TH["median_r_min"])
             out[f"{pdir}_{lv}"] = {"2b_conmutacion_clarividente": tg,
                                    "2a_asignacion_estatica_optima": ts,
+                                   "2c_exploratorio_mejora_relativa": tr,
                                    "n_funcs_con_curvas": len(rows_g),
                                    "bitmatch_all": bool(all(x in (True, None) and y in (True, None) for x, y in bitm))}
     return out
@@ -243,12 +268,12 @@ def main():
     for k, v in c1.items():
         L.append(f"| {k} | {v['wins']}/{v['losses']} | {v['median_r']:.2f} | {v['vbs_choice']} | {'SI' if v['pass'] else 'no'} |")
     L += ["\n## (2) Oraculo de conmutacion por Δ vs C1_div\n",
-          "| celda | 2b clarividente mejor/peor (r) | 2a estatica optima mejor/peor (r) | funcs | bitmatch | supera(2b) |", "|---|---|---|---|---|---|"]
+          "| celda | 2b clarividente abs. mejor/peor (r) | 2a estatica optima mejor/peor (r) | 2c EXPLORATORIO rel. mejor/peor (r) | funcs | bitmatch | supera(2b) | supera(2a) |", "|---|---|---|---|---|---|---|---|"]
     for k, v in c2.items():
         if "status" in v:
-            L.append(f"| {k} | {v['status']} | | | | |"); continue
-        g, s = v["2b_conmutacion_clarividente"], v["2a_asignacion_estatica_optima"]
-        L.append(f"| {k} | {g['wins']}/{g['losses']} ({g['median_r']:.2f}) | {s['wins']}/{s['losses']} ({s['median_r']:.2f}) | {v['n_funcs_con_curvas']} | {v['bitmatch_all']} | {'SI' if g['pass'] else 'no'} |")
+            L.append(f"| {k} | {v['status']} | | | | | | |"); continue
+        g, s, rr = v["2b_conmutacion_clarividente"], v["2a_asignacion_estatica_optima"], v["2c_exploratorio_mejora_relativa"]
+        L.append(f"| {k} | {g['wins']}/{g['losses']} ({g['median_r']:.2f}) | {s['wins']}/{s['losses']} ({s['median_r']:.2f}) | {rr['wins']}/{rr['losses']} ({rr['median_r']:.2f}) | {v['n_funcs_con_curvas']} | {v['bitmatch_all']} | {'SI' if g['pass'] else 'no'} | {'SI' if s['pass'] else 'no'} |")
     L += ["\n## (3) Cribado de complementariedad\n",
           "| nivel | solvers | ganadores | modal | cambio de ganador | supera | split por par |", "|---|---|---|---|---|---|---|"]
     for k, v in c3.items():
@@ -259,7 +284,7 @@ def main():
     else:
         for arm, v in c4.items():
             L.append(f"\n**{arm}**: elegibles={v['n_eligible']}, estables={v['n_stable']}, supera={'SI' if v['pass'] else 'no'}\n")
-            L += ["| triple | semillas | signo mayoritario | estabilidad |", "|---|---|---|---|"]
+            L += ["| triple | obs (función×semilla) | signo mayoritario | estabilidad |", "|---|---|---|---|"]
             for t, r in sorted(v["triples"].items()):
                 L.append(f"| {t} | {r['n_seed_obs']} | {r['majority_sign']} | {r['stability']:.2f} |")
     L += ["\n## Corte 1\n", f"cota1 supera: {any1}; cota2 supera: {any2}", f"\n**Decision: {decision}**"]

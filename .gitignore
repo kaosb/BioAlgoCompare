@@ -191,3 +191,7 @@ cec2017_comparison_results.csv
 !results/cooperative/scale_v2_memfix/summary_*.json
 !results/cooperative/scale_dt500/
 !results/cooperative/scale_dt500/summary_*.json
+!results/cooperative/fase1/
+!results/cooperative/fase1/cotas_fase1.json
+!results/cooperative/fase1/cotas_fase1.md
+!results/cooperative/fase1/e2_effect_logs.json

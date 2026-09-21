@@ -1,0 +1,400 @@
+{
+ "thresholds": {
+  "wins_min": 20,
+  "n_funcs": 70,
+  "median_r_min": 0.3,
+  "winner_change_min": 0.4,
+  "stability_min": 0.7,
+  "stability_min_seeds": 30,
+  "alpha": 0.05
+ },
+ "cota1_vbs": {
+  "GWOGA_5000": {
+   "wins": 15,
+   "losses": 0,
+   "n": 70,
+   "median_r": 0.33182503770739064,
+   "vbs_choice": {
+    "GA": 42,
+    "GWO": 28
+   },
+   "pass": false
+  },
+  "GWOGA_50000": {
+   "wins": 39,
+   "losses": 3,
+   "n": 70,
+   "median_r": 0.8348416289592759,
+   "vbs_choice": {
+    "GA": 57,
+    "GWO": 13
+   },
+   "pass": true
+  },
+  "GWOGA_500000": {
+   "wins": 46,
+   "losses": 3,
+   "n": 69,
+   "median_r": 1.0,
+   "vbs_choice": {
+    "GA": 58,
+    "GWO": 11
+   },
+   "pass": true
+  },
+  "DEGA_5000": {
+   "wins": 63,
+   "losses": 1,
+   "n": 70,
+   "median_r": 0.9834087481146305,
+   "vbs_choice": {
+    "DE": 34,
+    "GA": 36
+   },
+   "pass": true
+  },
+  "DEGA_50000": {
+   "wins": 49,
+   "losses": 0,
+   "n": 70,
+   "median_r": 0.949931357158248,
+   "vbs_choice": {
+    "DE": 58,
+    "GA": 12
+   },
+   "pass": true
+  },
+  "PSOACO_5000": {
+   "wins": 27,
+   "losses": 1,
+   "n": 70,
+   "median_r": 0.4379392509868104,
+   "vbs_choice": {
+    "ACO": 44,
+    "PSO": 26
+   },
+   "pass": true
+  },
+  "PSOACO_50000": {
+   "wins": 8,
+   "losses": 7,
+   "n": 70,
+   "median_r": -0.12417725643532096,
+   "vbs_choice": {
+    "ACO": 26,
+    "PSO": 44
+   },
+   "pass": false
+  }
+ },
+ "cota2_oraculo": {
+  "GWOGA_5000": {
+   "2b_conmutacion_clarividente": {
+    "wins": 5,
+    "losses": 15,
+    "n": 70,
+    "median_r": 0.0,
+    "pass": false
+   },
+   "2a_asignacion_estatica_optima": {
+    "wins": 31,
+    "losses": 1,
+    "n": 70,
+    "median_r": 0.5233785822021115,
+    "pass": true
+   },
+   "2c_exploratorio_mejora_relativa": {
+    "wins": 7,
+    "losses": 14,
+    "n": 70,
+    "median_r": 0.0,
+    "pass": false
+   },
+   "n_funcs_con_curvas": 70,
+   "bitmatch_all": true
+  },
+  "GWOGA_50000": {
+   "2b_conmutacion_clarividente": {
+    "wins": 0,
+    "losses": 57,
+    "n": 70,
+    "median_r": -0.9513826043237807,
+    "pass": false
+   },
+   "2a_asignacion_estatica_optima": {
+    "wins": 43,
+    "losses": 0,
+    "n": 70,
+    "median_r": 0.858974358974359,
+    "pass": true
+   },
+   "2c_exploratorio_mejora_relativa": {
+    "wins": 0,
+    "losses": 57,
+    "n": 70,
+    "median_r": -0.9513826043237807,
+    "pass": false
+   },
+   "n_funcs_con_curvas": 70,
+   "bitmatch_all": true
+  },
+  "GWOGA_500000": {
+   "status": "sin_curvas (diferido/en curso)"
+  },
+  "DEGA_5000": {
+   "2b_conmutacion_clarividente": {
+    "wins": 16,
+    "losses": 0,
+    "n": 70,
+    "median_r": 0.4438349007314525,
+    "pass": false
+   },
+   "2a_asignacion_estatica_optima": {
+    "wins": 65,
+    "losses": 0,
+    "n": 70,
+    "median_r": 1.0,
+    "pass": true
+   },
+   "2c_exploratorio_mejora_relativa": {
+    "wins": 36,
+    "losses": 1,
+    "n": 70,
+    "median_r": 0.6045106056733964,
+    "pass": true
+   },
+   "n_funcs_con_curvas": 70,
+   "bitmatch_all": true
+  },
+  "DEGA_50000": {
+   "2b_conmutacion_clarividente": {
+    "wins": 40,
+    "losses": 8,
+    "n": 70,
+    "median_r": 0.8578038502850533,
+    "pass": true
+   },
+   "2a_asignacion_estatica_optima": {
+    "wins": 55,
+    "losses": 0,
+    "n": 70,
+    "median_r": 1.0,
+    "pass": true
+   },
+   "2c_exploratorio_mejora_relativa": {
+    "wins": 40,
+    "losses": 8,
+    "n": 70,
+    "median_r": 0.8578038502850533,
+    "pass": true
+   },
+   "n_funcs_con_curvas": 70,
+   "bitmatch_all": true
+  },
+  "PSOACO_5000": {
+   "2b_conmutacion_clarividente": {
+    "wins": 1,
+    "losses": 13,
+    "n": 70,
+    "median_r": -0.2195169775227164,
+    "pass": false
+   },
+   "2a_asignacion_estatica_optima": {
+    "wins": 61,
+    "losses": 0,
+    "n": 70,
+    "median_r": 0.7713965586234495,
+    "pass": true
+   },
+   "2c_exploratorio_mejora_relativa": {
+    "wins": 3,
+    "losses": 8,
+    "n": 70,
+    "median_r": -0.05715886354541816,
+    "pass": false
+   },
+   "n_funcs_con_curvas": 70,
+   "bitmatch_all": true
+  },
+  "PSOACO_50000": {
+   "2b_conmutacion_clarividente": {
+    "wins": 1,
+    "losses": 7,
+    "n": 70,
+    "median_r": -0.04791047385906627,
+    "pass": false
+   },
+   "2a_asignacion_estatica_optima": {
+    "wins": 17,
+    "losses": 0,
+    "n": 70,
+    "median_r": 0.46822508398656215,
+    "pass": false
+   },
+   "2c_exploratorio_mejora_relativa": {
+    "wins": 1,
+    "losses": 7,
+    "n": 70,
+    "median_r": -0.04791047385906627,
+    "pass": false
+   },
+   "n_funcs_con_curvas": 70,
+   "bitmatch_all": true
+  }
+ },
+ "cota3_cribado": {
+  "5000": {
+   "solvers": [
+    "ACO",
+    "DE",
+    "GA",
+    "GWO",
+    "PSO",
+    "SSA",
+    "WOA"
+   ],
+   "n_funcs": 70,
+   "winner_counts": {
+    "ACO": 22,
+    "DE": 19,
+    "GWO": 3,
+    "PSO": 9,
+    "GA": 11,
+    "SSA": 5,
+    "WOA": 1
+   },
+   "modal": "ACO",
+   "winner_change": 0.686,
+   "pass": true,
+   "pair_split": {
+    "GWOGA": {
+     "GWO": 23,
+     "GA": 47
+    },
+    "DEGA": {
+     "DE": 29,
+     "GA": 41
+    },
+    "PSOACO": {
+     "PSO": 21,
+     "ACO": 49
+    }
+   }
+  },
+  "50000": {
+   "solvers": [
+    "ACO",
+    "DE",
+    "GA",
+    "GWO",
+    "PSO",
+    "SSA",
+    "WOA"
+   ],
+   "n_funcs": 70,
+   "winner_counts": {
+    "DE": 44,
+    "PSO": 7,
+    "GWO": 1,
+    "SSA": 4,
+    "GA": 9,
+    "ACO": 5
+   },
+   "modal": "DE",
+   "winner_change": 0.371,
+   "pass": false,
+   "pair_split": {
+    "GWOGA": {
+     "GWO": 8,
+     "GA": 62
+    },
+    "DEGA": {
+     "DE": 50,
+     "GA": 20
+    },
+    "PSOACO": {
+     "PSO": 37,
+     "ACO": 33
+    }
+   }
+  }
+ },
+ "cota4_estabilidad": {
+  "C2p": {
+   "triples": {
+    "GA->DE:DIVERSIFY": {
+     "n_seed_obs": 305,
+     "majority_sign": "beneficio",
+     "stability": 1.0
+    },
+    "DE->GA:DIVERSIFY": {
+     "n_seed_obs": 301,
+     "majority_sign": "da\u00f1o",
+     "stability": 0.9
+    },
+    "GA->DE:INTENSIFY": {
+     "n_seed_obs": 80,
+     "majority_sign": "beneficio",
+     "stability": 1.0
+    },
+    "DE->GA:INTENSIFY": {
+     "n_seed_obs": 46,
+     "majority_sign": "beneficio",
+     "stability": 1.0
+    }
+   },
+   "n_eligible": 4,
+   "n_stable": 4,
+   "pass": true
+  },
+  "C3p": {
+   "triples": {
+    "GA->DE:DIVERSIFY": {
+     "n_seed_obs": 246,
+     "majority_sign": "beneficio",
+     "stability": 1.0
+    },
+    "GA->DE:INTENSIFY": {
+     "n_seed_obs": 175,
+     "majority_sign": "beneficio",
+     "stability": 1.0
+    },
+    "DE->GA:DIVERSIFY": {
+     "n_seed_obs": 96,
+     "majority_sign": "da\u00f1o",
+     "stability": 1.0
+    },
+    "DE->GA:INTENSIFY": {
+     "n_seed_obs": 67,
+     "majority_sign": "beneficio",
+     "stability": 1.0
+    }
+   },
+   "n_eligible": 4,
+   "n_stable": 4,
+   "pass": true
+  }
+ },
+ "corte1": {
+  "cota1_supera": true,
+  "cota2_supera": true,
+  "decision": "CONTINUAR a Fase 2 (alguna cota de asignacion supera el umbral)"
+ },
+ "provenance": {
+  "git_commit": "66249ede38d02e872226348dfa37a00d5fbc5143",
+  "git_dirty": true,
+  "timestamp_utc": "2026-09-21T19:09:57.812340+00:00",
+  "python_version": "3.12.13",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "hostname": "neuromancer",
+  "package_versions": {
+   "numpy": "1.26.0",
+   "scipy": "1.16.3",
+   "scikit-learn": "not-installed",
+   "minionpy": "not-installed",
+   "mealpy": "not-installed",
+   "opfunu": "1.0.1",
+   "cma": "not-installed"
+  }
+ }
+}
