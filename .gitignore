@@ -195,3 +195,12 @@ cec2017_comparison_results.csv
 !results/cooperative/fase1/cotas_fase1.json
 !results/cooperative/fase1/cotas_fase1.md
 !results/cooperative/fase1/e2_effect_logs.json
+!results/cooperative/fase2/
+!results/cooperative/fase2/benign_regimes.json
+!results/cooperative/fase2/piloto_summary.json
+!results/cooperative/fase2/piloto_secundarios.json
+!results/cooperative/fase2/piloto/
+!results/cooperative/fase2/piloto/**
+!results/cooperative/fase3/
+!results/cooperative/fase3/**
+results/cooperative/fase3/queue.log

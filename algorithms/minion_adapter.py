@@ -36,6 +36,10 @@ with warnings.catch_warnings():
     import minionpy as mp
 
 
+class _MinionBudgetExhausted(Exception):
+    """Raised from the objective when the exact FES budget is reached."""
+
+
 class _BestWrapper:
     """Minimal best-solution object exposing ``fitness()`` and ``position``."""
 
@@ -62,6 +66,9 @@ class MinionAlgorithm:
         self.seed = seed
         kwargs.pop("use_il", None)
         kwargs.pop("il_model", None)
+        # Explicit minionpy options (None -> minionpy defaults). The Fase 3
+        # confirmatory passes the author-published L-SHADE settings here.
+        self.minion_options = kwargs.pop("minion_options", None)
         self.best_solution = None
         self.convergence_curve = []
         self._result = None
@@ -78,21 +85,52 @@ class MinionAlgorithm:
         ub = np.asarray(raw.get_upper_bounds(), dtype=float)
         bounds = list(zip(lb.tolist(), ub.tolist()))
 
+        # Hard FES cap: minionpy's C++ core counts evaluations itself and may
+        # overshoot ``maxevals`` by a fraction of a batch. Every evaluation is
+        # counted here, the best point is tracked, and the run is cut at
+        # exactly ``max_fes``. The core may also stop earlier by its own
+        # schedule; ``fes_used`` records what was actually consumed.
+        state = {"n": 0, "best_x": None, "best_f": float("inf")}
+
+        def _eval_one(x):
+            if state["n"] >= max_fes:
+                raise _MinionBudgetExhausted()
+            state["n"] += 1
+            v = float(raw.evaluate(x))
+            if v < state["best_f"]:
+                state["best_f"] = v
+                state["best_x"] = np.array(x, dtype=float).copy()
+            return v
+
         def f(X, data=None):
             X = np.asarray(X, dtype=float)
             if X.ndim == 1:
-                return float(raw.evaluate(X))
-            return [float(raw.evaluate(row)) for row in X]
+                return _eval_one(X)
+            return [_eval_one(row) for row in X]
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
+            # minionpy >= 1.9 removed ``relTol``; the run is bounded by
+            # ``maxevals`` alone (no early stop by tolerance).
             m = mp.Minimizer(
                 func=f, bounds=bounds, x0=None, algo=self.MINION_ALGO,
-                relTol=0.0, maxevals=int(max_fes), seed=self.seed,
+                maxevals=int(max_fes), seed=self.seed,
+                options=self.minion_options,
             )
-            res = m.optimize()
-        self._result = res
-        self.best_solution = _BestWrapper(res.x, res.fun)
+            try:
+                res = m.optimize()
+                self._result = res
+                if float(res.fun) < state["best_f"]:
+                    state["best_f"] = float(res.fun)
+                    state["best_x"] = np.asarray(res.x, dtype=float)
+            except (_MinionBudgetExhausted, RuntimeError) as exc:
+                # pybind re-raises the Python cut as RuntimeError('<name>: ...')
+                if not isinstance(exc, _MinionBudgetExhausted) and \
+                        "_MinionBudgetExhausted" not in str(exc):
+                    raise
+                self._result = None
+        self.fes_used = int(state["n"])
+        self.best_solution = _BestWrapper(state["best_x"], state["best_f"])
         self.convergence_curve = [self.best_solution.fitness()]
         return self.best_solution
 
@@ -104,7 +142,9 @@ class MinionAlgorithm:
             "algorithm": self.NAME,
             "backend": "minionpy",
             "minion_algo": self.MINION_ALGO,
-            "author_params": "minionpy defaults (author-recommended)",
+            "author_params": ("explicit options" if self.minion_options
+                              else "minionpy defaults (author-recommended)"),
+            "minion_options": self.minion_options,
             "seed": self.seed,
         }
 

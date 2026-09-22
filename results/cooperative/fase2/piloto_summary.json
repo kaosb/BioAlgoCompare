@@ -1,0 +1,352 @@
+{
+ "criteria": "v0.1 \u00a75: mejor>peor en ambos presupuestos; mediana r>=0.3; peor<=2/12; en >=2 de 3 pares",
+ "contrasts": {
+  "GWO+GA_5000": {
+   "C1_island_vs_C1div": {
+    "wins": 3,
+    "losses": 0,
+    "median_r": 0.30249227896286723,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 2,
+    "losses": 0,
+    "median_r": 0.05024975024975025,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 4,
+    "losses": 4,
+    "median_r": -0.13281004709576139,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 3,
+    "losses": 0,
+    "median_r": 0.5106227106227106,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 0,
+    "losses": 2,
+    "median_r": -0.048265460030165915,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 3,
+    "losses": 0,
+    "median_r": 0.36681057038199893,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.05450980392156863,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.08295625942684766,
+    "n": 12
+   }
+  },
+  "GWO+GA_50000": {
+   "C1_island_vs_C1div": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.4497590872419874,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.013131313131313131,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 5,
+    "losses": 0,
+    "median_r": 0.31786819811013356,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.5443650552346204,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 1,
+    "losses": 0,
+    "median_r": -0.005279034690799397,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 1,
+    "losses": 0,
+    "median_r": 0.19181145063612565,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 3,
+    "losses": 0,
+    "median_r": 0.272878102289867,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": -0.19292929292929295,
+    "n": 12
+   }
+  },
+  "DE+GA_5000": {
+   "C1_island_vs_C1div": {
+    "wins": 7,
+    "losses": 0,
+    "median_r": 0.6771951787118622,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 1,
+    "losses": 2,
+    "median_r": -0.06277056277056277,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 9,
+    "losses": 0,
+    "median_r": 0.7703030303030303,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 7,
+    "losses": 0,
+    "median_r": 0.7229419703103914,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.43553544494720964,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 7,
+    "losses": 0,
+    "median_r": 0.8275050709939148,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 8,
+    "losses": 2,
+    "median_r": 0.9300627133444471,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 2,
+    "losses": 7,
+    "median_r": -0.5591303840997843,
+    "n": 12
+   }
+  },
+  "DE+GA_50000": {
+   "C1_island_vs_C1div": {
+    "wins": 7,
+    "losses": 1,
+    "median_r": 0.6128506787330317,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 1,
+    "losses": 4,
+    "median_r": -0.11327607966263428,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 7,
+    "losses": 1,
+    "median_r": 0.8393374741200827,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 7,
+    "losses": 1,
+    "median_r": 0.5128205128205128,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 6,
+    "losses": 1,
+    "median_r": 0.2458521870286576,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.2985704426698216,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 7,
+    "losses": 2,
+    "median_r": 0.555052790346908,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 1,
+    "losses": 1,
+    "median_r": -0.27978883861236803,
+    "n": 12
+   }
+  },
+  "PSO+ACO_5000": {
+   "C1_island_vs_C1div": {
+    "wins": 5,
+    "losses": 0,
+    "median_r": 0.39140271493212664,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.10259426847662143,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 1,
+    "losses": 5,
+    "median_r": -0.3755656108597285,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 5,
+    "losses": 1,
+    "median_r": 0.3003016591251886,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 2,
+    "losses": 0,
+    "median_r": 0.030165912518853696,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.16817496229260936,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 3,
+    "losses": 0,
+    "median_r": 0.19306184012066363,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.1262187088274045,
+    "n": 12
+   }
+  },
+  "PSO+ACO_50000": {
+   "C1_island_vs_C1div": {
+    "wins": 1,
+    "losses": 6,
+    "median_r": -0.3286311447655985,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 0,
+    "losses": 4,
+    "median_r": -0.2015620487147396,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 0,
+    "losses": 5,
+    "median_r": -0.2561576354679803,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 0,
+    "losses": 4,
+    "median_r": -0.288122941484286,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 0,
+    "losses": 3,
+    "median_r": -0.051583710407239816,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 0,
+    "losses": 3,
+    "median_r": -0.09261828003278072,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 0,
+    "losses": 4,
+    "median_r": -0.10105580693815988,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.004489795918367347,
+    "n": 12
+   }
+  }
+ },
+ "success": {
+  "A": {
+   "pairs_ok": {
+    "GWO+GA": false,
+    "DE+GA": true,
+    "PSO+ACO": false
+   },
+   "n_pairs_ok": 1,
+   "cumple_criterio": false
+  },
+  "B": {
+   "pairs_ok": {
+    "GWO+GA": true,
+    "DE+GA": true,
+    "PSO+ACO": false
+   },
+   "n_pairs_ok": 2,
+   "cumple_criterio": true
+  },
+  "C": {
+   "pairs_ok": {
+    "GWO+GA": false,
+    "DE+GA": false,
+    "PSO+ACO": false
+   },
+   "n_pairs_ok": 0,
+   "cumple_criterio": false
+  }
+ },
+ "corte2": "CONTINUAR a Fase 3 con B",
+ "provenance": {
+  "git_commit": "448e3021a5832e3f40735ad5e6ab2185a819d685",
+  "git_dirty": true,
+  "timestamp_utc": "2026-09-21T23:14:31.173254+00:00",
+  "python_version": "3.12.13",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "hostname": "neuromancer",
+  "package_versions": {
+   "numpy": "1.26.0",
+   "scipy": "1.16.3",
+   "scikit-learn": "not-installed",
+   "minionpy": "not-installed",
+   "mealpy": "not-installed",
+   "opfunu": "1.0.1",
+   "cma": "not-installed"
+  }
+ }
+}

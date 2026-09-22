@@ -1,0 +1,500 @@
+{
+ "DEGA_5000": {
+  "vs_SBS": {
+   "C1_div": {
+    "wins": 2,
+    "losses": 8,
+    "median_r": -0.86,
+    "n": 12
+   },
+   "C1_island": {
+    "wins": 4,
+    "losses": 5,
+    "median_r": 0.05,
+    "n": 12
+   },
+   "A": {
+    "wins": 2,
+    "losses": 8,
+    "median_r": -0.89,
+    "n": 12
+   },
+   "B": {
+    "wins": 2,
+    "losses": 5,
+    "median_r": -0.14,
+    "n": 12
+   },
+   "C": {
+    "wins": 4,
+    "losses": 5,
+    "median_r": 0.11,
+    "n": 12
+   }
+  },
+  "B_vs_C1_island": {
+   "wins": 0,
+   "losses": 3,
+   "median_r": -0.26,
+   "n": 12
+  },
+  "A_vs_C1_island": {
+   "wins": 5,
+   "losses": 6,
+   "median_r": -0.18,
+   "n": 12
+  },
+  "mech": {
+   "C1_island": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 0.0,
+    "kept": 0.0
+   },
+   "B": {
+    "proposed": 18.26,
+    "accepted": 8.76,
+    "rejected": 9.36,
+    "rolled_back": 2.64,
+    "kept": 5.17
+   },
+   "C": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 3.65,
+    "kept": 12.35
+   },
+   "BENg": {
+    "proposed": 18.0,
+    "accepted": 3.3,
+    "rejected": 14.7,
+    "rolled_back": 1.04,
+    "kept": 1.91
+   },
+   "BENn": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 4.75,
+    "kept": 11.25
+   }
+  }
+ },
+ "DEGA_50000": {
+  "vs_SBS": {
+   "C1_div": {
+    "wins": 8,
+    "losses": 3,
+    "median_r": 0.7,
+    "n": 12
+   },
+   "C1_island": {
+    "wins": 9,
+    "losses": 0,
+    "median_r": 0.86,
+    "n": 12
+   },
+   "A": {
+    "wins": 7,
+    "losses": 3,
+    "median_r": 0.74,
+    "n": 12
+   },
+   "B": {
+    "wins": 8,
+    "losses": 0,
+    "median_r": 0.77,
+    "n": 12
+   },
+   "C": {
+    "wins": 8,
+    "losses": 1,
+    "median_r": 0.7,
+    "n": 12
+   }
+  },
+  "B_vs_C1_island": {
+   "wins": 0,
+   "losses": 5,
+   "median_r": -0.09,
+   "n": 12
+  },
+  "A_vs_C1_island": {
+   "wins": 2,
+   "losses": 4,
+   "median_r": -0.23,
+   "n": 12
+  },
+  "mech": {
+   "C1_island": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 0.0,
+    "kept": 0.0
+   },
+   "B": {
+    "proposed": 198.0,
+    "accepted": 25.48,
+    "rejected": 172.52,
+    "rolled_back": 9.04,
+    "kept": 16.43
+   },
+   "C": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 98.03,
+    "kept": 97.97
+   },
+   "BENg": {
+    "proposed": 198.0,
+    "accepted": 16.08,
+    "rejected": 181.92,
+    "rolled_back": 10.18,
+    "kept": 5.81
+   },
+   "BENn": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 134.94,
+    "kept": 61.06
+   }
+  }
+ },
+ "GWOGA_5000": {
+  "vs_SBS": {
+   "C1_div": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.36,
+    "n": 12
+   },
+   "C1_island": {
+    "wins": 7,
+    "losses": 0,
+    "median_r": 0.72,
+    "n": 12
+   },
+   "A": {
+    "wins": 4,
+    "losses": 3,
+    "median_r": 0.19,
+    "n": 12
+   },
+   "B": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.55,
+    "n": 12
+   },
+   "C": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.53,
+    "n": 12
+   }
+  },
+  "B_vs_C1_island": {
+   "wins": 0,
+   "losses": 2,
+   "median_r": -0.15,
+   "n": 12
+  },
+  "A_vs_C1_island": {
+   "wins": 2,
+   "losses": 6,
+   "median_r": -0.29,
+   "n": 12
+  },
+  "mech": {
+   "C1_island": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 0.0,
+    "kept": 0.0
+   },
+   "B": {
+    "proposed": 18.13,
+    "accepted": 7.1,
+    "rejected": 10.98,
+    "rolled_back": 3.36,
+    "kept": 3.03
+   },
+   "C": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 4.31,
+    "kept": 11.69
+   },
+   "BENg": {
+    "proposed": 18.0,
+    "accepted": 3.64,
+    "rejected": 14.36,
+    "rolled_back": 1.5,
+    "kept": 1.75
+   },
+   "BENn": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 6.02,
+    "kept": 9.98
+   }
+  }
+ },
+ "GWOGA_50000": {
+  "vs_SBS": {
+   "C1_div": {
+    "wins": 10,
+    "losses": 0,
+    "median_r": 0.96,
+    "n": 12
+   },
+   "C1_island": {
+    "wins": 11,
+    "losses": 0,
+    "median_r": 1.0,
+    "n": 12
+   },
+   "A": {
+    "wins": 11,
+    "losses": 0,
+    "median_r": 0.99,
+    "n": 12
+   },
+   "B": {
+    "wins": 11,
+    "losses": 0,
+    "median_r": 0.99,
+    "n": 12
+   },
+   "C": {
+    "wins": 11,
+    "losses": 0,
+    "median_r": 0.93,
+    "n": 12
+   }
+  },
+  "B_vs_C1_island": {
+   "wins": 0,
+   "losses": 1,
+   "median_r": -0.33,
+   "n": 12
+  },
+  "A_vs_C1_island": {
+   "wins": 1,
+   "losses": 4,
+   "median_r": -0.3,
+   "n": 12
+  },
+  "mech": {
+   "C1_island": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 0.0,
+    "kept": 0.0
+   },
+   "B": {
+    "proposed": 198.0,
+    "accepted": 35.15,
+    "rejected": 162.85,
+    "rolled_back": 28.51,
+    "kept": 6.49
+   },
+   "C": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 128.17,
+    "kept": 67.83
+   },
+   "BENg": {
+    "proposed": 198.0,
+    "accepted": 12.89,
+    "rejected": 185.11,
+    "rolled_back": 10.11,
+    "kept": 2.72
+   },
+   "BENn": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 163.5,
+    "kept": 32.5
+   }
+  }
+ },
+ "PSOACO_5000": {
+  "vs_SBS": {
+   "C1_div": {
+    "wins": 6,
+    "losses": 2,
+    "median_r": 0.36,
+    "n": 12
+   },
+   "C1_island": {
+    "wins": 5,
+    "losses": 0,
+    "median_r": 0.41,
+    "n": 12
+   },
+   "A": {
+    "wins": 1,
+    "losses": 8,
+    "median_r": -0.99,
+    "n": 12
+   },
+   "B": {
+    "wins": 5,
+    "losses": 0,
+    "median_r": 0.42,
+    "n": 12
+   },
+   "C": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.3,
+    "n": 12
+   }
+  },
+  "B_vs_C1_island": {
+   "wins": 0,
+   "losses": 0,
+   "median_r": -0.08,
+   "n": 12
+  },
+  "A_vs_C1_island": {
+   "wins": 1,
+   "losses": 6,
+   "median_r": -0.52,
+   "n": 12
+  },
+  "mech": {
+   "C1_island": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 0.0,
+    "kept": 0.0
+   },
+   "B": {
+    "proposed": 18.0,
+    "accepted": 10.89,
+    "rejected": 7.11,
+    "rolled_back": 2.17,
+    "kept": 7.55
+   },
+   "C": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 3.57,
+    "kept": 12.43
+   },
+   "BENg": {
+    "proposed": 18.0,
+    "accepted": 4.61,
+    "rejected": 13.39,
+    "rolled_back": 1.62,
+    "kept": 2.45
+   },
+   "BENn": {
+    "proposed": 18.0,
+    "accepted": 18.0,
+    "rejected": 0.0,
+    "rolled_back": 4.42,
+    "kept": 11.58
+   }
+  }
+ },
+ "PSOACO_50000": {
+  "vs_SBS": {
+   "C1_div": {
+    "wins": 6,
+    "losses": 2,
+    "median_r": 0.28,
+    "n": 12
+   },
+   "C1_island": {
+    "wins": 5,
+    "losses": 5,
+    "median_r": -0.05,
+    "n": 12
+   },
+   "A": {
+    "wins": 3,
+    "losses": 4,
+    "median_r": -0.22,
+    "n": 12
+   },
+   "B": {
+    "wins": 5,
+    "losses": 4,
+    "median_r": -0.03,
+    "n": 12
+   },
+   "C": {
+    "wins": 6,
+    "losses": 4,
+    "median_r": 0.24,
+    "n": 12
+   }
+  },
+  "B_vs_C1_island": {
+   "wins": 0,
+   "losses": 1,
+   "median_r": 0.05,
+   "n": 12
+  },
+  "A_vs_C1_island": {
+   "wins": 5,
+   "losses": 5,
+   "median_r": 0.17,
+   "n": 12
+  },
+  "mech": {
+   "C1_island": {
+    "proposed": 198.0,
+    "accepted": 198.0,
+    "rejected": 0.0,
+    "rolled_back": 0.0,
+    "kept": 0.0
+   },
+   "B": {
+    "proposed": 198.05,
+    "accepted": 94.29,
+    "rejected": 103.75,
+    "rolled_back": 44.32,
+    "kept": 49.52
+   },
+   "C": {
+    "proposed": 200.0,
+    "accepted": 200.0,
+    "rejected": 0.0,
+    "rolled_back": 71.36,
+    "kept": 126.64
+   },
+   "BENg": {
+    "proposed": 200.0,
+    "accepted": 35.8,
+    "rejected": 164.2,
+    "rolled_back": 22.94,
+    "kept": 12.68
+   },
+   "BENn": {
+    "proposed": 200.0,
+    "accepted": 200.0,
+    "rejected": 0.0,
+    "rolled_back": 114.17,
+    "kept": 83.83
+   }
+  }
+ }
+}

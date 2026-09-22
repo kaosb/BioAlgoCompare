@@ -17,6 +17,15 @@ schedules por iteración cubran exactamente el presupuesto.*
 | ACO_R | m = 2 hormigas/iter, q = 1e-4, ξ = 0.85, k = max(50, pop) | ninguno | 30 (archivo k = 50) | Socha & Dorigo (2008), Tabla 2 | `algorithms/aco.py:100-129` |
 | SSA | c1 = 2·exp(−(4t/T)²); N/2 líderes | c1 exponencial | 30 | Mirjalili et al. (2017) (Faris & Mirjalili, código MATLAB) | `algorithms/ssa.py:129-143` |
 | WOA | a: 2 → 0; b (espiral) con a2 = 0.5; p = 0.5 | a lineal (con ajuste por estancamiento en el código) | 30 | Mirjalili & Lewis (2016) | `algorithms/woa.py:143,164` |
+| L-SHADE (referencia externa, Fase 3) | N_init = 18·D, H = 6, r_arc = 2.6, N_min = 4, current-to-pbest/1/bin con archivo, reducción lineal; sin parada por tolerancia | reducción lineal de población en FES | 18·D → 4 | Tanabe & Fukunaga (2014); implementación C++ `minionpy 1.9.1`, opciones explícitas (v0.4 §D, D14) | `algorithms/minion_adapter.py`, `run_fase3_confirmatorio.py:lshade_options` |
+
+## Manejo de límites del dominio (v0.1 §6, declarado en v0.4)
+
+No es común entre solvers: cada implementación sigue su referencia. DE:
+reinicialización uniforme de la componente fuera de rango (`de.py:172`); PSO:
+recorte de posición y de velocidad (`pso.py:118-124`); GWO: recorte
+(`gwo.py:208`); ACO_R: recorte (`aco.py:216`); GA: operadores acotados al rango;
+L-SHADE (minionpy): reinicialización uniforme (`bound_strategy="random"`).
 
 ## Notas de fidelidad y alcance
 
