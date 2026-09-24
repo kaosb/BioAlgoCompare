@@ -223,6 +223,12 @@ class PSO(MetaheuristicAlgorithm):
         best_particle = min(self.population, key=lambda p: p.fitness())
         self.best_solution = best_particle
 
+    def absorb_injected(self, index) -> None:
+        """A migrant was written into population[index] and evaluated: it
+        becomes that particle's pbest (if better) and may become gbest."""
+        self.population[index].update_pbest()
+        self.update_global_best()
+
     def update_global_best(self) -> None:
         """Update global best position based on all particles."""
         for particle in self.population:

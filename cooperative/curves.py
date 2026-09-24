@@ -11,7 +11,7 @@ plus the best-so-far error sampled at every multiple of ``delta`` FES.
 
 import math
 
-from problems.continuous.cec_problem import BudgetExhausted, FESLimitProblem
+from problems.continuous.cec_problem import schedule_horizon, BudgetExhausted, FESLimitProblem
 
 
 class FESCurveProblem(FESLimitProblem):
@@ -44,13 +44,7 @@ def run_with_curve(algo_class, problem, pop_size: int, max_fes: int,
     wrapped = FESCurveProblem(problem, max_fes, delta=delta)
     algo = algo_class(problem=wrapped, population_size=pop_size,
                       max_iterations=1, seed=seed, **algo_params)
-    epi = getattr(algo, "evals_per_iteration", pop_size)
-    try:
-        epi = int(epi() if callable(epi) else epi)
-    except Exception:
-        epi = pop_size
-    epi = max(1, epi)
-    algo.max_iterations = max(1, int(math.ceil(max_fes / epi)))
+    algo.max_iterations = schedule_horizon(algo, max_fes)
     try:
         algo.execute()
     except BudgetExhausted:

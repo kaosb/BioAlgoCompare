@@ -162,6 +162,11 @@ class GA(MetaheuristicAlgorithm):
         self.base_crossover_rate = float(crossover_rate)
         self.base_mutation_rate = float(mutation_rate)
 
+    @property
+    def evals_per_iteration(self) -> int:
+        """Only the offspring are evaluated; the elites keep their fitness."""
+        return max(1, int(self.population_size) - int(self.elitism_size))
+
     def _get_il_params(self, iteration: int) -> tuple:
         """Return (cx_factor, mut_factor) multipliers; neutral (1.0, 1.0)."""
         if not self.use_il or self.il_model is None:

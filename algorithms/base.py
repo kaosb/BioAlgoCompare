@@ -99,6 +99,16 @@ class MetaheuristicAlgorithm(ABC):
         """Actualiza la población en cada iteración."""
         pass
 
+    @property
+    def evals_per_iteration(self) -> int:
+        """Function evaluations charged per update_population() call."""
+        return int(self.population_size)
+
+    @property
+    def init_evals(self) -> int:
+        """Function evaluations charged by initialize_population()."""
+        return int(self.population_size)
+
     def execute(self) -> "Individual":
         """Ejecuta el algoritmo completo."""
         self.start_time = time.time()

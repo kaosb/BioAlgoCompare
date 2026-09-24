@@ -1,16 +1,23 @@
-"""Fase 3 (enmienda v0.4) — confirmatorio bajo protocolo CEC.
+"""Fase 3 (enmienda v0.5) — confirmatorio bajo protocolo CEC.
+
+v0.5 (revisión interna del 23-Sep-2026): benchmark OFICIAL (minionpy = código C
+de Suganthan, 142/142 verificado), numeración oficial (71 problemas: CEC2014
+F1–F30, CEC2017 F1,F3–F30, CEC2022 F1–F12), semillas independientes por
+solver (`solver_seed`), reparto del presupuesto cooperativo por evaluaciones,
+migrante absorbido por GWO/PSO, mejor = mínimo evaluado, brazo de control
+C1_shared (runner compartido SIN migración) para atribuir la ganancia.
+Salida en results/cooperative/fase3_v05/ (lo de fase3/ es inválido: opfunu).
 
 Mecanismo bajo prueba: C1_island (migración fija de una élite cada Δ=500 FES,
 sin admisión ni rollback), con B (élite bajo admisión, v0.3) como variante.
 Baselines por celda: C0 de cada solver a presupuesto completo (SBS/VBS),
-C1_div (reparto igual). Referencia externa: L-SHADE aislado (minionpy, parámetros
+C1_div (reparto igual), C1_shared (mismo runner que C1_island, sin migrar). Referencia externa: L-SHADE aislado (minionpy, parámetros
 de Tanabe & Fukunaga 2014), una celda por (dimset, nivel, función), independiente
 del par.
 
-Matriz: 70 problemas (CEC2014 sin F22, CEC2017 sin F2, CEC2022 completo);
-dimset 10 (todo a 10D) y 50 (2014/2017 a 50D, 2022 a 20D); 51 corridas CRN
-(seed0 = 10000); cada nivel parte de cero. A 5·10⁶ la matriz se restringe a las
-12 funciones del piloto (recorte declarado en v0.4).
+Matriz: 71 problemas oficiales; dimset 10 (todo a 10D) y 50 (2014/2017 a 50D,
+2022 a 20D, su máximo); 51 corridas CRN (seed0 = 11000); cada nivel parte de
+cero. A 5·10⁶ la matriz se restringe a las 12 funciones del piloto (v0.4).
 
 Celdas resumibles (un JSON por celda, escritura atómica) con tiempo de pared.
 
@@ -33,26 +40,27 @@ from algorithms.ga import GA  # noqa: E402
 from algorithms.de import DE  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
 from algorithms.aco import ACO  # noqa: E402
-from cooperative.orchestrator import CooperativeRunner  # noqa: E402
+from cooperative.orchestrator import CooperativeRunner, solver_seed  # noqa: E402
 from cooperative.candidates import StructuralGatedRunner  # noqa: E402
 from utils.provenance import provenance  # noqa: E402
 
 _REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 _CLS = {"GWO": GWO, "GA": GA, "DE": DE, "PSO": PSO, "ACO": ACO}
 PAIRS = ["GWO+GA", "DE+GA", "PSO+ACO"]
-PROBLEMS = ([("CEC2014", f) for f in range(1, 31) if f != 22]
-            + [("CEC2017", f) for f in range(1, 30)]
+PROBLEMS = ([("CEC2014", f) for f in range(1, 31)]
+            + [("CEC2017", f) for f in range(1, 31) if f != 2]
             + [("CEC2022", f) for f in range(1, 13)])
 PILOT_FUNCS = [("CEC2014", f) for f in [2, 3, 5, 8, 11, 14, 17, 18, 20, 24, 26, 29]]
 DIMSETS = {"10": {"CEC2014": 10, "CEC2017": 10, "CEC2022": 10},
            "50": {"CEC2014": 50, "CEC2017": 50, "CEC2022": 20}}
 DIMSET = os.environ.get("DIMSET", "10")
 LEVELS = [int(x) for x in os.environ.get("LEVELS", "5000,50000").split(",")]
-POP, RUNS, SEED0, DELTA = 30, int(os.environ.get("RUNS", "51")), 10000, 500
+POP, RUNS, SEED0, DELTA = 30, int(os.environ.get("RUNS", "51")), 11000, 500
+NO_MIGRATION = 10**12
 N_JOBS = int(os.environ.get("N_JOBS", "12"))
-OUT_DIR = os.path.join(os.environ.get("FASE3_OUT", os.path.join(_REPO, "results", "cooperative", "fase3")),
+OUT_DIR = os.path.join(os.environ.get("FASE3_OUT", os.path.join(_REPO, "results", "cooperative", "fase3_v05")),
                        f"dim{DIMSET}")
-ARMS = ["C0_A", "C0_B", "C1_div", "C1_island", "B"]
+ARMS = ["C0_A", "C0_B", "C1_div", "C1_shared", "C1_island", "B"]
 
 if os.environ.get("ONLY_PAIR"):
     PAIRS = [p for p in PAIRS if p == os.environ["ONLY_PAIR"]]
@@ -85,15 +93,19 @@ def _dim(suite):
 
 def _run_arm(arm, a, b, suite, f, level, seed):
     dim = _dim(suite)
+    sa, sb = solver_seed(seed, 0), solver_seed(seed, 1)   # same mapping as the cooperative runner (CRN)
     if arm == "C0_A":
-        return float(run_with_fes(_CLS[a], CECProblem(suite, f, dim), pop_size=POP, max_fes=level, seed=seed)), {}
+        return float(run_with_fes(_CLS[a], CECProblem(suite, f, dim), pop_size=POP, max_fes=level, seed=sa)), {}
     if arm == "C0_B":
-        return float(run_with_fes(_CLS[b], CECProblem(suite, f, dim), pop_size=POP, max_fes=level, seed=seed)), {}
+        return float(run_with_fes(_CLS[b], CECProblem(suite, f, dim), pop_size=POP, max_fes=level, seed=sb)), {}
     if arm == "C1_div":
-        return float(min(run_with_fes(_CLS[a], CECProblem(suite, f, dim), pop_size=POP, max_fes=level // 2, seed=seed),
-                         run_with_fes(_CLS[b], CECProblem(suite, f, dim), pop_size=POP, max_fes=level // 2, seed=seed))), {}
+        return float(min(run_with_fes(_CLS[a], CECProblem(suite, f, dim), pop_size=POP, max_fes=level // 2, seed=sa),
+                         run_with_fes(_CLS[b], CECProblem(suite, f, dim), pop_size=POP, max_fes=level - level // 2, seed=sb))), {}
     prob = FESLimitProblem(CECProblem(suite, f, dim), max_fes=level)
-    if arm == "C1_island":
+    if arm == "C1_shared":
+        r = CooperativeRunner(prob, _specs(a, b), transfer_every=NO_MIGRATION, gate_enabled=False,
+                              seed=seed, transfer_mode="structural")
+    elif arm == "C1_island":
         r = CooperativeRunner(prob, _specs(a, b), transfer_every=DELTA, gate_enabled=False,
                               seed=seed, transfer_mode="structural")
     elif arm == "B":
@@ -103,7 +115,9 @@ def _run_arm(arm, a, b, suite, f, level, seed):
     res = r.run()
     if res["fes_used"] != level:
         raise AssertionError((arm, a, b, suite, f, level, seed, res["fes_used"]))
-    return float(res["best_fitness"]), res.get("transfer_stats", {})
+    st = dict(res.get("transfer_stats", {}))
+    st.update({f"fes_{k}": v for k, v in res.get("fes_per_solver", {}).items()})
+    return float(res["best_fitness"]), st
 
 
 def _cell_path(pair, level, suite, f):

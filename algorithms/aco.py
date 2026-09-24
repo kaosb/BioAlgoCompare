@@ -265,6 +265,11 @@ class ACO(MetaheuristicAlgorithm):
         self.convergence_curve.append(self.best_solution.fitness())
 
     @property
+    def init_evals(self) -> int:
+        """The solution archive (k solutions) is evaluated at initialization."""
+        return int(self.k)
+
+    @property
     def evals_per_iteration(self) -> int:
         """Function evaluations charged per update_population() call (m ants)."""
         return self.m

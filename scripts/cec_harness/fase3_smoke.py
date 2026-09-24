@@ -46,7 +46,7 @@ for dimset in ("10", "50"):
             core_h = (pair_s * N_PAIRS + per["LSHADE"]) * scale * nf * RUNS_FULL / 3600
             out["estimate_core_h"].setdefault(f"dim{dimset}_{lv}", {})[f"from_{base}"] = round(core_h, 1)
 print(json.dumps(out["estimate_core_h"], indent=1))
-os.makedirs(os.path.join(F._REPO, "results", "cooperative", "fase3"), exist_ok=True)
-with open(os.path.join(F._REPO, "results", "cooperative", "fase3", "costo_estimado.json"), "w") as fh:
+os.makedirs(os.path.join(F._REPO, "results", "cooperative", "fase3_v05"), exist_ok=True)
+with open(os.path.join(F._REPO, "results", "cooperative", "fase3_v05", "costo_estimado.json"), "w") as fh:
     json.dump(out, fh, indent=1)
 print("SMOKE_OK")

@@ -204,3 +204,7 @@ cec2017_comparison_results.csv
 !results/cooperative/fase3/
 !results/cooperative/fase3/**
 results/cooperative/fase3/queue.log
+!results/cooperative/fase2_v05/
+!results/cooperative/fase2_v05/**
+!results/cooperative/fase3_v05/
+!results/cooperative/fase3_v05/**

@@ -28,7 +28,7 @@ _REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 _CLS = {"GWO": GWO, "GA": GA, "DE": DE, "PSO": PSO, "ACO": ACO}
 FUNCS = [2, 3, 5, 8, 11, 14, 17, 18, 20, 24, 26, 29]
 LEVELS = [int(x) for x in os.environ.get("LEVELS", "5000,50000").split(",")]
-DIM, POP, TUNE_SEEDS, SEED0 = 10, 30, 11, 9500
+DIM, POP, TUNE_SEEDS, SEED0 = 10, 30, 11, 12500
 N_JOBS = int(os.environ.get("N_JOBS", "10"))
 GRIDS = {
     "DE":  [(f, cr) for f in (0.75, 1.00, 1.20) for cr in (0.67, 1.00)],
@@ -37,7 +37,7 @@ GRIDS = {
     "GA":  [(cx, m) for cx in (0.9, 1.0, 1.1) for m in (0.4, 1.0, 1.5)],
     "ACO": [(xi, q) for xi in (0.7, 1.0, 1.15) for q in (0.5, 1.0, 1.8)],
 }
-OUT = os.path.join(_REPO, "results", "cooperative", "fase2", "benign_regimes.json")
+OUT = os.path.join(_REPO, "results", "cooperative", "fase2_v05", "benign_regimes.json")
 
 
 class _Const:

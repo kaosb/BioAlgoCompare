@@ -1,4 +1,6 @@
-"""Fase 2 (enmienda v0.3 §D) — piloto de candidatos A, B, C.
+"""Fase 2 (enmienda v0.3 §D; re-ejecución v0.5 sobre el benchmark OFICIAL) — piloto
+de candidatos A, B, C. v0.5: semillas por solver, brazo C1_shared (control sin
+migración), salida en results/cooperative/fase2_v05/ (fase2/ = opfunu, inválido).
 
 12 funciones CEC2014-10D × 51 corridas CRN (seed0=9000) × {5e3, 5e4} × 3 pares.
 Brazos por celda: SBS_A, SBS_B, C1_div, C1_island, C3p_v2, A, B, C, BENg, BENn.
@@ -18,7 +20,7 @@ from multiprocessing import Pool
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import numpy as np  # noqa: E402
-from scipy.stats import wilcoxon  # noqa: E402
+from scipy.stats import wilcoxon, rankdata  # noqa: E402
 
 from problems.continuous.cec_problem import CECProblem, FESLimitProblem, run_with_fes  # noqa: E402
 from algorithms.gwo import GWO  # noqa: E402
@@ -26,7 +28,7 @@ from algorithms.ga import GA  # noqa: E402
 from algorithms.de import DE  # noqa: E402
 from algorithms.pso import PSO  # noqa: E402
 from algorithms.aco import ACO  # noqa: E402
-from cooperative.orchestrator import CooperativeRunner  # noqa: E402
+from cooperative.orchestrator import CooperativeRunner, solver_seed  # noqa: E402
 from cooperative.functional_intent import PRESETS_V2  # noqa: E402
 from cooperative.candidates import (BudgetAllocRunner, StructuralGatedRunner,  # noqa: E402
                                     UCBRegimeRunner, BenignControlRunner)
@@ -37,11 +39,12 @@ _CLS = {"GWO": GWO, "GA": GA, "DE": DE, "PSO": PSO, "ACO": ACO}
 PAIRS = ["GWO+GA", "DE+GA", "PSO+ACO"]
 FUNCS = [2, 3, 5, 8, 11, 14, 17, 18, 20, 24, 26, 29]
 LEVELS = [int(x) for x in os.environ.get("LEVELS", "5000,50000").split(",")]
-DIM, POP, RUNS, SEED0, DELTA = 10, 30, int(os.environ.get("RUNS", "51")), 9000, 500
+DIM, POP, RUNS, SEED0, DELTA = 10, 30, int(os.environ.get("RUNS", "51")), 12000, 500
+NO_MIGRATION = 10**12
 N_JOBS = int(os.environ.get("N_JOBS", "10"))
-OUT_DIR = os.path.join(_REPO, "results", "cooperative", "fase2", "piloto")
-BENIGN = os.path.join(_REPO, "results", "cooperative", "fase2", "benign_regimes.json")
-ARMS = ["SBS_A", "SBS_B", "C1_div", "C1_island", "C3p_v2", "A", "B", "C", "BENg", "BENn"]
+OUT_DIR = os.path.join(_REPO, "results", "cooperative", "fase2_v05", "piloto")
+BENIGN = os.path.join(_REPO, "results", "cooperative", "fase2_v05", "benign_regimes.json")
+ARMS = ["SBS_A", "SBS_B", "C1_div", "C1_shared", "C1_island", "C3p_v2", "A", "B", "C", "BENg", "BENn"]
 CANDIDATES = ["A", "B", "C"]
 
 
@@ -56,14 +59,18 @@ def _prob(f, level):
 
 def _run_arm(arm, a, b, f, level, seed, benign):
     specs = _specs(a, b)
+    sa, sb = solver_seed(seed, 0), solver_seed(seed, 1)
     if arm == "SBS_A":
-        return float(run_with_fes(_CLS[a], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level, seed=seed)), {}
+        return float(run_with_fes(_CLS[a], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level, seed=sa)), {}
     if arm == "SBS_B":
-        return float(run_with_fes(_CLS[b], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level, seed=seed)), {}
+        return float(run_with_fes(_CLS[b], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level, seed=sb)), {}
     if arm == "C1_div":
-        return float(min(run_with_fes(_CLS[a], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level // 2, seed=seed),
-                         run_with_fes(_CLS[b], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level // 2, seed=seed))), {}
-    if arm == "C1_island":
+        return float(min(run_with_fes(_CLS[a], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level // 2, seed=sa),
+                         run_with_fes(_CLS[b], CECProblem("CEC2014", f, DIM), pop_size=POP, max_fes=level - level // 2, seed=sb))), {}
+    if arm == "C1_shared":
+        r = CooperativeRunner(_prob(f, level), specs, transfer_every=NO_MIGRATION, gate_enabled=False,
+                              seed=seed, transfer_mode="structural")
+    elif arm == "C1_island":
         r = CooperativeRunner(_prob(f, level), specs, transfer_every=DELTA, gate_enabled=False,
                               seed=seed, transfer_mode="structural")
     elif arm == "C3p_v2":
@@ -131,11 +138,13 @@ def _holm(pv):
 
 
 def _paired(a, b):
-    a = np.asarray(a, float); b = np.asarray(b, float); d = a - b; dd = d[d != 0]
+    a = np.where(np.asarray(a, float) < 1e-8, 0.0, np.asarray(a, float))
+    b = np.where(np.asarray(b, float) < 1e-8, 0.0, np.asarray(b, float))
+    d = a - b; dd = d[d != 0]
     if len(dd) == 0:
         return 1.0, 0.0
     _, p = wilcoxon(a, b, zero_method="wilcox")
-    r = np.argsort(np.argsort(np.abs(dd))) + 1.0
+    r = rankdata(np.abs(dd))
     return float(p), float((r[dd < 0].sum() - r[dd > 0].sum()) / r.sum())
 
 
@@ -159,7 +168,7 @@ def stage_aggregate():
                 continue
             key = f"{pair}_{lv}"
             summary["contrasts"][key] = {}
-            for arm in ["C1_island", "C3p_v2", "A", "B", "C", "BENg", "BENn"]:
+            for arm in ["C1_shared", "C1_island", "C3p_v2", "A", "B", "C", "BENg", "BENn"]:
                 pv, rs = [], []
                 for c in cells:
                     p, r = _paired(c["errors"][arm], c["errors"]["C1_div"]); pv.append(p); rs.append(r)
@@ -194,7 +203,7 @@ def stage_aggregate():
     winners = [c for c in CANDIDATES if summary["success"][c]["cumple_criterio"]]
     summary["corte2"] = ("CONTINUAR a Fase 3 con " + ", ".join(winners)) if winners else "CAMINO ALTERNO (ningun candidato cumple)"
     summary["provenance"] = provenance()
-    out = os.path.join(_REPO, "results", "cooperative", "fase2", "piloto_summary.json")
+    out = os.path.join(_REPO, "results", "cooperative", "fase2_v05", "piloto_summary.json")
     with open(out, "w") as fh:
         json.dump(summary, fh, indent=1)
     print(json.dumps({k: v for k, v in summary.items() if k != "provenance"}, indent=1))

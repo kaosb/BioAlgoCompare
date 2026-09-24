@@ -23,6 +23,45 @@ import numpy as np
 from problems.continuous.cec_problem import BudgetExhausted
 from cooperative.transfer_gate import TransferGate
 from cooperative.transfer_memory import TransferMemory
+from problems.continuous.cec_problem import schedule_horizon
+
+
+def solver_seed(seed: int, index: int) -> int:
+    """Seed of the index-th solver of a pair. Independent streams per solver
+    (the same seed made both solvers start from the SAME population); the
+    isolated baselines (C0, C1_div) must use the same mapping to keep CRN."""
+    return int(seed) + 1_000_003 * int(index)
+
+
+class _SolverBudget:
+    """Per-solver view of the shared FES budget: forwards every evaluation to
+    the shared FESLimitProblem (exact global stop) and counts this solver's
+    own evaluations, so the scheduler can split the budget by EVALUATIONS."""
+
+    def __init__(self, shared):
+        self.shared = shared
+        self.fes = 0
+        self.max_fes = getattr(shared, "max_fes", None)
+
+    def evaluate(self, x):
+        v = self.shared.evaluate(x)
+        self.fes += 1
+        return v
+
+    def __getattr__(self, name):
+        return getattr(self.shared, name)
+
+
+def elite_of(solver):
+    """(position, fitness) of a solver's best-known point without re-evaluating.
+    PSO: gbest (not the current best particle); others: best_solution."""
+    if getattr(solver, "gbest_position", None) is not None:
+        return np.asarray(solver.gbest_position, dtype=float), float(solver.gbest_fitness)
+    ind = solver.best_solution
+    fit = getattr(ind, "_fitness", None)
+    if fit is None:
+        fit = solver.convergence_curve[-1] if getattr(solver, "convergence_curve", None) else float("inf")
+    return np.asarray(ind.position, dtype=float), float(fit)
 
 
 class CooperativeRunner:
@@ -74,18 +113,15 @@ class CooperativeRunner:
         self.solvers = []
         for i, (name, cls, kwargs) in enumerate(solver_specs):
             kw = dict(kwargs)
-            # CRN (common random numbers): each solver-in-cooperation uses
-            # the SAME seed as its isolated counterpart, so paired contrasts (DE-coop
-            # vs DE-iso, PSO-coop vs PSO-iso) share common random numbers. The old
-            # self.seed + i broke the pairing for the second solver.
-            kw.setdefault("seed", self.seed)
+            kw.setdefault("seed", solver_seed(self.seed, i))
+            kw["max_iterations"] = 1
+            view = _SolverBudget(shared_problem)
+            solver = cls(view, **kw)
             if budget_per_solver is not None:
-                pop = int(kw.get("population_size", 30))
-                epi = max(1, pop)  # per-iteration evals (structural transfer aside)
-                kw["max_iterations"] = max(1, math.ceil(budget_per_solver / epi))
-            solver = cls(shared_problem, **kw)
+                # schedules span the evaluations this solver really gets (B/N)
+                solver.max_iterations = schedule_horizon(solver, budget_per_solver)
             solver.initialize_population()
-            self.solvers.append({"name": name, "solver": solver})
+            self.solvers.append({"name": name, "solver": solver, "budget": view})
 
         self.stats = {"proposed": 0, "accepted": 0, "rejected": 0,
                       "rolled_back": 0, "kept": 0, "transfers": []}
@@ -130,6 +166,7 @@ class CooperativeRunner:
             except Exception:
                 pass
         ind.fitness()  # re-evaluate (consumes 1 FES from the shared budget)
+        absorb_migrant(target_solver, j)
 
     def _target_error(self, solver):
         return float(solver.best_solution.fitness())
@@ -160,8 +197,7 @@ class CooperativeRunner:
                 if a == b:
                     continue
                 src, tgt = self.solvers[a], self.solvers[b]
-                cand = src["solver"].best_solution
-                cand_fit = cand.fitness()
+                cand_pos, cand_fit = elite_of(src["solver"])
                 tgt_solver = tgt["solver"]
                 tgt_fits = [ind.fitness() for ind in tgt_solver.population]
                 curve = tgt_solver.convergence_curve
@@ -172,7 +208,7 @@ class CooperativeRunner:
                 # incumbent (internal-review fix: incumbent gave effect<=0 always).
                 med_before = self._target_median(tgt_solver)
                 if allow:
-                    self._inject(tgt_solver, cand.position)
+                    self._inject(tgt_solver, cand_pos)
                     self.stats["accepted"] += 1
                 else:
                     self.stats["rejected"] += 1
@@ -270,8 +306,11 @@ class CooperativeRunner:
         next_cp = self.transfer_every
         try:
             while True:
-                for entry in self.solvers:
-                    entry["solver"].update_population()
+                # the solver with fewer own evaluations steps next (ties ->
+                # lowest index): each solver gets ~B/N evaluations whatever its
+                # evaluations per iteration (ACO_R: 2; GA: pop - elitism).
+                entry = min(self.solvers, key=lambda e: e["budget"].fes)
+                entry["solver"].update_population()
                 if self.problem.fes >= next_cp:
                     cp()
                     next_cp += self.transfer_every
@@ -291,7 +330,10 @@ class CooperativeRunner:
         best = next(e["solver"].best_solution for e in self.solvers
                     if e["name"] == best_name)
         out = {
-            "best_fitness": float(per_solver[best_name]),
+            # minimum REALLY evaluated under the shared budget (a solver's
+            # best_solution can miss points of its interrupted last iteration)
+            "best_fitness": float(min(self.problem.best_error, per_solver[best_name])),
+            "fes_per_solver": {e["name"]: int(e["budget"].fes) for e in self.solvers},
             "best_position": np.asarray(best.position, dtype=float),
             "per_solver": per_solver,
             "fes_used": int(self.problem.fes),
@@ -314,3 +356,12 @@ class CooperativeRunner:
         if getattr(solver, "convergence_curve", None):
             return float(solver.convergence_curve[-1])
         return float("inf")
+
+
+def absorb_migrant(solver, index):
+    """Make an injected (already evaluated) individual visible to the solver's
+    memory: GWO leaders, PSO pbest/gbest. GA/DE/ACO_R read the population
+    directly and need nothing."""
+    hook = getattr(solver, "absorb_injected", None)
+    if hook is not None:
+        hook(index)

@@ -10,10 +10,10 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import numpy as np  # noqa: E402
-from scipy.stats import wilcoxon  # noqa: E402
+from scipy.stats import wilcoxon, rankdata  # noqa: E402
 
 _REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-PIL = os.path.join(_REPO, "results", "cooperative", "fase2", "piloto")
+PIL = os.path.join(_REPO, "results", "cooperative", "fase2_v05", "piloto")
 SBS = {"GWOGA": "SBS_A", "DEGA": "SBS_B", "PSOACO": "SBS_B"}   # GWO, GA, ACO
 
 
@@ -25,11 +25,13 @@ def holm(pv):
 
 
 def paired(a, b):
-    a = np.asarray(a, float); b = np.asarray(b, float); d = a - b; dd = d[d != 0]
+    a = np.where(np.asarray(a, float) < 1e-8, 0.0, np.asarray(a, float))
+    b = np.where(np.asarray(b, float) < 1e-8, 0.0, np.asarray(b, float))
+    d = a - b; dd = d[d != 0]
     if len(dd) == 0:
         return 1.0, 0.0
     _, p = wilcoxon(a, b, zero_method="wilcox")
-    r = np.argsort(np.argsort(np.abs(dd))) + 1.0
+    r = rankdata(np.abs(dd))
     return float(p), float((r[dd < 0].sum() - r[dd > 0].sum()) / r.sum())
 
 
@@ -50,8 +52,10 @@ for d in sorted(glob.glob(os.path.join(PIL, "*"))):
     if not cells:
         continue
     sbs = SBS[pair]
-    res = {"vs_SBS": {arm: table(cells, arm, sbs) for arm in ["C1_div", "C1_island", "A", "B", "C"]},
+    res = {"vs_SBS": {arm: table(cells, arm, sbs) for arm in ["C1_div", "C1_shared", "C1_island", "A", "B", "C"]},
            "B_vs_C1_island": table(cells, "B", "C1_island"),
+           "C1_island_vs_C1_shared": table(cells, "C1_island", "C1_shared"),
+           "C1_shared_vs_C1_div": table(cells, "C1_shared", "C1_div"),
            "A_vs_C1_island": table(cells, "A", "C1_island"),
            "mech": {}}
     for arm in ["C1_island", "B", "C", "BENg", "BENn"]:
@@ -67,5 +71,5 @@ for d in sorted(glob.glob(os.path.join(PIL, "*"))):
     print(f"  B vs C1_island: {res['B_vs_C1_island']['wins']}/{res['B_vs_C1_island']['losses']} r={res['B_vs_C1_island']['median_r']}"
           f" | A vs C1_island: {res['A_vs_C1_island']['wins']}/{res['A_vs_C1_island']['losses']} r={res['A_vs_C1_island']['median_r']}")
     print("  mech (por corrida):", {a: v for a, v in res["mech"].items() if a in ("C1_island", "B")})
-with open(os.path.join(_REPO, "results", "cooperative", "fase2", "piloto_secundarios.json"), "w") as fh:
+with open(os.path.join(_REPO, "results", "cooperative", "fase2_v05", "piloto_secundarios.json"), "w") as fh:
     json.dump(out, fh, indent=1)

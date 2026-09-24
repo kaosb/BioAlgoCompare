@@ -26,7 +26,7 @@ import math
 import numpy as np
 
 from problems.continuous.cec_problem import BudgetExhausted
-from cooperative.orchestrator import CooperativeRunner
+from cooperative.orchestrator import CooperativeRunner, elite_of, absorb_migrant
 from cooperative.functional_intent import (PRESETS_V2, RegimeController,
                                            INTENSIFY, DIVERSIFY)
 
@@ -161,6 +161,7 @@ class StructuralGatedRunner(CooperativeRunner):
             except Exception:
                 pass
         ind.fitness()                              # 1 FES (presupuesto compartido)
+        absorb_migrant(tgt_solver, j)   # rollback repone el individuo, no deshace líderes/pbest/gbest
         return saved
 
     def _rollback(self, tgt_solver, saved):
@@ -206,8 +207,7 @@ class StructuralGatedRunner(CooperativeRunner):
                 if a == b or self.solvers[b]["name"] in self._pending_struct:
                     continue
                 src, tgt = self.solvers[a], self.solvers[b]
-                cand = src["solver"].best_solution
-                cand_fit = self._safe_best_fitness(src["solver"])
+                cand_pos, cand_fit = elite_of(src["solver"])
                 tgt_fits = _cached_fits(tgt["solver"].population) or [cand_fit]
                 self.stats["proposed"] += 1
                 allow = self.gate.allows(src["name"], tgt["name"], cand_fit,
@@ -215,7 +215,7 @@ class StructuralGatedRunner(CooperativeRunner):
                 if allow:
                     med0 = self._target_median(tgt["solver"])
                     err0 = self._safe_best_fitness(tgt["solver"])
-                    saved = self._inject_saving(tgt["solver"], cand.position)
+                    saved = self._inject_saving(tgt["solver"], cand_pos)
                     self._pending_struct[tgt["name"]] = {
                         "src": src["name"], "saved": saved,
                         "err_at_commit": err0, "med_at_commit": med0}

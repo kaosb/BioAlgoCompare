@@ -1,124 +1,142 @@
 """CEC continuous benchmark problems (CEC2014 / CEC2017 / CEC2022).
 
-This module wraps the ``opfunu`` library to expose CEC benchmark functions
-through the same problem interface used by the metaheuristics in this
-framework (``evaluate``, ``get_dimension``, ``get_lower_bounds``,
-``get_upper_bounds``, ``is_valid``).
+Backend (revisión interna del 23-Sep-2026): the functions come from
+``minionpy`` (``CEC2014Functions`` / ``CEC2017Functions`` /
+``CEC2022Functions``), a C++ port of the OFFICIAL Suganthan C code with the
+official data files. It matches the compiled official C code in 142/142
+(function x dimension) cases (max relative error <= 3.7e-10), verified by
+``tests/test_cec_official.py`` against stored reference values.
+
+The previous backend, ``opfunu`` 1.0.1, matched the official definitions in
+only 32/142 cases (inverted Schwefel sign, NaN in CEC2017 F17/F29 at 10D,
+CEC2017 data shifted by one index, wrong range scalings, hybrid functions
+permuting before rotating). It is kept ONLY as ``backend="opfunu_legacy"`` to
+reproduce historical results bit for bit; never use it for new experiments.
 
 Design notes
 ------------
-* The objective reported by ``evaluate`` is the **error to the global
-  optimum**: ``error = f.evaluate(x) - f.f_global``, which is ``>= 0`` and
-  equals ``0`` at the global optimum. This is the standard reporting metric
-  for CEC suites and makes results comparable across functions.
-* ``FESLimitProblem`` wraps any problem and enforces a hard Maximum number of
-  Function Evaluations (MaxFES) budget by tracking a counter and returning the
-  best error seen so far once the budget is exhausted (no further "real"
-  evaluations are charged).
-* ``run_with_fes`` is a thin helper that runs any algorithm in this framework
-  respecting an exact MaxFES budget.
+* Numbering is OFFICIAL for every suite (CEC2017: 1..30; F2 is the function
+  retired by the organisers and is rejected unless ``allow_retired=True``).
+* ``evaluate`` returns the **error to the optimum**, ``f(x) - bias``. A value
+  below ``-ERROR_TOL`` or non-finite is IMPOSSIBLE for a correct CEC function
+  and raises :class:`InvalidEvaluation` instead of being silently clipped
+  (the legacy wrapper clipped negatives to 0 and turned NaN into 0, which
+  hid the opfunu defects). Errors in ``[-ERROR_TOL, 0)`` are floating-point
+  noise and are reported as 0.
+* ``FESLimitProblem`` enforces a hard MaxFES budget; ``run_with_fes`` runs an
+  algorithm under an exact budget.
 
 References
 ----------
-* Wu, Mallipeddi & Suganthan (2017). Problem definitions and evaluation
-  criteria for the CEC 2017 competition on constrained real-parameter
-  optimization.
-* Nguyen Van Thieu, *opfunu*: An open-source benchmark functions library.
+* Liang, Qu & Suganthan (2013). CEC 2014 technical report.
+* Awad, Ali, Liang, Qu & Suganthan (2016). CEC 2017 technical report.
+* Kumar, Price, Mohamed, Hadi & Suganthan (2021). CEC 2022 technical report.
 """
 
 import math
+import warnings
 from typing import Optional
 
 import numpy as np
 
-try:  # opfunu emits a harmless pkg_resources deprecation warning on import
-    import warnings
+ERROR_TOL = 1e-8
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        import opfunu
-except ImportError as exc:  # pragma: no cover - environment guard
-    raise ImportError(
-        "CECProblem requires the 'opfunu' package. Install it with "
-        "'pip install opfunu'."
-    ) from exc
+# Official biases (f* at the optimum).
+_CEC2022_BIAS = [300, 400, 600, 800, 900, 1800, 2000, 2200, 2300, 2400, 2600, 2700]
+_N_FUNCS = {"CEC2014": 30, "CEC2017": 30, "CEC2022": 12}
+_DIMS = {"CEC2014": (10, 20, 30, 50, 100), "CEC2017": (10, 20, 30, 50, 100),
+         "CEC2022": (10, 20)}
 
 
-# Map the user-facing suite name to the year token used by opfunu.
-_SUITE_TO_YEAR = {
-    "CEC2014": "2014",
-    "CEC2017": "2017",
-    "CEC2022": "2022",
-}
+class InvalidEvaluation(RuntimeError):
+    """A benchmark returned a value impossible for its definition."""
+
+
+def _official_bias(suite: str, fnum: int) -> float:
+    if suite == "CEC2022":
+        return float(_CEC2022_BIAS[fnum - 1])
+    return 100.0 * fnum
 
 
 class CECProblem:
-    """Self-contained wrapper around a single CEC benchmark function.
+    """One CEC benchmark function, objective = error to the optimum (>= 0).
 
     Args:
-        suite: One of ``'CEC2014'``, ``'CEC2017'`` or ``'CEC2022'``.
-        fnum: Function number (1-based), e.g. ``1`` -> ``F1{year}``.
-        ndim: Problem dimensionality.
-
-    The wrapped objective is the *error* to the global optimum (>= 0), so the
-    global optimum has objective value ``0`` for every function.
+        suite: ``'CEC2014'``, ``'CEC2017'`` or ``'CEC2022'``.
+        fnum: OFFICIAL function number (CEC2017: 1..30, F2 retired).
+        ndim: dimensionality (CEC2022 supports only 10 and 20).
+        backend: ``'official'`` (minionpy, default) or ``'opfunu_legacy'``.
+        allow_retired: accept CEC2017 F2 (numerically unstable, retired).
     """
 
-    def __init__(self, suite: str, fnum: int, ndim: int):
-        if suite not in _SUITE_TO_YEAR:
-            raise ValueError(
-                f"Unknown suite '{suite}'. Valid options: "
-                f"{sorted(_SUITE_TO_YEAR)}"
-            )
-        if fnum < 1:
-            raise ValueError(f"fnum must be >= 1, got {fnum}")
+    def __init__(self, suite: str, fnum: int, ndim: int, backend: str = "official",
+                 allow_retired: bool = False):
+        if suite not in _N_FUNCS:
+            raise ValueError(f"Unknown suite '{suite}'. Valid: {sorted(_N_FUNCS)}")
         if ndim < 1:
             raise ValueError(f"ndim must be >= 1, got {ndim}")
+        self.suite, self.fnum, self.ndim, self.backend = suite, int(fnum), int(ndim), backend
+        if backend == "opfunu_legacy":
+            self._init_opfunu()
+            return
+        if backend != "official":
+            raise ValueError(f"Unknown backend '{backend}'")
+        if not 1 <= self.fnum <= _N_FUNCS[suite]:
+            raise ValueError(f"{suite} has functions 1..{_N_FUNCS[suite]}, got {fnum}")
+        if suite == "CEC2017" and self.fnum == 2 and not allow_retired:
+            raise ValueError("CEC2017 F2 was retired by the organisers; pass allow_retired=True")
+        if self.ndim not in _DIMS[suite]:
+            raise ValueError(f"{suite} is defined for D in {_DIMS[suite]}, got {ndim}")
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            import minionpy as mp
+        cls = {"CEC2014": mp.CEC2014Functions, "CEC2017": mp.CEC2017Functions,
+               "CEC2022": mp.CEC2022Functions}[suite]
+        self._func = cls(self.fnum, self.ndim)
+        self.f_global = _official_bias(suite, self.fnum)
+        self._lb = np.full(self.ndim, -100.0)
+        self._ub = np.full(self.ndim, 100.0)
 
-        self.suite = suite
-        self.fnum = int(fnum)
-        self.ndim = int(ndim)
-        year = _SUITE_TO_YEAR[suite]
-        class_name = f"F{self.fnum}{year}"
-
-        # Discover the function class via opfunu's introspection helper.
-        candidates = opfunu.get_functions_based_classname(year)
-        match = [c for c in candidates if c.__name__ == class_name]
-        if not match:
-            available = sorted(c.__name__ for c in candidates)
-            raise ValueError(
-                f"Function '{class_name}' not found in suite {suite}. "
-                f"Available: {available}"
-            )
-
-        # Instantiate the function at the requested dimensionality.
-        self._func = match[0](ndim=self.ndim)
-
-        # f_global is the objective value at the global optimum.
+    def _init_opfunu(self):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            import opfunu
+        year = self.suite[3:]
+        cands = [c for c in opfunu.get_functions_based_classname(year)
+                 if c.__name__ == f"F{self.fnum}{year}"]
+        if not cands:
+            raise ValueError(f"opfunu has no F{self.fnum}{year}")
+        self._func = cands[0](ndim=self.ndim)
         self.f_global = float(self._func.f_global)
-
-        # Bounds from the function definition (typically +/- 100 for CEC).
         self._lb = np.asarray(self._func.lb, dtype=float).copy()
         self._ub = np.asarray(self._func.ub, dtype=float).copy()
 
-    def evaluate(self, x) -> float:
-        """Return the error to the global optimum (>= 0, optimum = 0)."""
+    def raw(self, x) -> float:
+        """Raw objective value f(x) (no bias subtraction)."""
         x = np.asarray(x, dtype=float)
-        value = float(self._func.evaluate(x))
+        if self.backend == "opfunu_legacy":
+            return float(self._func.evaluate(x))
+        return float(self._func([x.tolist()])[0])
+
+    def evaluate(self, x) -> float:
+        """Error to the optimum. Raises InvalidEvaluation on impossible values."""
+        value = self.raw(x)
         error = value - self.f_global
-        # Numerical floor: error is non-negative by definition.
+        if self.backend == "opfunu_legacy":
+            # historical behaviour, kept only for bit-exact reproduction
+            return error if error > 0.0 else 0.0
+        if not math.isfinite(error) or error < -ERROR_TOL:
+            raise InvalidEvaluation(
+                f"{self.suite} F{self.fnum} D={self.ndim}: error={error!r} at x={np.asarray(x).tolist()}")
         return error if error > 0.0 else 0.0
 
     def get_dimension(self) -> int:
-        """Return the problem dimensionality."""
         return self.ndim
 
     def get_lower_bounds(self) -> np.ndarray:
-        """Return the per-dimension lower bounds."""
         return self._lb.copy()
 
     def get_upper_bounds(self) -> np.ndarray:
-        """Return the per-dimension upper bounds."""
         return self._ub.copy()
 
     def is_valid(self, x) -> bool:
@@ -191,6 +209,25 @@ class FESLimitProblem:
         return self.fes >= self.max_fes
 
 
+def schedule_horizon(algo, budget: int) -> int:
+    """Iterations T such that init_evals + T * evals_per_iteration >= budget.
+
+    Iteration-based schedules (PSO inertia, GWO ``a``) then span exactly the
+    evaluations the solver really gets. Uses the algorithm's own
+    ``init_evals`` / ``evals_per_iteration`` (GA: pop - elitism; ACO_R:
+    archive k, then m ants). The FES guard remains the exact stop.
+    """
+    def _int(v, default):
+        try:
+            return max(1, int(v() if callable(v) else v))
+        except Exception:
+            return default
+    pop = int(getattr(algo, "population_size", 1))
+    epi = _int(getattr(algo, "evals_per_iteration", pop), max(1, pop))
+    init = _int(getattr(algo, "init_evals", pop), max(1, pop))
+    return max(1, int(math.ceil(max(0, int(budget) - init) / epi)))
+
+
 def run_with_fes(
     algo_class,
     problem,
@@ -238,13 +275,7 @@ def run_with_fes(
     # (evals per iteration). Algorithms whose evals/iter != pop_size expose
     # ``evals_per_iteration`` (ACO -> m; HO -> ~3*pop); the rest default to
     # pop_size. The FES guard (BudgetExhausted) is the EXACT stop on top.
-    epi = getattr(algo, "evals_per_iteration", pop_size)
-    try:
-        epi = int(epi() if callable(epi) else epi)
-    except Exception:
-        epi = pop_size
-    epi = max(1, epi)
-    algo.max_iterations = max(1, int(math.ceil(max_fes / epi)))
+    algo.max_iterations = schedule_horizon(algo, max_fes)
 
     try:
         algo.execute()
