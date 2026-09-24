@@ -67,7 +67,8 @@ def elite_of(solver):
 class CooperativeRunner:
     def __init__(self, shared_problem, solver_specs, transfer_every=500,
                  gate_enabled=True, seed=0, transfer_mode="structural",
-                 intent_mode="source", stop_loss=True, log_transfers=False):
+                 intent_mode="source", stop_loss=True, log_transfers=False,
+                 presets=None, memory_enabled=True):
         """
         shared_problem : a FESLimitProblem shared by all solvers (defines B).
         solver_specs   : list of (name, solver_cls, kwargs). Each solver is built
@@ -85,7 +86,11 @@ class CooperativeRunner:
         self.problem = shared_problem
         self.transfer_every = int(transfer_every)
         self.memory = TransferMemory()
-        self.gate = TransferGate(enabled=gate_enabled, memory=self.memory)
+        # memory_enabled=False: effects are still recorded, but the gate never
+        # vetoes by history (ablation of the memory component).
+        self.gate = TransferGate(enabled=gate_enabled,
+                                 memory=self.memory if memory_enabled else None)
+        self.presets = presets
         self.seed = int(seed)
         self.transfer_mode = str(transfer_mode)
         self.intent_mode = str(intent_mode)
@@ -136,7 +141,7 @@ class CooperativeRunner:
             for e in self.solvers:
                 key = (e["name"] if e["name"] in PRESETS
                        else type(e["solver"]).__name__)
-                ctrl = RegimeController(key)
+                ctrl = RegimeController(key, presets=self.presets)
                 e["solver"].use_il = True
                 e["solver"].il_model = ctrl
                 self._controllers[e["name"]] = ctrl
@@ -169,7 +174,9 @@ class CooperativeRunner:
         absorb_migrant(target_solver, j)
 
     def _target_error(self, solver):
-        return float(solver.best_solution.fitness())
+        """Incumbent (best-known) error, monotone: gbest for PSO (its
+        best_solution is the CURRENT best particle, which can worsen)."""
+        return elite_of(solver)[1]
 
     def _target_median(self, solver):
         """Median CACHED fitness of the population (0 FES; harm-sensitive).
@@ -348,14 +355,8 @@ class CooperativeRunner:
 
     @staticmethod
     def _safe_best_fitness(solver):
-        """Best fitness of a solver without re-evaluating (budget-safe)."""
-        ind = solver.best_solution
-        cached = getattr(ind, "_fitness", None)
-        if cached is not None:
-            return float(cached)
-        if getattr(solver, "convergence_curve", None):
-            return float(solver.convergence_curve[-1])
-        return float("inf")
+        """Best-known fitness of a solver without re-evaluating (budget-safe)."""
+        return elite_of(solver)[1]
 
 
 def absorb_migrant(solver, index):

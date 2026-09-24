@@ -135,3 +135,84 @@ def test_gwo_leaders_are_elitist():
         assert g._alpha_score <= prev
         assert g._alpha_score == pytest.approx(min(spy.values))
         prev = g._alpha_score
+
+
+# ---------------------------------------------------------------------------
+# Parametric (gate) path — camino alterno, enmienda v0.6
+# ---------------------------------------------------------------------------
+from cooperative.functional_intent import PRESETS_V2  # noqa: E402
+
+
+def _param(a, b, budget, intent_mode="adversarial", gate=True, **kw):
+    spy = Spy("CEC2014", 4, 10)
+    specs = [(a, CLS[a], {"population_size": 30}), (b, CLS[b], {"population_size": 30})]
+    r = CooperativeRunner(FESLimitProblem(spy, budget), specs, transfer_every=500, gate_enabled=gate,
+                          seed=10000, transfer_mode="parametric", intent_mode=intent_mode,
+                          presets=PRESETS_V2, **kw)
+    return r, spy
+
+
+@pytest.mark.parametrize("pair", PAIRS)
+def test_parametric_budget_split_and_min_evaluated(pair):
+    r, spy = _param(*pair, 50000, intent_mode="source")
+    res = r.run()
+    assert res["fes_used"] == 50000 == len(spy.values)
+    assert res["best_fitness"] == min(spy.values)
+    for fes in res["fes_per_solver"].values():
+        assert abs(fes - 25000) <= 60
+
+
+def test_controllers_use_requested_vocabulary():
+    r, _ = _param("DE", "GA", 5000, intent_mode="source")
+    for e in r.solvers:
+        ctrl = r._controllers[e["name"]]
+        assert ctrl._presets is PRESETS_V2[e["name"]]
+
+
+@pytest.mark.parametrize("pair", PAIRS)
+def test_adversarial_without_gate_is_harmful(pair):
+    """Sanity of the positive control on a function where it is harmful for all
+    three pairs (CEC2022 F6). NOT harmful everywhere: on some functions the
+    adversarial preset helps (declared in enmienda v0.6)."""
+    worse = 0
+    for seed in range(10000, 10005):
+        spy_a = Spy("CEC2022", 6, 10); spy_b = Spy("CEC2022", 6, 10)
+        specs = [(pair[0], CLS[pair[0]], {"population_size": 30}), (pair[1], CLS[pair[1]], {"population_size": 30})]
+        ctrl = CooperativeRunner(FESLimitProblem(spy_a, 5000), specs, transfer_every=500, gate_enabled=False,
+                                 seed=seed, transfer_mode="parametric", intent_mode="adversarial",
+                                 presets=PRESETS_V2, stop_loss=False).run()
+        base = CooperativeRunner(FESLimitProblem(spy_b, 5000), specs, transfer_every=10**12, gate_enabled=False,
+                                 seed=seed, transfer_mode="structural").run()
+        worse += ctrl["best_fitness"] > base["best_fitness"]
+    assert worse >= 4, (pair, worse)
+
+
+def test_stop_loss_rolls_back_and_memory_vetoes():
+    r, _ = _param("DE", "GA", 50000)
+    res = r.run()
+    st = res["transfer_stats"]
+    assert st["accepted"] > 0 and st["rolled_back"] > 0
+    assert any(r.memory.is_harmful_triple(s, t, "ADVERSARIAL") for s in ("DE", "GA") for t in ("DE", "GA") if s != t)
+
+
+def test_memory_disabled_never_vetoes():
+    r, _ = _param("DE", "GA", 50000, memory_enabled=False)
+    assert r.gate.memory is None
+    r.run()
+    assert len(r.memory._triples if hasattr(r.memory, "_triples") else [1]) >= 0
+
+
+def test_no_stop_loss_means_no_rollback():
+    r, _ = _param("DE", "GA", 50000, stop_loss=False)
+    assert r.run()["transfer_stats"]["rolled_back"] == 0
+
+
+def test_pso_incumbent_is_monotone_gbest():
+    r, spy = _param("PSO", "ACO", 10**6, intent_mode="source")
+    pso = r.solvers[0]["solver"]
+    prev = r._target_error(pso)
+    for _ in range(60):
+        pso.update_population()
+        cur = r._target_error(pso)
+        assert cur <= prev and cur == pso.gbest_fitness
+        prev = cur

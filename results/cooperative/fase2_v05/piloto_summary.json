@@ -1,0 +1,388 @@
+{
+ "criteria": "v0.1 \u00a75: mejor>peor en ambos presupuestos; mediana r>=0.3; peor<=2/12; en >=2 de 3 pares",
+ "contrasts": {
+  "GWO+GA_5000": {
+   "C1_shared_vs_C1div": {
+    "wins": 3,
+    "losses": 0,
+    "median_r": 1.0,
+    "n": 12
+   },
+   "C1_island_vs_C1div": {
+    "wins": 2,
+    "losses": 0,
+    "median_r": 0.13543643263757116,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.12892440892440893,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 3,
+    "losses": 3,
+    "median_r": -0.2137935797673513,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.30775075987841943,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.19683257918552038,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.02823872868985651,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.010769230769230769,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.0,
+    "n": 12
+   }
+  },
+  "GWO+GA_50000": {
+   "C1_shared_vs_C1div": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": -1.0,
+    "n": 12
+   },
+   "C1_island_vs_C1div": {
+    "wins": 3,
+    "losses": 1,
+    "median_r": 0.061640656262505006,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 1,
+    "losses": 1,
+    "median_r": -0.1244343891402715,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 2,
+    "losses": 5,
+    "median_r": -0.13299760237119826,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 1,
+    "losses": 1,
+    "median_r": 0.12216748768472907,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 0,
+    "losses": 2,
+    "median_r": -0.14479638009049775,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": 0.008405256394312482,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.06608716361038343,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.011312217194570135,
+    "n": 12
+   }
+  },
+  "DE+GA_5000": {
+   "C1_shared_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.5,
+    "n": 12
+   },
+   "C1_island_vs_C1div": {
+    "wins": 9,
+    "losses": 0,
+    "median_r": 0.6688341154024648,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 0,
+    "losses": 4,
+    "median_r": -0.23139097744360904,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 8,
+    "losses": 0,
+    "median_r": 0.8477891156462585,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.6441595441595442,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 7,
+    "losses": 0,
+    "median_r": 0.44720965309200605,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.5917739403453689,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 8,
+    "losses": 0,
+    "median_r": 0.9044666515254751,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 4,
+    "median_r": -0.3575496342737722,
+    "n": 12
+   }
+  },
+  "DE+GA_50000": {
+   "C1_shared_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.0,
+    "n": 12
+   },
+   "C1_island_vs_C1div": {
+    "wins": 4,
+    "losses": 1,
+    "median_r": 0.07906485671191553,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 0,
+    "losses": 3,
+    "median_r": -0.12654600301659125,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 8,
+    "losses": 1,
+    "median_r": 1.0,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 5,
+    "losses": 1,
+    "median_r": 0.05019607843137254,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 7,
+    "losses": 1,
+    "median_r": 0.5520361990950227,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 4,
+    "losses": 0,
+    "median_r": 0.37434069198775083,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 8,
+    "losses": 0,
+    "median_r": 0.5128205128205128,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": -0.08295625942684767,
+    "n": 12
+   }
+  },
+  "PSO+ACO_5000": {
+   "C1_shared_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.5632478632478632,
+    "n": 12
+   },
+   "C1_island_vs_C1div": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": 0.08244343891402714,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 1,
+    "losses": 0,
+    "median_r": 0.13799530021878292,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 2,
+    "losses": 1,
+    "median_r": -0.29204297103456767,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": 0.01566472742943331,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 1,
+    "losses": 0,
+    "median_r": 0.08823529411764706,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 2,
+    "losses": 0,
+    "median_r": 0.21228878648233487,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 6,
+    "losses": 0,
+    "median_r": 0.3997141070311802,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 2,
+    "median_r": -0.23683051444679354,
+    "n": 12
+   }
+  },
+  "PSO+ACO_50000": {
+   "C1_shared_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 1.0,
+    "n": 12
+   },
+   "C1_island_vs_C1div": {
+    "wins": 3,
+    "losses": 6,
+    "median_r": -0.34841628959276016,
+    "n": 12
+   },
+   "C3p_v2_vs_C1div": {
+    "wins": 0,
+    "losses": 1,
+    "median_r": -0.09844035813998267,
+    "n": 12
+   },
+   "A_vs_C1div": {
+    "wins": 0,
+    "losses": 6,
+    "median_r": -0.4312134129013925,
+    "n": 12
+   },
+   "B_vs_C1div": {
+    "wins": 1,
+    "losses": 4,
+    "median_r": -0.28808446455505277,
+    "n": 12
+   },
+   "C_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.13383630375227012,
+    "n": 12
+   },
+   "BENg_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": -0.06706403491629209,
+    "n": 12
+   },
+   "BENn_vs_C1div": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.0022624434389140274,
+    "n": 12
+   },
+   "BENg_vs_BENn": {
+    "wins": 0,
+    "losses": 0,
+    "median_r": 0.05694254445964432,
+    "n": 12
+   }
+  }
+ },
+ "success": {
+  "A": {
+   "pairs_ok": {
+    "GWO+GA": false,
+    "DE+GA": true,
+    "PSO+ACO": false
+   },
+   "n_pairs_ok": 1,
+   "cumple_criterio": false
+  },
+  "B": {
+   "pairs_ok": {
+    "GWO+GA": false,
+    "DE+GA": false,
+    "PSO+ACO": false
+   },
+   "n_pairs_ok": 0,
+   "cumple_criterio": false
+  },
+  "C": {
+   "pairs_ok": {
+    "GWO+GA": false,
+    "DE+GA": true,
+    "PSO+ACO": false
+   },
+   "n_pairs_ok": 1,
+   "cumple_criterio": false
+  }
+ },
+ "corte2": "CAMINO ALTERNO (ningun candidato cumple)",
+ "provenance": {
+  "git_commit": "71db1363e4e6ed09fb628dea904b6781a6daf07f",
+  "git_dirty": true,
+  "timestamp_utc": "2026-09-24T04:08:43.431816+00:00",
+  "python_version": "3.12.13",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "hostname": "neuromancer",
+  "package_versions": {
+   "numpy": "1.26.0",
+   "scipy": "1.16.3",
+   "scikit-learn": "not-installed",
+   "minionpy": "1.9.1",
+   "mealpy": "not-installed",
+   "opfunu": "1.0.1",
+   "cma": "not-installed"
+  }
+ }
+}

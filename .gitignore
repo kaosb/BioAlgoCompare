@@ -208,3 +208,8 @@ results/cooperative/fase3/queue.log
 !results/cooperative/fase2_v05/**
 !results/cooperative/fase3_v05/
 !results/cooperative/fase3_v05/**
+results/cooperative/fase2_v05/queue.log
+results/cooperative/fase3_v05/queue.log
+!results/cooperative/camino_alterno_v06/
+!results/cooperative/camino_alterno_v06/**
+results/cooperative/camino_alterno_v06/queue.log
