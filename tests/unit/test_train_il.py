@@ -2,6 +2,10 @@
 Tests para el módulo train_il.
 Cubre el entrenamiento del modelo de Imitation Learning para HO.
 """
+import pytest
+
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
+
 import os
 import sys
 

@@ -3,7 +3,7 @@ el planificador del protocolo antes de lanzar").
 
 Corre cada brazo en 1 función × 3 semillas por (dimset, nivel ∈ {5e3, 5e4}) con
 aserción de presupuesto exacto, mide segundos por corrida y extrapola a la
-matriz completa. Escribe results/cooperative/fase3/costo_estimado.json.
+matriz completa. Escribe results/cooperative/fase3_v05/costo_estimado.json.
 """
 import json
 import os

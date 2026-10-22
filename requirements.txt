@@ -10,7 +10,8 @@ scikit-posthocs>=0.7.0
 jinja2>=3.0.0
 scikit-learn>=1.0.0
 tabulate>=0.9.0
-# CEC continuous benchmarking (opfunu suites + validated modern roster)
+# Benchmarking CEC: opfunu es el backend heredado del estudio IL y no coincide con el código C oficial (D16);
+# minionpy y mealpy son adaptadores de implementaciones de terceros. Entorno de la fase vigente: requirements-fase-positiva.lock
 opfunu>=1.0.0
 mealpy>=3.0.1
 minionpy>=1.9.0   # C++ CEC winners: jSO, NL-SHADE-RSP, L-SRTDE, CMA-ES, ... (API 1.9: sin relTol)

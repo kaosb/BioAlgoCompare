@@ -1,5 +1,9 @@
 # Discrepancias HO implementacion vs Amiri et al. (2024)
 
+> **Superado.** La implementación de HO se reescribió fiel al código oficial el 3 de junio de 2026
+> (`algorithms/ho.py`). Este documento describe la versión anterior, usada en el
+> paper de CISTI 2026, y se conserva como registro.
+
 Fecha: 22 Marzo 2026
 Paper original: Scientific Reports 14, Article 5032 (2024)
 

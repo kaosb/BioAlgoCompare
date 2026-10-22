@@ -2,6 +2,10 @@
 Tests para el módulo evaluate_il.
 Cubre todas las funciones de evaluación de HO con Imitation Learning.
 """
+import pytest
+
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
+
 import os
 import sys
 

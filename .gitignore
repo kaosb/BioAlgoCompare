@@ -91,6 +91,11 @@ results/**/*
 !results/constructo/constructo_K.json
 !results/cooperative/
 !results/cooperative/pilot_C0C2C3.json
+# Extensión del 21-Oct-2026 (D38): controles de atribución y referencia L-SHADE
+!results/cooperative/attribution_v20_20261021/
+!results/cooperative/attribution_v20_20261021/**
+!results/cooperative/attribution_lshade_20261021/
+!results/cooperative/attribution_lshade_20261021/**
 
 # Temporary files
 *.tmp
@@ -135,7 +140,7 @@ paper.pdf
 texput.*
 *~
 
-# PDFs de compilación (ignora todos salvo versiones finales)
+# PDFs de compilación
 *.pdf
 
 # Runtime logs
@@ -213,3 +218,14 @@ results/cooperative/fase3_v05/queue.log
 !results/cooperative/camino_alterno_v06/
 !results/cooperative/camino_alterno_v06/**
 results/cooperative/camino_alterno_v06/queue.log
+!results/cooperative/camino_alterno_v06_dim50/
+!results/cooperative/camino_alterno_v06_dim50/**
+results/cooperative/camino_alterno_v06_dim50/queue.log
+!results/cooperative/fase1_v05/
+!results/cooperative/fase1_v05/cotas_fase1.*
+!results/cooperative/fase1_v05/e2_effect_logs.json
+!results/cooperative/fase1_v05/c0_half/
+!results/cooperative/fase1_v05/c0_half/**
+# Marcas de validez de resultados (LEEME_VALIDEZ.md, INVALIDO_LEEME.md)
+!results/cooperative/LEEME_VALIDEZ.md
+!results/**/INVALIDO_LEEME.md

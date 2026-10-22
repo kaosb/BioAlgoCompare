@@ -2,6 +2,7 @@
 Tests para operadores de VRP específicos para la función Split.
 """
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 import sys
 import os

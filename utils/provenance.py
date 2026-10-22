@@ -44,7 +44,9 @@ def _versions() -> dict:
 def provenance(extra: dict | None = None) -> dict:
     """Return a provenance record. ``extra`` merges experiment-specific fields."""
     commit = _git("rev-parse", "HEAD")
-    dirty = _git("status", "--porcelain") != ""
+    # Solo cambios sin confirmar en archivos versionados: los archivos sin
+    # versionar (p. ej., un lock local) no cambian el código que se ejecuta.
+    dirty = _git("status", "--porcelain", "--untracked-files=no") != ""
     rec = {
         "git_commit": commit,
         "git_dirty": dirty,

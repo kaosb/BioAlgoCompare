@@ -1,5 +1,6 @@
 """Tests for QC-DVRP Simulator."""
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 from problems.qc_dvrp import QCDVRPSimulator, Order, DarkStore
 from algorithms.gto import GTO

@@ -1,3 +1,8 @@
+> **Documento histórico (plataforma VRP y estudio de imitación, 2025–jul 2026).** Conserva su
+> redacción original: puede describir rutas, comandos, resultados o planes que ya no existen o que
+> quedaron invalidados al corregir el benchmark CEC (D16). No forma parte de la evidencia del estudio
+> vigente, documentado en [`README_FASE_POSITIVA.md`](../README_FASE_POSITIVA.md).
+
 # 📖 BioAlgoCompare - Unified Command Reference
 
 > Comprehensive guide for using BioAlgoCompare's command-line interface with scientific rigor and reproducibility.
@@ -399,7 +404,7 @@ python scripts/analyze.py run --algorithm ho --instance A-n32-k5 --log-level DEB
 
 - [Algorithm Implementations](algorithms/overview.md)
 - [Statistical Methods](scientific/statistical_analysis.md)
-- [VRP Problem Details](../README.md)
+- [VRP Problem Details](../README_VRP.md)
 - [Contributing Guide](development/contribution.md)
 
 ---

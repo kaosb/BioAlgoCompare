@@ -1,3 +1,13 @@
+> **Documento histórico (plataforma VRP y estudio de imitación, 2025–jul 2026).** Conserva su
+> redacción original: puede describir rutas, comandos, resultados o planes que ya no existen o que
+> quedaron invalidados al corregir el benchmark CEC (D16). No forma parte de la evidencia del estudio
+> vigente, documentado en [`README_FASE_POSITIVA.md`](../../../README_FASE_POSITIVA.md).
+
+> **Sobre HO:** esta descripción corresponde a una variante con parámetros α/β/γ y operadores
+> discretos que no existen en el algoritmo de Amiri et al. (2024); la implementación vigente es
+> `algorithms/ho.py`, reescrita fiel al código oficial (ver `docs/HO_DISCREPANCIES.md`). La
+> hipótesis de que la imitación (IL) mejora a HO fue evaluada en 2026 y no se sostuvo.
+
 # Hippopotamus Optimization (HO)
 
 ## Descripción General

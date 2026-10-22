@@ -1,0 +1,32 @@
+{
+  "tag": "v1.9.1",
+  "commit": "c3b4845c0bcbb3192facc4043c5e8c89ca795db5",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/khoirulmuzakka/Minion/c3b4845c0bcbb3192facc4043c5e8c89ca795db5/minion/algorithms/lshade.cpp",
+      "sha256": "6c2eb8565f0a556ea4c81d28e368477400aad3e31e7fbf2ac4a51232fb8a3de8"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/khoirulmuzakka/Minion/c3b4845c0bcbb3192facc4043c5e8c89ca795db5/minion/algorithms/lshade.h",
+      "sha256": "dcafb515205f7124fe08fdb9ee3f4fcbd37cd6f3ee51b958ca4a5d183298f00c"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/khoirulmuzakka/Minion/c3b4845c0bcbb3192facc4043c5e8c89ca795db5/minion/algorithms/de.cpp",
+      "sha256": "83dc1acae80dcebc00c02ac9a91830693762e9565a68f26beafc01bf97566481"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/khoirulmuzakka/Minion/c3b4845c0bcbb3192facc4043c5e8c89ca795db5/minionpy/algorithms.py",
+      "sha256": "0cdf3d864bf88046778edc018865050e77c322a281e15fff55121b05fab0aa63"
+    }
+  ],
+  "installed_python_module_matches_tag": true,
+  "binary_rebuilt_independently": false,
+  "observations": [
+    "p=0.11 hard-coded",
+    "Memory initial values 0.5",
+    "Random bound repair used, differs from original parent-bound midpoint",
+    "Memory-index sample without replacement when N <= H",
+    "Previous terminal CR memory state not necessarily preserved on update"
+  ],
+  "scope": "Directed source inspection, not exhaustive formal equivalence audit"
+}

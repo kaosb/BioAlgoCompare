@@ -22,7 +22,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import numpy as np  # noqa: E402
-from scipy.stats import wilcoxon, rankdata  # noqa: E402
+from scipy.stats import wilcoxon, rankdata, f as f_dist  # noqa: E402
+
+from scripts.cec_harness.stats import friedman_test, shaffer_posthoc  # noqa: E402
 
 from utils.provenance import provenance  # noqa: E402
 
@@ -87,6 +89,18 @@ def analyse(pair, level):
     det = set(res["contrasts"]["G1_CTRLg_vs_CTRLn"]["better_set"])
     res["G1b_deteccion"] = {"n_funciones_daninas": len(harm), "detectadas": len(harm & det),
                             "tasa": round(len(harm & det) / len(harm), 3) if harm else None}
+    # Omnibus del protocolo (v0.1 §8): Friedman + Iman-Davenport + Shaffer sobre
+    # la mediana de 51 corridas por función (empate a 1e-8)
+    arms = ["C0_A", "C0_B", "C1_div", "C2p", "C3p", "ABL", "CTRLn", "CTRLg"]
+    names = [cells[0]["solvers"][0], cells[0]["solvers"][1]] + arms[2:]
+    M = np.array([[float(np.median(c["errors"][x])) for x in arms] for c in cells])
+    M = np.where(M < 1e-8, 0.0, M)
+    fr = friedman_test(M); N, k = M.shape; chi2 = fr["statistic"]
+    ff = (N - 1) * chi2 / (N * (k - 1) - chi2) if N * (k - 1) - chi2 > 0 else float("inf")
+    res["friedman"] = {"chi2": round(chi2, 3), "df": fr["df"], "p": fr["p_value"], "iman_davenport_F": round(ff, 3),
+                       "p_FF": float(f_dist.sf(ff, k - 1, (k - 1) * (N - 1))),
+                       "mean_ranks": dict(zip(names, [round(x, 3) for x in fr["mean_ranks"]]))}
+    res["shaffer"] = shaffer_posthoc(M, names)
     res["mech_por_corrida"] = {arm: {k: round(sum(c["mech_stats"][arm].get(k, 0) for c in cells) / (len(cells) * c["runs"]), 2)
                                      for k in ("proposed", "accepted", "rolled_back")}
                                for arm in ("C3p", "CTRLg", "CTRLg_noSL", "CTRLg_nomem", "BENg", "MODg")}
@@ -120,6 +134,10 @@ def main():
         d = r["G1b_deteccion"]
         lines.append(f"| {k} (n={r['n']}) | " + " | ".join(fmt(r["contrasts"][c]) for c in cols)
                      + f" | {d['detectadas']}/{d['n_funciones_daninas']} |")
+    lines += ["", "## Friedman + Iman-Davenport (rangos medios; menor = mejor)", ""]
+    for k, r in out["configs"].items():
+        fz = r["friedman"]
+        lines.append(f"- {k}: F_F={fz['iman_davenport_F']} p={fz['p_FF']:.2g}; " + ", ".join(f"{a} {v}" for a, v in fz["mean_ranks"].items()))
     lines += ["", f"G1 por par: {out['G1_exito']}", f"**Gate validado como componente de seguridad (≥2/3 pares): {out['G1_gate_validado']}**"]
     open(os.path.join(OUT, "analisis.md"), "w").write("\n".join(lines) + "\n")
     print("\n".join(lines))

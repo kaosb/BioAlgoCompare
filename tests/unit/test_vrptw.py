@@ -2,6 +2,7 @@
 Tests para el módulo problems.vrptw (Vehicle Routing Problem with Time Windows).
 """
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 from problems.vrptw import VRPTWProblem
 

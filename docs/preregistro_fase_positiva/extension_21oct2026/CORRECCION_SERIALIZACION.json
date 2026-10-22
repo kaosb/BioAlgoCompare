@@ -1,0 +1,12 @@
+{
+  "timestamp_utc": "2026-10-21T19:10:24.872156+00:00",
+  "original_sha256": "ebae89b0149cf5f18169619707da2f280084a0d053b9343c531f3aee79b02b1e",
+  "corrected_sha256": "42b4ea966712d14fc069357740558a62b29285a7ae6f32f688b55e4d89f7c95b",
+  "only_change": {
+    "before": "json.dumps(report,indent=2)",
+    "after": "json.dumps(report,indent=2,default=lambda value: value.item())"
+  },
+  "reason": "NumPy int64 counts are not JSON serializable by default. Only conversion to native scalar at JSON output; tests, contrasts, p-values, ranks and thresholds unchanged.",
+  "optimizer_data_changed": false,
+  "original_preserved": true
+}

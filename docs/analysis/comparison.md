@@ -1,3 +1,8 @@
+> **Documento histórico (plataforma VRP y estudio de imitación, 2025–jul 2026).** Conserva su
+> redacción original: puede describir rutas, comandos, resultados o planes que ya no existen o que
+> quedaron invalidados al corregir el benchmark CEC (D16). No forma parte de la evidencia del estudio
+> vigente, documentado en [`README_FASE_POSITIVA.md`](../../README_FASE_POSITIVA.md).
+
 # Análisis Comparativo Exhaustivo de Algoritmos Metaheurísticos
 
 Este documento presenta un análisis exhaustivo del rendimiento de todos los algoritmos metaheurísticos implementados, evaluados con diferentes números de iteraciones y semillas para garantizar conclusiones estadísticamente significativas.

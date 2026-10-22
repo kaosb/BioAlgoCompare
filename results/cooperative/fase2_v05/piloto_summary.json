@@ -241,19 +241,19 @@
    "C3p_v2_vs_C1div": {
     "wins": 1,
     "losses": 0,
-    "median_r": 0.13799530021878292,
+    "median_r": 0.20460254436431408,
     "n": 12
    },
    "A_vs_C1div": {
     "wins": 2,
     "losses": 1,
-    "median_r": -0.29204297103456767,
+    "median_r": -0.1169309373820652,
     "n": 12
    },
    "B_vs_C1div": {
     "wins": 0,
     "losses": 1,
-    "median_r": 0.01566472742943331,
+    "median_r": 0.0013359189829778052,
     "n": 12
    },
    "C_vs_C1div": {
@@ -265,7 +265,7 @@
    "BENg_vs_C1div": {
     "wins": 2,
     "losses": 0,
-    "median_r": 0.21228878648233487,
+    "median_r": 0.18003072196620584,
     "n": 12
    },
    "BENn_vs_C1div": {
@@ -277,7 +277,7 @@
    "BENg_vs_BENn": {
     "wins": 0,
     "losses": 2,
-    "median_r": -0.23683051444679354,
+    "median_r": -0.2192924722336487,
     "n": 12
    }
   },
@@ -296,20 +296,20 @@
    },
    "C3p_v2_vs_C1div": {
     "wins": 0,
-    "losses": 1,
-    "median_r": -0.09844035813998267,
+    "losses": 0,
+    "median_r": -0.13007445203940823,
     "n": 12
    },
    "A_vs_C1div": {
     "wins": 0,
-    "losses": 6,
-    "median_r": -0.4312134129013925,
+    "losses": 3,
+    "median_r": -0.21172845872221935,
     "n": 12
    },
    "B_vs_C1div": {
     "wins": 1,
     "losses": 4,
-    "median_r": -0.28808446455505277,
+    "median_r": -0.32202111613876316,
     "n": 12
    },
    "C_vs_C1div": {
@@ -321,7 +321,7 @@
    "BENg_vs_C1div": {
     "wins": 0,
     "losses": 0,
-    "median_r": -0.06706403491629209,
+    "median_r": -0.011111111111111112,
     "n": 12
    },
    "BENn_vs_C1div": {
@@ -333,7 +333,7 @@
    "BENg_vs_BENn": {
     "wins": 0,
     "losses": 0,
-    "median_r": 0.05694254445964432,
+    "median_r": -0.0058823529411764705,
     "n": 12
    }
   }
@@ -369,9 +369,9 @@
  },
  "corte2": "CAMINO ALTERNO (ningun candidato cumple)",
  "provenance": {
-  "git_commit": "71db1363e4e6ed09fb628dea904b6781a6daf07f",
+  "git_commit": "bd2ebf2c679cc2f8e20d3782c7438f7928bf6381",
   "git_dirty": true,
-  "timestamp_utc": "2026-09-24T04:08:43.431816+00:00",
+  "timestamp_utc": "2026-09-24T05:43:25.728123+00:00",
   "python_version": "3.12.13",
   "platform": "macOS-26.6.2-arm64-arm-64bit",
   "hostname": "neuromancer",

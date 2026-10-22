@@ -10,6 +10,7 @@ Valida:
 """
 
 import pytest
+pytest.importorskip("torch", reason="test heredado (VRP/IL): requiere torch, fuera del entorno de la fase positiva")
 import numpy as np
 import torch
 import pandas as pd

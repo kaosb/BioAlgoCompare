@@ -1,0 +1,21 @@
+{
+  "python": "3.12.13 (main, Aug  7 2026, 02:15:23) [Clang 22.1.3 ]",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "machine": "arm64",
+  "packages": {
+    "numpy": "1.26.0",
+    "scipy": "1.16.3",
+    "minionpy": "1.9.1"
+  },
+  "minion_files": {
+    "cec.py": "64b6eb0d6d4bd8d3a1229b7f853fcf91ffc8fe6ddafb7e05a4751f7039d49ecb",
+    "algorithms.py": "0cdf3d864bf88046778edc018865050e77c322a281e15fff55121b05fab0aa63",
+    "benchmark.py": "f150239497bad187712ce28afc1353a520c571c8f5ef36c0226e52a44c3c1625",
+    "bbob.py": "976d95f4c77c1dc94af97b9c46d80efcb1c9d1169afa60756fdcce86d1c1ef5b",
+    "__init__.py": "b4ad5aa43966d67c4ae4146ec0e07d38148bfb19563037a2a1b761eadff26775",
+    "test_functions.py": "3ee393d56d4596a309e2f83b4419e04afb0603da5470e433397af202ff7d42e6",
+    "minionpycpp.cpython-312-darwin.so": "40e68a674eb739d78c6479c9ea2009212b92daec2f7665c26e96d9dac96a925d",
+    "parallel.py": "1e8780eb8fada03b43dc429c3db5fdde3355cf45bd7eae7449453b0f88447ec0"
+  },
+  "capture": "durante la campaña; no es un sello externo ni reemplaza el congelamiento previo"
+}

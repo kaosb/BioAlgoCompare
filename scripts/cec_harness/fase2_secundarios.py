@@ -1,7 +1,7 @@
 """Fase 2 — contrastes secundarios pre-registrados (v0.1 §8) sobre el piloto:
 candidatos vs SBS del par, B vs C1_island (¿aporta la admisión/rollback sobre
 la migración fija?), y actividad del mecanismo por brazo. Lee las celdas del
-piloto y escribe results/cooperative/fase2/piloto_secundarios.json"""
+piloto y escribe results/cooperative/fase2_v05/piloto_secundarios.json"""
 import glob
 import json
 import os

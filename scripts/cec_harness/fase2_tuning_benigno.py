@@ -1,8 +1,8 @@
 """Fase 2 (enmienda v0.3 §C) — afinado del régimen BENIGN por (función, solver).
 
 Corridas AISLADAS a B/2 con factores multiplicativos constantes (grilla dentro
-de las regiones de convergencia), 11 semillas de tuning (seed0=9500), elección
-por mediana. Salida: results/cooperative/fase2/benign_regimes.json
+de las regiones de convergencia), 11 semillas de tuning (seed0=12500, D20), elección
+por mediana. Salida: results/cooperative/fase2_v05/benign_regimes.json
   {"<level>": {"F<n>": {"<solver>": {"factors": [...], "median": x}}}}
 Uso: N_JOBS=10 python scripts/cec_harness/fase2_tuning_benigno.py
 """

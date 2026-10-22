@@ -1,7 +1,5 @@
-# requirements.lock — versiones exactas del entorno del estudio IL × CEC (8 Jul 2026)
-# Python 3.12.5 · macOS-26.5.2-arm64-arm-64bit
-# Generado desde el entorno que produjo los resultados del paper.
-# Estas versiones DEBEN respetarse para reproducir los numeros exactos
+# requirements.lock — entorno del estudio IL × CEC (jul 2026); sus resultados CEC quedaron invalidados (D16).
+# Python 3.12.5 · macOS arm64. Para la fase vigente usar requirements-fase-positiva.lock.
 # (minionpy encapsula los competidores CEC C++; sklearn fija el RF de BC).
 
 numpy==1.26.0

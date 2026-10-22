@@ -1,3 +1,8 @@
+> **Documento histórico (plataforma VRP y estudio de imitación, 2025–jul 2026).** Conserva su
+> redacción original: puede describir rutas, comandos, resultados o planes que ya no existen o que
+> quedaron invalidados al corregir el benchmark CEC (D16). No forma parte de la evidencia del estudio
+> vigente, documentado en [`README_FASE_POSITIVA.md`](../../README_FASE_POSITIVA.md).
+
 # Guía de Análisis Estadístico
 
 Este documento proporciona una explicación detallada de las metodologías estadísticas implementadas en BioAlgoCompare para el análisis riguroso de algoritmos metaheurísticos. Está dirigido a investigadores y académicos que buscan comprender e interpretar correctamente los resultados estadísticos generados por la plataforma.

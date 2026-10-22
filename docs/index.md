@@ -1,5 +1,9 @@
 # Documentación de BioAlgoCompare
 
+> Índice histórico de la plataforma VRP/IL. El estudio actual (cooperación entre
+> metaheurísticas y salvaguarda frente a la transferencia negativa) se documenta
+> en [`README_FASE_POSITIVA.md`](../README_FASE_POSITIVA.md).
+
 Bienvenido a la documentación oficial de BioAlgoCompare, una plataforma para evaluación estadística rigurosa de algoritmos bio-inspirados en problemas de optimización.
 
 ## Estructura de la Documentación

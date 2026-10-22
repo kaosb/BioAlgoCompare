@@ -1,0 +1,21 @@
+{
+  "control_cells": 426,
+  "external_cells": 142,
+  "traced_runs": 21726,
+  "modified_runs": 10927,
+  "unmodified_runs": 10799,
+  "preserved_exposure": true,
+  "identity_replay_exact": true,
+  "frozen_inputs_unchanged": true,
+  "lshade_actual_fes": {
+    "5000": [
+      5000,
+      5000
+    ],
+    "50000": [
+      47581,
+      50000
+    ]
+  },
+  "meaning": "Integridad de entradas; no certifica novedad, aprobación editorial ni generalización."
+}

@@ -1,6 +1,10 @@
 """
 Tests adicionales para alcanzar 100% de cobertura en problems/vrp.py
 """
+import pytest
+
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
+
 import os
 import sys
 

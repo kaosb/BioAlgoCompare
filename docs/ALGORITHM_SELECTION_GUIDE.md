@@ -1,3 +1,8 @@
+> **Documento histórico (plataforma VRP y estudio de imitación, 2025–jul 2026).** Conserva su
+> redacción original: puede describir rutas, comandos, resultados o planes que ya no existen o que
+> quedaron invalidados al corregir el benchmark CEC (D16). No forma parte de la evidencia del estudio
+> vigente, documentado en [`README_FASE_POSITIVA.md`](../README_FASE_POSITIVA.md).
+
 # Algorithm Selection Guide
 
 This guide helps you choose the most appropriate bio-inspired algorithm for your Vehicle Routing Problem (VRP) based on problem characteristics and requirements.

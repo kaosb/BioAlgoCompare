@@ -1,6 +1,7 @@
 """Unit tests for Genetic Algorithm."""
 
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 from algorithms.ga import GA, Chromosome
 from problems.vrp import VRPProblem

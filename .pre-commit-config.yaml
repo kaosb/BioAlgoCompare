@@ -31,7 +31,6 @@ repos:
           "--cov=problems",
           "--cov=utils",
           "--cov-report=term-missing",
-          # "--cov-fail-under=85",  # Temporarily disabled for initial commit
           "-v"
         ]
 

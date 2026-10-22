@@ -425,14 +425,14 @@
    },
    "A": {
     "wins": 0,
-    "losses": 5,
-    "median_r": -0.2,
+    "losses": 4,
+    "median_r": -0.06,
     "n": 12
    },
    "B": {
     "wins": 2,
     "losses": 1,
-    "median_r": 0.03,
+    "median_r": 0.04,
     "n": 12
    },
    "C": {
@@ -445,7 +445,7 @@
   "B_vs_C1_island": {
    "wins": 0,
    "losses": 0,
-   "median_r": -0.08,
+   "median_r": -0.07,
    "n": 12
   },
   "C1_island_vs_C1_shared": {
@@ -463,7 +463,7 @@
   "A_vs_C1_island": {
    "wins": 0,
    "losses": 2,
-   "median_r": -0.18,
+   "median_r": -0.1,
    "n": 12
   },
   "mech": {
@@ -476,31 +476,31 @@
    },
    "B": {
     "proposed": 18.0,
-    "accepted": 11.63,
-    "rejected": 6.37,
-    "rolled_back": 4.03,
-    "kept": 6.44
+    "accepted": 11.65,
+    "rejected": 6.35,
+    "rolled_back": 4.15,
+    "kept": 6.33
    },
    "C": {
     "proposed": 18.0,
     "accepted": 18.0,
     "rejected": 0.0,
-    "rolled_back": 3.23,
-    "kept": 12.77
+    "rolled_back": 3.3,
+    "kept": 12.7
    },
    "BENg": {
     "proposed": 18.0,
     "accepted": 4.31,
     "rejected": 13.69,
-    "rolled_back": 0.84,
-    "kept": 2.97
+    "rolled_back": 0.87,
+    "kept": 2.95
    },
    "BENn": {
     "proposed": 18.0,
     "accepted": 18.0,
     "rejected": 0.0,
-    "rolled_back": 4.01,
-    "kept": 11.99
+    "rolled_back": 4.32,
+    "kept": 11.68
    }
   }
  },
@@ -527,13 +527,13 @@
    "A": {
     "wins": 6,
     "losses": 2,
-    "median_r": 0.41,
+    "median_r": 0.52,
     "n": 12
    },
    "B": {
     "wins": 6,
     "losses": 2,
-    "median_r": 0.47,
+    "median_r": 0.46,
     "n": 12
    },
    "C": {
@@ -544,9 +544,9 @@
    }
   },
   "B_vs_C1_island": {
-   "wins": 1,
+   "wins": 0,
    "losses": 2,
-   "median_r": 0.07,
+   "median_r": -0.03,
    "n": 12
   },
   "C1_island_vs_C1_shared": {
@@ -564,7 +564,7 @@
   "A_vs_C1_island": {
    "wins": 1,
    "losses": 2,
-   "median_r": -0.1,
+   "median_r": 0.13,
    "n": 12
   },
   "mech": {
@@ -576,32 +576,32 @@
     "kept": 0.0
    },
    "B": {
-    "proposed": 198.29,
-    "accepted": 90.8,
-    "rejected": 107.38,
-    "rolled_back": 59.06,
-    "kept": 31.36
+    "proposed": 198.25,
+    "accepted": 91.14,
+    "rejected": 107.01,
+    "rolled_back": 59.33,
+    "kept": 31.4
    },
    "C": {
     "proposed": 198.0,
     "accepted": 198.0,
     "rejected": 0.0,
-    "rolled_back": 75.23,
-    "kept": 120.77
+    "rolled_back": 79.57,
+    "kept": 116.43
    },
    "BENg": {
     "proposed": 198.0,
-    "accepted": 42.06,
-    "rejected": 155.94,
-    "rolled_back": 32.59,
-    "kept": 9.0
+    "accepted": 42.23,
+    "rejected": 155.77,
+    "rolled_back": 33.28,
+    "kept": 8.53
    },
    "BENn": {
     "proposed": 198.0,
     "accepted": 198.0,
     "rejected": 0.0,
-    "rolled_back": 109.63,
-    "kept": 86.37
+    "rolled_back": 121.61,
+    "kept": 74.39
    }
   }
  }

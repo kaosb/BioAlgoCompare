@@ -34,13 +34,6 @@ line-length = 88
 # E501: Line too long - mathematical formulas and URLs can be long  
 # E741: Ambiguous names - mathematical notation uses l, O, I
 # E402: Module import not at top - needed for sys.path modifications
-# 
-# CONSIDER FIXING THESE:
-# E712: Comparison to True/False - use 'is' instead
-# F841: Unused variables - might indicate dead code
-# F823: Variable used before assignment - can cause runtime errors
-# E722: Bare except - dangerous, catches system exits
-# F811: Redefinition - might indicate copy-paste errors
 ignore = ["F401", "E501", "E741", "E402"]
 
 # Target Python 3.8+

@@ -2,14 +2,14 @@
 de candidatos A, B, C. v0.5: semillas por solver, brazo C1_shared (control sin
 migración), salida en results/cooperative/fase2_v05/ (fase2/ = opfunu, inválido).
 
-12 funciones CEC2014-10D × 51 corridas CRN (seed0=9000) × {5e3, 5e4} × 3 pares.
+12 funciones CEC2014-10D × 51 corridas CRN (seed0=12000, D20) × {5e3, 5e4} × 3 pares.
 Brazos por celda: SBS_A, SBS_B, C1_div, C1_island, C3p_v2, A, B, C, BENg, BENn.
 Resumible por celda (un JSON por (par, nivel, función)); `aggregate` emite la
 tabla de criterios de éxito por candidato (v0.1 §5).
 
 Uso:  N_JOBS=10 python scripts/cec_harness/run_fase2_piloto.py run
       python scripts/cec_harness/run_fase2_piloto.py aggregate
-Requiere results/cooperative/fase2/benign_regimes.json (fase2_tuning_benigno.py).
+Requiere results/cooperative/fase2_v05/benign_regimes.json (fase2_tuning_benigno.py).
 """
 import glob
 import json

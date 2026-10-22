@@ -3,7 +3,8 @@ Concurrent knowledge transfer between heterogeneous metaheuristics.
 
 New research line (Fase 3, Jul 2026): heterogeneous metaheuristics run
 concurrently on the same problem and transfer useful knowledge online, gated to
-prevent negative transfer.
+prevent negative transfer. Current guide:
+README_FASE_POSITIVA.md.
 
 Public API:
     CooperativeRunner  -- orchestrates N concurrent solvers under a shared FES

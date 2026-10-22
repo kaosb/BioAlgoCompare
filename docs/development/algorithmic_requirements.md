@@ -1,3 +1,8 @@
+> **Documento histórico (plataforma VRP y estudio de imitación, 2025–jul 2026).** Conserva su
+> redacción original: puede describir rutas, comandos, resultados o planes que ya no existen o que
+> quedaron invalidados al corregir el benchmark CEC (D16). No forma parte de la evidencia del estudio
+> vigente, documentado en [`README_FASE_POSITIVA.md`](../../README_FASE_POSITIVA.md).
+
 # Requisitos para Implementación de Algoritmos
 
 Este documento define los requisitos técnicos y de implementación que deben cumplir todos los algoritmos metaheurísticos integrados en BioAlgoCompare, para garantizar la consistencia, reproducibilidad y rigor científico del proyecto.

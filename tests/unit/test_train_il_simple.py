@@ -2,6 +2,7 @@
 Tests for simple IL training module.
 """
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 import pickle
 import tempfile

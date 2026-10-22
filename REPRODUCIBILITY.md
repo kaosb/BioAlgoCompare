@@ -1,3 +1,11 @@
+> **Aviso (18-Oct-2026).** Este documento describe el estudio de aprendizaje por
+> imitación (jul 2026). Sus cifras CEC quedaron invalidadas como resultado CEC por
+> D16 (`docs/preregistro_fase_positiva/deviations-log.md`): se obtuvieron con una
+> implementación del benchmark que no coincide con el código C oficial. Para la
+> fase positiva (transferencia entre metaheurísticas y gate), ver
+> [`README_FASE_POSITIVA.md`](README_FASE_POSITIVA.md) y su lock
+> `requirements-fase-positiva.lock`.
+
 # Reproducibilidad — estudio IL × CEC
 
 Receta end-to-end para reproducir los números del estudio "¿mejora el Imitation
@@ -70,5 +78,5 @@ del oráculo miope no se versiona en este repositorio.
 - **IL determinista:** RandomForest `random_state` + `n_jobs=1`; oráculo CMA
   `seed=0`; split train/test congelado.
 
-> Nota: la sección "Flujo de Reproducibilidad" del `README.md` describe el
+> Nota: la sección "Flujo de Reproducibilidad" de `README_VRP.md` describe el
 > experimento VRP masivo **antiguo** (legacy), no este pipeline CEC/IL.

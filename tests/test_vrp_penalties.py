@@ -1,4 +1,5 @@
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 from problems.vrp import VRPProblem, PENALTY_CAP, PENALTY_MISSING
 import os

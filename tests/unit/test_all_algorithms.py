@@ -8,6 +8,7 @@ This module provides systematic testing for all algorithms to ensure:
 4. Reproducibility with seeds
 """
 import pytest
+pytest.importorskip("pandas", reason="test heredado (VRP/IL): requiere pandas, fuera del entorno de la fase positiva")
 import numpy as np
 from algorithms import ALGORITHMS
 from problems.vrp import VRPProblem

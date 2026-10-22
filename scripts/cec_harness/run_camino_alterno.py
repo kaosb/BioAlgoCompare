@@ -12,7 +12,8 @@ Parámetros: Δ = 500 FES, PRESETS_V2, población 30, memoria por mediana.
 
 Uso:  N_JOBS=12 python scripts/cec_harness/run_camino_alterno.py tune   # régimen benigno
       N_JOBS=12 LEVELS=5000,50000 python scripts/cec_harness/run_camino_alterno.py run
-Env: ONLY_PAIR, ONLY_FUNCS=CEC2014:1,..., CA_OUT (directorio de salida).
+Env: ONLY_PAIR, ONLY_FUNCS=CEC2014:1,..., CA_OUT (directorio de salida),
+     DIMSET=10|50 (50: CEC2014/2017 a 50D, CEC2022 a 20D; salida *_dim50).
 """
 import json
 import os
@@ -41,12 +42,20 @@ PAIRS = ["GWO+GA", "DE+GA", "PSO+ACO"]
 PROBLEMS = ([("CEC2014", f) for f in range(1, 31)]
             + [("CEC2017", f) for f in range(1, 31) if f != 2]
             + [("CEC2022", f) for f in range(1, 13)])
-DIM, POP, DELTA = 10, 30, 500
+POP, DELTA = 30, 500
+DIMSET = os.environ.get("DIMSET", "10")
+DIMSETS = {"10": {"CEC2014": 10, "CEC2017": 10, "CEC2022": 10},
+           "50": {"CEC2014": 50, "CEC2017": 50, "CEC2022": 20}}
+
+
+def _dim(suite):
+    return DIMSETS[DIMSET][suite]
+
 RUNS = int(os.environ.get("RUNS", "51"))
 SEED0, TUNE_SEED0, TUNE_SEEDS = 13000, 13500, 11
 LEVELS = [int(x) for x in os.environ.get("LEVELS", "5000,50000").split(",")]
 N_JOBS = int(os.environ.get("N_JOBS", "12"))
-OUT = os.environ.get("CA_OUT", os.path.join(_REPO, "results", "cooperative", "camino_alterno_v06"))
+OUT = os.environ.get("CA_OUT", os.path.join(_REPO, "results", "cooperative", "camino_alterno_v06" + ("" if DIMSET == "10" else f"_dim{DIMSET}")))
 BENIGN = os.path.join(OUT, "benign_regimes.json")
 
 # arm -> (gate, intent_mode, stop_loss, memory)
@@ -102,7 +111,7 @@ def _tune_cell(args):
     solver, level, suite, f = args
     res = {}
     for factors in GRIDS[solver]:
-        meds = [float(run_with_fes(_CLS[solver], CECProblem(suite, f, DIM), pop_size=POP,
+        meds = [float(run_with_fes(_CLS[solver], CECProblem(suite, f, _dim(suite)), pop_size=POP,
                                    max_fes=level // 2, seed=TUNE_SEED0 + s,
                                    algo_params={"use_il": True, "il_model": _Const(factors)}))
                 for s in range(TUNE_SEEDS)]
@@ -136,13 +145,13 @@ def _specs(a, b):
 def _run_arm(arm, a, b, suite, f, level, seed, benign):
     sa, sb = solver_seed(seed, 0), solver_seed(seed, 1)
     if arm == "C0_A":
-        return float(run_with_fes(_CLS[a], CECProblem(suite, f, DIM), pop_size=POP, max_fes=level, seed=sa)), {}
+        return float(run_with_fes(_CLS[a], CECProblem(suite, f, _dim(suite)), pop_size=POP, max_fes=level, seed=sa)), {}
     if arm == "C0_B":
-        return float(run_with_fes(_CLS[b], CECProblem(suite, f, DIM), pop_size=POP, max_fes=level, seed=sb)), {}
+        return float(run_with_fes(_CLS[b], CECProblem(suite, f, _dim(suite)), pop_size=POP, max_fes=level, seed=sb)), {}
     if arm == "C1_div":
-        return float(min(run_with_fes(_CLS[a], CECProblem(suite, f, DIM), pop_size=POP, max_fes=level // 2, seed=sa),
-                         run_with_fes(_CLS[b], CECProblem(suite, f, DIM), pop_size=POP, max_fes=level - level // 2, seed=sb))), {}
-    prob = FESLimitProblem(CECProblem(suite, f, DIM), max_fes=level)
+        return float(min(run_with_fes(_CLS[a], CECProblem(suite, f, _dim(suite)), pop_size=POP, max_fes=level // 2, seed=sa),
+                         run_with_fes(_CLS[b], CECProblem(suite, f, _dim(suite)), pop_size=POP, max_fes=level - level // 2, seed=sb))), {}
+    prob = FESLimitProblem(CECProblem(suite, f, _dim(suite)), max_fes=level)
     if arm in ("BENn", "BENg"):
         r = BenignControlRunner(prob, _specs(a, b), benign, delta=DELTA, seed=seed,
                                 gate_enabled=(arm == "BENg"), presets=PRESETS_V2)
@@ -180,7 +189,7 @@ def _cell(args):
             errors[arm].append(e)
             for k, v in st.items():
                 stats[arm][k] = stats[arm].get(k, 0) + v
-    _write(path, {"pair": pair, "solvers": [a, b], "level": level, "suite": suite, "fnum": f, "dim": DIM,
+    _write(path, {"pair": pair, "solvers": [a, b], "level": level, "suite": suite, "fnum": f, "dim": _dim(suite), "dimset": DIMSET,
                   "runs": RUNS, "seed0": SEED0, "delta": DELTA, "benign": benign, "errors": errors,
                   "mech_stats": stats, "wall_s": time.time() - t0})
     return path, "done", time.time() - t0
